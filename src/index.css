@@ -781,6 +781,15 @@ a:hover {
   padding: 1.5rem 1.6rem;
   overflow-y: auto;
   flex: 1;
+  min-height: 0;
+  -webkit-overflow-scrolling: touch;
+}
+
+.modal-content > form,
+form.modal-content {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .modal-footer {

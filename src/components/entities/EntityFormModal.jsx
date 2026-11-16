@@ -130,21 +130,24 @@ export default function EntityFormModal({
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content modal-content-lg" onClick={(e) => e.stopPropagation()}>
+      <form 
+        className="modal-content modal-content-lg" 
+        onClick={(e) => e.stopPropagation()} 
+        onSubmit={handleSubmit}
+      >
         {/* 모달 헤더 */}
         <div className="modal-header">
           <div className="modal-header-title">
             <span style={{ fontSize: '1.4rem' }}>{isEditing ? '✏️' : '🐂'}</span>
             <span>{isEditing ? '개체 정보 수정' : '신규 개체 등록 (개체등록카드)'}</span>
           </div>
-          <button className="modal-close-btn" onClick={onClose}>
+          <button type="button" className="modal-close-btn" onClick={onClose}>
             <X size={20} />
           </button>
         </div>
 
-        {/* 폼 본문 */}
-        <form onSubmit={handleSubmit}>
-          <div className="modal-body">
+        {/* 폼 본문 (스크롤 영역) */}
+        <div className="modal-body">
             {errorMsg && (
               <div style={{
                 background: 'rgba(239, 68, 68, 0.12)',
@@ -357,6 +360,5 @@ export default function EntityFormModal({
           </div>
         </form>
       </div>
-    </div>
-  );
-}
+    );
+  }
