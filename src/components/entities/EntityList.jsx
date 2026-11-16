@@ -92,7 +92,7 @@ export default function EntityList({
 
       return true;
     });
-  }, [entities, searchQuery, selectedCategory, selectedStatus, selectedBarn]);
+  }, [entities, searchQuery, selectedBreed, selectedStatus, selectedBarn]);
 
   // 특정 개체의 최근 관리 이력 가져오기
   const getLatestCareLog = (entityId, tagNumber) => {
