@@ -73,29 +73,27 @@ export default function EntityDetailModal({
             </div>
           </div>
 
-          {/* 우측 1안: 닫기 및 세로 스택형 액션 버튼 */}
+          {/* 우측 상단 액션 버튼 그룹 (수정, 출력, 닫기 - 간섭 방지 안전거리 확보) */}
           <div className="entity-detail-header-actions">
+            <button 
+              className="btn btn-outline btn-sm detail-print-btn"
+              onClick={() => onOpenPrintSheet(entity)}
+              title="이 개체의 전체 관리 이력 A4 인쇄"
+            >
+              <Printer size={14} />
+              <span>출력</span>
+            </button>
+            <button 
+              className="btn btn-outline btn-sm detail-edit-btn"
+              onClick={() => onOpenEntityModal(entity)}
+              title="개체 기본 정보 수정"
+            >
+              <Edit3 size={14} />
+              <span>수정</span>
+            </button>
             <button className="modal-close-btn" onClick={onClose} title="닫기">
               <X size={20} />
             </button>
-            <div className="detail-header-btns">
-              <button 
-                className="btn btn-outline btn-sm"
-                onClick={() => onOpenPrintSheet(entity)}
-                title="이 개체의 전체 관리 이력 A4 인쇄"
-              >
-                <Printer size={14} />
-                <span>출력</span>
-              </button>
-              <button 
-                className="btn btn-outline btn-sm"
-                onClick={() => onOpenEntityModal(entity)}
-                title="개체 기본 정보 수정"
-              >
-                <Edit3 size={14} />
-                <span>수정</span>
-              </button>
-            </div>
           </div>
         </div>
 
