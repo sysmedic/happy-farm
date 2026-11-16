@@ -41,9 +41,6 @@ export default function App() {
   const [printSheetEntity, setPrintSheetEntity] = useState(null);
   const [targetReportDate, setTargetReportDate] = useState(getTodayDateString());
 
-  // PC에서 모바일 뷰 시뮬레이터 토글 상태
-  const [isMobilePreview, setIsMobilePreview] = useState(false);
-
   // 토스트 피드백
   const [toastMessage, setToastMessage] = useState(null);
 
@@ -190,8 +187,6 @@ export default function App() {
           setIsCareLogModalOpen(true);
         }}
         onResetSample={handleResetSample}
-        isMobilePreview={isMobilePreview}
-        onToggleMobilePreview={() => setIsMobilePreview(prev => !prev)}
       />
 
       {/* 토스트 알림 */}
@@ -218,166 +213,87 @@ export default function App() {
         </div>
       )}
 
-      {/* 메인 콘텐츠 영역 (모바일 미리보기 모드 지원) */}
-      {isMobilePreview ? (
-        <div className="mobile-preview-wrapper">
-          <div className="mobile-preview-notch"></div>
-          <main className="main-content" style={{ padding: '0.75rem' }}>
-            {printSheetEntity ? (
-              <EntityPrintSheet
-                entity={printSheetEntity}
-                careLogs={careLogs}
-                onClose={() => setPrintSheetEntity(null)}
-              />
-            ) : (
-              <>
-                {activeTab === 'entities' && (
-                  <EntityList
-                    entities={entities}
-                    careLogs={careLogs}
-                    onOpenEntityDetail={handleOpenEntityDetail}
-                    onOpenEntityModal={(entity = null) => {
-                      setEntityToEdit(entity);
-                      setIsEntityModalOpen(true);
-                    }}
-                    onOpenCareLogModal={(entity) => {
-                      setCareLogPreselectedEntity(entity);
-                      setIsCareLogModalOpen(true);
-                    }}
-                    onOpenPrintSheet={(entity) => setPrintSheetEntity(entity)}
-                    onDeleteEntity={handleDeleteEntity}
-                  />
-                )}
-                {activeTab === 'diary' && (
-                  <DailyDiaryView
-                    entities={entities}
-                    careLogs={careLogs}
-                    onOpenEntityDetail={handleOpenEntityDetail}
-                    onOpenCareLogModal={(entity = null, date = null) => {
-                      setCareLogPreselectedEntity(entity);
-                      setIsCareLogModalOpen(true);
-                    }}
-                    onNavigateToReport={(date) => {
-                      setTargetReportDate(date);
-                      setActiveTab('report');
-                    }}
-                  />
-                )}
-                {activeTab === 'report' && (
-                  <DailyReportView
-                    targetDate={targetReportDate}
-                    entities={entities}
-                    careLogs={careLogs}
-                    onOpenEntityDetail={handleOpenEntityDetail}
-                    onOpenCareLogModal={(entity = null) => {
-                      setCareLogPreselectedEntity(entity);
-                      setIsCareLogModalOpen(true);
-                    }}
-                    onNavigateToCloud={() => setActiveTab('cloud')}
-                  />
-                )}
-                {activeTab === 'cloud' && (
-                  <GoogleDriveView
-                    entities={entities}
-                    careLogs={careLogs}
-                    onDatabaseRestored={handleDatabaseRestored}
-                  />
-                )}
-              </>
-            )}
-          </main>
-          <MobileNavBar
-            activeTab={activeTab}
-            onSelectTab={(tab) => {
-              setActiveTab(tab);
-              setPrintSheetEntity(null);
-            }}
-            onOpenCareLogModal={(preselected = null) => {
-              setCareLogPreselectedEntity(preselected);
-              setIsCareLogModalOpen(true);
-            }}
+      {/* 메인 콘텐츠 영역 */}
+      <main className="main-content">
+        {printSheetEntity ? (
+          <EntityPrintSheet
+            entity={printSheetEntity}
+            careLogs={careLogs}
+            onClose={() => setPrintSheetEntity(null)}
           />
-        </div>
-      ) : (
-        <>
-          <main className="main-content">
-            {printSheetEntity ? (
-              <EntityPrintSheet
-                entity={printSheetEntity}
+        ) : (
+          <>
+            {activeTab === 'entities' && (
+              <EntityList
+                entities={entities}
                 careLogs={careLogs}
-                onClose={() => setPrintSheetEntity(null)}
+                onOpenEntityDetail={handleOpenEntityDetail}
+                onOpenEntityModal={(entity = null) => {
+                  setEntityToEdit(entity);
+                  setIsEntityModalOpen(true);
+                }}
+                onOpenCareLogModal={(entity) => {
+                  setCareLogPreselectedEntity(entity);
+                  setIsCareLogModalOpen(true);
+                }}
+                onOpenPrintSheet={(entity) => setPrintSheetEntity(entity)}
+                onDeleteEntity={handleDeleteEntity}
               />
-            ) : (
-              <>
-                {activeTab === 'entities' && (
-                  <EntityList
-                    entities={entities}
-                    careLogs={careLogs}
-                    onOpenEntityDetail={handleOpenEntityDetail}
-                    onOpenEntityModal={(entity = null) => {
-                      setEntityToEdit(entity);
-                      setIsEntityModalOpen(true);
-                    }}
-                    onOpenCareLogModal={(entity) => {
-                      setCareLogPreselectedEntity(entity);
-                      setIsCareLogModalOpen(true);
-                    }}
-                    onOpenPrintSheet={(entity) => setPrintSheetEntity(entity)}
-                    onDeleteEntity={handleDeleteEntity}
-                  />
-                )}
-                {activeTab === 'diary' && (
-                  <DailyDiaryView
-                    entities={entities}
-                    careLogs={careLogs}
-                    onOpenEntityDetail={handleOpenEntityDetail}
-                    onOpenCareLogModal={(entity = null, date = null) => {
-                      setCareLogPreselectedEntity(entity);
-                      setIsCareLogModalOpen(true);
-                    }}
-                    onNavigateToReport={(date) => {
-                      setTargetReportDate(date);
-                      setActiveTab('report');
-                    }}
-                  />
-                )}
-                {activeTab === 'report' && (
-                  <DailyReportView
-                    targetDate={targetReportDate}
-                    entities={entities}
-                    careLogs={careLogs}
-                    onOpenEntityDetail={handleOpenEntityDetail}
-                    onOpenCareLogModal={(entity = null) => {
-                      setCareLogPreselectedEntity(entity);
-                      setIsCareLogModalOpen(true);
-                    }}
-                    onNavigateToCloud={() => setActiveTab('cloud')}
-                  />
-                )}
-                {activeTab === 'cloud' && (
-                  <GoogleDriveView
-                    entities={entities}
-                    careLogs={careLogs}
-                    onDatabaseRestored={handleDatabaseRestored}
-                  />
-                )}
-              </>
             )}
-          </main>
 
-          <MobileNavBar
-            activeTab={activeTab}
-            onSelectTab={(tab) => {
-              setActiveTab(tab);
-              setPrintSheetEntity(null);
-            }}
-            onOpenCareLogModal={(preselected = null) => {
-              setCareLogPreselectedEntity(preselected);
-              setIsCareLogModalOpen(true);
-            }}
-          />
-        </>
-      )}
+            {activeTab === 'diary' && (
+              <DailyDiaryView
+                entities={entities}
+                careLogs={careLogs}
+                onOpenEntityDetail={handleOpenEntityDetail}
+                onOpenCareLogModal={(entity = null, date = null) => {
+                  setCareLogPreselectedEntity(entity);
+                  setIsCareLogModalOpen(true);
+                }}
+                onNavigateToReport={(date) => {
+                  setTargetReportDate(date);
+                  setActiveTab('report');
+                }}
+              />
+            )}
+
+            {activeTab === 'report' && (
+              <DailyReportView
+                targetDate={targetReportDate}
+                entities={entities}
+                careLogs={careLogs}
+                onOpenEntityDetail={handleOpenEntityDetail}
+                onOpenCareLogModal={(entity = null) => {
+                  setCareLogPreselectedEntity(entity);
+                  setIsCareLogModalOpen(true);
+                }}
+                onNavigateToCloud={() => setActiveTab('cloud')}
+              />
+            )}
+
+            {activeTab === 'cloud' && (
+              <GoogleDriveView
+                entities={entities}
+                careLogs={careLogs}
+                onDatabaseRestored={handleDatabaseRestored}
+              />
+            )}
+          </>
+        )}
+      </main>
+
+      {/* 모바일 환경 전용 터치 네비게이션 바 */}
+      <MobileNavBar
+        activeTab={activeTab}
+        onSelectTab={(tab) => {
+          setActiveTab(tab);
+          setPrintSheetEntity(null);
+        }}
+        onOpenCareLogModal={(preselected = null) => {
+          setCareLogPreselectedEntity(preselected);
+          setIsCareLogModalOpen(true);
+        }}
+      />
 
       {/* 개체 상세 관리 내역 모달 (타임라인 & 처치 기록) */}
       {selectedEntityForDetail && (

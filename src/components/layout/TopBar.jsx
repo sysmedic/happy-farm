@@ -8,8 +8,7 @@ import {
   Sun, 
   Moon, 
   ListPlus,
-  RotateCcw,
-  Smartphone
+  RotateCcw
 } from 'lucide-react';
 
 export default function TopBar({ 
@@ -19,9 +18,7 @@ export default function TopBar({
   onToggleTheme, 
   onOpenEntityModal, 
   onOpenCareLogModal,
-  onResetSample,
-  isMobilePreview,
-  onToggleMobilePreview
+  onResetSample
 }) {
   return (
     <header className="topbar">
@@ -91,15 +88,6 @@ export default function TopBar({
         >
           <ListPlus size={15} />
           <span>관리 추가</span>
-        </button>
-
-        <button
-          className={`btn ${isMobilePreview ? 'btn-primary' : 'btn-outline'} btn-sm`}
-          onClick={onToggleMobilePreview}
-          title="PC에서 스마트폰 모바일 화면 모드로 즉시 미리보기"
-        >
-          <Smartphone size={15} />
-          <span>{isMobilePreview ? '🖥️ PC 모드로 복귀' : '📱 모바일 모드'}</span>
         </button>
 
         <button
