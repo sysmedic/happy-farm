@@ -1167,11 +1167,10 @@ form.modal-content {
     display: none; /* 모바일에서는 하단 탭바로 대체 */
   }
 
-  .brand-title {
-    font-size: 1.1rem;
-  }
-
-  .brand-subtitle {
+  /* 모바일 화면에서는 상단 긴 브랜드 텍스트 숨김 (1안: 아이콘만 유지) */
+  .brand-title,
+  .brand-subtitle,
+  .brand-section > div:not(.brand-logo-icon) {
     display: none;
   }
 
