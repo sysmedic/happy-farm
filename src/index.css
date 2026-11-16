@@ -727,7 +727,7 @@ a:hover {
   box-shadow: var(--shadow-xl);
   width: 100%;
   max-width: 680px;
-  max-height: 90vh;
+  max-height: min(88vh, 88dvh);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -749,6 +749,8 @@ a:hover {
   align-items: center;
   justify-content: space-between;
   background: var(--bg-card);
+  flex-shrink: 0 !important;
+  z-index: 2;
 }
 
 .modal-header-title {
@@ -778,9 +780,9 @@ a:hover {
 }
 
 .modal-body {
-  padding: 1.5rem 1.6rem;
+  padding: 1.5rem 1.6rem 2.5rem 1.6rem;
   overflow-y: auto;
-  flex: 1;
+  flex: 1 1 auto;
   min-height: 0;
   -webkit-overflow-scrolling: touch;
 }
@@ -789,6 +791,8 @@ a:hover {
 form.modal-content {
   display: flex;
   flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
   overflow: hidden;
 }
 
@@ -800,6 +804,8 @@ form.modal-content {
   justify-content: flex-end;
   gap: 0.75rem;
   background: var(--bg-card-subtle);
+  flex-shrink: 0 !important;
+  z-index: 2;
 }
 
 /* Forms */
@@ -1253,7 +1259,7 @@ form.modal-content {
 
   .modal-content {
     max-width: 100%;
-    max-height: 88vh;
+    max-height: min(85vh, 85dvh);
     border-radius: 22px 22px 0 0;
     border-bottom: none;
     animation: slideUpBottom 0.25s cubic-bezier(0.16, 1, 0.3, 1);
@@ -1261,15 +1267,23 @@ form.modal-content {
 
   .modal-header {
     padding: 1rem 1.25rem;
+    flex-shrink: 0 !important;
+    z-index: 2;
   }
 
   .modal-body {
-    padding: 1.1rem 1.25rem;
+    padding: 1.1rem 1.25rem 2.5rem 1.25rem;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .modal-footer {
     padding: 0.85rem 1.25rem;
-    padding-bottom: calc(0.85rem + env(safe-area-inset-bottom, 10px));
+    padding-bottom: calc(0.85rem + env(safe-area-inset-bottom, 15px));
+    flex-shrink: 0 !important;
+    z-index: 2;
   }
 
   /* 폼 1열 배치 (터치 용이성) */
