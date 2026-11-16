@@ -103,72 +103,51 @@ export default function EntityDetailModal({
 
         {/* 모달 본문 */}
         <div className="modal-body">
-          {/* 1. 4대 중요 정보 2x2 아이콘 스펙 카드 그리드 */}
+          {/* 1. 4대 중요 정보 2x2 균등 카드 그리드 (이모지 제거, 선명한 정보 직접 전달) */}
           <div className="modal-specs-grid">
             {/* 1) 축사 및 구역 */}
             <div className="modal-spec-card">
-              <div className="modal-spec-icon-box" style={{ background: 'rgba(245, 158, 11, 0.15)', color: '#f59e0b' }}>
-                <MapPin size={20} />
-              </div>
-              <div className="modal-spec-content">
-                <span className="modal-spec-label">축사 및 구역</span>
-                <span className="modal-spec-value" title={entity.barn || '미지정'}>
-                  {entity.barn || '미지정'}
-                </span>
-              </div>
+              <span className="modal-spec-label">축사 및 구역</span>
+              <span className="modal-spec-value" title={entity.barn || '미지정'}>
+                {entity.barn || '미지정'}
+              </span>
             </div>
 
             {/* 2) 현재 체중 */}
             <div className="modal-spec-card">
-              <div className="modal-spec-icon-box" style={{ background: 'rgba(14, 165, 233, 0.15)', color: '#0ea5e9' }}>
-                <Scale size={20} />
-              </div>
-              <div className="modal-spec-content">
-                <span className="modal-spec-label">현재 체중</span>
-                <span className="modal-spec-value">
-                  {entity.weight ? (
-                    <>
-                      {entity.weight} <small style={{ fontSize: '0.8rem', fontWeight: 600 }}>kg</small>
-                    </>
-                  ) : (
-                    '미측정'
-                  )}
-                </span>
-              </div>
+              <span className="modal-spec-label">현재 체중</span>
+              <span className="modal-spec-value">
+                {entity.weight ? (
+                  <>
+                    {entity.weight} <small style={{ fontSize: '0.82rem', fontWeight: 600 }}>kg</small>
+                  </>
+                ) : (
+                  '미측정'
+                )}
+              </span>
             </div>
 
             {/* 3) 모체 번호 */}
             <div className="modal-spec-card">
-              <div className="modal-spec-icon-box" style={{ background: 'rgba(139, 92, 246, 0.15)', color: '#8b5cf6' }}>
-                <Dna size={20} />
-              </div>
-              <div className="modal-spec-content">
-                <span className="modal-spec-label">모체 번호</span>
-                <span className="modal-spec-value" title={entity.motherTag || '정보 없음'}>
-                  {entity.motherTag || '정보 없음'}
-                </span>
-              </div>
+              <span className="modal-spec-label">모체 번호</span>
+              <span className="modal-spec-value" title={entity.motherTag || '정보 없음'}>
+                {entity.motherTag || '정보 없음'}
+              </span>
             </div>
 
             {/* 4) 부체 (KPN) */}
             <div className="modal-spec-card">
-              <div className="modal-spec-icon-box" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10b981' }}>
-                <Sparkles size={20} />
-              </div>
-              <div className="modal-spec-content">
-                <span className="modal-spec-label">부체 (KPN)</span>
-                <span className="modal-spec-value" title={entity.fatherTag || '정보 없음'}>
-                  {entity.fatherTag || '정보 없음'}
-                </span>
-              </div>
+              <span className="modal-spec-label">부체 (KPN)</span>
+              <span className="modal-spec-value" title={entity.fatherTag || '정보 없음'}>
+                {entity.fatherTag || '정보 없음'}
+              </span>
             </div>
           </div>
 
-          {/* 특이사항 메모 (있는 경우 콤팩트 스트립 표시) */}
+          {/* 특이사항 메모 (타이틀/이모지 제거, 본문 내용만 선명하게 직접 전달) */}
           {entity.memo && (
             <div className="modal-spec-memo-card">
-              <span className="modal-spec-memo-tag">📝 특이사항</span>
-              <span className="modal-spec-memo-text">{entity.memo}</span>
+              {entity.memo}
             </div>
           )}
 
