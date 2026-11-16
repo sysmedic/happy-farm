@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import TopBar from './components/layout/TopBar.jsx';
+import MobileNavBar from './components/layout/MobileNavBar.jsx';
 import EntityList from './components/entities/EntityList.jsx';
 import EntityDetailModal from './components/entities/EntityDetailModal.jsx';
 import EntityFormModal from './components/entities/EntityFormModal.jsx';
@@ -285,6 +286,19 @@ export default function App() {
           </>
         )}
       </main>
+
+      {/* 모바일 하단 전용 네비게이션 탭바 (화면 폭 768px 이하에서 노출) */}
+      <MobileNavBar
+        activeTab={activeTab}
+        onSelectTab={(tab) => {
+          setActiveTab(tab);
+          setPrintSheetEntity(null);
+        }}
+        onOpenCareLogModal={(preselected = null) => {
+          setCareLogPreselectedEntity(preselected);
+          setIsCareLogModalOpen(true);
+        }}
+      />
 
       {/* 개체 상세 관리 내역 모달 (타임라인 & 처치 기록) */}
       {selectedEntityForDetail && (

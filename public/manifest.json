@@ -1,0 +1,18 @@
+{
+  "name": "행복 농장 관리 프로그램 - Happy Farm",
+  "short_name": "행복농장",
+  "description": "가축 개체번호 관리, 일정 다이어리, 일일 영농보고서, 구글 드라이브 클라우드 동기화",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0b1120",
+  "theme_color": "#10b981",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
