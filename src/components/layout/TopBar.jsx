@@ -36,7 +36,7 @@ export default function TopBar({
           onClick={() => onSelectTab('entities')}
         >
           <span style={{ fontSize: '1rem' }}>🐂</span>
-          <span>개체 관리</span>
+          <span>개체관리</span>
         </button>
 
         <button
@@ -44,7 +44,7 @@ export default function TopBar({
           onClick={() => onSelectTab('diary')}
         >
           <Calendar size={16} />
-          <span>일정 다이어리</span>
+          <span>다이어리</span>
         </button>
 
         <button
@@ -52,7 +52,7 @@ export default function TopBar({
           onClick={() => onSelectTab('report')}
         >
           <FileText size={16} />
-          <span>일일 보고서</span>
+          <span>일일보고</span>
         </button>
 
         <button
@@ -60,7 +60,7 @@ export default function TopBar({
           onClick={() => onSelectTab('cloud')}
         >
           <Cloud size={16} />
-          <span>구글 드라이브</span>
+          <span>드라이브</span>
         </button>
       </nav>
 
