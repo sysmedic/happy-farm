@@ -290,7 +290,6 @@ export default function App() {
           setCareLogPreselectedEntity(preselected);
           setIsCareLogModalOpen(true);
         }}
-        onToggleTheme={handleToggleTheme}
       />
 
       {/* 개체 상세 관리 내역 모달 (타임라인 & 처치 기록) */}
