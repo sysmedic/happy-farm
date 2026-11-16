@@ -1131,6 +1131,28 @@ a:hover {
   display: none;
 }
 
+/* Desktop Mobile Preview Mode (PC에서 모바일 화면 시뮬레이션) */
+.mobile-preview-wrapper {
+  max-width: 420px;
+  margin: 1.5rem auto;
+  border: 10px solid #1e293b;
+  border-radius: 40px;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+  background: var(--bg-page);
+  position: relative;
+  min-height: 820px;
+  padding-bottom: 70px;
+}
+
+.mobile-preview-notch {
+  width: 140px;
+  height: 20px;
+  background: #1e293b;
+  margin: 0 auto;
+  border-radius: 0 0 14px 14px;
+}
+
 /* ==========================================================================
    Mobile Responsive Breakpoint (스마트폰 & 태블릿 최적화)
    ========================================================================== */
