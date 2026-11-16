@@ -16,7 +16,7 @@ export default function MobileNavBar({
   const isLongPressRef = useRef(false);
   const touchStartPos = useRef({ x: 0, y: 0 });
 
-  // 롱프레스 타이머 시작 (0.5초 이상 누르고 있을 시 테마 토글)
+  // 롱프레스 타이머 시작 (1.0초 이상 꾹 누르고 있을 시 테마 토글)
   const startPress = (clientX, clientY) => {
     isLongPressRef.current = false;
     touchStartPos.current = { x: clientX, y: clientY };
@@ -36,7 +36,7 @@ export default function MobileNavBar({
       if (onToggleTheme) {
         onToggleTheme();
       }
-    }, 550);
+    }, 1000);
   };
 
   // 손가락 또는 마우스 뗐을 때
