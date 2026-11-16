@@ -50,50 +50,52 @@ export default function EntityDetailModal({
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content modal-content-lg" onClick={(e) => e.stopPropagation()}>
-        {/* 모달 상단 헤더 (모바일 최적화 4단 배열 & 우측 세로 스택) */}
+        {/* 모달 상단 헤더: 상단 행(좌측 1-2단 + 우측 액션) + 하단 100% 전폭(3단 설명) */}
         <div className="modal-header entity-detail-header">
-          <div className="entity-detail-header-info">
-            {/* 1줄: 이표번호 */}
-            <div className="detail-header-tag">
-              <span style={{ fontSize: '1.15rem', marginRight: '0.35rem' }}>🐂</span>
-              <span className="entity-ear-tag">#{entity.tagNumber}</span>
+          <div className="detail-header-top-row">
+            <div className="entity-detail-header-info">
+              {/* 1줄: 이표번호 */}
+              <div className="detail-header-tag">
+                <span style={{ fontSize: '1.15rem', marginRight: '0.35rem' }}>🐂</span>
+                <span className="entity-ear-tag">#{entity.tagNumber}</span>
+              </div>
+
+              {/* 2줄: 애칭 & 상태 한 행 나란히 배치 */}
+              <div className="detail-header-name-row">
+                <h2 className="detail-header-name">{entity.name}</h2>
+                <span className={`badge ${statusObj.colorClass}`}>
+                  {statusObj.icon} {statusObj.label}
+                </span>
+              </div>
             </div>
 
-            {/* 2줄: 애칭 & 상태 한 행 나란히 배치 */}
-            <div className="detail-header-name-row">
-              <h2 className="detail-header-name">{entity.name}</h2>
-              <span className={`badge ${statusObj.colorClass}`}>
-                {statusObj.icon} {statusObj.label}
-              </span>
-            </div>
-
-            {/* 3줄: 설명 */}
-            <div className="detail-header-desc">
-              한우 • {entity.breed} • {genderObj.symbol} {genderObj.label} • {age.text}
+            {/* 우측 상단 액션 버튼 그룹 (수정, 출력, 닫기 - 간섭 방지 안전거리 확보) */}
+            <div className="entity-detail-header-actions">
+              <button 
+                className="btn btn-outline btn-sm detail-print-btn"
+                onClick={() => onOpenPrintSheet(entity)}
+                title="이 개체의 전체 관리 이력 A4 인쇄"
+              >
+                <Printer size={14} />
+                <span>출력</span>
+              </button>
+              <button 
+                className="btn btn-outline btn-sm detail-edit-btn"
+                onClick={() => onOpenEntityModal(entity)}
+                title="개체 기본 정보 수정"
+              >
+                <Edit3 size={14} />
+                <span>수정</span>
+              </button>
+              <button className="modal-close-btn" onClick={onClose} title="닫기">
+                <X size={20} />
+              </button>
             </div>
           </div>
 
-          {/* 우측 상단 액션 버튼 그룹 (수정, 출력, 닫기 - 간섭 방지 안전거리 확보) */}
-          <div className="entity-detail-header-actions">
-            <button 
-              className="btn btn-outline btn-sm detail-print-btn"
-              onClick={() => onOpenPrintSheet(entity)}
-              title="이 개체의 전체 관리 이력 A4 인쇄"
-            >
-              <Printer size={14} />
-              <span>출력</span>
-            </button>
-            <button 
-              className="btn btn-outline btn-sm detail-edit-btn"
-              onClick={() => onOpenEntityModal(entity)}
-              title="개체 기본 정보 수정"
-            >
-              <Edit3 size={14} />
-              <span>수정</span>
-            </button>
-            <button className="modal-close-btn" onClick={onClose} title="닫기">
-              <X size={20} />
-            </button>
+          {/* 3줄: 설명 (하단 100% 전폭 독립 배치 & 폰트 크기 확대) */}
+          <div className="detail-header-desc">
+            {entity.breed?.startsWith('한우') ? entity.breed : `한우 • ${entity.breed}`} • {genderObj.symbol} {genderObj.label} • {age.text}
           </div>
         </div>
 
