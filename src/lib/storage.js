@@ -8,7 +8,7 @@ const STORAGE_ENTITIES_KEY = 'happy_farm_entities_v1';
 const STORAGE_LOGS_KEY = 'happy_farm_care_logs_v1';
 const STORAGE_CONFIG_KEY = 'happy_farm_config_v1';
 
-// 초기 풍부한 실제 농장 샘플 데이터 (한우, 젖소, 흑염소 등)
+// 초기 풍부한 실제 한우 농장 샘플 데이터 (번식우, 비육우, 육성우, 송아지)
 export const INITIAL_SAMPLE_ENTITIES = [
   {
     id: 'ENT-001',
@@ -47,17 +47,17 @@ export const INITIAL_SAMPLE_ENTITIES = [
   {
     id: 'ENT-003',
     tagNumber: '002-1601-7733',
-    name: '밀키',
-    category: 'dairy',
-    breed: '홀스타인',
+    name: '미순이',
+    category: 'hanwoo',
+    breed: '한우(번식우 - 암소)',
     gender: 'female',
     birthDate: '2023-11-05',
-    barn: '착유사 2번열',
+    barn: '제2축사 2번방',
     motherTag: '002-0992-1144',
-    fatherTag: 'US-7788',
-    weight: 610,
+    fatherTag: 'KPN-1390',
+    weight: 495,
     status: 'in_heat',
-    memo: '일일 산유량 32kg. 승가 행동 관찰됨. 금일 오후 인공수정 예정.',
+    memo: '승가 행동 및 점액 분비 관찰됨. 금일 오후 인공수정(KPN-1422) 예정.',
     createdAt: '2023-11-05T08:30:00Z',
     updatedAt: '2026-11-16T08:15:00Z',
   },
@@ -66,7 +66,7 @@ export const INITIAL_SAMPLE_ENTITIES = [
     tagNumber: '002-1755-1209',
     name: '대박이',
     category: 'hanwoo',
-    breed: '한우(번식우)',
+    breed: '한우(번식우 - 암소)',
     gender: 'female',
     birthDate: '2025-01-10',
     barn: '제2축사 4번방',
@@ -81,18 +81,18 @@ export const INITIAL_SAMPLE_ENTITIES = [
   {
     id: 'ENT-005',
     tagNumber: '002-1899-6501',
-    name: '까망이',
-    category: 'goat',
-    breed: '재래흑염소',
-    gender: 'female',
-    birthDate: '2025-04-12',
-    barn: '염소사 A동',
-    motherTag: 'GT-081',
-    fatherTag: 'GT-KING',
-    weight: 42,
-    status: 'nursing',
-    memo: '쌍둥이 자견 순산 완료. 모유 수유 상태 아주 양호함.',
-    createdAt: '2025-04-12T11:20:00Z',
+    name: '장군이',
+    category: 'hanwoo',
+    breed: '한우(거세 비육우)',
+    gender: 'castrated',
+    birthDate: '2024-09-12',
+    barn: '제1축사 4번방',
+    motherTag: '002-1144-8899',
+    fatherTag: 'KPN-1410',
+    weight: 580,
+    status: 'healthy',
+    memo: '비육 중기 배합사료 섭취량 양호. 발굽 상태 및 활력 정상.',
+    createdAt: '2024-09-12T11:20:00Z',
     updatedAt: '2026-11-14T10:00:00Z',
   },
   {
@@ -119,12 +119,12 @@ export const INITIAL_SAMPLE_CARE_LOGS = [
     id: 'LOG-20261116-001',
     entityId: 'ENT-003',
     tagNumber: '002-1601-7733',
-    entityName: '밀키',
+    entityName: '미순이',
     date: getTodayDateString(),
     time: '08:30',
     category: 'breeding',
     title: '발정 관찰 및 인공수정 예약',
-    details: '아침 착유 시 승가 행동 및 점액 분비 관찰됨. 수정사(김번식) 방문 요청 완료.',
+    details: '아침 급여 시 승가 행동 및 점액 분비 관찰됨. 수정사(김번식) 방문 요청 완료.',
     operator: '홍길동 대표',
     nextScheduleDate: getTodayDateString(),
     nextScheduleTitle: '인공수정 시술 진행 (14:00)',
@@ -170,18 +170,18 @@ export const INITIAL_SAMPLE_CARE_LOGS = [
     id: 'LOG-20261114-001',
     entityId: 'ENT-005',
     tagNumber: '002-1899-6501',
-    entityName: '까망이',
+    entityName: '장군이',
     date: '2026-11-14',
-    time: '06:10',
-    category: 'calving',
-    title: '자견 쌍둥이 자연 분만',
-    details: '암컷 1두(2.8kg), 수컷 1두(3.1kg) 건강하게 출산. 초유 섭취 완료 확인.',
+    time: '10:30',
+    category: 'treatment',
+    title: '정기 구충제 투약 및 사양 점검',
+    details: '이버멕틴 12ml 피하 주사 처치 완료. 사료 섭취량 아주 양호.',
     operator: '홍길동 대표',
-    nextScheduleDate: '2026-11-21',
-    nextScheduleTitle: '자견 구충제 투약 및 꼬리 손질',
-    cost: 0,
+    nextScheduleDate: '2026-12-14',
+    nextScheduleTitle: '비육 후기 전환 사료 급여 점검',
+    cost: 10000,
     completed: true,
-    createdAt: '2026-11-14T06:10:00Z'
+    createdAt: '2026-11-14T10:30:00Z'
   },
   {
     id: 'LOG-20261112-001',
@@ -245,7 +245,21 @@ export function loadEntities() {
       return INITIAL_SAMPLE_ENTITIES;
     }
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) && parsed.length > 0 ? parsed : INITIAL_SAMPLE_ENTITIES;
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      // 한우 전용 농장 데이터 정규화
+      const normalized = parsed.map(e => {
+        if (e.category !== 'hanwoo') {
+          return {
+            ...e,
+            category: 'hanwoo',
+            breed: e.breed && e.breed.includes('한우') ? e.breed : '한우(번식우)',
+          };
+        }
+        return e;
+      });
+      return normalized;
+    }
+    return INITIAL_SAMPLE_ENTITIES;
   } catch (err) {
     console.error('Failed to load entities:', err);
     return INITIAL_SAMPLE_ENTITIES;

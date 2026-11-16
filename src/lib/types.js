@@ -4,12 +4,14 @@
 
 export const ENTITY_CATEGORIES = [
   { id: 'hanwoo', label: '한우', icon: '🐂', defaultBreed: '한우(번식우)' },
-  { id: 'dairy', label: '젖소', icon: '🐄', defaultBreed: '홀스타인' },
-  { id: 'goat', label: '흑염소', icon: '🐐', defaultBreed: '재래흑염소' },
-  { id: 'pig', label: '돼지', icon: '🐖', defaultBreed: '랜드레이스' },
-  { id: 'horse', label: '말', icon: '🐎', defaultBreed: '제주마' },
-  { id: 'sheep', label: '양', icon: '🐑', defaultBreed: '코리델' },
-  { id: 'other', label: '기타 가축', icon: '🐾', defaultBreed: '일반' },
+];
+
+export const HANWOO_BREEDS = [
+  { id: 'breeding_cow', label: '한우(번식우 - 암소)', shortLabel: '번식우' },
+  { id: 'steer_beef', label: '한우(거세 비육우)', shortLabel: '거세/비육우' },
+  { id: 'calf', label: '한우(송아지 - 자우)', shortLabel: '송아지' },
+  { id: 'growing', label: '한우(육성우)', shortLabel: '육성우' },
+  { id: 'bull', label: '한우(종모우/씨수소)', shortLabel: '씨수소' },
 ];
 
 export const GENDER_OPTIONS = [

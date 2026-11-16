@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { X, Sparkles, AlertCircle, Save } from 'lucide-react';
 import { 
-  ENTITY_CATEGORIES, 
   ENTITY_STATUSES, 
   GENDER_OPTIONS, 
+  HANWOO_BREEDS,
   calculateAge, 
   getTodayDateString 
 } from '../../lib/types.js';
@@ -52,13 +52,18 @@ export default function EntityFormModal({
     }
   }, [entityToEdit]);
 
-  // 카테고리 변경 시 기본 품종 자동 추천
-  const handleCategoryChange = (catId) => {
-    const cat = ENTITY_CATEGORIES.find(c => c.id === catId);
+  // 한우 사육 단계 선택 시 성별 자동 매핑 및 설정
+  const handleBreedSelect = (breedLabel) => {
+    let gender = formData.gender;
+    if (breedLabel.includes('암소') || breedLabel.includes('번식우')) gender = 'female';
+    else if (breedLabel.includes('거세')) gender = 'castrated';
+    else if (breedLabel.includes('씨수소') || breedLabel.includes('종모우')) gender = 'male';
+
     setFormData(prev => ({
       ...prev,
-      category: catId,
-      breed: cat ? cat.defaultBreed : prev.breed
+      category: 'hanwoo',
+      breed: breedLabel,
+      gender: gender
     }));
   };
 
@@ -203,31 +208,30 @@ export default function EntityFormModal({
                 />
               </div>
 
-              {/* 축종 분류 */}
-              <div className="form-group">
-                <label className="form-label">축종 분류</label>
-                <select
-                  className="form-select"
-                  value={formData.category}
-                  onChange={(e) => handleCategoryChange(e.target.value)}
-                >
-                  {ENTITY_CATEGORIES.map(cat => (
-                    <option key={cat.id} value={cat.id}>
-                      {cat.icon} {cat.label}
-                    </option>
+              {/* 한우 사육 단계 및 구분 (타 축종 숨김 및 한우 전용) */}
+              <div className="form-group full-width">
+                <label className="form-label">
+                  한우 사육 단계 및 구분 <span className="required">*</span>
+                </label>
+                <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
+                  {HANWOO_BREEDS.map(item => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      className={`btn btn-sm ${formData.breed === item.label ? 'btn-primary' : 'btn-outline'}`}
+                      onClick={() => handleBreedSelect(item.label)}
+                    >
+                      {item.shortLabel}
+                    </button>
                   ))}
-                </select>
-              </div>
-
-              {/* 세부 품종 */}
-              <div className="form-group">
-                <label className="form-label">세부 품종</label>
+                </div>
                 <input
                   type="text"
                   className="form-input"
-                  placeholder="예: 한우(번식우), 홀스타인"
+                  placeholder="예: 한우(번식우 - 암소), 직접 수정 가능"
                   value={formData.breed}
                   onChange={(e) => setFormData({ ...formData, breed: e.target.value })}
+                  required
                 />
               </div>
 

@@ -15,7 +15,6 @@ import {
   Share2
 } from 'lucide-react';
 import { 
-  ENTITY_CATEGORIES, 
   ENTITY_STATUSES, 
   GENDER_OPTIONS, 
   CARE_CATEGORIES, 
@@ -38,7 +37,6 @@ export default function EntityDetailModal({
   const age = calculateAge(entity.birthDate);
   const statusObj = ENTITY_STATUSES.find(s => s.id === entity.status) || ENTITY_STATUSES[0];
   const genderObj = GENDER_OPTIONS.find(g => g.id === entity.gender) || GENDER_OPTIONS[0];
-  const categoryObj = ENTITY_CATEGORIES.find(c => c.id === entity.category) || ENTITY_CATEGORIES[0];
 
   // 이 개체에 속한 관리 기록 필터링 & 정렬
   const filteredLogs = useMemo(() => {
@@ -55,7 +53,7 @@ export default function EntityDetailModal({
         {/* 모달 상단 헤더 */}
         <div className="modal-header">
           <div className="modal-header-title">
-            <span style={{ fontSize: '1.4rem' }}>{categoryObj.icon}</span>
+            <span style={{ fontSize: '1.4rem' }}>🐂</span>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
                 <span className="entity-ear-tag">#{entity.tagNumber}</span>
@@ -65,7 +63,7 @@ export default function EntityDetailModal({
                 </span>
               </div>
               <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 500, marginTop: '2px' }}>
-                {entity.breed} • {genderObj.symbol} {genderObj.label} • {age.text}
+                한우 • {entity.breed} • {genderObj.symbol} {genderObj.label} • {age.text}
               </div>
             </div>
           </div>

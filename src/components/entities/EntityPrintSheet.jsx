@@ -8,7 +8,6 @@ import {
   Share2
 } from 'lucide-react';
 import { 
-  ENTITY_CATEGORIES, 
   ENTITY_STATUSES, 
   GENDER_OPTIONS, 
   CARE_CATEGORIES, 
@@ -25,7 +24,6 @@ export default function EntityPrintSheet({
   const age = calculateAge(entity.birthDate);
   const statusObj = ENTITY_STATUSES.find(s => s.id === entity.status) || ENTITY_STATUSES[0];
   const genderObj = GENDER_OPTIONS.find(g => g.id === entity.gender) || GENDER_OPTIONS[0];
-  const categoryObj = ENTITY_CATEGORIES.find(c => c.id === entity.category) || ENTITY_CATEGORIES[0];
 
   // 이 개체의 전체 관리 내역 (날짜순 정렬)
   const historyLogs = useMemo(() => {
@@ -102,12 +100,12 @@ export default function EntityPrintSheet({
               </td>
               <th style={{ width: '15%' }}>개체명 (애칭)</th>
               <td style={{ width: '35%', fontWeight: 700 }}>
-                {categoryObj.icon} {entity.name}
+                🐂 {entity.name}
               </td>
             </tr>
             <tr>
-              <th>축종 / 세부품종</th>
-              <td>{categoryObj.label} / {entity.breed}</td>
+              <th>축종 / 사육구분</th>
+              <td>한우 / {entity.breed || '한우'}</td>
               <th>성별 / 상태</th>
               <td>
                 <span style={{ fontWeight: 700 }}>{genderObj.label} ({genderObj.symbol})</span>

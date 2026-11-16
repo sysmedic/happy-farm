@@ -14,9 +14,9 @@ import {
   Heart
 } from 'lucide-react';
 import { 
-  ENTITY_CATEGORIES, 
   ENTITY_STATUSES, 
   GENDER_OPTIONS, 
+  HANWOO_BREEDS,
   calculateAge, 
   getKoreanChoseong 
 } from '../../lib/types.js';
@@ -31,7 +31,7 @@ export default function EntityList({
   onDeleteEntity
 }) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedBreed, setSelectedBreed] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [selectedBarn, setSelectedBarn] = useState('all');
 
@@ -59,8 +59,8 @@ export default function EntityList({
     const choseongQ = getKoreanChoseong(q);
 
     return entities.filter(entity => {
-      // 카테고리 필터
-      if (selectedCategory !== 'all' && entity.category !== selectedCategory) {
+      // 한우 사육 구분 필터 (번식우, 비육우, 송아지 등)
+      if (selectedBreed !== 'all' && !(entity.breed || '').includes(selectedBreed)) {
         return false;
       }
       // 상태 필터
@@ -160,15 +160,15 @@ export default function EntityList({
         </div>
 
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-          {/* 축종 분류 필터 */}
+          {/* 한우 사육 단계 필터 */}
           <select 
             className="filter-select"
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
+            value={selectedBreed}
+            onChange={(e) => setSelectedBreed(e.target.value)}
           >
-            <option value="all">전체 축종</option>
-            {ENTITY_CATEGORIES.map(cat => (
-              <option key={cat.id} value={cat.id}>{cat.icon} {cat.label}</option>
+            <option value="all">전체 사육 구분</option>
+            {HANWOO_BREEDS.map(breed => (
+              <option key={breed.id} value={breed.shortLabel}>🐂 {breed.label}</option>
             ))}
           </select>
 
@@ -227,7 +227,6 @@ export default function EntityList({
             const age = calculateAge(entity.birthDate);
             const statusObj = ENTITY_STATUSES.find(s => s.id === entity.status) || ENTITY_STATUSES[0];
             const genderObj = GENDER_OPTIONS.find(g => g.id === entity.gender) || GENDER_OPTIONS[0];
-            const categoryObj = ENTITY_CATEGORIES.find(c => c.id === entity.category) || ENTITY_CATEGORIES[0];
             const latestLog = getLatestCareLog(entity.id, entity.tagNumber);
 
             return (
@@ -255,17 +254,17 @@ export default function EntityList({
                     style={{ cursor: 'pointer' }}
                     onClick={() => onOpenEntityDetail(entity.tagNumber)}
                   >
-                    {categoryObj.icon} {entity.name}
+                    🐂 {entity.name}
                   </h3>
                   <span style={{ fontSize: '0.85rem', color: genderObj.color, fontWeight: 700 }}>
                     {genderObj.symbol} {genderObj.label}
                   </span>
                 </div>
 
-                {/* 축종 및 위치 */}
+                {/* 사육 구분 및 축사 위치 */}
                 <div className="entity-meta-row">
-                  <span className="badge" style={{ background: 'var(--bg-card-subtle)', color: 'var(--text-muted)' }}>
-                    {entity.breed || categoryObj.label}
+                  <span className="badge" style={{ background: 'rgba(16, 185, 129, 0.1)', color: 'var(--color-primary)', fontWeight: 600 }}>
+                    {entity.breed || '한우'}
                   </span>
                   <span className="badge" style={{ background: 'var(--bg-card-subtle)', color: 'var(--text-muted)' }}>
                     📍 {entity.barn || '축사 미지정'}
