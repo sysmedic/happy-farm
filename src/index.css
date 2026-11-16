@@ -836,17 +836,20 @@ a:hover {
   white-space: nowrap;
 }
 
+.detail-header-name-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin: 0.1rem 0;
+}
+
 .detail-header-name {
   font-size: 1.35rem;
   font-weight: 800;
   color: var(--text-main);
-  margin: 0.1rem 0;
+  margin: 0;
   line-height: 1.2;
-}
-
-.detail-header-status {
-  display: flex;
-  align-items: center;
 }
 
 .detail-header-desc {

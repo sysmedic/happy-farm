@@ -59,17 +59,15 @@ export default function EntityDetailModal({
               <span className="entity-ear-tag">#{entity.tagNumber}</span>
             </div>
 
-            {/* 2줄: 애칭 */}
-            <h2 className="detail-header-name">{entity.name}</h2>
-
-            {/* 3줄: 상태 */}
-            <div className="detail-header-status">
+            {/* 2줄: 애칭 & 상태 한 행 나란히 배치 */}
+            <div className="detail-header-name-row">
+              <h2 className="detail-header-name">{entity.name}</h2>
               <span className={`badge ${statusObj.colorClass}`}>
                 {statusObj.icon} {statusObj.label}
               </span>
             </div>
 
-            {/* 4줄: 설명 */}
+            {/* 3줄: 설명 */}
             <div className="detail-header-desc">
               한우 • {entity.breed} • {genderObj.symbol} {genderObj.label} • {age.text}
             </div>
