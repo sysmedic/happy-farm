@@ -1,16 +1,73 @@
-# React + Vite
+# 🌾 행복 농장 관리 프로그램 (Happy Farm Management)
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+기존 **프로드릴앱(ProDrill App)**의 아키텍처와 고객등록카드 설계 패턴을 차용하여 개발된 모바일/태블릿/데스크톱 대응 반응형 **스마트 가축/농장 개체 관리 프로그램**입니다.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 🌟 핵심 구현 기능
 
-## React Compiler
+### 1. 개체번호 기반 식별 관리 (고객등록카드 차용)
+- **개체식별번호 (이표번호 12자리 / 농장 관리번호)** 기반 고유 관리
+- **고객등록카드 스타일의 개체 관리 카드**:
+  - 개체번호 바코드 룩앤필 & 상태 뱃지 (건강, 발정, 수정, 임신, 포유, 치료중, 출하예정)
+  - 생년월일 기준 실시간 월령(개월령, 일령) 자동 연산
+  - 축사/방 번호, 체중, 모체번호, 부체(씨수소 KPN) 계통 정보 관리
+  - 한글 초성 검색(예: `ㅂㅅㅇ` -> 복순이) 및 이표번호, 축사별 즉시 필터링
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 2. 매일 일정을 모아 보고서로 작성 (일정 다이어리 생성)
+- **월간 캘린더 & 일자별 영농 다이어리 (`DailyDiaryView`)**:
+  - 작업 및 이벤트가 있는 날짜 자동 마킹
+  - 당일 실시된 전체 영농 작업 내역 집계
+  - 차기 관리 예정일(백신 주기, 재발정 관찰, 임신감정, 분만예정일) D-Day 자동 리마인더
+- **일일 영농 관리 보고서 자동 생성 (`DailyReportView`)**:
+  - 당일 발생한 전체 관리/처치 내역을 집계하여 공식 일일 영농일지 자동 편철
+  - 작업 분류별(백신, 투약, 번식, 분만, 사료) 건수 및 소요 비용 자동 계산
+  - 영농 총평 및 기상/특이사항 기록
+  - 원클릭 **A4 규격 인쇄** (`window.print()`) 및 스마트폰/PC 클립보드 공유
 
-## Expanding the Oxlint configuration
+### 3. 보고서의 개체번호 클릭 시 개체 관리 내역으로 즉시 이동 (관계형 DB)
+- **Relational Schema**: `Entities (1) <---> CareLogs (N)`
+- 일일 보고서, 일정 다이어리, 최근 작업 목록 어디서든 **파란색 [개체식별번호(예: #002-1402-9851)] 뱃지를 클릭**하면:
+  - 해당 개체의 **생애 관리 내역(Entity Detail & Care Timeline)**으로 즉시 스무스하게 화면 이동!
+  - 개체 전 생애 동안 진행된 백신, 진료, 번식, 분만, 체중 기록을 타임라인으로 열람
+  - 그 자리에서 즉시 새 관리 기록 추가 가능
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+### 4. 구글 드라이브(Google Drive)를 통한 자료 공유 & 클라우드 백업
+- **구글 드라이브 클라우드 동기화 (Google Drive API GIS OAuth 2.0)**:
+  - 구글 계정 원클릭 로그인
+  - 행복 농장 데이터베이스를 구글 드라이브에 안전하게 타임스탬프 스냅샷 백업
+  - 드라이브 백업 파일 목록 조회 및 원클릭 복원
+- **오프라인/간편 파일 공유**:
+  - 전체 데이터베이스 JSON 백업 파일 다운로드 및 불러오기 (구글 드라이브 수동 공유 가능)
+  - 구글 스프레드시트 및 엑셀 호환 CSV 파일 내보내기
+
+---
+
+## 📝 4가지 필수 입력폼 구현 내역
+
+| 입력폼 명칭 | 설명 및 주요 입력 항목 |
+| :--- | :--- |
+| **1. 개체등록 폼** | 개체번호(자동 채번 지원), 이름/애칭, 축종(한우, 젖소, 흑염소 등), 세부 품종, 성별, 생년월일, 축사/방 위치, 체중, 모체번호, 부체(KPN), 상태, 메모 |
+| **2. 개체별 관리 추가 폼** | 대상 개체 선택, 작업 일시, 관리 분류(백신, 치료, 번식, 분만, 사료, 체중, 이동), 작업명, 처방/투약/상세 내용, 작업자, 비용, **차기 예정일(D-day 빠른 프리셋 +7일, +21일, +180일 등)** |
+| **3. 개체관리 내역 출력** | 지공차트/고객카드 양식을 계승한 **공식 A4 규격 개체관리카드**. 바코드 그래픽, 기본 인적 정보, 전 생애 관리/진료 이력 대장, 관리자 직인 서명란 포함 |
+| **4. 일자별 내역 열람** | 월간 캘린더 다이어리 뷰, 선택한 일자의 작업 내역 및 도래한 D-day 예정 일정 한눈에 보기, 개체번호 원클릭 관계형 점프 |
+
+---
+
+## 🚀 빠른 시작 (실행 방법)
+
+### 프로젝트 디렉토리 위치
+- 개발 워크스페이스: `/Users/sysmedic/Projects/happy-farm`
+- (스크래치 사본: `/Users/sysmedic/.gemini/antigravity-ide/scratch/happy-farm`)
+
+### 로컬 실행
+```bash
+cd /Users/sysmedic/Projects/happy-farm
+npm run dev
+```
+브라우저에서 `http://localhost:5173/` 로 접속하여 바로 사용하실 수 있습니다.
+
+### 프로덕션 빌드 검증
+```bash
+npm run build
+```
