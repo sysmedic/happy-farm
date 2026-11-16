@@ -534,36 +534,6 @@ a:hover {
   background: rgba(239, 68, 68, 0.06);
 }
 
-.active-filter-banner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.75rem 1.15rem;
-  margin-bottom: 1.15rem;
-  border-radius: var(--radius-md);
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  font-size: 0.9rem;
-  animation: fadeIn 0.15s ease-out;
-}
-
-.btn-filter-reset {
-  background: var(--bg-card-subtle);
-  border: 1px solid var(--border-color);
-  padding: 0.35rem 0.75rem;
-  border-radius: var(--radius-sm);
-  font-size: 0.8rem;
-  font-weight: 700;
-  cursor: pointer;
-  color: var(--text-muted);
-  transition: all 0.15s ease;
-}
-
-.btn-filter-reset:hover {
-  background: var(--bg-hover);
-  color: var(--text-main);
-  border-color: var(--color-primary);
-}
 
 .stat-icon-wrapper {
   width: 48px;

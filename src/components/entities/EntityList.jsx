@@ -235,31 +235,6 @@ export default function EntityList({
         </div>
       </div>
 
-      {/* 2-1. 원클릭 상태 필터 활성 알림 배너 */}
-      {selectedStatus !== 'all' && (
-        <div className="active-filter-banner">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-            <span style={{ fontSize: '1.1rem' }}>
-              {selectedStatus === 'pregnant' ? '💜' : '❤️'}
-            </span>
-            <span>
-              <strong>{selectedStatus === 'pregnant' ? '임신 / 수태 개체' : '치료 / 집중 관찰 개체'}</strong>
-              <span style={{ marginLeft: '0.5rem', color: 'var(--text-muted)', fontSize: '0.825rem', fontWeight: 500 }}>
-                ({filteredEntities.length}두 리스트업 완료)
-              </span>
-            </span>
-          </div>
-          <button 
-            type="button" 
-            className="btn-filter-reset" 
-            onClick={() => setSelectedStatus('all')}
-            title="필터 해제하고 전체 개체 목록 보기"
-          >
-            전체 개체 보기 ✕
-          </button>
-        </div>
-      )}
-
       {/* 3. 개체 카드 그리드 (고객등록카드 차용) */}
       {filteredEntities.length === 0 ? (
         <div className="card" style={{ padding: '3.5rem 1.5rem', textAlign: 'center' }}>
