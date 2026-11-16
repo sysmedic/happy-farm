@@ -55,7 +55,11 @@ export default function App() {
   };
 
   const handleToggleTheme = () => {
-    setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
+    setTheme(prev => {
+      const next = prev === 'dark' ? 'light' : 'dark';
+      showToast(next === 'dark' ? '다크(나이트) 모드로 전환되었습니다 🌙' : '라이트 모드로 전환되었습니다 ☀️');
+      return next;
+    });
   };
 
   // ⚡ 요구사항 3: 보고서나 일정 다이어리에서 개체번호를 클릭하면 해당 개체 관리 내역으로 이동!
@@ -178,7 +182,6 @@ export default function App() {
         }}
         theme={theme}
         onToggleTheme={handleToggleTheme}
-        onResetSample={handleResetSample}
       />
 
       {/* 토스트 알림 */}
@@ -287,6 +290,7 @@ export default function App() {
           setCareLogPreselectedEntity(preselected);
           setIsCareLogModalOpen(true);
         }}
+        onToggleTheme={handleToggleTheme}
       />
 
       {/* 개체 상세 관리 내역 모달 (타임라인 & 처치 기록) */}

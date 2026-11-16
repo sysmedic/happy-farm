@@ -5,16 +5,14 @@ import {
   FileText, 
   Cloud, 
   Sun, 
-  Moon, 
-  RotateCcw
+  Moon
 } from 'lucide-react';
 
 export default function TopBar({ 
   activeTab, 
   onSelectTab, 
   theme, 
-  onToggleTheme, 
-  onResetSample
+  onToggleTheme
 }) {
   return (
     <header className="topbar">
@@ -74,14 +72,6 @@ export default function TopBar({
           title={theme === 'dark' ? '라이트 모드로 전환' : '다크 모드로 전환'}
         >
           {theme === 'dark' ? <Sun size={17} color="#f59e0b" /> : <Moon size={17} />}
-        </button>
-
-        <button
-          className="btn btn-outline btn-icon-only"
-          onClick={onResetSample}
-          title="초기 샘플 데이터 복구"
-        >
-          <RotateCcw size={15} />
         </button>
       </div>
     </header>

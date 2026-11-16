@@ -1183,30 +1183,16 @@ form.modal-content {
    ========================================================================== */
 @media (max-width: 768px) {
   :root {
-    --header-height: 58px;
+    --header-height: 0px;
   }
 
-  body {
-    padding-bottom: calc(64px + env(safe-area-inset-bottom, 14px));
-  }
-
+  /* 모바일 화면에서는 상단 메뉴(탑바) 완전 숨김 (100% 풀스크린 화면 활용) */
   .topbar {
-    padding: 0 1rem;
-  }
-
-  .topbar .nav-tabs {
-    display: none; /* 모바일에서는 하단 탭바로 대체 */
-  }
-
-  /* 모바일 화면에서는 상단 긴 브랜드 텍스트 숨김 (1안: 아이콘만 유지) */
-  .brand-title,
-  .brand-subtitle,
-  .brand-section > div:not(.brand-logo-icon) {
-    display: none;
+    display: none !important;
   }
 
   .main-content {
-    padding: 1rem 0.75rem calc(88px + env(safe-area-inset-bottom, 20px)) 0.75rem !important;
+    padding: calc(0.75rem + env(safe-area-inset-top, 10px)) 0.75rem calc(88px + env(safe-area-inset-bottom, 20px)) 0.75rem !important;
   }
 
   /* 토스트 알림이 모바일 하단 바에 가리지 않도록 상단 배치 */
@@ -1356,10 +1342,10 @@ form.modal-content {
     font-weight: 700;
   }
 
-  /* 중앙 원형 플로팅 액션 버튼 (현장 빠른 등록) */
+  /* 중앙 원형 플로팅 액션 버튼 (짧은 탭: 관리 등록 / 0.55초 롱프레스: 나이트 모드 전환) */
   .mobile-fab-btn {
-    width: 46px;
-    height: 46px;
+    width: 48px;
+    height: 48px;
     border-radius: 50%;
     background: linear-gradient(135deg, #10b981 0%, #059669 100%);
     border: 3px solid var(--bg-page);
@@ -1368,12 +1354,16 @@ form.modal-content {
     justify-content: center;
     cursor: pointer;
     box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
-    margin-top: -16px;
-    transition: transform 0.15s ease;
+    margin-top: -18px;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
   }
 
   .mobile-fab-btn:active {
-    transform: scale(0.92);
+    transform: scale(0.88);
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.4);
   }
 }
 
