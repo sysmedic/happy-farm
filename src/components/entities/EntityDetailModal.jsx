@@ -6,6 +6,8 @@ import {
   Edit3, 
   Calendar, 
   MapPin, 
+  Scale,
+  Dna,
   Weight, 
   Sparkles,
   ClipboardList,
@@ -101,45 +103,74 @@ export default function EntityDetailModal({
 
         {/* 모달 본문 */}
         <div className="modal-body">
-          {/* 1. 개체 기본 스펙 카드 */}
-          <div className="card" style={{ marginBottom: '1.5rem', background: 'var(--bg-card-subtle)' }}>
-            <div className="card-body" style={{ padding: '1.1rem 1.3rem' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '0.85rem' }}>
-                <div>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>📍 축사 및 구역</span>
-                  <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>{entity.barn || '미지정'}</div>
-                </div>
-                <div>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>⚖️ 현재 체중</span>
-                  <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>{entity.weight ? `${entity.weight} kg` : '미측정'}</div>
-                </div>
-                <div>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>🧬 모체 번호</span>
-                  <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>{entity.motherTag || '정보 없음'}</div>
-                </div>
-                <div>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>🧬 부체(KPN)</span>
-                  <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>{entity.fatherTag || '정보 없음'}</div>
-                </div>
+          {/* 1. 4대 중요 정보 2x2 아이콘 스펙 카드 그리드 */}
+          <div className="modal-specs-grid">
+            {/* 1) 축사 및 구역 */}
+            <div className="modal-spec-card">
+              <div className="modal-spec-icon-box" style={{ background: 'rgba(245, 158, 11, 0.15)', color: '#f59e0b' }}>
+                <MapPin size={20} />
               </div>
+              <div className="modal-spec-content">
+                <span className="modal-spec-label">축사 및 구역</span>
+                <span className="modal-spec-value" title={entity.barn || '미지정'}>
+                  {entity.barn || '미지정'}
+                </span>
+              </div>
+            </div>
 
-              {entity.memo && (
-                <div style={{ 
-                  marginTop: '0.85rem', 
-                  paddingTop: '0.75rem', 
-                  borderTop: '1px solid var(--border-color)',
-                  fontSize: '0.85rem',
-                  color: 'var(--text-main)',
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: '0.4rem'
-                }}>
-                  <span style={{ fontWeight: 600, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>특이사항 메모:</span>
-                  <span>{entity.memo}</span>
-                </div>
-              )}
+            {/* 2) 현재 체중 */}
+            <div className="modal-spec-card">
+              <div className="modal-spec-icon-box" style={{ background: 'rgba(14, 165, 233, 0.15)', color: '#0ea5e9' }}>
+                <Scale size={20} />
+              </div>
+              <div className="modal-spec-content">
+                <span className="modal-spec-label">현재 체중</span>
+                <span className="modal-spec-value">
+                  {entity.weight ? (
+                    <>
+                      {entity.weight} <small style={{ fontSize: '0.8rem', fontWeight: 600 }}>kg</small>
+                    </>
+                  ) : (
+                    '미측정'
+                  )}
+                </span>
+              </div>
+            </div>
+
+            {/* 3) 모체 번호 */}
+            <div className="modal-spec-card">
+              <div className="modal-spec-icon-box" style={{ background: 'rgba(139, 92, 246, 0.15)', color: '#8b5cf6' }}>
+                <Dna size={20} />
+              </div>
+              <div className="modal-spec-content">
+                <span className="modal-spec-label">모체 번호</span>
+                <span className="modal-spec-value" title={entity.motherTag || '정보 없음'}>
+                  {entity.motherTag || '정보 없음'}
+                </span>
+              </div>
+            </div>
+
+            {/* 4) 부체 (KPN) */}
+            <div className="modal-spec-card">
+              <div className="modal-spec-icon-box" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10b981' }}>
+                <Sparkles size={20} />
+              </div>
+              <div className="modal-spec-content">
+                <span className="modal-spec-label">부체 (KPN)</span>
+                <span className="modal-spec-value" title={entity.fatherTag || '정보 없음'}>
+                  {entity.fatherTag || '정보 없음'}
+                </span>
+              </div>
             </div>
           </div>
+
+          {/* 특이사항 메모 (있는 경우 콤팩트 스트립 표시) */}
+          {entity.memo && (
+            <div className="modal-spec-memo-card">
+              <span className="modal-spec-memo-tag">📝 특이사항</span>
+              <span className="modal-spec-memo-text">{entity.memo}</span>
+            </div>
+          )}
 
           {/* 2. 관리 이력 섹션 헤더 및 카테고리 필터 */}
           <div style={{ 
