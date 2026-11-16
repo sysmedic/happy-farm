@@ -4,10 +4,8 @@ import {
   Calendar, 
   FileText, 
   Cloud, 
-  PlusCircle, 
   Sun, 
   Moon, 
-  ListPlus,
   RotateCcw
 } from 'lucide-react';
 
@@ -16,8 +14,6 @@ export default function TopBar({
   onSelectTab, 
   theme, 
   onToggleTheme, 
-  onOpenEntityModal, 
-  onOpenCareLogModal,
   onResetSample
 }) {
   return (
@@ -72,24 +68,6 @@ export default function TopBar({
 
       {/* Quick Action Buttons */}
       <div className="topbar-actions">
-        <button 
-          className="btn btn-secondary btn-sm"
-          onClick={onOpenEntityModal}
-          title="새 가축/개체 등록"
-        >
-          <PlusCircle size={15} />
-          <span>개체 등록</span>
-        </button>
-
-        <button 
-          className="btn btn-primary btn-sm"
-          onClick={() => onOpenCareLogModal()}
-          title="개체별 관리 내역 추가"
-        >
-          <ListPlus size={15} />
-          <span>관리 추가</span>
-        </button>
-
         <button
           className="btn btn-outline btn-icon-only"
           onClick={onToggleTheme}

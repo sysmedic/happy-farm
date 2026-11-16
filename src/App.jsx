@@ -178,14 +178,6 @@ export default function App() {
         }}
         theme={theme}
         onToggleTheme={handleToggleTheme}
-        onOpenEntityModal={() => {
-          setEntityToEdit(null);
-          setIsEntityModalOpen(true);
-        }}
-        onOpenCareLogModal={(preselected = null) => {
-          setCareLogPreselectedEntity(preselected);
-          setIsCareLogModalOpen(true);
-        }}
         onResetSample={handleResetSample}
       />
 
