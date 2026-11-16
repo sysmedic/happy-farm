@@ -504,6 +504,67 @@ a:hover {
   box-shadow: var(--shadow-md);
 }
 
+/* 대시보드 통계 카드 원클릭 필터링 스타일 */
+.stat-card-interactive {
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.stat-card-interactive:active {
+  transform: scale(0.97);
+}
+
+.stat-card-interactive.active-all {
+  border-color: #10b981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.4), var(--shadow-md);
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.stat-card-interactive.active-pregnant {
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.4), var(--shadow-md);
+  background: rgba(139, 92, 246, 0.06);
+}
+
+.stat-card-interactive.active-treatment {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.4), var(--shadow-md);
+  background: rgba(239, 68, 68, 0.06);
+}
+
+.active-filter-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.15rem;
+  margin-bottom: 1.15rem;
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  font-size: 0.9rem;
+  animation: fadeIn 0.15s ease-out;
+}
+
+.btn-filter-reset {
+  background: var(--bg-card-subtle);
+  border: 1px solid var(--border-color);
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: all 0.15s ease;
+}
+
+.btn-filter-reset:hover {
+  background: var(--bg-hover);
+  color: var(--text-main);
+  border-color: var(--color-primary);
+}
+
 .stat-icon-wrapper {
   width: 48px;
   height: 48px;

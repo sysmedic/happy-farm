@@ -101,11 +101,26 @@ export default function EntityList({
     return logs.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
   };
 
+  // 대시보드 카드 클릭 시 원클릭 필터링 (토글 지원)
+  const handleStatusCardClick = (statusKey) => {
+    if (statusKey === 'all') {
+      setSelectedStatus('all');
+    } else {
+      setSelectedStatus(prev => prev === statusKey ? 'all' : statusKey);
+    }
+  };
+
   return (
     <div>
-      {/* 1. 상단 통계 현황판 */}
+      {/* 1. 상단 통계 현황판 (클릭 시 원클릭 리스트업) */}
       <div className="stats-grid">
-        <div className="stat-card">
+        <div 
+          className={`stat-card stat-card-interactive ${selectedStatus === 'all' ? 'active-all' : ''}`}
+          onClick={() => handleStatusCardClick('all')}
+          title="클릭 시 전체 한우 목록 보기"
+          role="button"
+          tabIndex={0}
+        >
           <div className="stat-icon-wrapper" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10b981' }}>
             🐂
           </div>
@@ -115,7 +130,13 @@ export default function EntityList({
           </div>
         </div>
 
-        <div className="stat-card">
+        <div 
+          className={`stat-card stat-card-interactive ${selectedStatus === 'pregnant' ? 'active-pregnant' : ''}`}
+          onClick={() => handleStatusCardClick('pregnant')}
+          title="클릭 시 임신/수태 개체만 즉시 필터링 (다시 누르면 전체보기)"
+          role="button"
+          tabIndex={0}
+        >
           <div className="stat-icon-wrapper" style={{ background: 'rgba(139, 92, 246, 0.15)', color: '#8b5cf6' }}>
             <Heart size={24} />
           </div>
@@ -125,7 +146,13 @@ export default function EntityList({
           </div>
         </div>
 
-        <div className="stat-card">
+        <div 
+          className={`stat-card stat-card-interactive ${selectedStatus === 'treatment' ? 'active-treatment' : ''}`}
+          onClick={() => handleStatusCardClick('treatment')}
+          title="클릭 시 치료/집중 관찰 개체만 즉시 필터링 (다시 누르면 전체보기)"
+          role="button"
+          tabIndex={0}
+        >
           <div className="stat-icon-wrapper" style={{ background: 'rgba(239, 68, 68, 0.15)', color: '#ef4444' }}>
             <Stethoscope size={24} />
           </div>
@@ -207,6 +234,31 @@ export default function EntityList({
           </button>
         </div>
       </div>
+
+      {/* 2-1. 원클릭 상태 필터 활성 알림 배너 */}
+      {selectedStatus !== 'all' && (
+        <div className="active-filter-banner">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+            <span style={{ fontSize: '1.1rem' }}>
+              {selectedStatus === 'pregnant' ? '💜' : '❤️'}
+            </span>
+            <span>
+              <strong>{selectedStatus === 'pregnant' ? '임신 / 수태 개체' : '치료 / 집중 관찰 개체'}</strong>
+              <span style={{ marginLeft: '0.5rem', color: 'var(--text-muted)', fontSize: '0.825rem', fontWeight: 500 }}>
+                ({filteredEntities.length}두 리스트업 완료)
+              </span>
+            </span>
+          </div>
+          <button 
+            type="button" 
+            className="btn-filter-reset" 
+            onClick={() => setSelectedStatus('all')}
+            title="필터 해제하고 전체 개체 목록 보기"
+          >
+            전체 개체 보기 ✕
+          </button>
+        </div>
+      )}
 
       {/* 3. 개체 카드 그리드 (고객등록카드 차용) */}
       {filteredEntities.length === 0 ? (
