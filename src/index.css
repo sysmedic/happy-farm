@@ -1175,7 +1175,15 @@ form.modal-content {
   }
 
   .main-content {
-    padding: 1rem 0.75rem;
+    padding: 1rem 0.75rem calc(88px + env(safe-area-inset-bottom, 20px)) 0.75rem !important;
+  }
+
+  /* 토스트 알림이 모바일 하단 바에 가리지 않도록 상단 배치 */
+  .toast-notification {
+    bottom: calc(76px + env(safe-area-inset-bottom, 16px)) !important;
+    left: 16px !important;
+    right: 16px !important;
+    justify-content: center;
   }
 
   /* 2열 통계 카드 */

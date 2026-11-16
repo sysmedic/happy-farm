@@ -191,10 +191,12 @@ export default function App() {
 
       {/* 토스트 알림 */}
       {toastMessage && (
-        <div style={{
-          position: 'fixed',
-          bottom: '24px',
-          right: '24px',
+        <div 
+          className="toast-notification"
+          style={{
+            position: 'fixed',
+            bottom: '24px',
+            right: '24px',
           zIndex: 9999,
           background: 'var(--text-main)',
           color: 'var(--bg-page)',
