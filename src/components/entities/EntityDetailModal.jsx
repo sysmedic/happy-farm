@@ -156,23 +156,11 @@ export default function EntityDetailModal({
             display: 'flex', 
             alignItems: 'center', 
             justifyContent: 'space-between', 
-            marginBottom: '1rem',
-            flexWrap: 'wrap',
-            gap: '0.75rem'
+            marginBottom: '0.85rem'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 800 }}>
-                📋 생애 관리 내역 ({filteredLogs.length}건)
-              </h3>
-            </div>
-
-            <button 
-              className="btn btn-primary btn-sm"
-              onClick={() => onOpenCareLogModal(entity)}
-            >
-              <Plus size={15} />
-              <span>새 관리 기록 추가</span>
-            </button>
+            <h3 style={{ fontSize: '1.05rem', fontWeight: 800 }}>
+              📋 생애 관리 내역 ({filteredLogs.length}건)
+            </h3>
           </div>
 
           {/* 카테고리 필터 탭 */}
@@ -206,7 +194,7 @@ export default function EntityDetailModal({
               <ClipboardList size={40} style={{ opacity: 0.3, marginBottom: '0.75rem' }} />
               <div style={{ fontWeight: 600 }}>해당 분류의 관리 기록이 없습니다.</div>
               <p style={{ fontSize: '0.85rem', marginTop: '0.25rem' }}>
-                상단의 [+ 새 관리 기록 추가] 버튼을 눌러 첫 관리 기록을 등록해보세요.
+                하단의 [관리 기록 추가] 버튼을 눌러 첫 관리 기록을 등록해보세요.
               </p>
             </div>
           ) : (

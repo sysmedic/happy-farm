@@ -1434,29 +1434,40 @@ form.modal-content {
     gap: 0.5rem;
   }
 
-  /* 모바일 바텀 시트 형태 모달 */
+  /* 모바일 전면 풀스크린 모달 (2안 적용) */
   .modal-overlay {
-    align-items: flex-end;
+    align-items: stretch;
+    justify-content: stretch;
     padding: 0;
+    z-index: 200;
   }
 
   .modal-content {
-    max-width: 100%;
-    max-height: min(85vh, 85dvh);
-    border-radius: 22px 22px 0 0;
-    border-bottom: none;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    max-height: 100vh !important;
+    max-height: 100dvh !important;
+    border-radius: 0 !important;
+    border: none !important;
+    display: flex;
+    flex-direction: column;
     animation: slideUpBottom 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .modal-header {
-    padding: 1rem 1.25rem;
+    padding: 0.9rem 1.15rem;
+    padding-top: calc(0.9rem + env(safe-area-inset-top, 0px));
     flex-shrink: 0 !important;
     z-index: 2;
+    border-bottom: 1px solid var(--border-color);
   }
 
-  /* 모바일 개체 상세 모달 헤더 (4줄 넉넉한 공간 & 우측 닫기+세로버튼) */
+  /* 모바일 개체 상세 모달 헤더 */
   .entity-detail-header {
-    padding: 1rem 1.15rem;
+    padding: 0.9rem 1.15rem;
+    padding-top: calc(0.9rem + env(safe-area-inset-top, 0px));
     gap: 0.55rem;
   }
 
