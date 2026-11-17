@@ -28,6 +28,7 @@ export const ENTITY_STATUSES = [
   { id: 'nursing', label: '포유/육아', colorClass: 'badge-nursing', icon: '🤱' },
   { id: 'treatment', label: '치료/투약중', colorClass: 'badge-treatment', icon: '💊' },
   { id: 'scheduled_ship', label: '출하 예정', colorClass: 'badge-scheduled_ship', icon: '🚛' },
+  { id: 'shipped', label: '출하 완료', colorClass: 'badge-shipped', icon: '🏷️' },
 ];
 
 export const CARE_CATEGORIES = [

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import TopBar from './components/layout/TopBar.jsx';
-import MobileNavBar from './components/layout/MobileNavBar.jsx';
 import EntityList from './components/entities/EntityList.jsx';
 import EntityDetailModal from './components/entities/EntityDetailModal.jsx';
 import EntityFormModal from './components/entities/EntityFormModal.jsx';
@@ -37,6 +36,7 @@ export default function App() {
 
   const [isCareLogModalOpen, setIsCareLogModalOpen] = useState(false);
   const [careLogPreselectedEntity, setCareLogPreselectedEntity] = useState(null);
+  const [careLogToEdit, setCareLogToEdit] = useState(null);
 
   const [printSheetEntity, setPrintSheetEntity] = useState(null);
   const [targetReportDate, setTargetReportDate] = useState(getTodayDateString());
@@ -114,9 +114,18 @@ export default function App() {
     }
   };
 
-  // 관리 내역 추가 저장
-  const handleSaveCareLog = (newLog, updates) => {
-    const updatedLogs = [newLog, ...careLogs];
+  // 관리 내역 추가 또는 수정 저장
+  const handleSaveCareLog = (savedLog, updates) => {
+    const exists = careLogs.some(l => l.id === savedLog.id);
+    let updatedLogs;
+    if (exists) {
+      updatedLogs = careLogs.map(l => l.id === savedLog.id ? savedLog : l);
+      showToast(`개체 [${savedLog.entityName}]의 관리 내역이 수정되었습니다.`);
+    } else {
+      updatedLogs = [savedLog, ...careLogs];
+      showToast(`개체 [${savedLog.entityName}]의 관리 내역이 등록되었습니다.`);
+    }
+
     setCareLogs(updatedLogs);
     saveCareLogs(updatedLogs);
 
@@ -139,7 +148,15 @@ export default function App() {
 
     setIsCareLogModalOpen(false);
     setCareLogPreselectedEntity(null);
-    showToast(`개체 [${newLog.entityName}]의 관리 내역이 등록되었습니다.`);
+    setCareLogToEdit(null);
+  };
+
+  // 관리 내역 수정 모달 오픈
+  const handleOpenEditCareLog = (log) => {
+    const ent = entities.find(e => e.id === log.entityId || e.tagNumber === log.tagNumber);
+    setCareLogPreselectedEntity(ent || null);
+    setCareLogToEdit(log);
+    setIsCareLogModalOpen(true);
   };
 
   // 관리 내역 삭제
@@ -182,6 +199,10 @@ export default function App() {
         }}
         theme={theme}
         onToggleTheme={handleToggleTheme}
+        onOpenCareLogModal={(preselected = null) => {
+          setCareLogPreselectedEntity(preselected);
+          setIsCareLogModalOpen(true);
+        }}
       />
 
       {/* 토스트 알림 */}
@@ -279,19 +300,6 @@ export default function App() {
         )}
       </main>
 
-      {/* 모바일 환경 전용 터치 네비게이션 바 */}
-      <MobileNavBar
-        activeTab={activeTab}
-        onSelectTab={(tab) => {
-          setActiveTab(tab);
-          setPrintSheetEntity(null);
-        }}
-        onOpenCareLogModal={(preselected = null) => {
-          setCareLogPreselectedEntity(preselected);
-          setIsCareLogModalOpen(true);
-        }}
-      />
-
       {/* 개체 상세 관리 내역 모달 (타임라인 & 처치 기록) */}
       {selectedEntityForDetail && (
         <EntityDetailModal
@@ -311,6 +319,7 @@ export default function App() {
             setPrintSheetEntity(entity);
           }}
           onDeleteCareLog={handleDeleteCareLog}
+          onEditCareLog={handleOpenEditCareLog}
         />
       )}
 
@@ -327,14 +336,16 @@ export default function App() {
         />
       )}
 
-      {/* 개체별 관리 내역 추가 폼 모달 */}
+      {/* 개체별 관리 내역 추가 및 수정 폼 모달 */}
       {isCareLogModalOpen && (
         <CareLogFormModal
           preselectedEntity={careLogPreselectedEntity}
+          logToEdit={careLogToEdit}
           entities={entities}
           onClose={() => {
             setIsCareLogModalOpen(false);
             setCareLogPreselectedEntity(null);
+            setCareLogToEdit(null);
           }}
           onSave={handleSaveCareLog}
         />

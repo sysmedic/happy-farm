@@ -1,13 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   X, 
   Save, 
-  Calendar, 
-  Clock, 
-  AlertCircle, 
-  CheckCircle,
-  PlusCircle,
-  Sparkles
+  AlertCircle
 } from 'lucide-react';
 import { 
   CARE_CATEGORIES, 
@@ -17,23 +12,25 @@ import {
 
 export default function CareLogFormModal({
   preselectedEntity,
+  logToEdit,
   entities,
   onClose,
   onSave
 }) {
-  const [selectedEntityId, setSelectedEntityId] = useState(preselectedEntity?.id || '');
-  const [date, setDate] = useState(getTodayDateString());
-  const [time, setTime] = useState(getCurrentTimeString());
-  const [category, setCategory] = useState('vaccine');
-  const [title, setTitle] = useState('');
-  const [details, setDetails] = useState('');
-  const [operator, setOperator] = useState('홍길동 대표');
-  const [cost, setCost] = useState('');
+  const isEditing = Boolean(logToEdit);
+  const [selectedEntityId, setSelectedEntityId] = useState(logToEdit?.entityId || preselectedEntity?.id || '');
+  const [date, setDate] = useState(logToEdit?.date || getTodayDateString());
+  const [time, setTime] = useState(logToEdit?.time || getCurrentTimeString());
+  const [category, setCategory] = useState(logToEdit?.category || 'vaccine');
+  const [title, setTitle] = useState(logToEdit?.title || '');
+  const [details, setDetails] = useState(logToEdit?.details || '');
+  const [operator, setOperator] = useState(logToEdit?.operator || '홍길동 대표');
+  const [cost, setCost] = useState(logToEdit?.cost ? String(logToEdit.cost) : '');
   
   // 차기 일정 등록 (일정 다이어리 자동 연동)
-  const [hasNextSchedule, setHasNextSchedule] = useState(false);
-  const [nextScheduleDate, setNextScheduleDate] = useState('');
-  const [nextScheduleTitle, setNextScheduleTitle] = useState('');
+  const [hasNextSchedule, setHasNextSchedule] = useState(Boolean(logToEdit?.nextScheduleDate));
+  const [nextScheduleDate, setNextScheduleDate] = useState(logToEdit?.nextScheduleDate || '');
+  const [nextScheduleTitle, setNextScheduleTitle] = useState(logToEdit?.nextScheduleTitle || '');
 
   // 체중 또는 상태 즉시 업데이트
   const [updateWeight, setUpdateWeight] = useState('');
@@ -41,13 +38,29 @@ export default function CareLogFormModal({
 
   const [errorMsg, setErrorMsg] = useState('');
 
+  const activeEntities = useMemo(() => entities ? entities.filter(e => e.status !== 'shipped') : [], [entities]);
+  const shippedEntities = useMemo(() => entities ? entities.filter(e => e.status === 'shipped') : [], [entities]);
+
   useEffect(() => {
-    if (preselectedEntity) {
+    if (logToEdit) {
+      setSelectedEntityId(logToEdit.entityId);
+      setDate(logToEdit.date);
+      setTime(logToEdit.time || getCurrentTimeString());
+      setCategory(logToEdit.category);
+      setTitle(logToEdit.title);
+      setDetails(logToEdit.details || '');
+      setOperator(logToEdit.operator || '홍길동 대표');
+      setCost(logToEdit.cost ? String(logToEdit.cost) : '');
+      setHasNextSchedule(Boolean(logToEdit.nextScheduleDate));
+      setNextScheduleDate(logToEdit.nextScheduleDate || '');
+      setNextScheduleTitle(logToEdit.nextScheduleTitle || '');
+    } else if (preselectedEntity) {
       setSelectedEntityId(preselectedEntity.id);
     } else if (entities && entities.length > 0 && !selectedEntityId) {
-      setSelectedEntityId(entities[0].id);
+      const firstActive = entities.find(e => e.status !== 'shipped') || entities[0];
+      setSelectedEntityId(firstActive.id);
     }
-  }, [preselectedEntity, entities]);
+  }, [logToEdit, preselectedEntity, entities, selectedEntityId]);
 
   // 카테고리 선택 시 권장 작업명 자동 추천
   const handleCategorySelect = (catId) => {
@@ -97,8 +110,8 @@ export default function CareLogFormModal({
       return;
     }
 
-    const newLog = {
-      id: `LOG-${Date.now()}`,
+    const logData = {
+      id: logToEdit?.id || `LOG-${Date.now()}`,
       entityId: targetEntity.id,
       tagNumber: targetEntity.tagNumber,
       entityName: targetEntity.name,
@@ -112,10 +125,11 @@ export default function CareLogFormModal({
       nextScheduleDate: hasNextSchedule ? nextScheduleDate : null,
       nextScheduleTitle: hasNextSchedule ? nextScheduleTitle.trim() : null,
       completed: true,
-      createdAt: new Date().toISOString(),
+      createdAt: logToEdit?.createdAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
 
-    onSave(newLog, {
+    onSave(logData, {
       entityId: targetEntity.id,
       weight: updateWeight ? Number(updateWeight) : null,
       status: updateStatus || null,
@@ -135,7 +149,7 @@ export default function CareLogFormModal({
         <div className="modal-header">
           <div className="modal-header-title">
             <span style={{ fontSize: '1.4rem' }}>📋</span>
-            <span>개체별 관리 내역 추가</span>
+            <span>{isEditing ? '개체 관리 내역 수정' : '개체별 관리 내역 추가'}</span>
           </div>
           <button type="button" className="modal-close-btn" onClick={onClose}>
             <X size={20} />
@@ -174,25 +188,44 @@ export default function CareLogFormModal({
                 required
               >
                 <option value="">-- 개체를 선택하세요 --</option>
-                {entities.map(ent => (
-                  <option key={ent.id} value={ent.id}>
-                    [이표: {ent.tagNumber}] {ent.name} ({ent.breed} • {ent.barn || '축사미지정'})
-                  </option>
-                ))}
+                {activeEntities.length > 0 && (
+                  <optgroup label="사육 중인 개체">
+                    {activeEntities.map(ent => (
+                      <option key={ent.id} value={ent.id}>
+                        #{ent.tagNumber} {ent.name}
+                      </option>
+                    ))}
+                  </optgroup>
+                )}
+                {shippedEntities.length > 0 && (
+                  <optgroup label="출하 완료 개체">
+                    {shippedEntities.map(ent => (
+                      <option key={ent.id} value={ent.id}>
+                        🏷️ [출하] #{ent.tagNumber} {ent.name}
+                      </option>
+                    ))}
+                  </optgroup>
+                )}
               </select>
 
               {currentSelectedEntity && (
                 <div style={{ 
                   marginTop: '0.5rem', 
                   fontSize: '0.825rem', 
-                  color: 'var(--color-primary)', 
+                  color: currentSelectedEntity.status === 'shipped' ? 'var(--color-accent)' : 'var(--color-primary)', 
                   fontWeight: 600,
                   display: 'flex',
                   alignItems: 'center',
                   gap: '0.5rem'
                 }}>
-                  <span>선택된 개체: #{currentSelectedEntity.tagNumber} ({currentSelectedEntity.name})</span>
-                  <span>• 축사: {currentSelectedEntity.barn}</span>
+                  {currentSelectedEntity.status === 'shipped' ? (
+                    <span>🏷️ 출하 완료된 개체입니다. (과거 관리 이력 보강용)</span>
+                  ) : (
+                    <>
+                      <span>선택된 개체: #{currentSelectedEntity.tagNumber} ({currentSelectedEntity.name})</span>
+                      <span>• 축사: {currentSelectedEntity.barn || '미지정'}</span>
+                    </>
+                  )}
                 </div>
               )}
             </div>
@@ -374,7 +407,7 @@ export default function CareLogFormModal({
             </button>
             <button type="submit" className="btn btn-primary">
               <Save size={16} />
-              <span>관리 기록 저장</span>
+              <span>{isEditing ? '수정 사항 저장' : '관리 기록 저장'}</span>
             </button>
           </div>
         </form>

@@ -19,18 +19,19 @@ export default function EntityPrintSheet({
   careLogs,
   onClose
 }) {
+  // 이 개체의 전체 관리 내역 (날짜순 정렬)
+  const historyLogs = useMemo(() => {
+    if (!entity) return [];
+    return careLogs
+      .filter(l => l.entityId === entity.id || l.tagNumber === entity.tagNumber)
+      .sort((a, b) => new Date(a.date) - new Date(b.date)); // 생애 순서(과거->최신)
+  }, [careLogs, entity]);
+
   if (!entity) return null;
 
   const age = calculateAge(entity.birthDate);
   const statusObj = ENTITY_STATUSES.find(s => s.id === entity.status) || ENTITY_STATUSES[0];
   const genderObj = GENDER_OPTIONS.find(g => g.id === entity.gender) || GENDER_OPTIONS[0];
-
-  // 이 개체의 전체 관리 내역 (날짜순 정렬)
-  const historyLogs = useMemo(() => {
-    return careLogs
-      .filter(l => l.entityId === entity.id || l.tagNumber === entity.tagNumber)
-      .sort((a, b) => new Date(a.date) - new Date(b.date)); // 생애 순서(과거->최신)
-  }, [careLogs, entity]);
 
   const handlePrint = () => {
     window.print();
