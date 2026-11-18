@@ -1849,10 +1849,36 @@ form.modal-content {
   gap: 1.5rem;
 }
 
+/* Diary Detail Section (외부 큰 카드 제거 후 독립 레이아웃) */
+.diary-detail-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  min-width: 0;
+}
+
+.diary-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
 @media (max-width: 900px) {
   .diary-container {
     grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .diary-detail-section {
     gap: 1rem;
+  }
+
+  .diary-section-header {
+    padding-bottom: 0.65rem;
   }
 
   /* 모바일에서 달력 카드가 과도하게 커지지 않도록 최대 너비 제한 및 중앙 정렬 */
