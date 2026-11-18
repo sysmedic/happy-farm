@@ -12,6 +12,7 @@ import {
 
 const STORAGE_ENTITIES_KEY = 'happy_farm_entities_v2';
 const STORAGE_LOGS_KEY = 'happy_farm_care_logs_v2';
+const STORAGE_SCHEDULES_KEY = 'happy_farm_schedules_v1';
 const STORAGE_CONFIG_KEY = 'happy_farm_config_v1';
 
 // 초기 풍부한 실제 한우 농장 20두 샘플 데이터 (번식우, 비육우, 육성우, 송아지, 씨수소)
@@ -704,6 +705,60 @@ export function saveCareLogs(logs) {
   }
 }
 
+// --------------------------------------------------------------------------
+// Independent Farm Schedules (독립 영농 일정 관리)
+// --------------------------------------------------------------------------
+export const INITIAL_SAMPLE_SCHEDULES = [
+  {
+    id: 'SCHED-001',
+    date: getTodayDateString(),
+    time: '10:00',
+    entityId: null,
+    tagNumber: null,
+    entityName: '농장 공통',
+    category: 'routine',
+    title: '제1·2축사 오전 정기 환기 및 방역 소독',
+    memo: '환풍기 정상 작동 확인 및 안개 분무 소독제 살포',
+    completed: false,
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 'SCHED-002',
+    date: getTodayDateString(),
+    time: '14:30',
+    entityId: 'ENT-003',
+    tagNumber: '002-1601-7733-3',
+    entityName: '미순이',
+    category: 'breeding',
+    title: '인공수정 적기 확인 및 수정사 시술',
+    memo: 'KPN-1422 정액 준비 완료. 발정 지속 상태 재확인',
+    completed: false,
+    createdAt: new Date().toISOString()
+  }
+];
+
+export function loadSchedules() {
+  try {
+    const raw = localStorage.getItem(STORAGE_SCHEDULES_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    }
+    return INITIAL_SAMPLE_SCHEDULES;
+  } catch (err) {
+    console.error('Failed to load schedules:', err);
+    return INITIAL_SAMPLE_SCHEDULES;
+  }
+}
+
+export function saveSchedules(schedules) {
+  try {
+    localStorage.setItem(STORAGE_SCHEDULES_KEY, JSON.stringify(schedules));
+  } catch (err) {
+    console.error('Failed to save schedules:', err);
+  }
+}
+
 // Relational Query Helpers
 export function getCareLogsForEntity(tagNumberOrId, allLogs) {
   const logs = allLogs || loadCareLogs();
@@ -727,13 +782,14 @@ export function getSchedulesForDate(dateStr, allLogs) {
 }
 
 // Full Database Export / Import
-export function exportFullDatabase(entities, careLogs, customCategories) {
+export function exportFullDatabase(entities, careLogs, customCategories, schedules) {
   const data = {
     app: 'happy-farm',
-    version: '1.0.0',
+    version: '1.1.0',
     exportTimestamp: new Date().toISOString(),
     entities: entities || loadEntities(),
     careLogs: careLogs || loadCareLogs(),
+    schedules: schedules || loadSchedules(),
     customCategories: customCategories || loadCustomCareCategories(),
   };
   return JSON.stringify(data, null, 2);
@@ -747,9 +803,11 @@ export function importFullDatabase(jsonString) {
     }
     const entities = data.entities;
     const careLogs = Array.isArray(data.careLogs) ? data.careLogs : [];
+    const schedules = Array.isArray(data.schedules) ? data.schedules : [];
 
     saveEntities(entities);
     saveCareLogs(careLogs);
+    saveSchedules(schedules);
 
     if (Array.isArray(data.customCategories)) {
       saveCustomCareCategories(data.customCategories);
@@ -759,6 +817,7 @@ export function importFullDatabase(jsonString) {
       success: true, 
       entityCount: entities.length, 
       logCount: careLogs.length,
+      scheduleCount: schedules.length,
       categoryCount: Array.isArray(data.customCategories) ? data.customCategories.length : 0
     };
   } catch (err) {
@@ -770,5 +829,10 @@ export function importFullDatabase(jsonString) {
 export function resetToSampleData() {
   saveEntities(INITIAL_SAMPLE_ENTITIES);
   saveCareLogs(INITIAL_SAMPLE_CARE_LOGS);
-  return { entities: INITIAL_SAMPLE_ENTITIES, careLogs: INITIAL_SAMPLE_CARE_LOGS };
+  saveSchedules(INITIAL_SAMPLE_SCHEDULES);
+  return { 
+    entities: INITIAL_SAMPLE_ENTITIES, 
+    careLogs: INITIAL_SAMPLE_CARE_LOGS,
+    schedules: INITIAL_SAMPLE_SCHEDULES
+  };
 }

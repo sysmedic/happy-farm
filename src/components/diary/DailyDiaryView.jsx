@@ -9,20 +9,30 @@ import {
   AlertCircle, 
   CheckCircle2, 
   Sparkles,
-  ArrowRight
+  ArrowRight,
+  CheckSquare,
+  Square,
+  Trash2,
+  Edit2
 } from 'lucide-react';
 import { 
   CARE_CATEGORIES, 
   getTodayDateString,
   getCategoryById
 } from '../../lib/types.js';
+import { SCHEDULE_CATEGORIES } from './ScheduleFormModal.jsx';
 
 export default function DailyDiaryView({
   entities,
   careLogs,
   careCategories,
+  schedules = [],
   onOpenEntityDetail,
   onOpenCareLogModal,
+  onOpenScheduleModal,
+  onToggleScheduleComplete,
+  onDeleteSchedule,
+  onEditSchedule,
   onNavigateToReport
 }) {
   const [selectedDate, setSelectedDate] = useState(getTodayDateString());
@@ -38,22 +48,32 @@ export default function DailyDiaryView({
       .sort((a, b) => (b.time || '').localeCompare(a.time || ''));
   }, [careLogs, selectedDate]);
 
-  // 선택한 날짜에 도래한 차기 예정 작업 (D-day 리마인더)
+  // 선택한 날짜에 도래한 차기 예정 작업 (기존 관리기록 D-day 리마인더)
   const scheduledTasks = useMemo(() => {
     return careLogs
       .filter(l => l.nextScheduleDate === selectedDate)
       .sort((a, b) => (a.time || '').localeCompare(b.time || ''));
   }, [careLogs, selectedDate]);
 
-  // 달력에 표시할 이벤트 있는 날짜 집합 (완료 로그 또는 예정 일정)
+  // 선택한 날짜에 등록된 독립 영농 일정
+  const dailySchedules = useMemo(() => {
+    return (schedules || [])
+      .filter(s => s.date === selectedDate)
+      .sort((a, b) => (a.time || '').localeCompare(b.time || ''));
+  }, [schedules, selectedDate]);
+
+  // 달력에 표시할 이벤트 있는 날짜 집합 (완료 로그 또는 예정 일정 전체)
   const datesWithActivity = useMemo(() => {
     const set = new Set();
     careLogs.forEach(l => {
       if (l.date) set.add(l.date);
       if (l.nextScheduleDate) set.add(l.nextScheduleDate);
     });
+    (schedules || []).forEach(s => {
+      if (s.date) set.add(s.date);
+    });
     return set;
-  }, [careLogs]);
+  }, [careLogs, schedules]);
 
   // 달력 날짜 매트릭스 생성
   const calendarDays = useMemo(() => {
@@ -191,11 +211,12 @@ export default function DailyDiaryView({
               </span>
               <button 
                 className="btn btn-primary btn-sm"
-                onClick={() => onOpenCareLogModal(null, selectedDate)}
+                onClick={() => onOpenScheduleModal(selectedDate)}
                 style={{ fontSize: '0.75rem', padding: '0.25rem 0.6rem' }}
+                title="선택한 일자에 새 영농 일정 등록"
               >
                 <Plus size={13} />
-                <span>기록 추가</span>
+                <span>일정 추가</span>
               </button>
             </div>
           </div>
@@ -224,8 +245,17 @@ export default function DailyDiaryView({
                   <span>일일 보고서 작성</span>
                 </button>
                 <button 
+                  className="btn btn-outline btn-sm"
+                  onClick={() => onOpenScheduleModal(selectedDate)}
+                  title="이 날짜에 새 영농 일정 추가"
+                >
+                  <Plus size={15} />
+                  <span>일정 추가</span>
+                </button>
+                <button 
                   className="btn btn-primary btn-sm"
                   onClick={() => onOpenCareLogModal(null, selectedDate)}
+                  title="이 날짜에 실시된 관리 작업 기록 추가"
                 >
                   <Plus size={15} />
                   <span>금일 작업 기록</span>
@@ -234,22 +264,168 @@ export default function DailyDiaryView({
             </div>
 
             <div className="card-body">
-              {/* 1. 도래한 예정 일정 (D-Day 리마인더) */}
-              {scheduledTasks.length > 0 && (
-                <div style={{ marginBottom: '1.5rem' }}>
-                  <h4 style={{ 
-                    fontSize: '0.95rem', 
-                    color: 'var(--color-accent)', 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: '0.4rem',
-                    marginBottom: '0.75rem' 
-                  }}>
-                    <Clock size={16} />
-                    <span>오늘 도래한 예정 일정 ({scheduledTasks.length}건)</span>
-                  </h4>
+              {/* 1. 도래한 예정 일정 (독립 영농 일정 + 개체 D-Day 리마인더 통합) */}
+              {(dailySchedules.length > 0 || scheduledTasks.length > 0) && (
+                <div style={{ marginBottom: '1.75rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+                    <h4 style={{ 
+                      fontSize: '0.95rem', 
+                      color: 'var(--color-accent)', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '0.4rem',
+                      margin: 0
+                    }}>
+                      <Clock size={16} />
+                      <span>예정 일정 (총 {dailySchedules.length + scheduledTasks.length}건)</span>
+                    </h4>
+                    <button 
+                      className="btn btn-outline btn-sm"
+                      onClick={() => onOpenScheduleModal(selectedDate)}
+                      style={{ fontSize: '0.75rem', padding: '0.2rem 0.5rem' }}
+                    >
+                      <Plus size={12} />
+                      <span>일정 추가</span>
+                    </button>
+                  </div>
 
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+                    {/* A. 직접 등록한 영농 스케줄 */}
+                    {dailySchedules.map(sched => {
+                      const catDef = SCHEDULE_CATEGORIES.find(c => c.id === sched.category) || SCHEDULE_CATEGORIES[0];
+                      const isDone = Boolean(sched.completed);
+
+                      return (
+                        <div 
+                          key={sched.id}
+                          style={{
+                            background: isDone ? 'var(--bg-card-subtle)' : 'rgba(245, 158, 11, 0.08)',
+                            border: `1px solid ${isDone ? 'var(--border-color)' : 'rgba(245, 158, 11, 0.35)'}`,
+                            borderRadius: 'var(--radius-md)',
+                            padding: '0.8rem 1rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            gap: '0.75rem',
+                            opacity: isDone ? 0.7 : 1,
+                            transition: 'all 0.2s ease'
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1, minWidth: 0 }}>
+                            {/* 완료 체크박스 버튼 */}
+                            <button
+                              type="button"
+                              onClick={() => onToggleScheduleComplete(sched.id)}
+                              style={{
+                                background: 'transparent',
+                                border: 'none',
+                                cursor: 'pointer',
+                                padding: 0,
+                                color: isDone ? 'var(--color-primary)' : 'var(--text-muted)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                flexShrink: 0
+                              }}
+                              title={isDone ? '미완료로 변경' : '완료 처리'}
+                            >
+                              {isDone ? <CheckSquare size={20} color="var(--color-primary)" /> : <Square size={20} />}
+                            </button>
+
+                            <div style={{ minWidth: 0, flex: 1 }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap', marginBottom: '0.2rem' }}>
+                                {/* 카테고리 뱃지 */}
+                                <span style={{
+                                  fontSize: '0.75rem',
+                                  fontWeight: 700,
+                                  padding: '0.15rem 0.45rem',
+                                  borderRadius: 'var(--radius-sm)',
+                                  background: isDone ? 'var(--bg-card)' : 'rgba(245, 158, 11, 0.15)',
+                                  color: isDone ? 'var(--text-muted)' : catDef.color,
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '0.25rem'
+                                }}>
+                                  <span>{catDef.icon}</span>
+                                  <span>{catDef.label}</span>
+                                </span>
+
+                                {/* 시간 뱃지 */}
+                                {sched.time && (
+                                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                                    ⏰ {sched.time}
+                                  </span>
+                                )}
+
+                                {/* 대상 개체 뱃지 (개체 지정 시) */}
+                                {sched.tagNumber ? (
+                                  <span 
+                                    className="badge badge-tag"
+                                    onClick={() => onOpenEntityDetail(sched.tagNumber)}
+                                    title="클릭 시 이 개체의 관리 내역으로 이동"
+                                    style={{ cursor: 'pointer' }}
+                                  >
+                                    {sched.tagNumber} ({sched.entityName})
+                                  </span>
+                                ) : (
+                                  <span style={{
+                                    fontSize: '0.75rem',
+                                    color: 'var(--text-muted)',
+                                    background: 'var(--bg-card-subtle)',
+                                    padding: '0.1rem 0.4rem',
+                                    borderRadius: '4px',
+                                    border: '1px solid var(--border-color)'
+                                  }}>
+                                    🌾 농장 공통
+                                  </span>
+                                )}
+                              </div>
+
+                              {/* 제목 및 메모 */}
+                              <div style={{ 
+                                fontWeight: 700, 
+                                fontSize: '0.925rem',
+                                textDecoration: isDone ? 'line-through' : 'none',
+                                color: isDone ? 'var(--text-muted)' : 'var(--text-main)',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap'
+                              }}>
+                                {sched.title}
+                              </div>
+                              {sched.memo && (
+                                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>
+                                  {sched.memo}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* 조작 버튼 그룹 */}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexShrink: 0 }}>
+                            <button
+                              type="button"
+                              className="btn btn-outline btn-sm btn-icon-only"
+                              onClick={() => onEditSchedule(sched)}
+                              title="일정 수정"
+                              style={{ width: '28px', height: '28px' }}
+                            >
+                              <Edit2 size={13} />
+                            </button>
+                            <button
+                              type="button"
+                              className="btn btn-outline btn-sm btn-icon-only"
+                              onClick={() => onDeleteSchedule(sched.id)}
+                              title="일정 삭제"
+                              style={{ width: '28px', height: '28px', color: 'var(--color-danger)' }}
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+
+                    {/* B. 기존 관리기록에서 자동 파생된 D-Day 차기 예정 작업 */}
                     {scheduledTasks.map(task => (
                       <div 
                         key={`sched-${task.id}`}

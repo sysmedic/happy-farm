@@ -9,11 +9,14 @@ import CareLogFormModal from './components/care/CareLogFormModal.jsx';
 import DailyDiaryView from './components/diary/DailyDiaryView.jsx';
 import DailyReportView from './components/diary/DailyReportView.jsx';
 import GoogleDriveView from './components/backup/GoogleDriveView.jsx';
+import ScheduleFormModal from './components/diary/ScheduleFormModal.jsx';
 import { 
   loadEntities, 
   saveEntities, 
   loadCareLogs, 
   saveCareLogs, 
+  loadSchedules,
+  saveSchedules,
   resetToSampleData 
 } from './lib/storage.js';
 import { 
@@ -27,6 +30,7 @@ import {
 export default function App() {
   const [entities, setEntities] = useState(() => loadEntities());
   const [careLogs, setCareLogs] = useState(() => loadCareLogs());
+  const [schedules, setSchedules] = useState(() => loadSchedules());
   const [customCategories, setCustomCategories] = useState(() => loadCustomCareCategories());
 
   // 기본 + 사용자 직접 추가 관리 분류 통합
@@ -51,6 +55,11 @@ export default function App() {
   const [careLogPreselectedEntity, setCareLogPreselectedEntity] = useState(null);
   const [careLogToEdit, setCareLogToEdit] = useState(null);
 
+  // 영농 일정 모달 상태
+  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
+  const [scheduleTargetDate, setScheduleTargetDate] = useState(getTodayDateString());
+  const [scheduleToEdit, setScheduleToEdit] = useState(null);
+
   const [printSheetEntity, setPrintSheetEntity] = useState(null);
   const [returnToDetailEntity, setReturnToDetailEntity] = useState(null);
   const [targetReportDate, setTargetReportDate] = useState(getTodayDateString());
@@ -65,7 +74,7 @@ export default function App() {
   }, [theme]);
 
   // 모달이 열려 있을 때 뒷배경(body/html) 스크롤 100% 잠금 및 해제
-  const isAnyModalOpen = Boolean(selectedEntityForDetail || isEntityModalOpen || isCareLogModalOpen);
+  const isAnyModalOpen = Boolean(selectedEntityForDetail || isEntityModalOpen || isCareLogModalOpen || isScheduleModalOpen);
 
   useEffect(() => {
     if (isAnyModalOpen) {
@@ -284,10 +293,74 @@ export default function App() {
     showToast('관리 분류가 삭제되었습니다.');
   };
 
+  // 영농 일정 모달 열기
+  const handleOpenScheduleModal = (dateStr) => {
+    setScheduleTargetDate(dateStr || getTodayDateString());
+    setScheduleToEdit(null);
+    setIsScheduleModalOpen(true);
+  };
+
+  // 영농 일정 수정 모달 열기
+  const handleEditSchedule = (sched) => {
+    setScheduleToEdit(sched);
+    setScheduleTargetDate(sched.date);
+    setIsScheduleModalOpen(true);
+  };
+
+  // 영농 일정 저장 (신규 등록 및 수정)
+  const handleSaveSchedule = (scheduleData) => {
+    setSchedules(prev => {
+      let next;
+      const exists = prev.some(s => s.id === scheduleData.id);
+      if (exists) {
+        next = prev.map(s => s.id === scheduleData.id ? scheduleData : s);
+      } else {
+        next = [scheduleData, ...prev];
+      }
+      saveSchedules(next);
+      return next;
+    });
+    setIsScheduleModalOpen(false);
+    setScheduleToEdit(null);
+    showToast(scheduleToEdit ? '영농 일정이 수정되었습니다 📅' : '새 영농 일정이 등록되었습니다 📅');
+  };
+
+  // 영농 일정 완료/미완료 토글
+  const handleToggleScheduleComplete = (scheduleId) => {
+    setSchedules(prev => {
+      const next = prev.map(s => {
+        if (s.id === scheduleId) {
+          const nextCompleted = !s.completed;
+          return {
+            ...s,
+            completed: nextCompleted,
+            completedAt: nextCompleted ? new Date().toISOString() : null
+          };
+        }
+        return s;
+      });
+      saveSchedules(next);
+      return next;
+    });
+    showToast('일정 완료 상태가 변경되었습니다 ✅');
+  };
+
+  // 영농 일정 삭제
+  const handleDeleteSchedule = (scheduleId) => {
+    if (!window.confirm('이 영농 일정을 삭제하시겠습니까?')) return;
+    setSchedules(prev => {
+      const next = prev.filter(s => s.id !== scheduleId);
+      saveSchedules(next);
+      return next;
+    });
+    showToast('일정이 삭제되었습니다.');
+  };
+
   // 데이터베이스 복원 시 상태 동기화
   const handleDatabaseRestored = () => {
     setEntities(loadEntities());
     setCareLogs(loadCareLogs());
+    setSchedules(loadSchedules());
     setCustomCategories(loadCustomCareCategories());
     setSelectedEntityForDetail(null);
   };
@@ -381,11 +454,16 @@ export default function App() {
                 entities={entities}
                 careLogs={careLogs}
                 careCategories={allCareCategories}
+                schedules={schedules}
                 onOpenEntityDetail={handleOpenEntityDetail}
                 onOpenCareLogModal={(entity = null, date = null) => {
                   setCareLogPreselectedEntity(entity);
                   setIsCareLogModalOpen(true);
                 }}
+                onOpenScheduleModal={handleOpenScheduleModal}
+                onToggleScheduleComplete={handleToggleScheduleComplete}
+                onDeleteSchedule={handleDeleteSchedule}
+                onEditSchedule={handleEditSchedule}
                 onNavigateToReport={(date) => {
                   setTargetReportDate(date);
                   setActiveTab('report');
@@ -475,6 +553,20 @@ export default function App() {
             setCareLogToEdit(null);
           }}
           onSave={handleSaveCareLog}
+        />
+      )}
+
+      {/* 영농 일정 추가 및 수정 폼 모달 */}
+      {isScheduleModalOpen && (
+        <ScheduleFormModal
+          initialDate={scheduleTargetDate}
+          scheduleToEdit={scheduleToEdit}
+          entities={entities}
+          onClose={() => {
+            setIsScheduleModalOpen(false);
+            setScheduleToEdit(null);
+          }}
+          onSave={handleSaveSchedule}
         />
       )}
 
