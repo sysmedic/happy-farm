@@ -1852,6 +1852,50 @@ form.modal-content {
 @media (max-width: 900px) {
   .diary-container {
     grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  /* 모바일에서 달력 카드가 과도하게 커지지 않도록 최대 너비 제한 및 중앙 정렬 */
+  .calendar-card {
+    max-width: 440px;
+    margin: 0 auto;
+    width: 100%;
+    padding: 1rem;
+  }
+
+  /* 모바일 다이어리 헤더: 우하단 플로팅 버튼(FAB)이 있으므로 '금일 작업 기록' 버튼 숨김 */
+  .diary-action-record {
+    display: none !important;
+  }
+
+  /* 달력 밑에 전용 '일정 추가' 버튼이 있으므로 모바일 헤더의 중복 버튼 숨김 */
+  .diary-action-schedule {
+    display: none !important;
+  }
+
+  /* 모바일에서 일일 보고서 버튼 텍스트 슬림화 */
+  .diary-action-report {
+    padding: 0.35rem 0.65rem !important;
+    font-size: 0.8rem !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .calendar-card {
+    padding: 0.85rem;
+  }
+
+  .calendar-grid {
+    gap: 2px;
+  }
+
+  .calendar-day-label {
+    font-size: 0.72rem;
+    padding: 0.25rem 0;
+  }
+
+  .calendar-cell {
+    font-size: 0.8rem;
   }
 }
 

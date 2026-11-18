@@ -235,9 +235,9 @@ export default function DailyDiaryView({
                 </h2>
               </div>
 
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <div className="diary-header-actions" style={{ display: 'flex', gap: '0.45rem', alignItems: 'center' }}>
                 <button 
-                  className="btn btn-secondary btn-sm"
+                  className="btn btn-secondary btn-sm diary-action-report"
                   onClick={() => onNavigateToReport(selectedDate)}
                   title="이 날짜의 일일 종합 영농 보고서 보기"
                 >
@@ -245,7 +245,7 @@ export default function DailyDiaryView({
                   <span>일일 보고서 작성</span>
                 </button>
                 <button 
-                  className="btn btn-outline btn-sm"
+                  className="btn btn-outline btn-sm diary-action-schedule"
                   onClick={() => onOpenScheduleModal(selectedDate)}
                   title="이 날짜에 새 영농 일정 추가"
                 >
@@ -253,7 +253,7 @@ export default function DailyDiaryView({
                   <span>일정 추가</span>
                 </button>
                 <button 
-                  className="btn btn-primary btn-sm"
+                  className="btn btn-primary btn-sm diary-action-record"
                   onClick={() => onOpenCareLogModal(null, selectedDate)}
                   title="이 날짜에 실시된 관리 작업 기록 추가"
                 >
