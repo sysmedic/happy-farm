@@ -141,10 +141,10 @@ export default function DailyDiaryView({
     <div>
       <div className="diary-container">
         {/* 왼쪽: 캘린더 다이어리 위젯 */}
-        <div>
+        <div style={{ width: '100%' }}>
           <div className="calendar-card">
             <div className="calendar-header">
-              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, letterSpacing: '-0.02em' }}>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, letterSpacing: '-0.02em', margin: 0 }}>
                 {currentYearMonth.year}년 {currentYearMonth.month + 1}월
               </h3>
               <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
@@ -214,6 +214,8 @@ export default function DailyDiaryView({
               display: 'flex', 
               alignItems: 'center', 
               justifyContent: 'space-between',
+              gap: '0.5rem',
+              flexWrap: 'wrap',
               fontSize: '0.75rem',
               color: 'var(--text-muted)'
             }}>
