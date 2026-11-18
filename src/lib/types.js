@@ -45,11 +45,11 @@ export const GENDER_OPTIONS = [
 ];
 
 export const ENTITY_STATUSES = [
-  { id: 'healthy', label: '건강/양호', colorClass: 'badge-healthy', icon: '✨', allowedGenders: ['female', 'male', 'castrated'] },
+  { id: 'healthy', label: '건강/양호', colorClass: 'badge-healthy', icon: '💚', allowedGenders: ['female', 'male', 'castrated'] },
   { id: 'in_heat', label: '발정 관찰', colorClass: 'badge-in_heat', icon: '🔥', allowedGenders: ['female'] },
-  { id: 'inseminated', label: '수정 완료', colorClass: 'badge-inseminated', icon: '💉', allowedGenders: ['female'] },
-  { id: 'pregnant', label: '임신/수태', colorClass: 'badge-pregnant', icon: '🍼', allowedGenders: ['female'] },
-  { id: 'nursing', label: '포유/육아', colorClass: 'badge-nursing', icon: '🤱', allowedGenders: ['female'] },
+  { id: 'inseminated', label: '수정 완료', colorClass: 'badge-inseminated', icon: '🧬', allowedGenders: ['female'] },
+  { id: 'pregnant', label: '임신/수태', colorClass: 'badge-pregnant', icon: '💖', allowedGenders: ['female'] },
+  { id: 'nursing', label: '포유/육아', colorClass: 'badge-nursing', icon: '🐄', allowedGenders: ['female'] },
   { id: 'treatment', label: '치료/투약중', colorClass: 'badge-treatment', icon: '💊', allowedGenders: ['female', 'male', 'castrated'] },
   { id: 'scheduled_ship', label: '출하 예정', colorClass: 'badge-scheduled_ship', icon: '🚛', allowedGenders: ['female', 'male', 'castrated'] },
   { id: 'shipped', label: '출하 완료', colorClass: 'badge-shipped', icon: '🏷️', allowedGenders: ['female', 'male', 'castrated'] },
