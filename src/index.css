@@ -1845,8 +1845,8 @@ form.modal-content {
 /* Diary & Calendar Layout */
 .diary-container {
   display: grid;
-  grid-template-columns: 340px 1fr;
-  gap: 1.5rem;
+  grid-template-columns: 380px 1fr;
+  gap: 1.75rem;
 }
 
 /* Diary Detail Section (외부 큰 카드 제거 후 독립 레이아웃) */
@@ -1881,12 +1881,12 @@ form.modal-content {
     padding-bottom: 0.65rem;
   }
 
-  /* 모바일에서 달력 카드가 과도하게 커지지 않도록 최대 너비 제한 및 중앙 정렬 */
+  /* 모바일에서 달력 카드가 화면 폭을 시원하게 채우도록 풀-위드 적용 */
   .calendar-card {
-    max-width: 440px;
-    margin: 0 auto;
+    max-width: 100%;
+    margin: 0;
     width: 100%;
-    padding: 1rem;
+    padding: 1.15rem;
   }
 
   /* 모바일 다이어리 헤더: 우하단 플로팅 버튼(FAB)이 있으므로 '금일 작업 기록' 버튼 숨김 */
@@ -1908,20 +1908,23 @@ form.modal-content {
 
 @media (max-width: 600px) {
   .calendar-card {
-    padding: 0.85rem;
+    padding: 1rem 0.85rem;
   }
 
   .calendar-grid {
-    gap: 2px;
+    gap: 4px;
   }
 
   .calendar-day-label {
-    font-size: 0.72rem;
-    padding: 0.25rem 0;
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 0.3rem 0;
   }
 
   .calendar-cell {
-    font-size: 0.8rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+    min-height: 38px;
   }
 }
 
@@ -1929,7 +1932,7 @@ form.modal-content {
   background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
-  padding: 1.25rem;
+  padding: 1.4rem;
   box-shadow: var(--shadow-sm);
 }
 
@@ -1937,57 +1940,61 @@ form.modal-content {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 1rem;
+  margin-bottom: 1.15rem;
 }
 
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
+  gap: 6px;
   text-align: center;
 }
 
 .calendar-day-label {
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-size: 0.85rem;
+  font-weight: 700;
   color: var(--text-muted);
-  padding: 0.4rem 0;
+  padding: 0.45rem 0;
 }
 
 .calendar-cell {
   aspect-ratio: 1;
+  min-height: 42px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-md);
-  font-size: 0.825rem;
-  font-weight: 600;
+  font-size: 1rem;
+  font-weight: 700;
   cursor: pointer;
   position: relative;
   transition: all 0.15s ease;
   color: var(--text-main);
-  background: transparent;
-  border: 1px solid transparent;
+  background: var(--bg-card-subtle);
+  border: 1px solid var(--border-color);
 }
 
 .calendar-cell:hover {
   background: var(--bg-hover);
+  border-color: var(--color-primary);
+  transform: translateY(-1px);
 }
 
 .calendar-cell.selected {
   background: var(--color-primary);
   color: #ffffff;
-  font-weight: 700;
-  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+  font-weight: 800;
+  border-color: var(--color-primary);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
 }
 
 .calendar-cell.has-logs::after {
   content: '';
   position: absolute;
-  bottom: 4px;
-  width: 5px;
-  height: 5px;
+  bottom: 5px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   background: var(--color-primary);
 }
@@ -1997,12 +2004,15 @@ form.modal-content {
 }
 
 .calendar-cell.is-today {
-  border-color: var(--color-primary);
+  border: 2px solid var(--color-primary);
+  font-weight: 800;
 }
 
 .calendar-cell.other-month {
   color: var(--text-subtle);
-  opacity: 0.4;
+  background: transparent;
+  border-color: transparent;
+  opacity: 0.3;
 }
 
 /* Print Sheet Styling (A4 Optimization) */

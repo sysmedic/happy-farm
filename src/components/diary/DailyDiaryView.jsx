@@ -144,12 +144,17 @@ export default function DailyDiaryView({
         <div>
           <div className="calendar-card">
             <div className="calendar-header">
-              <h3 style={{ fontSize: '1.05rem', fontWeight: 800 }}>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, letterSpacing: '-0.02em' }}>
                 {currentYearMonth.year}년 {currentYearMonth.month + 1}월
               </h3>
-              <div style={{ display: 'flex', gap: '0.3rem' }}>
-                <button className="btn btn-outline btn-sm btn-icon-only" onClick={handlePrevMonth}>
-                  <ChevronLeft size={16} />
+              <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
+                <button 
+                  className="btn btn-outline btn-sm btn-icon-only" 
+                  onClick={handlePrevMonth}
+                  title="이전 달"
+                  style={{ width: '32px', height: '32px' }}
+                >
+                  <ChevronLeft size={18} />
                 </button>
                 <button 
                   className="btn btn-outline btn-sm"
@@ -158,11 +163,18 @@ export default function DailyDiaryView({
                     setCurrentYearMonth({ year: now.getFullYear(), month: now.getMonth() });
                     setSelectedDate(todayStr);
                   }}
+                  title="오늘 날짜로 이동"
+                  style={{ padding: '0.3rem 0.75rem', fontWeight: 700 }}
                 >
                   오늘
                 </button>
-                <button className="btn btn-outline btn-sm btn-icon-only" onClick={handleNextMonth}>
-                  <ChevronRight size={16} />
+                <button 
+                  className="btn btn-outline btn-sm btn-icon-only" 
+                  onClick={handleNextMonth}
+                  title="다음 달"
+                  style={{ width: '32px', height: '32px' }}
+                >
+                  <ChevronRight size={18} />
                 </button>
               </div>
             </div>
