@@ -11,12 +11,15 @@ import {
   ENTITY_STATUSES, 
   GENDER_OPTIONS, 
   CARE_CATEGORIES, 
-  calculateAge 
+  calculateAge,
+  formatDisplayBreed,
+  getCategoryById
 } from '../../lib/types.js';
 
 export default function EntityPrintSheet({
   entity,
   careLogs,
+  careCategories,
   onClose
 }) {
   // 이 개체의 전체 관리 내역 (날짜순 정렬)
@@ -40,18 +43,26 @@ export default function EntityPrintSheet({
   return (
     <div>
       {/* 상단 액션 바 (인쇄 시 숨겨짐) */}
-      <div className="filter-bar" style={{ marginBottom: '1.5rem' }}>
-        <button className="btn btn-secondary" onClick={onClose}>
+      <div 
+        className="filter-bar" 
+        style={{ 
+          marginBottom: '1.25rem',
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'nowrap',
+          gap: '0.75rem'
+        }}
+      >
+        <button className="btn btn-secondary" onClick={onClose} style={{ whiteSpace: 'nowrap' }}>
           <ArrowLeft size={16} />
-          <span>목록으로 돌아가기</span>
+          <span>돌아가기</span>
         </button>
 
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
-          <button className="btn btn-primary" onClick={handlePrint}>
-            <Printer size={16} />
-            <span>개체관리카드 A4 인쇄</span>
-          </button>
-        </div>
+        <button className="btn btn-primary" onClick={handlePrint} style={{ whiteSpace: 'nowrap' }}>
+          <Printer size={16} />
+          <span>관리카드 인쇄</span>
+        </button>
       </div>
 
       {/* A4 인쇄 규격 개체관리 이력서 */}
@@ -86,7 +97,7 @@ export default function EntityPrintSheet({
               ||| | || |||| | |
             </div>
             <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>
-              #{entity.tagNumber}
+              {entity.tagNumber}
             </div>
           </div>
         </div>
@@ -106,7 +117,7 @@ export default function EntityPrintSheet({
             </tr>
             <tr>
               <th>축종 / 사육구분</th>
-              <td>한우 / {entity.breed || '한우'}</td>
+              <td>한우 / {formatDisplayBreed(entity.breed)}</td>
               <th>성별 / 상태</th>
               <td>
                 <span style={{ fontWeight: 700 }}>{genderObj.label} ({genderObj.symbol})</span>
@@ -170,7 +181,7 @@ export default function EntityPrintSheet({
             </thead>
             <tbody>
               {historyLogs.map((log, index) => {
-                const catObj = CARE_CATEGORIES.find(c => c.id === log.category) || CARE_CATEGORIES[0];
+                const catObj = getCategoryById(log.category, careCategories);
 
                 return (
                   <tr key={log.id}>

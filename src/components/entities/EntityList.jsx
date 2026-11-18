@@ -13,15 +13,40 @@ import {
   Stethoscope,
   Heart,
   CheckCircle,
-  RotateCcw
+  RotateCcw,
+  Settings,
+  X,
+  Check,
+  ArrowUpDown
 } from 'lucide-react';
 import { 
   ENTITY_STATUSES, 
   GENDER_OPTIONS, 
   HANWOO_BREEDS,
   calculateAge, 
-  getKoreanChoseong 
+  getKoreanChoseong,
+  formatDisplayBreed,
+  isHistoricalStatus
 } from '../../lib/types.js';
+
+const DASHBOARD_CARDS_STORAGE_KEY = 'happy_farm_active_dashboard_cards';
+const DEFAULT_DASHBOARD_CARDS = ['total', 'pregnant', 'treatment', 'in_heat'];
+
+const ALL_DASHBOARD_CARDS = [
+  { id: 'total', label: '사육 두수', icon: '🐂', color: '#10b981', bg: 'rgba(16, 185, 129, 0.15)', isFixed: true, desc: '현재 축사에서 사육 중인 전체 한우' },
+  { id: 'pregnant', label: '임신 / 수태 개체', icon: '🍼', color: '#8b5cf6', bg: 'rgba(139, 92, 246, 0.15)', desc: '임신 감정 완료 및 출산 대기' },
+  { id: 'treatment', label: '치료 / 집중 관찰', icon: '💊', color: '#ef4444', bg: 'rgba(239, 68, 68, 0.15)', desc: '치료 투약 및 특별 관리' },
+  { id: 'in_heat', label: '발정 / 수정 대기', icon: '🔥', color: '#f97316', bg: 'rgba(249, 115, 22, 0.15)', desc: '발정 징후 관찰 및 적기 인공수정' },
+  { id: 'inseminated', label: '수정 완료', icon: '💉', color: '#0ea5e9', bg: 'rgba(14, 165, 233, 0.15)', desc: '인공수정 후 임신 확인 대기' },
+  { id: 'calf', label: '송아지 (자우)', icon: '🐮', color: '#10b981', bg: 'rgba(16, 185, 129, 0.15)', desc: '생후 포유 및 이유기 송아지' },
+  { id: 'steer_beef', label: '비육우 (거세우)', icon: '🥩', color: '#d97706', bg: 'rgba(245, 158, 11, 0.15)', desc: '비육 후기 및 출하 체중 관리' },
+  { id: 'growing', label: '육성우', icon: '🌱', color: '#059669', bg: 'rgba(5, 150, 105, 0.15)', desc: '송아지 이후 성장 단계' },
+  { id: 'nursing', label: '포유 / 육아우', icon: '🤱', color: '#14b8a6', bg: 'rgba(20, 184, 166, 0.15)', desc: '분만 후 젖먹이는 어미소' },
+  { id: 'scheduled_ship', label: '출하 예정', icon: '🚛', color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.15)', desc: '도축 및 경매 출하 예정' },
+  { id: 'history', label: '사육 이력', icon: '📜', color: '#64748b', bg: 'rgba(100, 116, 139, 0.15)', desc: '출하 완료 및 폐사된 종료 개체' },
+  { id: 'shipped', label: '출하 완료', icon: '🏷️', color: '#64748b', bg: 'rgba(100, 116, 139, 0.15)', desc: '농장에서 출하 완료된 개체' },
+  { id: 'deceased', label: '폐사 / 도태', icon: '🪦', color: '#475569', bg: 'rgba(71, 85, 105, 0.15)', desc: '질병 또는 사고로 폐사된 개체' },
+];
 
 export default function EntityList({
   entities,
@@ -36,14 +61,34 @@ export default function EntityList({
   const [selectedBreed, setSelectedBreed] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('active'); // 'active': 사육 중인 전체 개체 기본값
   const [selectedBarn, setSelectedBarn] = useState('all');
+  const [sortBy, setSortBy] = useState('latest'); // 'latest' | 'tag_asc' | 'age_asc' | 'age_desc' | 'barn_asc'
+
+  // 대시보드 맞춤 활성 카드 ID 목록
+  const [activeCardIds, setActiveCardIds] = useState(() => {
+    try {
+      const saved = localStorage.getItem(DASHBOARD_CARDS_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          if (!parsed.includes('total')) parsed.unshift('total');
+          return parsed;
+        }
+      }
+    } catch (e) {
+      // ignore
+    }
+    return DEFAULT_DASHBOARD_CARDS;
+  });
+
+  const [isCustomizeOpen, setIsCustomizeOpen] = useState(false);
 
   // 축사 고유 목록 추출 (현재 사육 중인 개체의 축사 기준 정제)
   const uniqueBarns = useMemo(() => {
     const set = new Set();
     entities.forEach(e => {
-      if (e.status !== 'shipped' && e.barn) {
+      if (!isHistoricalStatus(e.status) && e.barn) {
         const trimmed = e.barn.trim();
-        if (trimmed && !trimmed.includes('출하') && !trimmed.includes('퇴농')) {
+        if (trimmed && !trimmed.includes('출하') && !trimmed.includes('퇴농') && !trimmed.includes('폐사')) {
           set.add(trimmed);
         }
       }
@@ -51,24 +96,71 @@ export default function EntityList({
     return Array.from(set).sort();
   }, [entities]);
 
-  // 상태 변경 핸들러: '출하 완료' 선택 시 축사 필터를 자동으로 'all'로 리셋하여 0건 노출 함정 방지
+  // 상태 변경 핸들러
   const handleStatusChange = (newStatus) => {
     setSelectedStatus(newStatus);
-    if (newStatus === 'shipped') {
+    if (newStatus === 'shipped' || newStatus === 'deceased' || newStatus === 'history') {
       setSelectedBarn('all');
     }
   };
 
-  // 통계 계산: 출하 완료 개체는 사육 두수에서 제외하여 실제 축사 사육 두수만 집계
+  // 통계 계산: 출하 및 폐사 개체는 사육 두수에서 제외하여 실제 축사 사육 두수만 집계
   const stats = useMemo(() => {
-    const activeEntities = entities.filter(e => e.status !== 'shipped');
+    const activeEntities = entities.filter(e => !isHistoricalStatus(e.status));
     const total = activeEntities.length;
     const pregnant = activeEntities.filter(e => e.status === 'pregnant').length;
     const treatment = activeEntities.filter(e => e.status === 'treatment').length;
     const inHeat = activeEntities.filter(e => e.status === 'in_heat').length;
+    const inseminated = activeEntities.filter(e => e.status === 'inseminated').length;
+    const nursing = activeEntities.filter(e => e.status === 'nursing').length;
+    const scheduledShip = activeEntities.filter(e => e.status === 'scheduled_ship').length;
+
+    // 사육 단계별 두수
+    const calf = activeEntities.filter(e => (e.breed || '').includes('송아지') || (e.breed || '').includes('자우')).length;
+    const steerBeef = activeEntities.filter(e => (e.breed || '').includes('거세') || (e.breed || '').includes('비육')).length;
+    const growing = activeEntities.filter(e => (e.breed || '').includes('육성')).length;
+
+    // 사육 이력(출하 및 폐사)
     const shippedCount = entities.filter(e => e.status === 'shipped').length;
-    return { total, pregnant, treatment, inHeat, shippedCount, logsCount: careLogs.length };
-  }, [entities, careLogs]);
+    const deceasedCount = entities.filter(e => e.status === 'deceased').length;
+    const historyCount = shippedCount + deceasedCount;
+
+    return { 
+      total, 
+      pregnant, 
+      treatment, 
+      inHeat, 
+      inseminated, 
+      nursing, 
+      scheduledShip,
+      calf, 
+      steerBeef, 
+      growing, 
+      shippedCount, 
+      deceasedCount, 
+      historyCount 
+    };
+  }, [entities]);
+
+  // 특정 카드의 두수/값 산출
+  const getCardValue = (cardId) => {
+    switch (cardId) {
+      case 'total': return stats.total;
+      case 'pregnant': return stats.pregnant;
+      case 'treatment': return stats.treatment;
+      case 'in_heat': return stats.inHeat;
+      case 'inseminated': return stats.inseminated;
+      case 'nursing': return stats.nursing;
+      case 'scheduled_ship': return stats.scheduledShip;
+      case 'calf': return stats.calf;
+      case 'steer_beef': return stats.steerBeef;
+      case 'growing': return stats.growing;
+      case 'history': return stats.historyCount;
+      case 'shipped': return stats.shippedCount;
+      case 'deceased': return stats.deceasedCount;
+      default: return 0;
+    }
+  };
 
   // 필터링 & 초성 검색
   const filteredEntities = useMemo(() => {
@@ -96,9 +188,11 @@ export default function EntityList({
         if (!match) return false;
       }
       
-      // 상태 필터: 'active'(사육 중 전체), 'all'(출하 포함 전체), 또는 개별 상태('shipped', 'pregnant' 등)
+      // 상태 필터: 'active'(사육 중 전체), 'history'(사육 이력 전체), 'all'(전체), 또는 개별 상태
       if (selectedStatus === 'active') {
-        if (entity.status === 'shipped') return false;
+        if (isHistoricalStatus(entity.status)) return false;
+      } else if (selectedStatus === 'history') {
+        if (!isHistoricalStatus(entity.status)) return false;
       } else if (selectedStatus !== 'all') {
         if (entity.status !== selectedStatus) return false;
       }
@@ -108,9 +202,11 @@ export default function EntityList({
         return false;
       }
 
-      // 검색어 필터 (이표번호, 이름, 축사, 메모, 초성)
+      // 검색어 필터 (이표번호, 이름, 축사, 메모, 초성, 숫자만 입력 시 이표 매칭)
       if (q) {
         const tag = (entity.tagNumber || '').toLowerCase();
+        const cleanTag = tag.replace(/[^0-9]/g, '');
+        const cleanQ = q.replace(/[^0-9]/g, '');
         const name = (entity.name || '').toLowerCase();
         const barn = (entity.barn || '').toLowerCase();
         const memo = (entity.memo || '').toLowerCase();
@@ -118,6 +214,7 @@ export default function EntityList({
 
         const match = 
           tag.includes(q) || 
+          (cleanQ.length > 0 && cleanTag.includes(cleanQ)) ||
           name.includes(q) || 
           barn.includes(q) || 
           memo.includes(q) ||
@@ -130,6 +227,26 @@ export default function EntityList({
     });
   }, [entities, searchQuery, selectedBreed, selectedStatus, selectedBarn]);
 
+  // 정렬 순서 적용
+  const sortedEntities = useMemo(() => {
+    const list = [...filteredEntities];
+    switch (sortBy) {
+      case 'tag_asc':
+        return list.sort((a, b) => (a.tagNumber || '').localeCompare(b.tagNumber || '', undefined, { numeric: true }));
+      case 'age_asc':
+        // 월령 어린순 = 출생일이 최근인 순서 (2026 -> 2025 -> ...)
+        return list.sort((a, b) => new Date(b.birthDate || 0) - new Date(a.birthDate || 0));
+      case 'age_desc':
+        // 월령 많은순 = 출생일이 오래된 순서 (2020 -> 2021 -> ...)
+        return list.sort((a, b) => new Date(a.birthDate || 0) - new Date(b.birthDate || 0));
+      case 'barn_asc':
+        return list.sort((a, b) => (a.barn || 'zzz').localeCompare(b.barn || 'zzz', undefined, { numeric: true }));
+      case 'latest':
+      default:
+        return list;
+    }
+  }, [filteredEntities, sortBy]);
+
   // 특정 개체의 최근 관리 이력 가져오기
   const getLatestCareLog = (entityId, tagNumber) => {
     const logs = careLogs.filter(l => l.entityId === entityId || l.tagNumber === tagNumber);
@@ -138,87 +255,128 @@ export default function EntityList({
   };
 
   // 대시보드 카드 클릭 시 원클릭 필터링 (토글 지원)
-  const handleStatusCardClick = (statusKey) => {
-    if (statusKey === 'active' || statusKey === 'all') {
+  const handleCardClick = (cardId) => {
+    if (cardId === 'total') {
       setSelectedStatus('active');
-    } else {
-      setSelectedStatus(prev => prev === statusKey ? 'active' : statusKey);
+      setSelectedBreed('all');
+    } else if (['pregnant', 'treatment', 'in_heat', 'inseminated', 'nursing', 'scheduled_ship'].includes(cardId)) {
+      setSelectedStatus(prev => prev === cardId ? 'active' : cardId);
+      setSelectedBreed('all');
+    } else if (cardId === 'history') {
+      setSelectedStatus(prev => prev === 'history' ? 'active' : 'history');
+      setSelectedBarn('all');
+    } else if (cardId === 'shipped') {
+      setSelectedStatus(prev => prev === 'shipped' ? 'active' : 'shipped');
+      setSelectedBarn('all');
+    } else if (cardId === 'deceased') {
+      setSelectedStatus(prev => prev === 'deceased' ? 'active' : 'deceased');
+      setSelectedBarn('all');
+    } else if (['calf', 'steer_beef', 'growing'].includes(cardId)) {
+      setSelectedBreed(prev => prev === cardId ? 'all' : cardId);
+      if (selectedStatus === 'history' || selectedStatus === 'shipped' || selectedStatus === 'deceased') {
+        setSelectedStatus('active');
+      }
     }
   };
 
+  // 대시보드 카드 활성화 여부 판정
+  const isCardActive = (cardId) => {
+    if (cardId === 'total') return selectedStatus === 'active' && selectedBreed === 'all';
+    if (['pregnant', 'treatment', 'in_heat', 'inseminated', 'nursing', 'scheduled_ship', 'history', 'shipped', 'deceased'].includes(cardId)) {
+      return selectedStatus === cardId;
+    }
+    if (['calf', 'steer_beef', 'growing'].includes(cardId)) {
+      return selectedBreed === cardId;
+    }
+    return false;
+  };
+
+  // 지표 토글 (체크 / 체크해제)
+  const handleToggleCard = (cardId) => {
+    if (cardId === 'total') return;
+    setActiveCardIds(prev => {
+      let next;
+      if (prev.includes(cardId)) {
+        next = prev.filter(id => id !== cardId);
+      } else {
+        next = [...prev, cardId];
+      }
+      try {
+        localStorage.setItem(DASHBOARD_CARDS_STORAGE_KEY, JSON.stringify(next));
+      } catch (e) {}
+      return next;
+    });
+  };
+
+  // 기본 지표로 초기화
+  const handleResetCards = () => {
+    setActiveCardIds(DEFAULT_DASHBOARD_CARDS);
+    try {
+      localStorage.setItem(DASHBOARD_CARDS_STORAGE_KEY, JSON.stringify(DEFAULT_DASHBOARD_CARDS));
+    } catch (e) {}
+  };
+
+  const isHistoryMode = selectedStatus === 'history' || selectedStatus === 'shipped' || selectedStatus === 'deceased';
+
   return (
     <div>
-      {/* 1. 상단 통계 현황판 (클릭 시 원클릭 리스트업) */}
+      {/* 1. 상단 맞춤형 통계 현황판 (원클릭 필터링 + 지표 추가) */}
       <div className="stats-grid">
+        {activeCardIds.map(cardId => {
+          const cardDef = ALL_DASHBOARD_CARDS.find(c => c.id === cardId);
+          if (!cardDef) return null;
+          const active = isCardActive(cardDef.id);
+          const val = getCardValue(cardDef.id);
+
+          return (
+            <div 
+              key={cardDef.id}
+              className={`stat-card stat-card-interactive ${active ? 'active-custom' : ''}`}
+              onClick={() => handleCardClick(cardDef.id)}
+              title={`클릭 시 ${cardDef.label} 개체 필터링 (다시 누르면 해제)`}
+              role="button"
+              tabIndex={0}
+            >
+              <div 
+                className="stat-icon-wrapper" 
+                style={{ background: cardDef.bg, color: cardDef.color }}
+              >
+                {cardDef.icon}
+              </div>
+              <div className="stat-info">
+                <span className="stat-label">{cardDef.label}</span>
+                <span className="stat-value" style={{ color: cardDef.color }}>
+                  {val}
+                  <small style={{ fontSize: '0.9rem', fontWeight: 500 }}> 두</small>
+                </span>
+              </div>
+            </div>
+          );
+        })}
+
+        {/* 대시보드 지표 추가 점선 버튼 */}
         <div 
-          className={`stat-card stat-card-interactive ${selectedStatus === 'active' ? 'active-all' : ''}`}
-          onClick={() => handleStatusCardClick('active')}
-          title="클릭 시 현재 사육 중인 한우 목록만 보기"
+          className="stat-card stat-card-add"
+          onClick={() => setIsCustomizeOpen(true)}
+          title="대시보드 지표 추가 및 설정"
           role="button"
           tabIndex={0}
         >
-          <div className="stat-icon-wrapper" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10b981' }}>
-            🐂
-          </div>
-          <div className="stat-info">
-            <span className="stat-label">사육 두수</span>
-            <span className="stat-value">{stats.total}<small style={{ fontSize: '0.9rem', fontWeight: 500 }}> 두</small></span>
-          </div>
-        </div>
-
-        <div 
-          className={`stat-card stat-card-interactive ${selectedStatus === 'pregnant' ? 'active-pregnant' : ''}`}
-          onClick={() => handleStatusCardClick('pregnant')}
-          title="클릭 시 임신/수태 개체만 즉시 필터링 (다시 누르면 사육 전체보기)"
-          role="button"
-          tabIndex={0}
-        >
-          <div className="stat-icon-wrapper" style={{ background: 'rgba(139, 92, 246, 0.15)', color: '#8b5cf6' }}>
-            <Heart size={24} />
-          </div>
-          <div className="stat-info">
-            <span className="stat-label">임신 / 수태 개체</span>
-            <span className="stat-value" style={{ color: '#8b5cf6' }}>{stats.pregnant}<small style={{ fontSize: '0.9rem', fontWeight: 500 }}> 두</small></span>
-          </div>
-        </div>
-
-        <div 
-          className={`stat-card stat-card-interactive ${selectedStatus === 'treatment' ? 'active-treatment' : ''}`}
-          onClick={() => handleStatusCardClick('treatment')}
-          title="클릭 시 치료/집중 관찰 개체만 즉시 필터링 (다시 누르면 사육 전체보기)"
-          role="button"
-          tabIndex={0}
-        >
-          <div className="stat-icon-wrapper" style={{ background: 'rgba(239, 68, 68, 0.15)', color: '#ef4444' }}>
-            <Stethoscope size={24} />
-          </div>
-          <div className="stat-info">
-            <span className="stat-label">치료 / 집중 관찰</span>
-            <span className="stat-value" style={{ color: '#ef4444' }}>{stats.treatment}<small style={{ fontSize: '0.9rem', fontWeight: 500 }}> 두</small></span>
-          </div>
-        </div>
-
-        <div className="stat-card">
-          <div className="stat-icon-wrapper" style={{ background: 'rgba(14, 165, 233, 0.15)', color: '#0ea5e9' }}>
-            <Activity size={24} />
-          </div>
-          <div className="stat-info">
-            <span className="stat-label">누적 관리 기록</span>
-            <span className="stat-value" style={{ color: '#0ea5e9' }}>{stats.logsCount}<small style={{ fontSize: '0.9rem', fontWeight: 500 }}> 건</small></span>
-          </div>
+          <Plus size={18} strokeWidth={2.5} />
+          <span>지표 추가</span>
         </div>
       </div>
 
       {/* 2. 검색 및 필터 바 */}
       <div className="filter-bar">
-        {/* 검색창 + 신규 등록 버튼 (고정 결합 그룹) */}
+        {/* 1행: 검색창 + 신규 등록 버튼 (가로 100% 점유) */}
         <div className="search-action-wrapper">
           <div className="search-input-group">
             <Search size={18} className="search-input-icon" />
             <input
               type="text"
               className="search-input"
-              placeholder="개체번호(이표), 이름, 축사, 초성(예: ㅂㅅㅇ) 검색..."
+              placeholder={isHistoryMode ? "출하/폐사 개체번호(이표), 이름, 초성 검색..." : "개체번호(이표), 이름, 축사, 초성(예: ㅂㅅㅇ) 검색..."}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -234,20 +392,22 @@ export default function EntityList({
           </button>
         </div>
 
-        {/* 우측 3대 필터 드롭다운 그룹 */}
-        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
-          {/* 1. 상태 필터: 사육 두수 / 개별 상태 / 출하 완료 / 모든 이력 */}
+        {/* 2행: 3대 필터 드롭다운 (항시 정확한 3분할 33.3% 유지) */}
+        <div className="filter-dropdowns-row">
+          {/* 1. 상태 필터: 사육 두수 / 개별 상태 / 출하 완료 / 폐사 / 사육 이력 전체 */}
           <select 
             className="filter-select"
             value={selectedStatus}
             onChange={(e) => handleStatusChange(e.target.value)}
           >
             <option value="active">사육 두수 ({stats.total}두)</option>
-            {ENTITY_STATUSES.filter(st => st.id !== 'shipped').map(st => (
+            {ENTITY_STATUSES.filter(st => !isHistoricalStatus(st.id)).map(st => (
               <option key={st.id} value={st.id}>{st.icon} {st.label}</option>
             ))}
+            <option value="history">📜 사육 이력 전체 ({stats.historyCount}두)</option>
             <option value="shipped">🏷️ 출하 완료 ({stats.shippedCount}두)</option>
-            <option value="all">모든 이력 (총 {entities.length}두)</option>
+            <option value="deceased">🪦 폐사 / 도태 ({stats.deceasedCount}두)</option>
+            <option value="all">모든 개체 (총 {entities.length}두)</option>
           </select>
 
           {/* 2. 한우 사육 단계 필터: 사육 구분 */}
@@ -262,28 +422,159 @@ export default function EntityList({
             ))}
           </select>
 
-          {/* 3. 축사 위치 필터 (출하 완료 상태 시 딤드 처리) */}
-          {uniqueBarns.length > 0 && (
-            <select 
-              className="filter-select"
-              value={selectedBarn}
-              onChange={(e) => setSelectedBarn(e.target.value)}
-              disabled={selectedStatus === 'shipped'}
-              title={selectedStatus === 'shipped' ? "출하 완료된 개체는 축사 위치 필터가 적용되지 않습니다" : "축사 위치 필터"}
-            >
-              <option value="all">
-                {selectedStatus === 'shipped' ? "축사 위치 (해당 없음)" : "축사 위치"}
-              </option>
-              {uniqueBarns.map(b => (
-                <option key={b} value={b}>📍 {b}</option>
-              ))}
-            </select>
-          )}
+          {/* 3. 축사 위치 필터 (사육 이력 시 딤드 처리 & 항시 3분할 유지) */}
+          <select 
+            className="filter-select"
+            value={selectedBarn}
+            onChange={(e) => setSelectedBarn(e.target.value)}
+            disabled={isHistoryMode || uniqueBarns.length === 0}
+            title={isHistoryMode ? "사육 종료된 개체는 축사 위치 필터가 적용되지 않습니다" : "축사 위치 필터"}
+          >
+            <option value="all">
+              {isHistoryMode ? "축사 위치 (사육 종료)" : "축사 위치"}
+            </option>
+            {uniqueBarns.map(b => (
+              <option key={b} value={b}>📍 {b}</option>
+            ))}
+          </select>
         </div>
       </div>
 
-      {/* 3. 개체 카드 그리드 (고객등록카드 차용) */}
-      {filteredEntities.length === 0 ? (
+      {/* 4. 대시보드 지표 설정 모달 */}
+      {isCustomizeOpen && (
+        <div className="modal-overlay" onClick={() => setIsCustomizeOpen(false)}>
+          <div 
+            className="modal-content" 
+            style={{ maxWidth: '480px' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal-header">
+              <div className="modal-header-title">
+                <Settings size={20} color="var(--color-primary)" />
+                <span>대시보드 지표 설정</span>
+              </div>
+              <button 
+                type="button" 
+                className="modal-close-btn" 
+                onClick={() => setIsCustomizeOpen(false)}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="modal-body" style={{ maxHeight: '60vh', overflowY: 'auto' }}>
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
+                상단 대시보드 현황판에 표시할 관리 지표를 선택하세요. (체크 시 즉시 반영)
+              </p>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                {ALL_DASHBOARD_CARDS.map(item => {
+                  const isChecked = activeCardIds.includes(item.id);
+                  const count = getCardValue(item.id);
+
+                  return (
+                    <label 
+                      key={item.id}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '0.75rem 0.9rem',
+                        borderRadius: 'var(--radius-md)',
+                        background: isChecked ? 'var(--color-primary-light)' : 'var(--bg-card-subtle)',
+                        border: `1px solid ${isChecked ? 'var(--color-primary)' : 'var(--border-color)'}`,
+                        cursor: item.isFixed ? 'default' : 'pointer',
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          disabled={item.isFixed}
+                          onChange={() => handleToggleCard(item.id)}
+                          style={{ width: '18px', height: '18px', accentColor: 'var(--color-primary)', cursor: item.isFixed ? 'default' : 'pointer' }}
+                        />
+                        <div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontWeight: 700, fontSize: '0.92rem' }}>
+                            <span>{item.icon}</span>
+                            <span>{item.label}</span>
+                            {item.isFixed && (
+                              <span style={{ fontSize: '0.72rem', color: 'var(--color-primary)', background: 'rgba(16, 185, 129, 0.15)', padding: '1px 5px', borderRadius: '4px' }}>
+                                필수
+                              </span>
+                            )}
+                          </div>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                            {item.desc}
+                          </div>
+                        </div>
+                      </div>
+
+                      <span style={{ fontWeight: 800, fontSize: '0.95rem', color: item.color }}>
+                        {count}두
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="modal-footer" style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <button 
+                type="button" 
+                className="btn btn-outline" 
+                onClick={handleResetCards}
+              >
+                <RotateCcw size={15} />
+                <span>기본값 복원</span>
+              </button>
+
+              <button 
+                type="button" 
+                className="btn btn-primary" 
+                onClick={() => setIsCustomizeOpen(false)}
+              >
+                완료
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 3. 목록 통계 카운터 & 정렬 컨트롤 서브헤더 바 */}
+      <div className="list-subheader-bar">
+        <div className="list-count-info">
+          {sortedEntities.length !== (selectedStatus === 'all' ? entities.length : isHistoryMode ? stats.historyCount : stats.total) ? (
+            <span>
+              총 <strong>{selectedStatus === 'all' ? entities.length : isHistoryMode ? stats.historyCount : stats.total}</strong>두 중 <strong>{sortedEntities.length}</strong>두
+            </span>
+          ) : (
+            <span>
+              총 <strong>{selectedStatus === 'all' ? entities.length : isHistoryMode ? stats.historyCount : stats.total}</strong>두
+            </span>
+          )}
+        </div>
+
+        <div className="sort-control-group">
+          <ArrowUpDown size={14} className="sort-icon" />
+          <select 
+            className="sort-select"
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            aria-label="개체 정렬 순서 선택"
+          >
+            <option value="latest">최신 등록순</option>
+            <option value="tag_asc">개체번호순 (오름차순)</option>
+            <option value="age_asc">월령 어린순 (송아지 먼저)</option>
+            <option value="age_desc">월령 많은순 (성우 먼저)</option>
+            <option value="barn_asc">축사 위치순 (1축사부터)</option>
+          </select>
+        </div>
+      </div>
+
+      {/* 4. 개체 카드 그리드 (고객등록카드 차용) */}
+      {sortedEntities.length === 0 ? (
         <div className="card" style={{ padding: '3.5rem 1.5rem', textAlign: 'center' }}>
           <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔍</div>
           <h3 style={{ marginBottom: '0.5rem' }}>일치하는 개체가 없습니다</h3>
@@ -311,18 +602,20 @@ export default function EntityList({
         </div>
       ) : (
         <div className="entity-cards-grid">
-          {filteredEntities.map(entity => {
+          {sortedEntities.map(entity => {
             const age = calculateAge(entity.birthDate);
             const statusObj = ENTITY_STATUSES.find(s => s.id === entity.status) || ENTITY_STATUSES[0];
             const genderObj = GENDER_OPTIONS.find(g => g.id === entity.gender) || GENDER_OPTIONS[0];
             const latestLog = getLatestCareLog(entity.id, entity.tagNumber);
             const isShipped = entity.status === 'shipped';
+            const isDeceased = entity.status === 'deceased';
+            const isHistory = isHistoricalStatus(entity.status);
 
             return (
               <div 
                 key={entity.id} 
                 className="entity-card"
-                style={isShipped ? { opacity: 0.92, borderColor: 'rgba(100, 116, 139, 0.3)' } : {}}
+                style={isHistory ? { opacity: 0.92, borderColor: 'rgba(100, 116, 139, 0.3)' } : {}}
               >
                 {/* 상단: 개체번호(클릭 시 상세 이동) & 상태 */}
                 <div className="entity-card-top">
@@ -332,7 +625,7 @@ export default function EntityList({
                       onClick={() => onOpenEntityDetail(entity.tagNumber)}
                       title="클릭 시 이 개체의 관리 내역으로 이동"
                     >
-                      #{entity.tagNumber}
+                      {entity.tagNumber}
                     </span>
                   </div>
                   <span className={`badge ${statusObj.colorClass}`}>
@@ -340,27 +633,21 @@ export default function EntityList({
                   </span>
                 </div>
 
-                {/* 개체명 & 뱃지 */}
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', marginBottom: '0.4rem' }}>
+                {/* 개체명, 사육단계, 축사 위치 1열 통합 배치 (동일한 폰트 크기 & 컬러 구분) */}
+                <div className="entity-card-identity-row">
                   <h3 
                     className="entity-name"
-                    style={{ cursor: 'pointer' }}
+                    style={{ margin: 0, cursor: 'pointer' }}
                     onClick={() => onOpenEntityDetail(entity.tagNumber)}
                   >
-                    🐂 {entity.name}
+                    {entity.name}
                   </h3>
-                  <span style={{ fontSize: '0.85rem', color: genderObj.color, fontWeight: 700 }}>
-                    {genderObj.symbol} {genderObj.label}
+                  <span className="entity-card-breed">
+                    {formatDisplayBreed(entity.breed)}
                   </span>
-                </div>
-
-                {/* 사육 구분 및 축사 위치 */}
-                <div className="entity-meta-row">
-                  <span className="badge" style={{ background: 'rgba(16, 185, 129, 0.1)', color: 'var(--color-primary)', fontWeight: 600 }}>
-                    {entity.breed || '한우'}
-                  </span>
-                  <span className="badge" style={{ background: 'var(--bg-card-subtle)', color: 'var(--text-muted)' }}>
-                    📍 {entity.barn || '축사 미지정'}
+                  <span className="entity-card-dot">•</span>
+                  <span className="entity-card-barn">
+                    {entity.barn || '축사 미지정'}
                   </span>
                 </div>
 
@@ -371,7 +658,7 @@ export default function EntityList({
                     <span className="spec-item-value">{age.text}</span>
                   </div>
                   <div className="spec-item">
-                    <span className="spec-item-label">{isShipped ? '출하 체중' : '현재 체중'}</span>
+                    <span className="spec-item-label">{isShipped ? '출하 체중' : isDeceased ? '최종 체중' : '현재 체중'}</span>
                     <span className="spec-item-value">{entity.weight ? `${entity.weight} kg` : '미측정'}</span>
                   </div>
                   <div className="spec-item">
@@ -414,15 +701,15 @@ export default function EntityList({
 
                 {/* 액션 버튼 그룹 */}
                 <div className="entity-card-actions">
-                  {isShipped ? (
+                  {isHistory ? (
                     <button 
                       className="btn btn-secondary btn-sm"
-                      disabled
-                      title="출하 완료된 개체입니다 (기록 추가 불가)"
-                      style={{ flex: 1, opacity: 0.65, cursor: 'not-allowed' }}
+                      onClick={() => onOpenCareLogModal(entity)}
+                      title={isShipped ? "출하 완료된 개체 (과거 이력 추가 가능)" : "폐사/도태된 개체 (과거 이력 추가 가능)"}
+                      style={{ flex: 1, opacity: 0.9 }}
                     >
-                      <CheckCircle size={14} />
-                      <span>출하 완료</span>
+                      <ClipboardList size={14} />
+                      <span>이력 추가</span>
                     </button>
                   ) : (
                     <button 

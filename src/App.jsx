@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { Plus } from 'lucide-react';
 import TopBar from './components/layout/TopBar.jsx';
 import EntityList from './components/entities/EntityList.jsx';
 import EntityDetailModal from './components/entities/EntityDetailModal.jsx';
@@ -15,11 +16,23 @@ import {
   saveCareLogs, 
   resetToSampleData 
 } from './lib/storage.js';
-import { getTodayDateString } from './lib/types.js';
+import { 
+  getTodayDateString, 
+  ENTITY_STATUSES,
+  DEFAULT_CARE_CATEGORIES,
+  loadCustomCareCategories,
+  saveCustomCareCategories
+} from './lib/types.js';
 
 export default function App() {
   const [entities, setEntities] = useState(() => loadEntities());
   const [careLogs, setCareLogs] = useState(() => loadCareLogs());
+  const [customCategories, setCustomCategories] = useState(() => loadCustomCareCategories());
+
+  // 기본 + 사용자 직접 추가 관리 분류 통합
+  const allCareCategories = useMemo(() => {
+    return [...DEFAULT_CARE_CATEGORIES, ...customCategories];
+  }, [customCategories]);
 
   // 현재 활성화된 탭 ('entities' | 'diary' | 'report' | 'cloud')
   const [activeTab, setActiveTab] = useState('entities');
@@ -39,19 +52,43 @@ export default function App() {
   const [careLogToEdit, setCareLogToEdit] = useState(null);
 
   const [printSheetEntity, setPrintSheetEntity] = useState(null);
+  const [returnToDetailEntity, setReturnToDetailEntity] = useState(null);
   const [targetReportDate, setTargetReportDate] = useState(getTodayDateString());
 
-  // 토스트 피드백
+  // 토스트 피드백 (2초 자동 소멸 및 타이머 안정화)
   const [toastMessage, setToastMessage] = useState(null);
+  const toastTimerRef = useRef(null);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('happy_farm_theme', theme);
   }, [theme]);
 
+  // 모달이 열려 있을 때 뒷배경(body/html) 스크롤 100% 잠금 및 해제
+  const isAnyModalOpen = Boolean(selectedEntityForDetail || isEntityModalOpen || isCareLogModalOpen);
+
+  useEffect(() => {
+    if (isAnyModalOpen) {
+      const originalBodyOverflow = document.body.style.overflow;
+      const originalHtmlOverflow = document.documentElement.style.overflow;
+      document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = originalBodyOverflow;
+        document.documentElement.style.overflow = originalHtmlOverflow;
+      };
+    }
+  }, [isAnyModalOpen]);
+
   const showToast = (text) => {
+    if (toastTimerRef.current) {
+      clearTimeout(toastTimerRef.current);
+    }
     setToastMessage(text);
-    setTimeout(() => setToastMessage(null), 3500);
+    toastTimerRef.current = setTimeout(() => {
+      setToastMessage(null);
+      toastTimerRef.current = null;
+    }, 2000);
   };
 
   const handleToggleTheme = () => {
@@ -100,9 +137,14 @@ export default function App() {
     }
   };
 
-  // 개체 삭제
+  // 개체 삭제 (2중 경고 적용)
   const handleDeleteEntity = (id, name) => {
-    if (!window.confirm(`정말 개체 [${name}]을(를) 삭제하시겠습니까? 관련된 관리 기록은 보존됩니다.`)) {
+    // 1차 경고: 대상 개체 확인
+    if (!window.confirm(`정말 개체 [${name}]을(를) 삭제하시겠습니까?\n(관련된 관리 기록은 보존됩니다.)`)) {
+      return;
+    }
+    // 2차 재확인: 영구 삭제 경고
+    if (!window.confirm(`⚠️ [최종 확인]\n개체 [${name}] 정보가 완전히 삭제됩니다.\n정말 삭제를 진행하시겠습니까?`)) {
       return;
     }
     const updated = entities.filter(e => e.id !== id);
@@ -111,6 +153,35 @@ export default function App() {
     showToast(`개체 [${name}]이(가) 삭제되었습니다.`);
     if (selectedEntityForDetail && selectedEntityForDetail.id === id) {
       setSelectedEntityForDetail(null);
+    }
+  };
+
+  // 개체 상태 원클릭 변경 저장
+  const handleUpdateEntityStatus = (entityId, newStatus) => {
+    const target = entities.find(e => e.id === entityId);
+    if (!target) return;
+    const statusObj = ENTITY_STATUSES.find(s => s.id === newStatus);
+    const updatedEntity = { ...target, status: newStatus };
+    const updatedList = entities.map(e => e.id === entityId ? updatedEntity : e);
+    setEntities(updatedList);
+    saveEntities(updatedList);
+    showToast(`개체 [${target.name || target.tagNumber}] 상태가 [${statusObj ? statusObj.label : newStatus}](으)로 변경되었습니다.`);
+    if (selectedEntityForDetail && selectedEntityForDetail.id === entityId) {
+      setSelectedEntityForDetail(updatedEntity);
+    }
+  };
+
+  // 개체 특이사항/사양관리 메모 직접 수정 저장
+  const handleUpdateEntityMemo = (entityId, newMemo) => {
+    const target = entities.find(e => e.id === entityId);
+    if (!target) return;
+    const updatedEntity = { ...target, memo: newMemo, updatedAt: new Date().toISOString() };
+    const updatedList = entities.map(e => e.id === entityId ? updatedEntity : e);
+    setEntities(updatedList);
+    saveEntities(updatedList);
+    showToast(`개체 [${target.name || target.tagNumber}]의 특이사항 메모가 저장되었습니다.`);
+    if (selectedEntityForDetail && selectedEntityForDetail.id === entityId) {
+      setSelectedEntityForDetail(updatedEntity);
     }
   };
 
@@ -159,9 +230,21 @@ export default function App() {
     setIsCareLogModalOpen(true);
   };
 
-  // 관리 내역 삭제
+  // 관리 내역 삭제 (2중 경고 적용)
   const handleDeleteCareLog = (logId) => {
-    if (!window.confirm('이 관리 기록을 삭제하시겠습니까?')) return;
+    const targetLog = careLogs.find(l => l.id === logId);
+    const logDesc = targetLog ? `[${targetLog.date}] ${targetLog.title}` : '이 관리 기록';
+
+    // 1차 경고: 대상 기록 정보 확인
+    if (!window.confirm(`${logDesc} 관리 기록을 삭제하시겠습니까?`)) {
+      return;
+    }
+
+    // 2차 재확인: 영구 삭제 및 복구 불가 최종 경고
+    if (!window.confirm(`⚠️ [최종 확인]\n삭제된 관리 기록은 다시 복구할 수 없습니다.\n정말 완전히 삭제하시겠습니까?`)) {
+      return;
+    }
+
     const updated = careLogs.filter(l => l.id !== logId);
     setCareLogs(updated);
     saveCareLogs(updated);
@@ -181,10 +264,31 @@ export default function App() {
     showToast('초기 행복 농장 샘플 데이터가 복구되었습니다.');
   };
 
+  // 사용자 직접 추가 커스텀 분류 추가
+  const handleAddCustomCategory = (newCat) => {
+    setCustomCategories(prev => {
+      const next = [...prev, newCat];
+      saveCustomCareCategories(next);
+      return next;
+    });
+    showToast(`새 관리 분류 [${newCat.label}]이(가) 추가되었습니다! ✨`);
+  };
+
+  // 사용자 커스텀 분류 삭제
+  const handleDeleteCustomCategory = (catId) => {
+    setCustomCategories(prev => {
+      const next = prev.filter(c => c.id !== catId);
+      saveCustomCareCategories(next);
+      return next;
+    });
+    showToast('관리 분류가 삭제되었습니다.');
+  };
+
   // 데이터베이스 복원 시 상태 동기화
   const handleDatabaseRestored = () => {
     setEntities(loadEntities());
     setCareLogs(loadCareLogs());
+    setCustomCategories(loadCustomCareCategories());
     setSelectedEntityForDetail(null);
   };
 
@@ -237,7 +341,16 @@ export default function App() {
           <EntityPrintSheet
             entity={printSheetEntity}
             careLogs={careLogs}
-            onClose={() => setPrintSheetEntity(null)}
+            careCategories={allCareCategories}
+            onClose={() => {
+              const returnEnt = returnToDetailEntity;
+              setPrintSheetEntity(null);
+              setReturnToDetailEntity(null);
+              if (returnEnt) {
+                const latest = entities.find(e => e.id === returnEnt.id) || returnEnt;
+                setSelectedEntityForDetail(latest);
+              }
+            }}
           />
         ) : (
           <>
@@ -245,6 +358,7 @@ export default function App() {
               <EntityList
                 entities={entities}
                 careLogs={careLogs}
+                careCategories={allCareCategories}
                 onOpenEntityDetail={handleOpenEntityDetail}
                 onOpenEntityModal={(entity = null) => {
                   setEntityToEdit(entity);
@@ -254,7 +368,10 @@ export default function App() {
                   setCareLogPreselectedEntity(entity);
                   setIsCareLogModalOpen(true);
                 }}
-                onOpenPrintSheet={(entity) => setPrintSheetEntity(entity)}
+                onOpenPrintSheet={(entity) => {
+                  setReturnToDetailEntity(null);
+                  setPrintSheetEntity(entity);
+                }}
                 onDeleteEntity={handleDeleteEntity}
               />
             )}
@@ -263,6 +380,7 @@ export default function App() {
               <DailyDiaryView
                 entities={entities}
                 careLogs={careLogs}
+                careCategories={allCareCategories}
                 onOpenEntityDetail={handleOpenEntityDetail}
                 onOpenCareLogModal={(entity = null, date = null) => {
                   setCareLogPreselectedEntity(entity);
@@ -280,6 +398,7 @@ export default function App() {
                 targetDate={targetReportDate}
                 entities={entities}
                 careLogs={careLogs}
+                careCategories={allCareCategories}
                 onOpenEntityDetail={handleOpenEntityDetail}
                 onOpenCareLogModal={(entity = null) => {
                   setCareLogPreselectedEntity(entity);
@@ -305,6 +424,7 @@ export default function App() {
         <EntityDetailModal
           entity={selectedEntityForDetail}
           careLogs={careLogs}
+          careCategories={allCareCategories}
           onClose={() => setSelectedEntityForDetail(null)}
           onOpenCareLogModal={(entity) => {
             setCareLogPreselectedEntity(entity);
@@ -315,11 +435,14 @@ export default function App() {
             setIsEntityModalOpen(true);
           }}
           onOpenPrintSheet={(entity) => {
+            setReturnToDetailEntity(entity);
             setSelectedEntityForDetail(null);
             setPrintSheetEntity(entity);
           }}
           onDeleteCareLog={handleDeleteCareLog}
           onEditCareLog={handleOpenEditCareLog}
+          onUpdateEntityStatus={handleUpdateEntityStatus}
+          onUpdateEntityMemo={handleUpdateEntityMemo}
         />
       )}
 
@@ -342,6 +465,10 @@ export default function App() {
           preselectedEntity={careLogPreselectedEntity}
           logToEdit={careLogToEdit}
           entities={entities}
+          careLogs={careLogs}
+          careCategories={allCareCategories}
+          onAddCustomCategory={handleAddCustomCategory}
+          onDeleteCustomCategory={handleDeleteCustomCategory}
           onClose={() => {
             setIsCareLogModalOpen(false);
             setCareLogPreselectedEntity(null);
@@ -350,6 +477,20 @@ export default function App() {
           onSave={handleSaveCareLog}
         />
       )}
+
+      {/* 모바일 전용 우측 하단 플로팅 액션 버튼 (FAB) */}
+      <button
+        type="button"
+        className="mobile-fab"
+        onClick={() => {
+          setCareLogPreselectedEntity(null);
+          setIsCareLogModalOpen(true);
+        }}
+        title="현장 관리 기록 빠른 추가"
+        aria-label="현장 관리 기록 빠른 추가"
+      >
+        <Plus size={26} color="#ffffff" strokeWidth={2.5} />
+      </button>
     </div>
   );
 }

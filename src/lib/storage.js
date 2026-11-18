@@ -2,7 +2,13 @@
 // Happy Farm Storage Service (행복 농장 데이터 저장소 및 관계형 DB 매니저)
 // ==========================================================================
 
-import { getTodayDateString } from './types.js';
+import { 
+  getTodayDateString, 
+  formatDisplayBreed, 
+  formatTagNumber,
+  loadCustomCareCategories,
+  saveCustomCareCategories
+} from './types.js';
 
 const STORAGE_ENTITIES_KEY = 'happy_farm_entities_v2';
 const STORAGE_LOGS_KEY = 'happy_farm_care_logs_v2';
@@ -12,14 +18,14 @@ const STORAGE_CONFIG_KEY = 'happy_farm_config_v1';
 export const INITIAL_SAMPLE_ENTITIES = [
   {
     id: 'ENT-001',
-    tagNumber: '002-1402-9851',
+    tagNumber: '002-1402-9851-1',
     name: '복순이',
     category: 'hanwoo',
-    breed: '한우(번식우 - 암소)',
+    breed: '번식우 - 암',
     gender: 'female',
     birthDate: '2024-03-15',
     barn: '제1축사 1번방',
-    motherTag: '002-1100-3411',
+    motherTag: '002-1100-3411-9',
     fatherTag: 'KPN-1422',
     weight: 485,
     status: 'pregnant',
@@ -29,14 +35,14 @@ export const INITIAL_SAMPLE_ENTITIES = [
   },
   {
     id: 'ENT-002',
-    tagNumber: '002-1521-4402',
+    tagNumber: '002-1521-4402-2',
     name: '금동이',
     category: 'hanwoo',
-    breed: '한우(거세 비육우)',
+    breed: '비육우 - 거세',
     gender: 'castrated',
     birthDate: '2024-07-20',
     barn: '제1축사 3번방',
-    motherTag: '002-1205-8821',
+    motherTag: '002-1205-8821-8',
     fatherTag: 'KPN-1380',
     weight: 620,
     status: 'scheduled_ship',
@@ -46,14 +52,14 @@ export const INITIAL_SAMPLE_ENTITIES = [
   },
   {
     id: 'ENT-003',
-    tagNumber: '002-1601-7733',
+    tagNumber: '002-1601-7733-3',
     name: '미순이',
     category: 'hanwoo',
-    breed: '한우(번식우 - 암소)',
+    breed: '번식우 - 암',
     gender: 'female',
     birthDate: '2023-11-05',
     barn: '제2축사 2번방',
-    motherTag: '002-0992-1144',
+    motherTag: '002-0992-1144-7',
     fatherTag: 'KPN-1390',
     weight: 495,
     status: 'in_heat',
@@ -63,14 +69,14 @@ export const INITIAL_SAMPLE_ENTITIES = [
   },
   {
     id: 'ENT-004',
-    tagNumber: '002-1755-1209',
+    tagNumber: '002-1755-1209-4',
     name: '대박이',
     category: 'hanwoo',
-    breed: '한우(번식우 - 암소)',
+    breed: '번식우 - 암',
     gender: 'female',
     birthDate: '2025-01-10',
     barn: '제2축사 4번방',
-    motherTag: '002-1322-9988',
+    motherTag: '002-1322-9988-6',
     fatherTag: 'KPN-1450',
     weight: 390,
     status: 'treatment',
@@ -80,14 +86,14 @@ export const INITIAL_SAMPLE_ENTITIES = [
   },
   {
     id: 'ENT-005',
-    tagNumber: '002-1899-6501',
+    tagNumber: '002-1899-6501-5',
     name: '장군이',
     category: 'hanwoo',
-    breed: '한우(거세 비육우)',
+    breed: '비육우 - 거세',
     gender: 'castrated',
     birthDate: '2024-09-12',
     barn: '제1축사 4번방',
-    motherTag: '002-1144-8899',
+    motherTag: '002-1144-8899-5',
     fatherTag: 'KPN-1410',
     weight: 580,
     status: 'healthy',
@@ -97,14 +103,14 @@ export const INITIAL_SAMPLE_ENTITIES = [
   },
   {
     id: 'ENT-006',
-    tagNumber: '002-1920-3312',
+    tagNumber: '002-1920-3312-6',
     name: '황우',
     category: 'hanwoo',
-    breed: '한우(육성우)',
+    breed: '육성우 - 수',
     gender: 'male',
     birthDate: '2025-08-01',
     barn: '제2축사 1번방',
-    motherTag: '002-1402-9851',
+    motherTag: '002-1402-9851-1',
     fatherTag: 'KPN-1466',
     weight: 295,
     status: 'healthy',
@@ -114,14 +120,14 @@ export const INITIAL_SAMPLE_ENTITIES = [
   },
   {
     id: 'ENT-007',
-    tagNumber: '002-1388-7210',
+    tagNumber: '002-1388-7210-7',
     name: '해순이',
     category: 'hanwoo',
-    breed: '한우(번식우 - 암소)',
+    breed: '번식우 - 암',
     gender: 'female',
     birthDate: '2023-05-18',
     barn: '분만/포유사 1호실',
-    motherTag: '002-0881-2211',
+    motherTag: '002-0881-2211-4',
     fatherTag: 'KPN-1355',
     weight: 510,
     status: 'nursing',
@@ -131,14 +137,14 @@ export const INITIAL_SAMPLE_ENTITIES = [
   },
   {
     id: 'ENT-008',
-    tagNumber: '002-1980-4421',
+    tagNumber: '002-1980-4421-8',
     name: '샛별이',
     category: 'hanwoo',
-    breed: '한우(송아지 - 자우)',
+    breed: '송아지 - 암',
     gender: 'female',
     birthDate: '2026-10-28',
     barn: '분만/포유사 1호실',
-    motherTag: '002-1388-7210',
+    motherTag: '002-1388-7210-7',
     fatherTag: 'KPN-1422',
     weight: 48,
     status: 'healthy',
@@ -148,14 +154,14 @@ export const INITIAL_SAMPLE_ENTITIES = [
   },
   {
     id: 'ENT-009',
-    tagNumber: '002-1433-2299',
+    tagNumber: '002-1433-2299-9',
     name: '영순이',
     category: 'hanwoo',
-    breed: '한우(번식우 - 암소)',
+    breed: '번식우 - 암',
     gender: 'female',
     birthDate: '2024-02-14',
     barn: '제1축사 2번방',
-    motherTag: '002-1055-7788',
+    motherTag: '002-1055-7788-3',
     fatherTag: 'KPN-1405',
     weight: 470,
     status: 'inseminated',
@@ -165,14 +171,14 @@ export const INITIAL_SAMPLE_ENTITIES = [
   },
   {
     id: 'ENT-010',
-    tagNumber: '002-1677-8812',
+    tagNumber: '002-1677-8812-1',
     name: '백호',
     category: 'hanwoo',
-    breed: '한우(종모우/씨수소)',
+    breed: '씨수소 - 수',
     gender: 'male',
     birthDate: '2022-09-05',
     barn: '종모우 특별사',
-    motherTag: '002-0771-3344',
+    motherTag: '002-0771-3344-2',
     fatherTag: 'KPN-1280',
     weight: 820,
     status: 'healthy',
@@ -182,14 +188,14 @@ export const INITIAL_SAMPLE_ENTITIES = [
   },
   {
     id: 'ENT-011',
-    tagNumber: '002-1510-9944',
+    tagNumber: '002-1510-9944-2',
     name: '태양이',
     category: 'hanwoo',
-    breed: '한우(거세 비육우)',
+    breed: '비육우 - 거세',
     gender: 'castrated',
     birthDate: '2024-06-11',
     barn: '제1축사 3번방',
-    motherTag: '002-1188-4422',
+    motherTag: '002-1188-4422-1',
     fatherTag: 'KPN-1375',
     weight: 595,
     status: 'treatment',
@@ -199,14 +205,14 @@ export const INITIAL_SAMPLE_ENTITIES = [
   },
   {
     id: 'ENT-012',
-    tagNumber: '002-1799-5566',
+    tagNumber: '002-1799-5566-3',
     name: '달순이',
     category: 'hanwoo',
-    breed: '한우(번식우 - 암소)',
+    breed: '번식우 - 암',
     gender: 'female',
     birthDate: '2024-11-20',
     barn: '제2축사 3번방',
-    motherTag: '002-1244-6677',
+    motherTag: '002-1244-6677-0',
     fatherTag: 'KPN-1430',
     weight: 460,
     status: 'pregnant',
@@ -216,14 +222,14 @@ export const INITIAL_SAMPLE_ENTITIES = [
   },
   {
     id: 'ENT-013',
-    tagNumber: '002-1644-3321',
+    tagNumber: '002-1644-3321-4',
     name: '누렁이',
     category: 'hanwoo',
-    breed: '한우(거세 비육우)',
+    breed: '비육우 - 거세',
     gender: 'castrated',
     birthDate: '2024-08-15',
     barn: '제1축사 2번방',
-    motherTag: '002-1211-5588',
+    motherTag: '002-1211-5588-9',
     fatherTag: 'KPN-1395',
     weight: 540,
     status: 'healthy',
@@ -233,14 +239,14 @@ export const INITIAL_SAMPLE_ENTITIES = [
   },
   {
     id: 'ENT-014',
-    tagNumber: '002-1855-6611',
+    tagNumber: '002-1855-6611-5',
     name: '꽃순이',
     category: 'hanwoo',
-    breed: '한우(육성우)',
+    breed: '육성우 - 암',
     gender: 'female',
     birthDate: '2025-05-10',
     barn: '제2축사 2번방',
-    motherTag: '002-1355-7799',
+    motherTag: '002-1355-7799-8',
     fatherTag: 'KPN-1440',
     weight: 340,
     status: 'in_heat',
@@ -250,14 +256,14 @@ export const INITIAL_SAMPLE_ENTITIES = [
   },
   {
     id: 'ENT-015',
-    tagNumber: '002-1711-2288',
+    tagNumber: '002-1711-2288-6',
     name: '천둥이',
     category: 'hanwoo',
-    breed: '한우(거세 비육우)',
+    breed: '비육우 - 거세',
     gender: 'castrated',
     birthDate: '2024-05-02',
     barn: '출하 완료(퇴농)',
-    motherTag: '002-1088-3355',
+    motherTag: '002-1088-3355-7',
     fatherTag: 'KPN-1360',
     weight: 685,
     status: 'shipped',
@@ -267,14 +273,14 @@ export const INITIAL_SAMPLE_ENTITIES = [
   },
   {
     id: 'ENT-016',
-    tagNumber: '002-1933-7755',
+    tagNumber: '002-1933-7755-7',
     name: '햇살이',
     category: 'hanwoo',
-    breed: '한우(송아지 - 자우)',
+    breed: '송아지 - 수',
     gender: 'male',
     birthDate: '2026-09-15',
     barn: '분만/포유사 2호실',
-    motherTag: '002-1499-1133',
+    motherTag: '002-1499-1133-8',
     fatherTag: 'KPN-1422',
     weight: 72,
     status: 'treatment',
@@ -284,14 +290,14 @@ export const INITIAL_SAMPLE_ENTITIES = [
   },
   {
     id: 'ENT-017',
-    tagNumber: '002-1499-1133',
+    tagNumber: '002-1499-1133-8',
     name: '진순이',
     category: 'hanwoo',
-    breed: '한우(번식우 - 암소)',
+    breed: '번식우 - 암',
     gender: 'female',
     birthDate: '2023-08-25',
     barn: '분만/포유사 2호실',
-    motherTag: '002-0944-1122',
+    motherTag: '002-0944-1122-6',
     fatherTag: 'KPN-1370',
     weight: 490,
     status: 'nursing',
@@ -301,14 +307,14 @@ export const INITIAL_SAMPLE_ENTITIES = [
   },
   {
     id: 'ENT-018',
-    tagNumber: '002-1588-4477',
+    tagNumber: '002-1588-4477-9',
     name: '보람이',
     category: 'hanwoo',
-    breed: '한우(번식우 - 암소)',
+    breed: '번식우 - 암',
     gender: 'female',
     birthDate: '2024-01-05',
     barn: '제2축사 4번방',
-    motherTag: '002-1133-8822',
+    motherTag: '002-1133-8822-5',
     fatherTag: 'KPN-1415',
     weight: 525,
     status: 'pregnant',
@@ -318,14 +324,14 @@ export const INITIAL_SAMPLE_ENTITIES = [
   },
   {
     id: 'ENT-019',
-    tagNumber: '002-1822-9900',
+    tagNumber: '002-1822-9900-1',
     name: '으뜸이',
     category: 'hanwoo',
-    breed: '한우(육성우)',
+    breed: '육성우 - 수',
     gender: 'male',
     birthDate: '2025-07-15',
     barn: '제2축사 1번방',
-    motherTag: '002-1311-6644',
+    motherTag: '002-1311-6644-4',
     fatherTag: 'KPN-1455',
     weight: 310,
     status: 'healthy',
@@ -335,14 +341,14 @@ export const INITIAL_SAMPLE_ENTITIES = [
   },
   {
     id: 'ENT-020',
-    tagNumber: '002-1766-3344',
+    tagNumber: '002-1766-3344-2',
     name: '청우',
     category: 'hanwoo',
-    breed: '한우(거세 비육우)',
+    breed: '비육우 - 거세',
     gender: 'castrated',
     birthDate: '2024-10-01',
     barn: '제1축사 1번방',
-    motherTag: '002-1277-9911',
+    motherTag: '002-1277-9911-3',
     fatherTag: 'KPN-1400',
     weight: 510,
     status: 'healthy',
@@ -356,7 +362,7 @@ export const INITIAL_SAMPLE_CARE_LOGS = [
   {
     id: 'LOG-20261116-001',
     entityId: 'ENT-003',
-    tagNumber: '002-1601-7733',
+    tagNumber: '002-1601-7733-3',
     entityName: '미순이',
     date: getTodayDateString(),
     time: '08:30',
@@ -373,7 +379,7 @@ export const INITIAL_SAMPLE_CARE_LOGS = [
   {
     id: 'LOG-20261116-002',
     entityId: 'ENT-004',
-    tagNumber: '002-1755-1209',
+    tagNumber: '002-1755-1209-4',
     entityName: '대박이',
     date: getTodayDateString(),
     time: '09:40',
@@ -390,7 +396,7 @@ export const INITIAL_SAMPLE_CARE_LOGS = [
   {
     id: 'LOG-20261116-003',
     entityId: 'ENT-011',
-    tagNumber: '002-1510-9944',
+    tagNumber: '002-1510-9944-2',
     entityName: '태양이',
     date: getTodayDateString(),
     time: '10:30',
@@ -407,7 +413,7 @@ export const INITIAL_SAMPLE_CARE_LOGS = [
   {
     id: 'LOG-20261116-004',
     entityId: 'ENT-016',
-    tagNumber: '002-1933-7755',
+    tagNumber: '002-1933-7755-7',
     entityName: '햇살이',
     date: getTodayDateString(),
     time: '14:00',
@@ -424,7 +430,7 @@ export const INITIAL_SAMPLE_CARE_LOGS = [
   {
     id: 'LOG-20261115-001',
     entityId: 'ENT-001',
-    tagNumber: '002-1402-9851',
+    tagNumber: '002-1402-9851-1',
     entityName: '복순이',
     date: '2026-11-15',
     time: '14:20',
@@ -441,7 +447,7 @@ export const INITIAL_SAMPLE_CARE_LOGS = [
   {
     id: 'LOG-20261115-002',
     entityId: 'ENT-015',
-    tagNumber: '002-1711-2288',
+    tagNumber: '002-1711-2288-6',
     entityName: '천둥이',
     date: '2026-11-15',
     time: '11:30',
@@ -458,7 +464,7 @@ export const INITIAL_SAMPLE_CARE_LOGS = [
   {
     id: 'LOG-20261114-001',
     entityId: 'ENT-005',
-    tagNumber: '002-1899-6501',
+    tagNumber: '002-1899-6501-5',
     entityName: '장군이',
     date: '2026-11-14',
     time: '10:30',
@@ -475,7 +481,7 @@ export const INITIAL_SAMPLE_CARE_LOGS = [
   {
     id: 'LOG-20261113-001',
     entityId: 'ENT-018',
-    tagNumber: '002-1588-4477',
+    tagNumber: '002-1588-4477-9',
     entityName: '보람이',
     date: '2026-11-13',
     time: '15:00',
@@ -492,7 +498,7 @@ export const INITIAL_SAMPLE_CARE_LOGS = [
   {
     id: 'LOG-20261112-001',
     entityId: 'ENT-002',
-    tagNumber: '002-1521-4402',
+    tagNumber: '002-1521-4402-2',
     entityName: '금동이',
     date: '2026-11-12',
     time: '11:00',
@@ -509,7 +515,7 @@ export const INITIAL_SAMPLE_CARE_LOGS = [
   {
     id: 'LOG-20261111-001',
     entityId: 'ENT-012',
-    tagNumber: '002-1799-5566',
+    tagNumber: '002-1799-5566-3',
     entityName: '달순이',
     date: '2026-11-11',
     time: '15:20',
@@ -526,7 +532,7 @@ export const INITIAL_SAMPLE_CARE_LOGS = [
   {
     id: 'LOG-20261110-001',
     entityId: 'ENT-001',
-    tagNumber: '002-1402-9851',
+    tagNumber: '002-1402-9851-1',
     entityName: '복순이',
     date: '2026-11-10',
     time: '10:30',
@@ -543,7 +549,7 @@ export const INITIAL_SAMPLE_CARE_LOGS = [
   {
     id: 'LOG-20261108-001',
     entityId: 'ENT-006',
-    tagNumber: '002-1920-3312',
+    tagNumber: '002-1920-3312-6',
     entityName: '황우',
     date: '2026-11-08',
     time: '15:00',
@@ -569,17 +575,57 @@ export function loadEntities() {
     }
     const parsed = JSON.parse(raw);
     if (Array.isArray(parsed) && parsed.length > 0) {
-      // 한우 전용 농장 데이터 정규화
+      // 한우 전용 농장 데이터 정규화 및 표준 사육구분 포맷, 이표번호 12자리 자동 마이그레이션
+      let needsSave = false;
+      const sampleMap = new Map(INITIAL_SAMPLE_ENTITIES.map(s => [s.id, s]));
+
       const normalized = parsed.map(e => {
-        if (e.category !== 'hanwoo') {
-          return {
-            ...e,
-            category: 'hanwoo',
-            breed: e.breed && e.breed.includes('한우') ? e.breed : '한우(번식우)',
-          };
+        const standardBreed = formatDisplayBreed(e.breed);
+        let tag = e.tagNumber || '';
+        let mother = e.motherTag || '';
+
+        // 샘플 개체인 경우 최신 12자리 표준 이표번호로 동기화
+        const matchedSample = sampleMap.get(e.id);
+        if (matchedSample) {
+          if (tag !== matchedSample.tagNumber) {
+            tag = matchedSample.tagNumber;
+            needsSave = true;
+          }
+          if (mother !== matchedSample.motherTag) {
+            mother = matchedSample.motherTag;
+            needsSave = true;
+          }
+        } else {
+          // 사용자 등록 개체의 경우 12자리 표준 포맷팅 확인
+          const formattedTag = formatTagNumber(tag);
+          if (formattedTag && formattedTag !== tag) {
+            tag = formattedTag;
+            needsSave = true;
+          }
+          if (mother) {
+            const formattedMother = formatTagNumber(mother);
+            if (formattedMother && formattedMother !== mother) {
+              mother = formattedMother;
+              needsSave = true;
+            }
+          }
         }
-        return e;
+
+        if (e.breed !== standardBreed || e.category !== 'hanwoo') {
+          needsSave = true;
+        }
+
+        return {
+          ...e,
+          tagNumber: tag,
+          motherTag: mother,
+          category: 'hanwoo',
+          breed: standardBreed,
+        };
       });
+      if (needsSave) {
+        saveEntities(normalized);
+      }
       return normalized;
     }
     return INITIAL_SAMPLE_ENTITIES;
@@ -605,7 +651,45 @@ export function loadCareLogs() {
       return INITIAL_SAMPLE_CARE_LOGS;
     }
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) && parsed.length > 0 ? parsed : INITIAL_SAMPLE_CARE_LOGS;
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      let needsSave = false;
+      const sampleLogMap = new Map(INITIAL_SAMPLE_CARE_LOGS.map(l => [l.id, l]));
+      const sampleEntityMap = new Map(INITIAL_SAMPLE_ENTITIES.map(e => [e.id, e]));
+
+      const normalized = parsed.map(log => {
+        let tag = log.tagNumber || '';
+        const matchedSampleLog = sampleLogMap.get(log.id);
+        if (matchedSampleLog) {
+          if (tag !== matchedSampleLog.tagNumber) {
+            tag = matchedSampleLog.tagNumber;
+            needsSave = true;
+          }
+        } else {
+          const matchedEntity = sampleEntityMap.get(log.entityId);
+          if (matchedEntity && matchedEntity.tagNumber) {
+            if (tag !== matchedEntity.tagNumber) {
+              tag = matchedEntity.tagNumber;
+              needsSave = true;
+            }
+          } else {
+            const formatted = formatTagNumber(tag);
+            if (formatted && formatted !== tag) {
+              tag = formatted;
+              needsSave = true;
+            }
+          }
+        }
+        return {
+          ...log,
+          tagNumber: tag,
+        };
+      });
+      if (needsSave) {
+        saveCareLogs(normalized);
+      }
+      return normalized;
+    }
+    return INITIAL_SAMPLE_CARE_LOGS;
   } catch (err) {
     console.error('Failed to load care logs:', err);
     return INITIAL_SAMPLE_CARE_LOGS;
@@ -643,13 +727,14 @@ export function getSchedulesForDate(dateStr, allLogs) {
 }
 
 // Full Database Export / Import
-export function exportFullDatabase(entities, careLogs) {
+export function exportFullDatabase(entities, careLogs, customCategories) {
   const data = {
     app: 'happy-farm',
     version: '1.0.0',
     exportTimestamp: new Date().toISOString(),
     entities: entities || loadEntities(),
     careLogs: careLogs || loadCareLogs(),
+    customCategories: customCategories || loadCustomCareCategories(),
   };
   return JSON.stringify(data, null, 2);
 }
@@ -666,7 +751,16 @@ export function importFullDatabase(jsonString) {
     saveEntities(entities);
     saveCareLogs(careLogs);
 
-    return { success: true, entityCount: entities.length, logCount: careLogs.length };
+    if (Array.isArray(data.customCategories)) {
+      saveCustomCareCategories(data.customCategories);
+    }
+
+    return { 
+      success: true, 
+      entityCount: entities.length, 
+      logCount: careLogs.length,
+      categoryCount: Array.isArray(data.customCategories) ? data.customCategories.length : 0
+    };
   } catch (err) {
     return { success: false, error: err.message };
   }

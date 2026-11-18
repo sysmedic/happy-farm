@@ -2,7 +2,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { 
   X, 
   Save, 
-  AlertCircle
+  AlertCircle,
+  Plus
 } from 'lucide-react';
 import { 
   CARE_CATEGORIES, 
@@ -10,22 +11,48 @@ import {
   getCurrentTimeString 
 } from '../../lib/types.js';
 
+const LAST_OPERATOR_STORAGE_KEY = 'happy_farm_last_operator';
+
+const getInitialOperator = (logToEdit, careLogs) => {
+  if (logToEdit?.operator) return logToEdit.operator;
+  try {
+    const saved = localStorage.getItem(LAST_OPERATOR_STORAGE_KEY);
+    if (saved && saved.trim()) return saved.trim();
+  } catch (e) {
+    // ignore
+  }
+  if (careLogs && careLogs.length > 0) {
+    const latestWithOp = careLogs.find(l => l.operator && l.operator.trim());
+    if (latestWithOp) return latestWithOp.operator;
+  }
+  return '홍길동 대표';
+};
+
 export default function CareLogFormModal({
   preselectedEntity,
   logToEdit,
   entities,
+  careLogs,
+  careCategories,
+  onAddCustomCategory,
+  onDeleteCustomCategory,
   onClose,
   onSave
 }) {
   const isEditing = Boolean(logToEdit);
+  const categoriesToDisplay = careCategories || CARE_CATEGORIES;
   const [selectedEntityId, setSelectedEntityId] = useState(logToEdit?.entityId || preselectedEntity?.id || '');
   const [date, setDate] = useState(logToEdit?.date || getTodayDateString());
   const [time, setTime] = useState(logToEdit?.time || getCurrentTimeString());
   const [category, setCategory] = useState(logToEdit?.category || 'vaccine');
   const [title, setTitle] = useState(logToEdit?.title || '');
   const [details, setDetails] = useState(logToEdit?.details || '');
-  const [operator, setOperator] = useState(logToEdit?.operator || '홍길동 대표');
+  const [operator, setOperator] = useState(() => getInitialOperator(logToEdit, careLogs));
   const [cost, setCost] = useState(logToEdit?.cost ? String(logToEdit.cost) : '');
+
+  // 새 커스텀 분류 추가 상태
+  const [isAddingCategory, setIsAddingCategory] = useState(false);
+  const [newCatName, setNewCatName] = useState('');
   
   // 차기 일정 등록 (일정 다이어리 자동 연동)
   const [hasNextSchedule, setHasNextSchedule] = useState(Boolean(logToEdit?.nextScheduleDate));
@@ -38,8 +65,8 @@ export default function CareLogFormModal({
 
   const [errorMsg, setErrorMsg] = useState('');
 
-  const activeEntities = useMemo(() => entities ? entities.filter(e => e.status !== 'shipped') : [], [entities]);
-  const shippedEntities = useMemo(() => entities ? entities.filter(e => e.status === 'shipped') : [], [entities]);
+  const activeEntities = useMemo(() => entities ? entities.filter(e => e.status !== 'shipped' && e.status !== 'deceased') : [], [entities]);
+  const historyEntities = useMemo(() => entities ? entities.filter(e => e.status === 'shipped' || e.status === 'deceased') : [], [entities]);
 
   useEffect(() => {
     if (logToEdit) {
@@ -49,18 +76,21 @@ export default function CareLogFormModal({
       setCategory(logToEdit.category);
       setTitle(logToEdit.title);
       setDetails(logToEdit.details || '');
-      setOperator(logToEdit.operator || '홍길동 대표');
+      setOperator(logToEdit.operator || getInitialOperator(null, careLogs));
       setCost(logToEdit.cost ? String(logToEdit.cost) : '');
       setHasNextSchedule(Boolean(logToEdit.nextScheduleDate));
       setNextScheduleDate(logToEdit.nextScheduleDate || '');
       setNextScheduleTitle(logToEdit.nextScheduleTitle || '');
-    } else if (preselectedEntity) {
-      setSelectedEntityId(preselectedEntity.id);
-    } else if (entities && entities.length > 0 && !selectedEntityId) {
-      const firstActive = entities.find(e => e.status !== 'shipped') || entities[0];
-      setSelectedEntityId(firstActive.id);
+    } else {
+      setOperator(getInitialOperator(null, careLogs));
+      if (preselectedEntity) {
+        setSelectedEntityId(preselectedEntity.id);
+      } else if (entities && entities.length > 0 && !selectedEntityId) {
+        const firstActive = entities.find(e => e.status !== 'shipped' && e.status !== 'deceased') || entities[0];
+        setSelectedEntityId(firstActive.id);
+      }
     }
-  }, [logToEdit, preselectedEntity, entities, selectedEntityId]);
+  }, [logToEdit, preselectedEntity, entities, selectedEntityId, careLogs]);
 
   // 카테고리 선택 시 권장 작업명 자동 추천
   const handleCategorySelect = (catId) => {
@@ -73,6 +103,64 @@ export default function CareLogFormModal({
       else if (catId === 'feed') setTitle('특수 영양제 및 미네랄 급여');
       else if (catId === 'weight') setTitle('정기 체중 측정');
       else if (catId === 'routine') setTitle('축사 소독 및 환경 점검');
+      else {
+        const found = categoriesToDisplay.find(c => c.id === catId);
+        if (found) setTitle(found.label);
+      }
+    }
+  };
+
+  // 새 커스텀 관리 분류 생성 (이모지 없이 이름만 등록)
+  const handleCreateCategory = () => {
+    const trimmed = newCatName.trim();
+    if (!trimmed) {
+      alert('새 분류명을 입력해주세요.');
+      return;
+    }
+    if (categoriesToDisplay.some(c => c.label.toLowerCase() === trimmed.toLowerCase())) {
+      alert('이미 동일한 이름의 관리 분류가 존재합니다.');
+      return;
+    }
+    const newCat = {
+      id: `custom_${Date.now()}`,
+      label: trimmed,
+      icon: '',
+      badgeClass: 'badge-cat-custom',
+      isCustom: true
+    };
+    if (onAddCustomCategory) {
+      onAddCustomCategory(newCat);
+    }
+    setCategory(newCat.id);
+    if (!title) {
+      setTitle(trimmed);
+    }
+    setIsAddingCategory(false);
+    setNewCatName('');
+  };
+
+  // 커스텀 분류 삭제 처리 (경고 및 연계 검증)
+  const handleDeleteCategoryClick = (cat) => {
+    const isCurrentlySelected = category === cat.id;
+    const linkedCount = careLogs ? careLogs.filter(l => l.category === cat.id).length : 0;
+
+    let confirmMsg = `'${cat.label}' 분류를 삭제하시겠습니까?`;
+
+    if (isCurrentlySelected && linkedCount > 0) {
+      confirmMsg = `⚠️ 주의:\n1. 현재 등록 폼에 '${cat.label}' 분류가 선택되어 있습니다.\n2. 이미 이 분류로 등록된 관리 기록이 ${linkedCount}건 존재합니다.\n\n정말 '${cat.label}' 분류를 삭제하시겠습니까?\n(삭제 시 현재 폼의 분류는 기본 분류('백신접종')로 변경됩니다.)`;
+    } else if (isCurrentlySelected) {
+      confirmMsg = `⚠️ 현재 등록 폼에 '${cat.label}' 분류가 선택되어 있습니다.\n삭제 시 기본 분류('백신접종')로 자동 변경됩니다.\n\n정말 '${cat.label}' 분류를 삭제하시겠습니까?`;
+    } else if (linkedCount > 0) {
+      confirmMsg = `⚠️ 주의: 이미 '${cat.label}' 분류로 등록된 관리 기록이 ${linkedCount}건 존재합니다.\n분류를 삭제해도 기존 기록은 보존되지만, 필터링 등에서 제한될 수 있습니다.\n\n정말 '${cat.label}' 분류를 삭제하시겠습니까?`;
+    }
+
+    if (window.confirm(confirmMsg)) {
+      if (onDeleteCustomCategory) {
+        onDeleteCustomCategory(cat.id);
+      }
+      if (isCurrentlySelected) {
+        setCategory('vaccine');
+      }
     }
   };
 
@@ -110,6 +198,15 @@ export default function CareLogFormModal({
       return;
     }
 
+    const trimmedOperator = operator.trim();
+    if (trimmedOperator) {
+      try {
+        localStorage.setItem(LAST_OPERATOR_STORAGE_KEY, trimmedOperator);
+      } catch (err) {
+        // ignore storage quota error
+      }
+    }
+
     const logData = {
       id: logToEdit?.id || `LOG-${Date.now()}`,
       entityId: targetEntity.id,
@@ -120,7 +217,7 @@ export default function CareLogFormModal({
       category,
       title: title.trim(),
       details: details.trim(),
-      operator: operator.trim(),
+      operator: trimmedOperator,
       cost: cost ? Number(cost) : 0,
       nextScheduleDate: hasNextSchedule ? nextScheduleDate : null,
       nextScheduleTitle: hasNextSchedule ? nextScheduleTitle.trim() : null,
@@ -136,7 +233,7 @@ export default function CareLogFormModal({
     });
   };
 
-  const currentSelectedEntity = entities.find(e => e.id === selectedEntityId);
+  const currentSelectedEntity = entities.find(e => e.id === selectedEntityId) || preselectedEntity;
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -149,7 +246,7 @@ export default function CareLogFormModal({
         <div className="modal-header">
           <div className="modal-header-title">
             <span style={{ fontSize: '1.4rem' }}>📋</span>
-            <span>{isEditing ? '개체 관리 내역 수정' : '개체별 관리 내역 추가'}</span>
+            <span>{isEditing ? '관리 내역 수정' : '관리 내역 추가'}</span>
           </div>
           <button type="button" className="modal-close-btn" onClick={onClose}>
             <X size={20} />
@@ -176,76 +273,195 @@ export default function CareLogFormModal({
               </div>
             )}
 
-            {/* 대상 개체 선택기 */}
-            <div className="form-group" style={{ marginBottom: '1.25rem' }}>
-              <label className="form-label">
-                관리 대상 개체 선택 <span className="required">*</span>
-              </label>
-              <select
-                className="form-select"
-                value={selectedEntityId}
-                onChange={(e) => setSelectedEntityId(e.target.value)}
-                required
-              >
-                <option value="">-- 개체를 선택하세요 --</option>
-                {activeEntities.length > 0 && (
-                  <optgroup label="사육 중인 개체">
-                    {activeEntities.map(ent => (
-                      <option key={ent.id} value={ent.id}>
-                        #{ent.tagNumber} {ent.name}
-                      </option>
-                    ))}
-                  </optgroup>
-                )}
-                {shippedEntities.length > 0 && (
-                  <optgroup label="출하 완료 개체">
-                    {shippedEntities.map(ent => (
-                      <option key={ent.id} value={ent.id}>
-                        🏷️ [출하] #{ent.tagNumber} {ent.name}
-                      </option>
-                    ))}
-                  </optgroup>
-                )}
-              </select>
-
-              {currentSelectedEntity && (
-                <div style={{ 
-                  marginTop: '0.5rem', 
-                  fontSize: '0.825rem', 
-                  color: currentSelectedEntity.status === 'shipped' ? 'var(--color-accent)' : 'var(--color-primary)', 
-                  fontWeight: 600,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem'
-                }}>
-                  {currentSelectedEntity.status === 'shipped' ? (
-                    <span>🏷️ 출하 완료된 개체입니다. (과거 관리 이력 보강용)</span>
-                  ) : (
-                    <>
-                      <span>선택된 개체: #{currentSelectedEntity.tagNumber} ({currentSelectedEntity.name})</span>
-                      <span>• 축사: {currentSelectedEntity.barn || '미지정'}</span>
-                    </>
-                  )}
+            {/* 대상 개체: 상세 모달 등에서 진입 시 외부 박스 없이 개체번호 + 별명만 심플 표시 */}
+            {preselectedEntity || isEditing ? (
+              <div className="form-group" style={{ marginBottom: '1.25rem' }}>
+                <label className="form-label">관리 대상 개체</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
+                  <span className="entity-ear-tag" style={{ height: '34px', fontSize: '1.05rem', padding: '0 0.65rem', cursor: 'default' }}>
+                    {currentSelectedEntity?.tagNumber}
+                  </span>
+                  <span style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-main)', lineHeight: 1.2 }}>
+                    {currentSelectedEntity?.name}
+                  </span>
                 </div>
-              )}
-            </div>
+              </div>
+            ) : (
+              /* 미지정 진입 시 (예: 메인 FAB 등): 기존 개체 선택 드롭다운 유지 */
+              <div className="form-group" style={{ marginBottom: '1.25rem' }}>
+                <label className="form-label">
+                  관리 대상 개체 선택 <span className="required">*</span>
+                </label>
+                <select
+                  className="form-select"
+                  value={selectedEntityId}
+                  onChange={(e) => setSelectedEntityId(e.target.value)}
+                  required
+                >
+                  <option value="">-- 개체를 선택하세요 --</option>
+                  {activeEntities.length > 0 && (
+                    <optgroup label="사육 중인 개체">
+                      {activeEntities.map(ent => (
+                        <option key={ent.id} value={ent.id}>
+                          {ent.tagNumber} {ent.name}
+                        </option>
+                      ))}
+                    </optgroup>
+                  )}
+                  {historyEntities.length > 0 && (
+                    <optgroup label="사육 이력 개체 (출하·폐사)">
+                      {historyEntities.map(ent => (
+                        <option key={ent.id} value={ent.id}>
+                          {ent.status === 'deceased' ? '🪦 [폐사] ' : '🏷️ [출하] '}{ent.tagNumber} {ent.name}
+                        </option>
+                      ))}
+                    </optgroup>
+                  )}
+                </select>
 
-            {/* 관리 분류 선택기 (버튼 칩 그리드) */}
+                {currentSelectedEntity && (
+                  <div style={{ 
+                    marginTop: '0.5rem', 
+                    fontSize: '0.825rem', 
+                    color: (currentSelectedEntity.status === 'shipped' || currentSelectedEntity.status === 'deceased') ? 'var(--color-accent)' : 'var(--color-primary)', 
+                    fontWeight: 600,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                  }}>
+                    {currentSelectedEntity.status === 'shipped' ? (
+                      <span>🏷️ 출하 완료된 개체입니다. (과거 관리 이력 보강용)</span>
+                    ) : currentSelectedEntity.status === 'deceased' ? (
+                      <span>🪦 폐사/도태된 개체입니다. (과거 관리 이력 보강용)</span>
+                    ) : (
+                      <>
+                        <span>선택된 개체: {currentSelectedEntity.tagNumber} ({currentSelectedEntity.name})</span>
+                        <span>• 축사: {currentSelectedEntity.barn || '미지정'}</span>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* 관리 분류 선택기 (버튼 칩 그리드 + 직접 추가) */}
             <div className="form-group" style={{ marginBottom: '1.25rem' }}>
               <label className="form-label">관리 분류 선택</label>
+
               <div className="category-picker-grid">
-                {CARE_CATEGORIES.map(cat => (
+                {categoriesToDisplay.map(cat => (
                   <button
                     key={cat.id}
                     type="button"
                     className={`category-picker-btn ${category === cat.id ? 'selected' : ''}`}
                     onClick={() => handleCategorySelect(cat.id)}
+                    style={{ position: 'relative' }}
                   >
-                    <span style={{ fontSize: '1.3rem' }}>{cat.icon}</span>
+                    {cat.isCustom && (
+                      <span
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteCategoryClick(cat);
+                        }}
+                        title="이 커스텀 분류 삭제"
+                        style={{
+                          position: 'absolute',
+                          top: '4px',
+                          right: '4px',
+                          width: '18px',
+                          height: '18px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          borderRadius: '50%',
+                          background: 'rgba(0, 0, 0, 0.08)',
+                          color: 'var(--text-muted)'
+                        }}
+                      >
+                        <X size={11} />
+                      </span>
+                    )}
+                    {cat.icon && <span style={{ fontSize: '1.3rem' }}>{cat.icon}</span>}
                     <span>{cat.label}</span>
                   </button>
                 ))}
+
+                {/* 그리드 끝의 직접 추가 버튼 */}
+                <button
+                  type="button"
+                  className={`category-picker-btn ${isAddingCategory ? 'selected' : ''}`}
+                  onClick={() => setIsAddingCategory(prev => !prev)}
+                  style={{ 
+                    borderStyle: 'dashed', 
+                    background: isAddingCategory ? 'var(--color-primary-light)' : 'transparent',
+                    borderColor: isAddingCategory ? 'var(--color-primary)' : 'var(--border-color)'
+                  }}
+                  title="새 관리 분류 직접 만들기"
+                >
+                  <span style={{ fontSize: '1.25rem', color: 'var(--color-primary)' }}>
+                    <Plus size={20} />
+                  </span>
+                  <span style={{ color: 'var(--color-primary)', fontWeight: 700 }}>+ 분류 추가</span>
+                </button>
               </div>
+
+              {/* 인라인 새 분류 생성 폼 (이모지 없이 이름만 간결하게 등록) */}
+              {isAddingCategory && (
+                <div style={{
+                  marginTop: '0.75rem',
+                  padding: '0.85rem 1rem',
+                  background: 'var(--bg-card-subtle)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: 'var(--radius-md)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.55rem',
+                  animation: 'fadeIn 0.15s ease-out'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-main)' }}>
+                      새 관리 분류명 입력
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsAddingCategory(false);
+                        setNewCatName('');
+                      }}
+                      style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '0.45rem' }}>
+                    <input
+                      type="text"
+                      className="form-input"
+                      placeholder="예: 발굽 손질, 제각, 방역소독 등"
+                      value={newCatName}
+                      onChange={(e) => setNewCatName(e.target.value)}
+                      style={{ height: '36px', fontSize: '0.88rem', flex: 1 }}
+                      maxLength={15}
+                      autoFocus
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleCreateCategory();
+                        }
+                      }}
+                    />
+                    <button
+                      type="button"
+                      className="btn btn-primary"
+                      onClick={handleCreateCategory}
+                      style={{ height: '36px', padding: '0 0.95rem', fontSize: '0.88rem', fontWeight: 700, whiteSpace: 'nowrap' }}
+                    >
+                      등록 및 선택
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* 작업 일시 및 작업명 */}
@@ -326,7 +542,7 @@ export default function CareLogFormModal({
                     onChange={(e) => setHasNextSchedule(e.target.checked)}
                     style={{ width: '18px', height: '18px', accentColor: 'var(--color-primary)' }}
                   />
-                  <span>📅 차기 관리 예정일 등록 (일정 다이어리에 자동 추가)</span>
+                  <span>📅 차기 관리 예정 등록</span>
                 </label>
 
                 {hasNextSchedule && (

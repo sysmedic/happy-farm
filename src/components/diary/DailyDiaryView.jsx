@@ -13,12 +13,14 @@ import {
 } from 'lucide-react';
 import { 
   CARE_CATEGORIES, 
-  getTodayDateString 
+  getTodayDateString,
+  getCategoryById
 } from '../../lib/types.js';
 
 export default function DailyDiaryView({
   entities,
   careLogs,
+  careCategories,
   onOpenEntityDetail,
   onOpenCareLogModal,
   onNavigateToReport
@@ -268,7 +270,7 @@ export default function DailyDiaryView({
                             onClick={() => onOpenEntityDetail(task.tagNumber)}
                             title="클릭 시 이 개체의 관리 내역으로 이동"
                           >
-                            #{task.tagNumber}
+                            {task.tagNumber}
                           </span>
                           <div>
                             <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>
@@ -332,7 +334,7 @@ export default function DailyDiaryView({
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
                   {dailyLogs.map(log => {
-                    const catObj = CARE_CATEGORIES.find(c => c.id === log.category) || CARE_CATEGORIES[0];
+                    const catObj = getCategoryById(log.category, careCategories);
 
                     return (
                       <div 
@@ -354,7 +356,7 @@ export default function DailyDiaryView({
                               onClick={() => onOpenEntityDetail(log.tagNumber)}
                               title="클릭 시 이 개체의 관리 내역으로 즉시 이동"
                             >
-                              #{log.tagNumber}
+                              {log.tagNumber}
                             </span>
                             <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>
                               {log.entityName}

@@ -1,9 +1,10 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { 
   X, 
   Plus, 
   Printer, 
   Edit3, 
+  Save,
   ClipboardList,
   Clock,
   Trash2,
@@ -14,21 +15,61 @@ import {
   ENTITY_STATUSES, 
   GENDER_OPTIONS, 
   CARE_CATEGORIES, 
-  calculateAge 
+  calculateAge,
+  formatDisplayBreed,
+  getAvailableStatuses,
+  getCategoryById
 } from '../../lib/types.js';
 
 export default function EntityDetailModal({
   entity,
   careLogs,
+  careCategories,
   onClose,
   onOpenCareLogModal,
   onOpenEntityModal,
   onOpenPrintSheet,
   onDeleteCareLog,
-  onEditCareLog
+  onEditCareLog,
+  onUpdateEntityStatus,
+  onUpdateEntityMemo
 }) {
+  const categoriesToDisplay = careCategories || CARE_CATEGORIES;
   const [viewMode, setViewMode] = useState('summary'); // 'summary' | 'fullHistory'
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [isStatusMenuOpen, setIsStatusMenuOpen] = useState(false);
+  const [isEditingMemo, setIsEditingMemo] = useState(false);
+  const [memoDraft, setMemoDraft] = useState(entity?.memo || '');
+  const statusMenuRef = useRef(null);
+
+  // 개체 정보가 변경되거나 모달 열릴 때 메모 초기화
+  useEffect(() => {
+    setMemoDraft(entity?.memo || '');
+    setIsEditingMemo(false);
+  }, [entity?.id, entity?.memo]);
+
+  // 상태 변경 드롭다운 바깥 클릭 감지
+  useEffect(() => {
+    if (!isStatusMenuOpen) return;
+    const handleClickOutside = (e) => {
+      if (statusMenuRef.current && !statusMenuRef.current.contains(e.target)) {
+        setIsStatusMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, [isStatusMenuOpen]);
+
+  const handleStatusSelect = (statusId) => {
+    setIsStatusMenuOpen(false);
+    if (onUpdateEntityStatus && statusId !== entity.status) {
+      onUpdateEntityStatus(entity.id, statusId);
+    }
+  };
 
   // 이 개체에 속한 전체 관리 기록 (최신순 정렬)
   const allEntityLogs = useMemo(() => {
@@ -61,73 +102,118 @@ export default function EntityDetailModal({
         {/* 모달 상단 헤더: viewMode에 따른 분기 */}
         {viewMode === 'fullHistory' ? (
           <div className="modal-header entity-detail-header fullhistory-header">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-              <button 
-                className="btn btn-outline btn-sm" 
-                onClick={() => setViewMode('summary')}
-                style={{ padding: '0.35rem 0.65rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
-                title="기본 정보로 돌아가기"
+            {/* 1열: 개체번호 + 별명 + 총 N건 (동등한 박스 규격의 전체보기 버튼) */}
+            <div className="fullhistory-header-identity-row">
+              <span className="entity-ear-tag fullhistory-tag">{entity.tagNumber}</span>
+              <h2 className="fullhistory-entity-name">{entity.name}</h2>
+              <button
+                type="button"
+                className={`fullhistory-total-tag ${selectedCategory === 'all' ? 'active' : ''}`}
+                onClick={() => setSelectedCategory('all')}
+                title="클릭하여 전체 관리 기록 보기"
               >
-                <ChevronLeft size={16} />
-                <span>기본정보</span>
+                총 {allEntityLogs.length}건
               </button>
-              <h2 style={{ fontSize: '1.05rem', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-                <span>생애 관리 내역</span>
-                <span className="badge" style={{ background: 'var(--color-primary-light)', color: 'var(--color-primary)', fontWeight: 700 }}>
-                  {allEntityLogs.length}건
-                </span>
-              </h2>
             </div>
-            <button className="modal-close-btn" onClick={onClose} title="닫기">
-              <X size={20} />
-            </button>
+
+            {/* 2열: 세부 관리 분류 (공간 부족 시 3열로 자동 줄바꿈 확장) */}
+            <div className="fullhistory-filter-bar">
+              {categoriesToDisplay.map(cat => {
+                const count = allEntityLogs.filter(l => l.category === cat.id).length;
+                if (count === 0 && selectedCategory !== cat.id) return null;
+                return (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    className={`fullhistory-tab-btn ${selectedCategory === cat.id ? 'active' : ''}`}
+                    onClick={() => setSelectedCategory(cat.id)}
+                  >
+                    <span>{cat.label}</span>
+                    <span className="tab-count">{count}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         ) : (
           <div className="modal-header entity-detail-header">
+            {/* 1행: 이표번호 & 상태 배너 (좌측) | 출력 & 정보 수정 버튼 (우측) */}
             <div className="detail-header-top-row">
-              <div className="entity-detail-header-info">
-                {/* 1줄: 이표번호 */}
-                <div className="detail-header-tag">
-                  <span style={{ fontSize: '1.15rem', marginRight: '0.35rem' }}>🐂</span>
-                  <span className="entity-ear-tag">#{entity.tagNumber}</span>
-                </div>
+              <div className="detail-header-tag" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <span className="entity-ear-tag">{entity.tagNumber}</span>
 
-                {/* 2줄: 애칭 & 상태 한 행 나란히 배치 */}
-                <div className="detail-header-name-row">
-                  <h2 className="detail-header-name">{entity.name}</h2>
-                  <span className={`badge ${statusObj.colorClass}`}>
-                    {statusObj.icon} {statusObj.label}
-                  </span>
+                {/* 상태 배너 (이표 크기와 동등화 & 이모지 제거하여 순수 텍스트로 배치) */}
+                <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }} ref={statusMenuRef}>
+                  <button
+                    type="button"
+                    className={`badge ${statusObj.colorClass} status-banner-btn`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsStatusMenuOpen(prev => !prev);
+                    }}
+                    title="클릭하여 개체 상태 즉시 변경"
+                  >
+                    <span>{statusObj.label}</span>
+                    <span style={{ fontSize: '0.75rem', opacity: 0.8, marginLeft: '0.15rem' }}>▾</span>
+                  </button>
+
+                  {/* 상태 선택 팝오버 메뉴 */}
+                  {isStatusMenuOpen && (
+                    <div className="status-picker-dropdown">
+                      <div className="status-picker-header">상태 변경 선택</div>
+                      <div className="status-picker-list">
+                        {getAvailableStatuses(entity.breed, entity.gender).map(st => {
+                          const isCurrent = st.id === entity.status;
+                          return (
+                            <button
+                              key={st.id}
+                              type="button"
+                              className={`status-picker-item ${isCurrent ? 'active' : ''}`}
+                              onClick={() => handleStatusSelect(st.id)}
+                            >
+                              <span style={{ fontSize: '1.05rem', lineHeight: 1 }}>{st.icon}</span>
+                              <span style={{ fontWeight: isCurrent ? 800 : 600, flex: 1, textAlign: 'left' }}>
+                                {st.label}
+                              </span>
+                              {isCurrent && (
+                                <span style={{ fontSize: '0.75rem', color: 'var(--color-primary)', fontWeight: 800 }}>선택됨</span>
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
-              {/* 우측 상단 액션 버튼 그룹 (수정, 출력, 닫기 - 간섭 방지 안전거리 확보) */}
+              {/* 우측 상단 액션 버튼 그룹: 출력 및 정보 수정 버튼 */}
               <div className="entity-detail-header-actions">
                 <button 
                   className="btn btn-outline btn-sm detail-print-btn"
                   onClick={() => onOpenPrintSheet(entity)}
                   title="이 개체의 전체 관리 이력 A4 인쇄"
                 >
-                  <Printer size={14} />
+                  <Printer size={15} />
                   <span>출력</span>
                 </button>
                 <button 
-                  className="btn btn-outline btn-sm detail-edit-btn"
+                  className="btn btn-primary btn-sm detail-edit-btn"
                   onClick={() => onOpenEntityModal(entity)}
                   title="개체 기본 정보 수정"
                 >
-                  <Edit3 size={14} />
-                  <span>수정</span>
-                </button>
-                <button className="modal-close-btn" onClick={onClose} title="닫기">
-                  <X size={20} />
+                  <Edit3 size={15} />
+                  <span>정보 수정</span>
                 </button>
               </div>
             </div>
 
-            {/* 3줄: 설명 (하단 100% 전폭 독립 배치 & 폰트 크기 확대) */}
-            <div className="detail-header-desc">
-              {entity.breed?.startsWith('한우') ? entity.breed : `한우 • ${entity.breed}`} • {genderObj.symbol} {genderObj.label} • {age.text}
+            {/* 2행: 애칭(이름) & 사육단계 - 성별 • 월령(일수) (가로 100% 전체 폭 시원하게 활용) */}
+            <div className="detail-header-name-row" style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap', width: '100%' }}>
+              <h2 className="detail-header-name" style={{ margin: 0 }}>{entity.name}</h2>
+              <span className="detail-header-subtext">
+                {formatDisplayBreed(entity.breed)} • {age.text}
+              </span>
             </div>
           </div>
         )}
@@ -142,12 +228,18 @@ export default function EntityDetailModal({
                 <div className="modal-spec-card">
                   <span className="modal-spec-label">축사 및 구역</span>
                   <span className="modal-spec-value" title={entity.barn || '미지정'}>
-                    {entity.barn || '미지정'}
+                    {entity.status === 'shipped' 
+                      ? `${entity.barn || '미지정'} (출하 완료)` 
+                      : entity.status === 'deceased'
+                      ? `${entity.barn || '미지정'} (폐사/도태)`
+                      : (entity.barn || '미지정')}
                   </span>
                 </div>
 
                 <div className="modal-spec-card">
-                  <span className="modal-spec-label">{entity.status === 'shipped' ? '출하 체중' : '현재 체중'}</span>
+                  <span className="modal-spec-label">
+                    {entity.status === 'shipped' ? '출하 체중' : entity.status === 'deceased' ? '최종 체중' : '현재 체중'}
+                  </span>
                   <span className="modal-spec-value">
                     {entity.weight ? (
                       <>
@@ -174,40 +266,156 @@ export default function EntityDetailModal({
                 </div>
               </div>
 
-              {/* 특이사항 메모 (있는 경우 표시) */}
-              {entity.memo && (
-                <div className="modal-spec-memo-card">
-                  {entity.memo}
-                </div>
-              )}
-
-              {/* 2. 생애 관리 내역 전체보기 액션 버튼 카드 */}
-              <div className="detail-history-action-box">
-                <button 
-                  type="button"
-                  className="detail-view-all-history-btn"
-                  onClick={() => setViewMode('fullHistory')}
-                  title="클릭 시 전체 생애 관리 내역과 분류 필터를 상세 조회합니다"
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem' }}>
-                    <ClipboardList size={18} style={{ color: 'var(--color-primary)' }} />
-                    <span style={{ fontWeight: 800, fontSize: '0.95rem' }}>생애 관리 내역 전체보기</span>
-                    <span className="badge" style={{ background: 'var(--color-primary-light)', color: 'var(--color-primary)', fontWeight: 800, fontSize: '0.78rem' }}>
-                      총 {allEntityLogs.length}건
-                    </span>
+              {/* 특이사항 / 사양 관리 메모 (모달 내 원클릭 인라인 직접 수정 지원) */}
+              <div className="modal-spec-memo-card" style={{ position: 'relative' }}>
+                {!isEditingMemo ? (
+                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '0.75rem' }}>
+                    <div 
+                      style={{ flex: 1, cursor: 'pointer' }}
+                      onClick={() => {
+                        setMemoDraft(entity.memo || '');
+                        setIsEditingMemo(true);
+                      }}
+                      title="클릭하여 특이사항 메모를 바로 수정합니다"
+                    >
+                      <div style={{ 
+                        fontSize: '0.8rem', 
+                        color: 'var(--color-primary)', 
+                        fontWeight: 700, 
+                        marginBottom: '0.35rem', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: '0.35rem' 
+                      }}>
+                        <span>📝 특이사항 / 사양 관리 메모</span>
+                      </div>
+                      <div style={{ 
+                        color: entity.memo ? 'var(--text-main)' : 'var(--text-muted)', 
+                        fontStyle: entity.memo ? 'normal' : 'italic',
+                        whiteSpace: 'pre-wrap',
+                        lineHeight: 1.55
+                      }}>
+                        {entity.memo || '등록된 특이사항 메모가 없습니다. (여기를 터치하여 메모 입력)'}
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      className="btn btn-outline btn-sm"
+                      style={{ 
+                        padding: '0.3rem 0.6rem', 
+                        fontSize: '0.78rem', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: '0.3rem', 
+                        flexShrink: 0,
+                        fontWeight: 600
+                      }}
+                      onClick={() => {
+                        setMemoDraft(entity.memo || '');
+                        setIsEditingMemo(true);
+                      }}
+                      title="특이사항 메모 수정"
+                    >
+                      <Edit3 size={13} />
+                      <span>메모 수정</span>
+                    </button>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', color: 'var(--text-muted)' }}>
-                    <span style={{ fontSize: '0.8rem', marginRight: '0.25rem', fontWeight: 600 }}>전체보기</span>
-                    <ChevronRight size={18} />
+                ) : (
+                  <div>
+                    <div style={{ 
+                      fontSize: '0.8rem', 
+                      color: 'var(--color-primary)', 
+                      fontWeight: 700, 
+                      marginBottom: '0.45rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.35rem'
+                    }}>
+                      <span>📝 특이사항 / 사양 관리 메모 직접 수정</span>
+                    </div>
+                    <textarea
+                      className="form-textarea"
+                      value={memoDraft}
+                      onChange={(e) => setMemoDraft(e.target.value)}
+                      placeholder="성격, 과거 병력, 백신 반응, 사료 기호도 등 특이사항을 기록하세요."
+                      style={{ 
+                        minHeight: '85px', 
+                        width: '100%', 
+                        fontSize: '0.88rem', 
+                        padding: '0.65rem 0.75rem', 
+                        marginBottom: '0.6rem',
+                        lineHeight: 1.5,
+                        borderRadius: 'var(--radius-sm)'
+                      }}
+                      autoFocus
+                    />
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.45rem' }}>
+                      <button
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                        onClick={() => {
+                          setMemoDraft(entity.memo || '');
+                          setIsEditingMemo(false);
+                        }}
+                      >
+                        취소
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-primary btn-sm"
+                        onClick={() => {
+                          if (onUpdateEntityMemo) {
+                            onUpdateEntityMemo(entity.id, memoDraft);
+                          }
+                          setIsEditingMemo(false);
+                        }}
+                        style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontWeight: 700 }}
+                      >
+                        <Save size={13} />
+                        <span>메모 저장</span>
+                      </button>
+                    </div>
                   </div>
-                </button>
+                )}
               </div>
 
-              {/* 3. 최근 처리 내역 (최대 10개) 요약 리스트 */}
+              {/* 2. 생애 관리 내역 (최근 10개 요약 리스트 & 전체보기 통합) */}
               <div className="recent-logs-section">
                 <div className="recent-logs-header">
-                  <span className="recent-logs-title">최근 처리 내역</span>
-                  <span className="recent-logs-count">최근 {recent10Logs.length}건 / 전체 {allEntityLogs.length}건</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                    <ClipboardList size={17} style={{ color: 'var(--color-primary)' }} />
+                    <span className="recent-logs-title" style={{ fontSize: '0.95rem' }}>생애 관리 내역</span>
+                  </div>
+
+                  {allEntityLogs.length > 0 ? (
+                    <button
+                      type="button"
+                      onClick={() => setViewMode('fullHistory')}
+                      title="클릭 시 전체 생애 관리 내역 타임라인으로 이동"
+                      style={{
+                        background: 'transparent',
+                        border: 'none',
+                        cursor: 'pointer',
+                        padding: '0.2rem 0.3rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.2rem',
+                        color: 'var(--color-primary)',
+                        fontWeight: 700,
+                        fontSize: '0.8rem',
+                        borderRadius: 'var(--radius-sm)'
+                      }}
+                    >
+                      <span>
+                        {allEntityLogs.length <= 10 
+                          ? `총 ${allEntityLogs.length}건` 
+                          : `최근 ${recent10Logs.length}건 / 전체 ${allEntityLogs.length}건`}
+                      </span>
+                      <ChevronRight size={15} style={{ opacity: 0.8 }} />
+                    </button>
+                  ) : (
+                    <span className="recent-logs-count">0건</span>
+                  )}
                 </div>
 
                 {recent10Logs.length === 0 ? (
@@ -217,7 +425,7 @@ export default function EntityDetailModal({
                 ) : (
                   <div className="recent-logs-list">
                     {recent10Logs.map((log) => {
-                      const catObj = CARE_CATEGORIES.find(c => c.id === log.category) || CARE_CATEGORIES[0];
+                      const catObj = getCategoryById(log.category, careCategories);
                       return (
                         <div 
                           key={log.id} 
@@ -226,7 +434,9 @@ export default function EntityDetailModal({
                           title="클릭 시 생애 관리 내역 전체보기로 이동"
                         >
                           <div className="recent-log-date">{log.date}</div>
-                          <div className="recent-log-cat-badge">{catObj.icon}</div>
+                          <span className={`badge ${catObj.badgeClass}`} style={{ fontSize: '0.74rem', padding: '0.18rem 0.5rem', flexShrink: 0, fontWeight: 700 }}>
+                            {catObj.label}
+                          </span>
                           <div className="recent-log-title" title={log.title}>{log.title}</div>
                         </div>
                       );
@@ -236,31 +446,8 @@ export default function EntityDetailModal({
               </div>
             </>
           ) : (
-            /* [생애 관리 내역 전면 뷰]: 카테고리 필터 + 타임라인 전체 */
+            /* [생애 관리 내역 전면 뷰]: 타임라인 전체 (카테고리 필터는 상단 탑바에 고정 탑재) */
             <>
-              {/* 카테고리 필터 탭 */}
-              <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '1.25rem' }}>
-                <button
-                  className={`btn btn-sm ${selectedCategory === 'all' ? 'btn-primary' : 'btn-outline'}`}
-                  onClick={() => setSelectedCategory('all')}
-                >
-                  전체 내역 ({allEntityLogs.length})
-                </button>
-                {CARE_CATEGORIES.map(cat => {
-                  const count = allEntityLogs.filter(l => l.category === cat.id).length;
-                  if (count === 0 && selectedCategory !== cat.id) return null;
-                  return (
-                    <button
-                      key={cat.id}
-                      className={`btn btn-sm ${selectedCategory === cat.id ? 'btn-primary' : 'btn-outline'}`}
-                      onClick={() => setSelectedCategory(cat.id)}
-                    >
-                      {cat.icon} {cat.label} ({count})
-                    </button>
-                  );
-                })}
-              </div>
-
               {/* 타임라인 리스트 */}
               {filteredLogs.length === 0 ? (
                 <div style={{ 
@@ -279,13 +466,13 @@ export default function EntityDetailModal({
               ) : (
                 <div className="timeline">
                   {filteredLogs.map(log => {
-                    const catObj = CARE_CATEGORIES.find(c => c.id === log.category) || CARE_CATEGORIES[0];
+                    const catObj = getCategoryById(log.category, careCategories);
 
                     return (
                       <div key={log.id} className="timeline-item">
                         {/* 타임라인 원형 뱃지 */}
                         <div className="timeline-dot">
-                          <span style={{ fontSize: '0.75rem' }}>{catObj.icon}</span>
+                          <span style={{ fontSize: '0.75rem' }}>{catObj.icon || '•'}</span>
                         </div>
 
                         <div className="timeline-header">
@@ -296,7 +483,7 @@ export default function EntityDetailModal({
                             </span>
                           </div>
                           <div style={{ fontSize: '0.825rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-                            📅 {log.date} {log.time && `• ${log.time}`}
+                            {log.date} {log.time && `• ${log.time}`}
                           </div>
                         </div>
 
@@ -364,14 +551,14 @@ export default function EntityDetailModal({
           {viewMode === 'fullHistory' ? (
             <button className="btn btn-secondary" onClick={() => setViewMode('summary')}>
               <ChevronLeft size={16} />
-              <span>기본 정보로 돌아가기</span>
+              <span>돌아가기</span>
             </button>
           ) : (
             <button className="btn btn-secondary" onClick={onClose}>
               닫기
             </button>
           )}
-          {entity.status === 'shipped' ? (
+          {(entity.status === 'shipped' || entity.status === 'deceased') ? (
             <button className="btn btn-outline" onClick={() => onOpenCareLogModal(entity)}>
               <Plus size={16} />
               <span>과거 관리 기록 추가</span>
@@ -379,7 +566,7 @@ export default function EntityDetailModal({
           ) : (
             <button className="btn btn-primary" onClick={() => onOpenCareLogModal(entity)}>
               <Plus size={16} />
-              <span>이 개체에 관리 기록 추가</span>
+              <span>관리 기록 추가</span>
             </button>
           )}
         </div>

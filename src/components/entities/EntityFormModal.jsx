@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { X, Sparkles, AlertCircle, Save } from 'lucide-react';
+import { X, AlertCircle, Save } from 'lucide-react';
 import { 
   ENTITY_STATUSES, 
   GENDER_OPTIONS, 
   HANWOO_BREEDS,
   calculateAge, 
-  getTodayDateString 
+  getTodayDateString,
+  formatDisplayBreed,
+  formatTagNumber,
+  getAvailableStatuses,
+  isStatusAllowed
 } from '../../lib/types.js';
 
 export default function EntityFormModal({
@@ -20,10 +24,10 @@ export default function EntityFormModal({
     tagNumber: '',
     name: '',
     category: 'hanwoo',
-    breed: '한우(번식우)',
+    breed: '번식우 - 암',
     gender: 'female',
     birthDate: getTodayDateString(),
-    barn: '제1축사 1번방',
+    barn: '',
     motherTag: '',
     fatherTag: '',
     weight: '',
@@ -39,7 +43,7 @@ export default function EntityFormModal({
         tagNumber: entityToEdit.tagNumber || '',
         name: entityToEdit.name || '',
         category: entityToEdit.category || 'hanwoo',
-        breed: entityToEdit.breed || '한우(번식우)',
+        breed: formatDisplayBreed(entityToEdit.breed),
         gender: entityToEdit.gender || 'female',
         birthDate: entityToEdit.birthDate || getTodayDateString(),
         barn: entityToEdit.barn || '',
@@ -52,28 +56,94 @@ export default function EntityFormModal({
     }
   }, [entityToEdit]);
 
-  // 한우 사육 단계 선택 시 성별 자동 매핑 및 설정
-  const handleBreedSelect = (breedLabel) => {
+  // 문자열에서 사육 단계(번식우, 비육우, 송아지, 육성우, 씨수소) 추출
+  const extractStage = (breedStr) => {
+    const s = (breedStr || '').toLowerCase();
+    if (s.includes('번식') || s.includes('암소')) return '번식우';
+    if (s.includes('비육') || s.includes('거세')) return '비육우';
+    if (s.includes('씨수소') || s.includes('종모우')) return '씨수소';
+    if (s.includes('송아지')) return '송아지';
+    if (s.includes('육성')) return '육성우';
+    return '번식우';
+  };
+
+  // 사육 단계별 성별 확정/가변 판별
+  const getGenderLockInfo = (breedString) => {
+    const b = (breedString || '').toLowerCase();
+    if (b.includes('번식') || b.includes('암소')) {
+      return { isFixed: true, fixedGender: 'female', message: '번식우는 암컷으로 성별이 자동 확정됩니다.' };
+    }
+    if (b.includes('비육') || b.includes('거세')) {
+      return { isFixed: true, fixedGender: 'castrated', message: '비육우는 거세로 성별이 자동 확정됩니다.' };
+    }
+    if (b.includes('씨수소') || b.includes('종모우')) {
+      return { isFixed: true, fixedGender: 'male', message: '씨수소(종모우)는 수컷으로 성별이 자동 확정됩니다.' };
+    }
+    if (b.includes('송아지')) {
+      return { isFixed: false, fixedGender: null, message: '송아지의 성별(암컷 / 수컷)을 선택하세요.' };
+    }
+    if (b.includes('육성')) {
+      return { isFixed: false, fixedGender: null, message: '육성우의 성별을 선택하세요.' };
+    }
+    return { isFixed: false, fixedGender: null, message: null };
+  };
+
+  const genderLockInfo = getGenderLockInfo(formData.breed);
+
+  // 사육 단계 버튼 클릭 시 '사육단계 - 성별' 표준 포맷으로 자동 완성 및 상태 안전 검증
+  const handleBreedSelect = (item) => {
+    const stage = item.shortLabel || item.label;
     let gender = formData.gender;
-    if (breedLabel.includes('암소') || breedLabel.includes('번식우')) gender = 'female';
-    else if (breedLabel.includes('거세')) gender = 'castrated';
-    else if (breedLabel.includes('씨수소') || breedLabel.includes('종모우')) gender = 'male';
+    if (item.isGenderFixed) {
+      gender = item.defaultGender;
+    } else {
+      if (gender === 'castrated') {
+        gender = 'female';
+      }
+    }
+    const genderLabel = gender === 'female' ? '암' : gender === 'male' ? '수' : '거세';
+    const newBreed = `${stage} - ${genderLabel}`;
+    // 송아지이거나 수컷/거세우인 경우 번식 상태 불가능 -> '건강/양호'로 자동 안전 전환
+    const safeStatus = isStatusAllowed(formData.status, newBreed, gender) ? formData.status : 'healthy';
 
     setFormData(prev => ({
       ...prev,
       category: 'hanwoo',
-      breed: breedLabel,
-      gender: gender
+      breed: newBreed,
+      gender: gender,
+      status: safeStatus
     }));
   };
 
-  // 개체번호 자동 채번 (이표번호 12자리 형식: 002-XXXX-XXXX)
-  const handleAutoGenerateTag = () => {
-    const prefix = '002';
-    const mid = String(Math.floor(1000 + Math.random() * 9000));
-    const suffix = String(Math.floor(1000 + Math.random() * 9000));
-    const newTag = `${prefix}-${mid}-${suffix}`;
-    setFormData(prev => ({ ...prev, tagNumber: newTag }));
+  // 성별 버튼 클릭 시 '사육단계 - 성별' 실시간 동적 연동 및 상태 안전 검증
+  const handleGenderSelect = (genderId) => {
+    if (genderLockInfo.isFixed) return;
+    const stage = extractStage(formData.breed);
+    const genderLabel = genderId === 'female' ? '암' : genderId === 'male' ? '수' : '거세';
+    const newBreed = `${stage} - ${genderLabel}`;
+    const safeStatus = isStatusAllowed(formData.status, newBreed, genderId) ? formData.status : 'healthy';
+
+    setFormData(prev => ({
+      ...prev,
+      gender: genderId,
+      breed: newBreed,
+      status: safeStatus
+    }));
+  };
+
+  const handleBreedInputChange = (value) => {
+    const lockInfo = getGenderLockInfo(value);
+    let newGender = formData.gender;
+    if (lockInfo.isFixed) {
+      newGender = lockInfo.fixedGender;
+    }
+    const safeStatus = isStatusAllowed(formData.status, value, newGender) ? formData.status : 'healthy';
+    setFormData(prev => ({
+      ...prev,
+      breed: value,
+      gender: newGender,
+      status: safeStatus
+    }));
   };
 
   const agePreview = calculateAge(formData.birthDate);
@@ -138,8 +208,7 @@ export default function EntityFormModal({
         {/* 모달 헤더 */}
         <div className="modal-header">
           <div className="modal-header-title">
-            <span style={{ fontSize: '1.4rem' }}>{isEditing ? '✏️' : '🐂'}</span>
-            <span>{isEditing ? '개체 정보 수정' : '신규 개체 등록 (개체등록카드)'}</span>
+            <span style={{ fontWeight: 800, fontSize: '1.25rem' }}>{isEditing ? '개체 정보 수정' : '신규 개체 등록'}</span>
           </div>
           <button type="button" className="modal-close-btn" onClick={onClose}>
             <X size={20} />
@@ -172,28 +241,16 @@ export default function EntityFormModal({
                 <label className="form-label">
                   개체식별번호 (이표번호) <span className="required">*</span>
                 </label>
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  <input
-                    type="text"
-                    className="form-input"
-                    placeholder="예: 002-1402-9851"
-                    value={formData.tagNumber}
-                    onChange={(e) => setFormData({ ...formData, tagNumber: e.target.value })}
-                    required
-                  />
-                  {!isEditing && (
-                    <button
-                      type="button"
-                      className="btn btn-secondary btn-sm"
-                      onClick={handleAutoGenerateTag}
-                      title="랜덤 이표번호 자동 생성"
-                    >
-                      <Sparkles size={14} />
-                      <span>자동 채번</span>
-                    </button>
-                  )}
-                </div>
-                <span className="form-hint">축산물이력제 12자리 또는 농장 관리번호</span>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  className="form-input"
+                  placeholder="예: 002-1234-5678-9 (숫자 12자리만 입력)"
+                  value={formData.tagNumber}
+                  onChange={(e) => setFormData({ ...formData, tagNumber: formatTagNumber(e.target.value) })}
+                  maxLength={15}
+                  required
+                />
               </div>
 
               {/* 개체 이름/애칭 */}
@@ -211,50 +268,120 @@ export default function EntityFormModal({
                 />
               </div>
 
-              {/* 한우 사육 단계 및 구분 (타 축종 숨김 및 한우 전용) */}
+              {/* 사육 단계 선택 (박스 제거, 다른 필드와 100% 동일한 톤의 표준 form-group) */}
               <div className="form-group full-width">
                 <label className="form-label">
-                  한우 사육 단계 및 구분 <span className="required">*</span>
+                  사육 단계 <span className="required">*</span>
                 </label>
-                <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
-                  {HANWOO_BREEDS.map(item => (
-                    <button
-                      key={item.id}
-                      type="button"
-                      className={`btn btn-sm ${formData.breed === item.label ? 'btn-primary' : 'btn-outline'}`}
-                      onClick={() => handleBreedSelect(item.label)}
-                    >
-                      {item.shortLabel}
-                    </button>
-                  ))}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '0.45rem' }}>
+                  {HANWOO_BREEDS.map(item => {
+                    const isSelected = extractStage(formData.breed) === item.shortLabel;
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        className={`btn btn-sm ${isSelected ? 'btn-primary' : 'btn-outline'}`}
+                        onClick={() => handleBreedSelect(item)}
+                        style={{
+                          fontWeight: isSelected ? 800 : 600,
+                          padding: '0.5rem 0.2rem',
+                          fontSize: '0.875rem',
+                          textAlign: 'center',
+                          whiteSpace: 'nowrap'
+                        }}
+                      >
+                        {item.shortLabel}
+                      </button>
+                    );
+                  })}
                 </div>
+              </div>
+
+              {/* 성별 선택 (박스 제거, 사육 단계 바로 밑에 표준 톤으로 배치) */}
+              <div className="form-group full-width">
+                <label className="form-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span>성별 <span className="required">*</span></span>
+                  {genderLockInfo.isFixed && (
+                    <span style={{ fontSize: '0.8rem', color: 'var(--color-primary)', fontWeight: 700 }}>
+                      🔒 성별 자동 확정
+                    </span>
+                  )}
+                </label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.45rem' }}>
+                  {GENDER_OPTIONS.map(g => {
+                    const isSelected = formData.gender === g.id;
+                    const isDisabled = genderLockInfo.isFixed && !isSelected;
+
+                    return (
+                      <button
+                        key={g.id}
+                        type="button"
+                        className={`btn btn-sm ${isSelected ? 'active-gender-btn' : 'btn-outline'}`}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '0.35rem',
+                          padding: '0.5rem 0.3rem',
+                          fontWeight: 700,
+                          fontSize: '0.875rem',
+                          ...(isSelected ? {
+                            background: g.id === 'female' 
+                              ? 'linear-gradient(135deg, #ec4899 0%, #db2777 100%)' 
+                              : g.id === 'male' 
+                              ? 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)' 
+                              : 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+                            color: '#ffffff',
+                            borderColor: 'transparent',
+                            boxShadow: '0 2px 6px rgba(0,0,0,0.18)'
+                          } : isDisabled ? {
+                            opacity: 0.35,
+                            cursor: 'not-allowed',
+                            background: 'var(--bg-card-subtle)',
+                            color: 'var(--text-muted)'
+                          } : {
+                            color: g.color,
+                            borderColor: 'var(--border-color)'
+                          })
+                        }}
+                        disabled={genderLockInfo.isFixed}
+                        onClick={() => handleGenderSelect(g.id)}
+                        title={genderLockInfo.isFixed ? genderLockInfo.message : `${g.label} 선택`}
+                      >
+                        <span style={{ fontSize: '1rem', lineHeight: 1 }}>{g.symbol}</span>
+                        <span>{g.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+                {genderLockInfo.message && (
+                  <span className="form-hint" style={{ 
+                    marginTop: '0.2rem', 
+                    color: genderLockInfo.isFixed ? 'var(--text-muted)' : 'var(--color-primary)',
+                    fontWeight: genderLockInfo.isFixed ? 500 : 700,
+                    display: 'block'
+                  }}>
+                    {genderLockInfo.isFixed ? `ℹ️ ${genderLockInfo.message}` : `👉 ${genderLockInfo.message}`}
+                  </span>
+                )}
+              </div>
+
+              {/* 사육구분 명칭 (직접 수정 가능) */}
+              <div className="form-group full-width">
+                <label className="form-label">
+                  사육구분 명칭 (직접 수정 가능) <span className="required">*</span>
+                </label>
                 <input
                   type="text"
                   className="form-input"
-                  placeholder="예: 한우(번식우 - 암소), 직접 수정 가능"
+                  placeholder="예: 번식우 - 암, 비육우 - 거세"
                   value={formData.breed}
-                  onChange={(e) => setFormData({ ...formData, breed: e.target.value })}
+                  onChange={(e) => handleBreedInputChange(e.target.value)}
                   required
                 />
               </div>
 
-              {/* 성별 */}
-              <div className="form-group">
-                <label className="form-label">성별</label>
-                <select
-                  className="form-select"
-                  value={formData.gender}
-                  onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
-                >
-                  {GENDER_OPTIONS.map(g => (
-                    <option key={g.id} value={g.id}>
-                      {g.symbol} {g.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* 현재 상태 */}
+              {/* 현재 상태 (사육단계 및 성별에 따라 번식 상태 자동 필터링) */}
               <div className="form-group">
                 <label className="form-label">현재 상태</label>
                 <select
@@ -262,7 +389,7 @@ export default function EntityFormModal({
                   value={formData.status}
                   onChange={(e) => setFormData({ ...formData, status: e.target.value })}
                 >
-                  {ENTITY_STATUSES.map(st => (
+                  {getAvailableStatuses(formData.breed, formData.gender).map(st => (
                     <option key={st.id} value={st.id}>
                       {st.icon} {st.label}
                     </option>
@@ -286,18 +413,6 @@ export default function EntityFormModal({
                 </span>
               </div>
 
-              {/* 축사 및 방 위치 */}
-              <div className="form-group">
-                <label className="form-label">축사 위치 및 방 번호</label>
-                <input
-                  type="text"
-                  className="form-input"
-                  placeholder="예: 제1축사 2번방, 분만사 A-1"
-                  value={formData.barn}
-                  onChange={(e) => setFormData({ ...formData, barn: e.target.value })}
-                />
-              </div>
-
               {/* 현재 체중 (kg) */}
               <div className="form-group">
                 <label className="form-label">현재 체중 (kg)</label>
@@ -311,15 +426,29 @@ export default function EntityFormModal({
                 />
               </div>
 
-              {/* 모체 번호 */}
+              {/* 축사 및 방 위치 (기본값 없이 직접 입력, 예시 플레이스홀더 제공) */}
+              <div className="form-group">
+                <label className="form-label">축사 위치 및 방 번호</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  placeholder="예: 제1축사 1번방, 분만사 2호실 (직접 입력)"
+                  value={formData.barn}
+                  onChange={(e) => setFormData({ ...formData, barn: e.target.value })}
+                />
+              </div>
+
+              {/* 모체 번호 (자동 하이픈 포맷팅 적용) */}
               <div className="form-group">
                 <label className="form-label">모체 개체번호 (선택)</label>
                 <input
                   type="text"
+                  inputMode="numeric"
                   className="form-input"
-                  placeholder="예: 002-1100-3411"
+                  placeholder="예: 002-1100-3411-2 (숫자 12자리 입력)"
                   value={formData.motherTag}
-                  onChange={(e) => setFormData({ ...formData, motherTag: e.target.value })}
+                  onChange={(e) => setFormData({ ...formData, motherTag: formatTagNumber(e.target.value) })}
+                  maxLength={15}
                 />
               </div>
 

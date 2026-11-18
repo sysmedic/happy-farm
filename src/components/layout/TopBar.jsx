@@ -4,8 +4,6 @@ import {
   Calendar, 
   FileText, 
   Cloud, 
-  Sun, 
-  Moon,
   Plus
 } from 'lucide-react';
 
@@ -18,17 +16,17 @@ export default function TopBar({
 }) {
   return (
     <header className="topbar">
-      {/* Brand Logo & Name */}
-      <div className="brand-section" onClick={() => onSelectTab('entities')}>
-        <div className="brand-logo-icon">
-          <Sprout size={24} />
-        </div>
-        <div>
-          <div className="brand-title">
-            행복 농장 <span style={{ fontSize: '0.8rem', opacity: 0.8, fontWeight: 500 }}>관리 프로그램</span>
-          </div>
-          <div className="brand-subtitle">Smart Happy Farm Management</div>
-        </div>
+      {/* Brand Logo (농장 아이콘 터치 시 나이트/라이트 모드 전환) */}
+      <div className="brand-section">
+        <button
+          type="button"
+          className="brand-logo-icon brand-theme-toggle-btn"
+          onClick={onToggleTheme}
+          title={theme === 'dark' ? '라이트 모드로 전환 ☀️' : '다크(나이트) 모드로 전환 🌙'}
+          aria-label={theme === 'dark' ? '라이트 모드로 전환' : '다크 모드로 전환'}
+        >
+          <Sprout size={22} />
+        </button>
       </div>
 
       {/* Main Navigation Tabs (모바일에서는 이모지만 표시 & 일일보고 숨김) */}
@@ -77,7 +75,7 @@ export default function TopBar({
 
       {/* Quick Action Buttons */}
       <div className="topbar-actions">
-        {/* 현장 관리 기록 빠른 추가 (+) 버튼 */}
+        {/* 현장 관리 기록 빠른 추가 (+) 버튼 (데스크톱 전용) */}
         <button
           type="button"
           className="btn-quick-log"
@@ -87,16 +85,6 @@ export default function TopBar({
         >
           <Plus size={16} strokeWidth={2.5} />
           <span className="quick-log-text">기록 추가</span>
-        </button>
-
-        {/* 테마 전환 버튼 */}
-        <button
-          className="btn btn-outline btn-icon-only"
-          onClick={onToggleTheme}
-          title={theme === 'dark' ? '라이트 모드로 전환' : '다크 모드로 전환'}
-          aria-label={theme === 'dark' ? '라이트 모드로 전환' : '다크 모드로 전환'}
-        >
-          {theme === 'dark' ? <Sun size={17} color="#f59e0b" /> : <Moon size={17} />}
         </button>
       </div>
     </header>

@@ -12,7 +12,8 @@ import {
 } from 'lucide-react';
 import { 
   CARE_CATEGORIES, 
-  getTodayDateString 
+  getTodayDateString,
+  getCategoryById
 } from '../../lib/types.js';
 import { shareFarmReport } from '../../lib/googleDriveService.js';
 
@@ -20,6 +21,7 @@ export default function DailyReportView({
   targetDate,
   entities,
   careLogs,
+  careCategories,
   onOpenEntityDetail,
   onOpenCareLogModal,
   onNavigateToCloud
@@ -27,6 +29,7 @@ export default function DailyReportView({
   const [reportDate, setReportDate] = useState(targetDate || getTodayDateString());
   const [farmNotes, setFarmNotes] = useState('특이 동태 및 전반적인 사육 상태 양호. 온습도 정상 유지.');
   const [shareFeedback, setShareFeedback] = useState('');
+  const categoriesToUse = careCategories || CARE_CATEGORIES;
 
   // 해당 일자 작업 로그 필터링
   const dailyLogs = useMemo(() => {
@@ -38,14 +41,14 @@ export default function DailyReportView({
   // 카테고리별 집계
   const categoryStats = useMemo(() => {
     const counts = {};
-    CARE_CATEGORIES.forEach(c => { counts[c.id] = 0; });
+    categoriesToUse.forEach(c => { counts[c.id] = 0; });
     dailyLogs.forEach(l => {
       if (counts[l.category] !== undefined) {
         counts[l.category]++;
       }
     });
     return counts;
-  }, [dailyLogs]);
+  }, [dailyLogs, categoriesToUse]);
 
   // 총 비용
   const totalCost = useMemo(() => {
@@ -232,7 +235,7 @@ export default function DailyReportView({
                 </thead>
                 <tbody>
                   {dailyLogs.map(log => {
-                    const catObj = CARE_CATEGORIES.find(c => c.id === log.category) || CARE_CATEGORIES[0];
+                    const catObj = getCategoryById(log.category, careCategories);
                     const ent = getEntityInfo(log.entityId, log.tagNumber);
 
                     return (
@@ -246,7 +249,7 @@ export default function DailyReportView({
                             title="클릭 시 이 개체의 관리 내역으로 이동"
                             style={{ cursor: 'pointer' }}
                           >
-                            #{log.tagNumber}
+                            {log.tagNumber}
                           </span>
                         </td>
                         <td style={{ fontWeight: 700 }}>{log.entityName}</td>
