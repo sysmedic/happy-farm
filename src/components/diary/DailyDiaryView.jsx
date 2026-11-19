@@ -309,27 +309,7 @@ export default function DailyDiaryView({
           {/* 탭 1: 일정 화면 */}
           {activeDiaryTab === 'schedules' && (
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-                <h4 style={{
-                  fontSize: '0.95rem',
-                  color: 'var(--color-accent)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.4rem',
-                  margin: 0,
-                  fontWeight: 700
-                }}>
-                  <Clock size={16} />
-                  <span>
-                    일정 {totalScheduleCount > 0 ? (
-                      pendingScheduleCount === 0
-                        ? '(모두 완료됨! 🎉)'
-                        : pendingScheduleCount < totalScheduleCount
-                          ? `(${pendingScheduleCount}건 남음 / 총 ${totalScheduleCount}건)`
-                          : `(총 ${totalScheduleCount}건)`
-                    ) : '(0건)'}
-                  </span>
-                </h4>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '0.75rem' }}>
                 <button
                   className="btn btn-outline btn-sm"
                   onClick={() => onOpenScheduleModal(selectedDate)}
