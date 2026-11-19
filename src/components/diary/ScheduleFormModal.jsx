@@ -67,10 +67,6 @@ export default function ScheduleFormModal({
     return entities.filter(e => e.status !== 'shipped' && e.status !== 'deceased');
   }, [entities]);
 
-  const currentSelectedEntity = useMemo(() => {
-    return entities.find(e => e.id === selectedEntityId) || null;
-  }, [entities, selectedEntityId]);
-
   useEffect(() => {
     if (scheduleToEdit) {
       setDate(scheduleToEdit.date);
@@ -255,21 +251,6 @@ export default function ScheduleFormModal({
                       </option>
                     ))}
                   </select>
-
-                  {currentSelectedEntity && (
-                    <div style={{
-                      marginTop: '0.45rem',
-                      fontSize: '0.8rem',
-                      color: 'var(--color-primary)',
-                      fontWeight: 600,
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.5rem'
-                    }}>
-                      <span>선택된 개체: {currentSelectedEntity.tagNumber}{currentSelectedEntity.name ? ` (${currentSelectedEntity.name})` : ''}</span>
-                      <span>• 축사: {currentSelectedEntity.barn || '미지정'}</span>
-                    </div>
-                  )}
                 </div>
               )}
             </div>

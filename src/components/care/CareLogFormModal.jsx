@@ -348,11 +348,11 @@ export default function CareLogFormModal({
                   )}
                 </select>
 
-                {currentSelectedEntity && (
+                {currentSelectedEntity && (currentSelectedEntity.status === 'shipped' || currentSelectedEntity.status === 'deceased') && (
                   <div style={{ 
                     marginTop: '0.5rem', 
                     fontSize: '0.825rem', 
-                    color: (currentSelectedEntity.status === 'shipped' || currentSelectedEntity.status === 'deceased') ? 'var(--color-accent)' : 'var(--color-primary)', 
+                    color: 'var(--color-accent)', 
                     fontWeight: 600,
                     display: 'flex',
                     alignItems: 'center',
@@ -360,13 +360,8 @@ export default function CareLogFormModal({
                   }}>
                     {currentSelectedEntity.status === 'shipped' ? (
                       <span>🏷️ 출하 완료된 개체입니다. (과거 관리 이력 보강용)</span>
-                    ) : currentSelectedEntity.status === 'deceased' ? (
-                      <span>🪦 폐사/도태된 개체입니다. (과거 관리 이력 보강용)</span>
                     ) : (
-                      <>
-                        <span>선택된 개체: {currentSelectedEntity.tagNumber} ({currentSelectedEntity.name})</span>
-                        <span>• 축사: {currentSelectedEntity.barn || '미지정'}</span>
-                      </>
+                      <span>🪦 폐사/도태된 개체입니다. (과거 관리 이력 보강용)</span>
                     )}
                   </div>
                 )}
