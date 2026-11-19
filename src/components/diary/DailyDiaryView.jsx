@@ -900,7 +900,9 @@ export default function DailyDiaryView({
                                     alignItems: 'center',
                                     gap: '0.25rem',
                                     minWidth: '54px',
-                                    justifyContent: 'center'
+                                    justifyContent: 'center',
+                                    border: '1px solid #047857',
+                                    boxShadow: '0 1px 3px rgba(4, 120, 87, 0.3)'
                                   }}
                                   title="이 예정 작업으로 새 관리기록 작성 (분류·작업명 자동 입력)"
                                 >
