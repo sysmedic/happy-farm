@@ -627,9 +627,6 @@ export default function DailyDiaryView({
                             <span>{sched.title}</span>
                             {sched.time && (
                               <span style={{
-                                fontSize: '0.8rem',
-                                fontWeight: 600,
-                                color: 'var(--text-muted)',
                                 paddingLeft: '0.35rem',
                                 whiteSpace: 'nowrap',
                                 display: 'inline-block'
@@ -937,9 +934,6 @@ export default function DailyDiaryView({
                               <span>{task.nextScheduleTitle || '예정 작업'}</span>
                               {task.nextScheduleTime && (
                                 <span style={{
-                                  fontSize: '0.8rem',
-                                  fontWeight: 600,
-                                  color: 'var(--text-muted)',
                                   paddingLeft: '0.35rem',
                                   whiteSpace: 'nowrap',
                                   display: 'inline-block'
