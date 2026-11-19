@@ -1850,6 +1850,133 @@ form.modal-content {
   align-items: start;
 }
 
+/* ========================================================
+   다이어리 브라우저 탭 스타일 시스템 (1안 폴더형, 2안 언더라인형, 3안 독 세그먼트)
+   ======================================================== */
+
+/* [1안] 정통 브라우저/폴더형 탭 (기본 적용) */
+.diary-browser-tabs {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.4rem;
+  margin-bottom: -1px;
+  position: relative;
+  z-index: 2;
+  padding: 0 0.5rem;
+}
+
+.diary-browser-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  border: 1px solid var(--border-color);
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+  background: var(--bg-card-subtle);
+  color: var(--text-muted);
+  font-weight: 600;
+  padding: 0.55rem 1.15rem 0.55rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.diary-browser-tab:hover:not(.active) {
+  background: var(--bg-hover);
+  color: var(--text-main);
+}
+
+.diary-browser-tab.active {
+  background: var(--bg-card);
+  color: var(--color-primary);
+  font-weight: 800;
+  border-bottom: 1px solid var(--bg-card) !important; /* 아래 본문 패널과 이어지도록 바닥 테두리 개방 */
+  padding: 0.65rem 1.25rem 0.62rem;
+  box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.03);
+  z-index: 3;
+}
+
+/* 탭 본문 패널 (1안 서류철/카드 일체형 본문) */
+.diary-tab-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  z-index: 1;
+}
+
+/* 탭 카운트 뱃지 */
+.diary-tab-count {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.1rem 0.45rem;
+  border-radius: 10px;
+  background: rgba(16, 185, 129, 0.12);
+  color: var(--color-primary);
+  transition: all 0.15s ease;
+}
+.diary-browser-tab:not(.active) .diary-tab-count {
+  background: var(--bg-card);
+  color: var(--text-subtle);
+}
+
+/* [2안] 모던 언더라인 탭 클래스 */
+.diary-browser-tabs.variant-underline {
+  border-bottom: 2px solid var(--border-color);
+  gap: 1.5rem;
+  padding: 0 0.25rem;
+  margin-bottom: 1rem;
+}
+.diary-browser-tabs.variant-underline .diary-browser-tab {
+  border: none;
+  background: transparent;
+  border-radius: 0;
+  padding: 0.6rem 0.25rem 0.75rem;
+  margin-bottom: -2px;
+}
+.diary-browser-tabs.variant-underline .diary-browser-tab.active {
+  border-bottom: 3px solid var(--color-primary) !important;
+  background: transparent;
+  box-shadow: none;
+}
+.diary-tab-panel.variant-underline {
+  border: none;
+  background: transparent;
+  padding: 0;
+  box-shadow: none;
+}
+
+/* [3안] 슬라이딩 독 세그먼트 탭 클래스 */
+.diary-browser-tabs.variant-dock {
+  background: var(--bg-card-subtle);
+  padding: 4px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  gap: 4px;
+  margin-bottom: 1rem;
+}
+.diary-browser-tabs.variant-dock .diary-browser-tab {
+  flex: 1;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 0.6rem 0.75rem;
+}
+.diary-browser-tabs.variant-dock .diary-browser-tab.active {
+  background: var(--bg-card);
+  box-shadow: var(--shadow-sm);
+  border-bottom: none !important;
+}
+.diary-tab-panel.variant-dock {
+  border: none;
+  background: transparent;
+  padding: 0;
+  box-shadow: none;
+}
+
 /* Diary Detail Section (외부 큰 카드 제거 후 독립 레이아웃) */
 .diary-detail-section {
   display: flex;

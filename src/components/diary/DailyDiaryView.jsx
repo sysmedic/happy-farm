@@ -42,8 +42,11 @@ export default function DailyDiaryView({
     return { year: today.getFullYear(), month: today.getMonth() };
   });
 
-  // 다이어리 서브 탭: 'schedules'(예정 일정) 또는 'logs'(실시된 영농 관리)
+  // 다이어리 서브 탭: 'schedules'(예정 일정) 또는 'logs'(관리 내역)
   const [activeDiaryTab, setActiveDiaryTab] = useState('schedules');
+
+  // 탭 브라우징 디자인 스타일: 'folder'(1안: 정통 브라우저 폴더형) | 'underline'(2안: 모던 언더라인) | 'dock'(3안: 세그먼트 독)
+  const [tabVariant, setTabVariant] = useState('folder');
 
   // 완료된 일정 중 상세 내용을 확인하기 위해 사용자가 탭하여 임시로 펼친 일정 ID 목록
   const [expandedCompletedIds, setExpandedCompletedIds] = useState(new Set());
@@ -269,84 +272,64 @@ export default function DailyDiaryView({
             </div>
           </div>
 
-          {/* 상단 서브 탭 (2개 탭 전환: 예정 일정 vs 관리 내역) */}
-          <div style={{
-            display: 'flex',
-            background: 'var(--bg-card-subtle)',
-            padding: '4px',
-            borderRadius: 'var(--radius-md)',
-            border: '1px solid var(--border-color)',
-            gap: '4px',
-            marginBottom: '1rem'
-          }}>
-            <button
-              type="button"
-              onClick={() => setActiveDiaryTab('schedules')}
-              style={{
-                flex: 1,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.45rem',
-                padding: '0.6rem 0.75rem',
-                borderRadius: 'var(--radius-sm)',
-                border: 'none',
-                fontWeight: activeDiaryTab === 'schedules' ? 800 : 600,
-                fontSize: '0.88rem',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
-                background: activeDiaryTab === 'schedules' ? 'var(--bg-card)' : 'transparent',
-                color: activeDiaryTab === 'schedules' ? 'var(--color-accent)' : 'var(--text-muted)',
-                boxShadow: activeDiaryTab === 'schedules' ? 'var(--shadow-sm)' : 'none'
-              }}
-            >
-              <span>예정 일정</span>
-              <span style={{
-                fontSize: '0.75rem',
-                padding: '0.1rem 0.45rem',
-                borderRadius: '10px',
-                background: activeDiaryTab === 'schedules' ? 'rgba(245, 158, 11, 0.15)' : 'var(--bg-card)',
-                color: activeDiaryTab === 'schedules' ? 'var(--color-accent)' : 'var(--text-subtle)',
-                fontWeight: 700
-              }}>
-                {dailySchedules.length + scheduledTasks.length}
-              </span>
-            </button>
+          {/* 브라우저 탭 바 (1안 정통 폴더형 기본 + 2안/3안 즉시 비교 스위치) */}
+          <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '0.5rem', flexWrap: 'wrap' }}>
+            <div className={`diary-browser-tabs ${tabVariant !== 'folder' ? `variant-${tabVariant}` : ''}`} style={{ flex: tabVariant === 'dock' ? 1 : 'none' }}>
+              <button
+                type="button"
+                className={`diary-browser-tab ${activeDiaryTab === 'schedules' ? 'active' : ''}`}
+                onClick={() => setActiveDiaryTab('schedules')}
+              >
+                <span>예정 일정</span>
+                <span className="diary-tab-count">
+                  {dailySchedules.length + scheduledTasks.length}
+                </span>
+              </button>
 
-            <button
-              type="button"
-              onClick={() => setActiveDiaryTab('logs')}
-              style={{
-                flex: 1,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.45rem',
-                padding: '0.6rem 0.75rem',
-                borderRadius: 'var(--radius-sm)',
-                border: 'none',
-                fontWeight: activeDiaryTab === 'logs' ? 800 : 600,
-                fontSize: '0.88rem',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
-                background: activeDiaryTab === 'logs' ? 'var(--bg-card)' : 'transparent',
-                color: activeDiaryTab === 'logs' ? 'var(--color-primary)' : 'var(--text-muted)',
-                boxShadow: activeDiaryTab === 'logs' ? 'var(--shadow-sm)' : 'none'
-              }}
-            >
-              <span>관리 내역</span>
-              <span style={{
-                fontSize: '0.75rem',
-                padding: '0.1rem 0.45rem',
-                borderRadius: '10px',
-                background: activeDiaryTab === 'logs' ? 'rgba(16, 185, 129, 0.15)' : 'var(--bg-card)',
-                color: activeDiaryTab === 'logs' ? 'var(--color-primary)' : 'var(--text-subtle)',
-                fontWeight: 700
-              }}>
-                {dailyLogs.length}
-              </span>
-            </button>
+              <button
+                type="button"
+                className={`diary-browser-tab ${activeDiaryTab === 'logs' ? 'active' : ''}`}
+                onClick={() => setActiveDiaryTab('logs')}
+              >
+                <span>관리 내역</span>
+                <span className="diary-tab-count">
+                  {dailyLogs.length}
+                </span>
+              </button>
+            </div>
+
+            {/* 1안/2안/3안 스타일 즉시 비교 툴 */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem', marginBottom: tabVariant === 'folder' ? '0.25rem' : '1.1rem', fontSize: '0.72rem', color: 'var(--text-subtle)' }}>
+              <span style={{ marginRight: '0.15rem' }}>보기:</span>
+              {[
+                { id: 'folder', label: '1안 폴더' },
+                { id: 'underline', label: '2안 라인' },
+                { id: 'dock', label: '3안 독' }
+              ].map(st => (
+                <button
+                  key={st.id}
+                  type="button"
+                  onClick={() => setTabVariant(st.id)}
+                  style={{
+                    background: tabVariant === st.id ? 'var(--color-primary)' : 'var(--bg-card-subtle)',
+                    color: tabVariant === st.id ? '#ffffff' : 'var(--text-muted)',
+                    border: '1px solid var(--border-color)',
+                    borderRadius: '4px',
+                    padding: '0.15rem 0.4rem',
+                    fontSize: '0.7rem',
+                    fontWeight: tabVariant === st.id ? 700 : 500,
+                    cursor: 'pointer'
+                  }}
+                  title={`${st.label} 스타일로 즉시 변경`}
+                >
+                  {st.label}
+                </button>
+              ))}
+            </div>
           </div>
+
+          {/* 탭 본문 패널 (1안 폴더형일 때 탭과 한 몸으로 이어지는 카드 서피스) */}
+          <div className={`diary-tab-panel ${tabVariant !== 'folder' ? `variant-${tabVariant}` : ''}`}>
 
           {/* 탭 1: 예정 일정 화면 */}
           {activeDiaryTab === 'schedules' && (
@@ -828,6 +811,7 @@ export default function DailyDiaryView({
               )}
             </div>
           )}
+          </div>
         </div>
       </div>
     </div>
