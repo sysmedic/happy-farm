@@ -242,9 +242,6 @@ export default function DailyReportView({
                           <span style={{ fontWeight: 700, fontSize: '0.88rem', color: '#0f172a' }}>
                             {log.entityName}
                           </span>
-                          <span className={`badge ${catObj.badgeClass}`} style={{ fontSize: '0.68rem', padding: '0.15rem 0.4rem' }}>
-                            {catObj.icon} {catObj.label}
-                          </span>
                         </div>
                         {log.operator && (
                           <span style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 500, flexShrink: 0 }}>
