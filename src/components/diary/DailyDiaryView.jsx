@@ -2,6 +2,8 @@ import React, { useState, useMemo } from 'react';
 import { 
   ChevronLeft, 
   ChevronRight, 
+  ChevronDown,
+  ChevronUp,
   Calendar as CalendarIcon, 
   Clock, 
   Plus, 
@@ -39,6 +41,21 @@ export default function DailyDiaryView({
     const today = new Date();
     return { year: today.getFullYear(), month: today.getMonth() };
   });
+
+  // 완료된 일정 중 상세 내용을 확인하기 위해 사용자가 탭하여 임시로 펼친 일정 ID 목록
+  const [expandedCompletedIds, setExpandedCompletedIds] = useState(new Set());
+
+  const toggleExpandCompleted = (id) => {
+    setExpandedCompletedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
 
   // 선택한 날짜에 수행된 관리 내역
   const dailyLogs = useMemo(() => {
@@ -302,11 +319,102 @@ export default function DailyDiaryView({
                   </div>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
-                    {/* A. 직접 등록한 영농 스케줄 (수직 2단 모바일 최적화 레이아웃) */}
+                    {/* A. 직접 등록한 영농 스케줄 (완료 시 접힘 지원 & 수직 3행 모바일 최적화 레이아웃) */}
                     {dailySchedules.map(sched => {
                       const catDef = SCHEDULE_CATEGORIES.find(c => c.id === sched.category) || SCHEDULE_CATEGORIES[0];
                       const isDone = Boolean(sched.completed);
+                      const isExpanded = expandedCompletedIds.has(sched.id);
 
+                      // 1. 완료 상태이면서 접힌 모드인 경우: 가로 한 줄로 콤팩트하게 표시 [체크박스 + 개체번호 + 카테고리아이콘]
+                      if (isDone && !isExpanded) {
+                        return (
+                          <div 
+                            key={sched.id}
+                            onClick={() => toggleExpandCompleted(sched.id)}
+                            style={{
+                              background: 'var(--bg-card-subtle)',
+                              border: '1px solid var(--border-color)',
+                              borderRadius: 'var(--radius-md)',
+                              padding: '0.45rem 0.75rem',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              gap: '0.5rem',
+                              opacity: 0.8,
+                              cursor: 'pointer',
+                              transition: 'all 0.2s ease',
+                              minHeight: '36px'
+                            }}
+                            title="클릭하여 상세 일정 내용 펼치기"
+                          >
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', minWidth: 0, flex: 1 }}>
+                              {/* 완료 체크 원형 토글 버튼 */}
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onToggleScheduleComplete(sched.id);
+                                }}
+                                style={{
+                                  background: 'none',
+                                  border: 'none',
+                                  cursor: 'pointer',
+                                  padding: '4px',
+                                  margin: '-4px',
+                                  color: 'var(--color-primary)',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  flexShrink: 0,
+                                  borderRadius: '50%'
+                                }}
+                                title="미완료로 변경 (원래 카드로 복원)"
+                              >
+                                <CheckCircle2 size={19} color="var(--color-primary)" />
+                              </button>
+
+                              {/* 개체번호 뱃지 또는 농장 공통 뱃지 */}
+                              {sched.tagNumber ? (
+                                <span 
+                                  className="badge badge-tag"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onOpenEntityDetail(sched.tagNumber);
+                                  }}
+                                  title="클릭 시 이 개체의 관리 내역으로 이동"
+                                  style={{ cursor: 'pointer', fontSize: '0.75rem', padding: '0.15rem 0.45rem' }}
+                                >
+                                  {sched.tagNumber} ({sched.entityName})
+                                </span>
+                              ) : (
+                                <span style={{
+                                  fontSize: '0.75rem',
+                                  color: 'var(--text-muted)',
+                                  background: 'var(--bg-card)',
+                                  padding: '0.15rem 0.45rem',
+                                  borderRadius: '4px',
+                                  border: '1px solid var(--border-color)',
+                                  fontWeight: 600
+                                }}>
+                                  🌾 농장 공통
+                                </span>
+                              )}
+
+                              {/* 카테고리 아이콘 */}
+                              <span style={{ fontSize: '0.95rem' }} title={catDef.label}>
+                                {catDef.icon}
+                              </span>
+                            </div>
+
+                            {/* 우측 펼치기 힌트 아이콘 */}
+                            <div style={{ color: 'var(--text-subtle)', display: 'flex', alignItems: 'center', flexShrink: 0 }} title="상세 내용 펼치기">
+                              <ChevronDown size={14} />
+                            </div>
+                          </div>
+                        );
+                      }
+
+                      // 2. 미완료 상태이거나, 사용자가 클릭하여 펼친 경우 (원래 3행 카드)
                       return (
                         <div 
                           key={sched.id}
@@ -323,7 +431,7 @@ export default function DailyDiaryView({
                             overflow: 'hidden'
                           }}
                         >
-                          {/* 1단 헤더: [원형 완료 체크 토글 + 카테고리 뱃지 + 시간] <---> (우측) [수정/삭제] */}
+                          {/* 1단 헤더: [원형 완료 체크 토글 + 카테고리 뱃지 + 시간] <---> (우측) [수정/삭제/접기] */}
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', minWidth: 0 }}>
                               {/* 완료 체크 원형 토글 버튼 (글자 제거, 원형 아이콘) */}
@@ -344,7 +452,7 @@ export default function DailyDiaryView({
                                   borderRadius: '50%',
                                   transition: 'all 0.15s ease'
                                 }}
-                                title={isDone ? '미완료로 변경' : '완료 처리'}
+                                title={isDone ? '미완료로 변경' : '완료 처리 (카드 접힘)'}
                               >
                                 {isDone ? (
                                   <CheckCircle2 size={19} color="var(--color-primary)" />
@@ -377,8 +485,19 @@ export default function DailyDiaryView({
                               )}
                             </div>
 
-                            {/* 우측 조작 버튼 (수정, 삭제) */}
+                            {/* 우측 조작 버튼 (수정, 삭제 및 완료 시 접기 버튼) */}
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', flexShrink: 0 }}>
+                              {isDone && isExpanded && (
+                                <button
+                                  type="button"
+                                  className="btn btn-outline btn-sm btn-icon-only"
+                                  onClick={() => toggleExpandCompleted(sched.id)}
+                                  title="다시 1줄로 접기"
+                                  style={{ width: '26px', height: '26px', padding: 0 }}
+                                >
+                                  <ChevronUp size={13} />
+                                </button>
+                              )}
                               <button
                                 type="button"
                                 className="btn btn-outline btn-sm btn-icon-only"
