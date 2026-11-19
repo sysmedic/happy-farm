@@ -542,6 +542,7 @@ export default function App() {
           entity={selectedEntityForDetail}
           careLogs={careLogs}
           careCategories={allCareCategories}
+          schedules={schedules}
           onClose={() => setSelectedEntityForDetail(null)}
           onOpenCareLogModal={(entity) => {
             setCareLogPreselectedEntity(entity);
@@ -558,6 +559,7 @@ export default function App() {
           }}
           onDeleteCareLog={handleDeleteCareLog}
           onEditCareLog={handleOpenEditCareLog}
+          onEditSchedule={handleEditSchedule}
           onUpdateEntityStatus={handleUpdateEntityStatus}
           onUpdateEntityMemo={handleUpdateEntityMemo}
         />

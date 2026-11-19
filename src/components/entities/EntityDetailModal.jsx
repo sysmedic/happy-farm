@@ -18,19 +18,22 @@ import {
   calculateAge,
   formatDisplayBreed,
   getAvailableStatuses,
-  getCategoryById
+  getCategoryById,
+  getTodayDateString
 } from '../../lib/types.js';
 
 export default function EntityDetailModal({
   entity,
   careLogs,
   careCategories,
+  schedules = [],
   onClose,
   onOpenCareLogModal,
   onOpenEntityModal,
   onOpenPrintSheet,
   onDeleteCareLog,
   onEditCareLog,
+  onEditSchedule,
   onUpdateEntityStatus,
   onUpdateEntityMemo
 }) {
@@ -89,6 +92,65 @@ export default function EntityDetailModal({
     if (selectedCategory === 'all') return allEntityLogs;
     return allEntityLogs.filter(l => l.category === selectedCategory);
   }, [allEntityLogs, selectedCategory]);
+
+  const today = useMemo(() => getTodayDateString(), []);
+
+  // 이 개체에 연결된 미완료 미래 일정 목록 (관리기록 다음일정 + 다이어리 스케줄 통합)
+  const upcomingSchedules = useMemo(() => {
+    if (!entity) return [];
+    const list = [];
+
+    // 1) 관리기록에서 지정된 다음 일정
+    if (careLogs && careLogs.length > 0) {
+      careLogs.forEach(log => {
+        const isMatch = log.entityId === entity.id || log.tagNumber === entity.tagNumber;
+        if (isMatch && log.nextScheduleDate && log.nextScheduleDate >= today && !log.nextScheduleCompleted) {
+          list.push({
+            id: `CARE-${log.id}`,
+            type: 'careLog',
+            date: log.nextScheduleDate,
+            time: log.nextScheduleTime || '',
+            title: log.nextScheduleTitle || '예정 작업',
+            sourceLog: log
+          });
+        }
+      });
+    }
+
+    // 2) 다이어리 스케줄에서 지정된 일정
+    if (schedules && schedules.length > 0) {
+      schedules.forEach(sc => {
+        const isMatch = sc.entityId === entity.id || sc.targetEntityId === entity.id;
+        if (isMatch && sc.date && sc.date >= today && !sc.completed) {
+          list.push({
+            id: `SCHED-${sc.id}`,
+            type: 'schedule',
+            date: sc.date,
+            time: sc.time || '',
+            title: sc.title || '예정 일정',
+            sourceSchedule: sc
+          });
+        }
+      });
+    }
+
+    // 날짜 및 시간 오름차순(가까운 미래 순) 정렬
+    return list.sort((a, b) => {
+      const cmp = a.date.localeCompare(b.date);
+      if (cmp !== 0) return cmp;
+      return (a.time || '').localeCompare(b.time || '');
+    });
+  }, [entity, careLogs, schedules, today]);
+
+  // D-Day 계산 함수
+  const getDdayBadge = (targetDate) => {
+    const tDate = new Date(today + 'T00:00:00');
+    const dDate = new Date(targetDate + 'T00:00:00');
+    const diffDays = Math.round((dDate - tDate) / (1000 * 60 * 60 * 24));
+    if (diffDays === 0) return 'D-Day (오늘)';
+    if (diffDays > 0) return `D-${diffDays}`;
+    return `D+${Math.abs(diffDays)}`;
+  };
 
   if (!entity) return null;
 
@@ -382,6 +444,93 @@ export default function EntityDetailModal({
                 )}
               </div>
 
+              {/* 다가올 다음 예정 일정 미니 배너 (가장 빠른 1개) */}
+              {upcomingSchedules.length > 0 && (
+                <div 
+                  style={{ 
+                    padding: '0.55rem 0.85rem',
+                    background: 'rgba(245, 158, 11, 0.08)',
+                    border: '1px solid rgba(245, 158, 11, 0.3)',
+                    borderRadius: 'var(--radius-md)',
+                    marginBottom: '1rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.2rem',
+                    boxShadow: 'var(--shadow-sm)'
+                  }}
+                >
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '0.5rem',
+                    width: '100%'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', minWidth: 0, flex: 1 }}>
+                      <span style={{
+                        fontSize: '0.78rem',
+                        color: 'var(--color-accent)',
+                        fontWeight: 700,
+                        letterSpacing: '-0.01em',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        다음 일정: {upcomingSchedules[0].date}{upcomingSchedules[0].time ? ` - ${upcomingSchedules[0].time}` : ''}
+                      </span>
+                      <span style={{
+                        fontSize: '0.72rem',
+                        background: 'var(--color-accent)',
+                        color: '#ffffff',
+                        padding: '0.1rem 0.4rem',
+                        borderRadius: '4px',
+                        fontWeight: 800,
+                        whiteSpace: 'nowrap'
+                      }}>
+                        {getDdayBadge(upcomingSchedules[0].date)}
+                      </span>
+                    </div>
+
+                    <button
+                      type="button"
+                      className="btn btn-outline btn-sm btn-icon-only"
+                      onClick={() => {
+                        if (upcomingSchedules[0].type === 'careLog' && onEditCareLog) {
+                          onEditCareLog(upcomingSchedules[0].sourceLog);
+                        } else if (upcomingSchedules[0].type === 'schedule' && onEditSchedule) {
+                          onEditSchedule(upcomingSchedules[0].sourceSchedule);
+                        }
+                      }}
+                      title="이 예정 일정 수정"
+                      style={{
+                        width: '24px',
+                        height: '24px',
+                        padding: 0,
+                        flexShrink: 0,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        border: '1px solid rgba(245, 158, 11, 0.4)',
+                        color: 'var(--color-accent)',
+                        background: 'var(--bg-card)',
+                        borderRadius: 'var(--radius-sm)'
+                      }}
+                    >
+                      <Edit3 size={12} />
+                    </button>
+                  </div>
+
+                  <div style={{
+                    fontSize: '0.88rem',
+                    fontWeight: 600,
+                    color: 'var(--text-main)',
+                    opacity: 0.7,
+                    lineHeight: 1.35,
+                    wordBreak: 'break-word'
+                  }}>
+                    {upcomingSchedules[0].title}
+                  </div>
+                </div>
+              )}
+
               {/* 2. 생애 관리 내역 (최근 10개 요약 리스트 & 전체보기 통합) */}
               <div className="recent-logs-section">
                 <div className="recent-logs-header">
@@ -468,6 +617,99 @@ export default function EntityDetailModal({
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+                  {/* 상단 스마트 배너: 아직 도래하지 않은 미래 예정 일정 (최대 3개 나열) */}
+                  {upcomingSchedules.length > 0 && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '0.35rem' }}>
+                      {upcomingSchedules.slice(0, 3).map(item => (
+                        <div 
+                          key={item.id}
+                          style={{ 
+                            padding: '0.55rem 0.85rem',
+                            background: 'rgba(245, 158, 11, 0.08)',
+                            border: '1px solid rgba(245, 158, 11, 0.3)',
+                            borderRadius: 'var(--radius-md)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '0.2rem',
+                            boxShadow: 'var(--shadow-sm)'
+                          }}
+                        >
+                          {/* 1단: 다음 일정: 날짜 - 시간 & D-day + 원클릭 수정 버튼 */}
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            gap: '0.5rem',
+                            width: '100%'
+                          }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', minWidth: 0, flex: 1 }}>
+                              <span style={{
+                                fontSize: '0.78rem',
+                                color: 'var(--color-accent)',
+                                fontWeight: 700,
+                                letterSpacing: '-0.01em',
+                                whiteSpace: 'nowrap'
+                              }}>
+                                다음 일정: {item.date}{item.time ? ` - ${item.time}` : ''}
+                              </span>
+                              <span style={{
+                                fontSize: '0.72rem',
+                                background: 'var(--color-accent)',
+                                color: '#ffffff',
+                                padding: '0.1rem 0.4rem',
+                                borderRadius: '4px',
+                                fontWeight: 800,
+                                whiteSpace: 'nowrap'
+                              }}>
+                                {getDdayBadge(item.date)}
+                              </span>
+                            </div>
+
+                            <button
+                              type="button"
+                              className="btn btn-outline btn-sm btn-icon-only"
+                              onClick={() => {
+                                if (item.type === 'careLog' && onEditCareLog) {
+                                  onEditCareLog(item.sourceLog);
+                                } else if (item.type === 'schedule' && onEditSchedule) {
+                                  onEditSchedule(item.sourceSchedule);
+                                }
+                              }}
+                              title="이 예정 일정 수정"
+                              style={{
+                                width: '24px',
+                                height: '24px',
+                                padding: 0,
+                                flexShrink: 0,
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                border: '1px solid rgba(245, 158, 11, 0.4)',
+                                color: 'var(--color-accent)',
+                                background: 'var(--bg-card)',
+                                borderRadius: 'var(--radius-sm)'
+                              }}
+                            >
+                              <Edit3 size={12} />
+                            </button>
+                          </div>
+
+                          {/* 2단: 작업 내용 (70% 소프트 그레이) */}
+                          <div style={{
+                            fontSize: '0.88rem',
+                            fontWeight: 600,
+                            color: 'var(--text-main)',
+                            opacity: 0.7,
+                            lineHeight: 1.35,
+                            wordBreak: 'break-word'
+                          }}>
+                            {item.title}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
                   {filteredLogs.map(log => {
                     const catObj = getCategoryById(log.category, careCategories);
 
@@ -578,44 +820,6 @@ export default function EntityDetailModal({
                         {log.details && (
                           <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.5, marginBottom: '0.45rem', whiteSpace: 'pre-wrap' }}>
                             {log.details}
-                          </div>
-                        )}
-
-                        {/* 다음 일정 (2단 구성: 1단 날짜/시간, 2단 내용) */}
-                        {log.nextScheduleDate && (
-                          <div style={{ 
-                            marginTop: '0.5rem',
-                            marginBottom: '0.45rem',
-                            padding: '0.5rem 0.75rem',
-                            background: 'rgba(245, 158, 11, 0.08)',
-                            border: '1px solid rgba(245, 158, 11, 0.25)',
-                            borderRadius: 'var(--radius-sm)',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: '0.2rem',
-                            width: '100%'
-                          }}>
-                            {/* 1단: 다음 일정: 날짜 - 시간 */}
-                            <div style={{
-                              fontSize: '0.78rem',
-                              color: 'var(--color-accent)',
-                              fontWeight: 700,
-                              letterSpacing: '-0.01em'
-                            }}>
-                              다음 일정: {log.nextScheduleDate}{log.nextScheduleTime ? ` - ${log.nextScheduleTime}` : ''}
-                            </div>
-
-                            {/* 2단: 내용 (작업명, 70% 소프트 그레이 톤) */}
-                            <div style={{
-                              fontSize: '0.88rem',
-                              fontWeight: 600,
-                              color: 'var(--text-main)',
-                              opacity: 0.7,
-                              lineHeight: 1.35,
-                              wordBreak: 'break-word'
-                            }}>
-                              {log.nextScheduleTitle || '예정 작업'}
-                            </div>
                           </div>
                         )}
 
