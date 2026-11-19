@@ -390,19 +390,22 @@ export default function DailyDiaryView({
                           <div
                             key={sched.id}
                             className="diary-item-card"
+                            onClick={() => toggleExpandCompleted(sched.id)}
                             style={{
-                              background: isDone ? 'var(--bg-card-subtle)' : 'rgba(245, 158, 11, 0.08)',
-                              border: `1px solid ${isDone ? 'var(--border-color)' : 'rgba(245, 158, 11, 0.35)'}`,
+                              background: 'var(--bg-card-subtle)',
+                              border: '1px solid var(--border-color)',
                               borderRadius: 'var(--radius-md)',
-                              padding: '0.75rem 0.85rem',
+                              padding: '0.45rem 0.75rem',
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'space-between',
                               gap: '0.5rem',
                               cursor: 'pointer',
                               transition: 'all 0.2s ease',
+                              minHeight: '36px',
                               overflow: 'hidden'
                             }}
+                            title="클릭하여 상세 내용 펼치기"
                           >
                             <div style={{ 
                               display: 'flex', 
@@ -585,7 +588,7 @@ export default function DailyDiaryView({
                               )}
                             </div>
 
-                            {/* 우측 조작 버튼 (수정, 삭제 및 펼침 시 다시 접기 버튼) */}
+                            {/* 우측 조작 버튼 (펼침 시 다시 접기 버튼, 수정/삭제 버튼은 임시 비노출) */}
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', flexShrink: 0 }}>
                               {isDone && isExpanded && (
                                 <button
@@ -598,6 +601,7 @@ export default function DailyDiaryView({
                                   <ChevronUp size={13} />
                                 </button>
                               )}
+                              {/* 수정, 삭제 버튼 임시 가림
                               <button
                                 type="button"
                                 className="btn btn-outline btn-sm btn-icon-only"
@@ -616,6 +620,7 @@ export default function DailyDiaryView({
                               >
                                 <Trash2 size={12} />
                               </button>
+                              */}
                             </div>
                           </div>
 
