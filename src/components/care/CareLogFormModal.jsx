@@ -654,7 +654,16 @@ export default function CareLogFormModal({
 
           {/* 모달 푸터 */}
           <div className="modal-footer">
-            <button type="button" className="btn btn-secondary" onClick={onClose}>
+            <button 
+              type="button" 
+              className="btn btn-secondary" 
+              onClick={onClose}
+              style={{
+                border: '1px solid var(--text-muted)',
+                color: 'var(--text-main)',
+                fontWeight: 600
+              }}
+            >
               취소
             </button>
             <button 
