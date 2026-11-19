@@ -254,12 +254,12 @@ export default function DailyDiaryView({
                 일정/작업 기록 있음
               </span>
               <button
-                className="btn btn-primary btn-sm"
+                className="btn btn-outline btn-sm"
                 onClick={() => onOpenScheduleModal(selectedDate)}
-                style={{ fontSize: '0.75rem', padding: '0.25rem 0.6rem' }}
+                style={{ fontSize: '0.75rem', padding: '0.2rem 0.5rem' }}
                 title="선택한 일자에 새 영농 일정 등록"
               >
-                <Plus size={13} />
+                <Plus size={12} />
                 <span>일정 추가</span>
               </button>
             </div>
