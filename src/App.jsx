@@ -74,18 +74,32 @@ export default function App() {
     localStorage.setItem('happy_farm_theme', theme);
   }, [theme]);
 
-  // 모달이 열려 있을 때 뒷배경(body/html) 스크롤 100% 잠금 및 해제
+  // 모달이 열려 있을 때 뒷배경(body/html) 스크롤 잠금 및 닫힐 때 마지막 스크롤 위치 100% 복원
   const isAnyModalOpen = Boolean(selectedEntityForDetail || isEntityModalOpen || isCareLogModalOpen || isScheduleModalOpen);
+  const savedScrollYRef = useRef(0);
 
   useEffect(() => {
     if (isAnyModalOpen) {
+      // 1. 모달이 열리기 직전의 스크롤 위치 저장
+      const currentScrollY = window.scrollY || document.documentElement.scrollTop || 0;
+      savedScrollYRef.current = currentScrollY;
+
       const originalBodyOverflow = document.body.style.overflow;
       const originalHtmlOverflow = document.documentElement.style.overflow;
       document.body.style.overflow = 'hidden';
       document.documentElement.style.overflow = 'hidden';
+
       return () => {
         document.body.style.overflow = originalBodyOverflow;
         document.documentElement.style.overflow = originalHtmlOverflow;
+
+        // 2. 모달 닫힘/저장 후 원래 보고 있던 스크롤 위치로 즉시 복원
+        requestAnimationFrame(() => {
+          window.scrollTo({ top: currentScrollY, behavior: 'instant' });
+          setTimeout(() => {
+            window.scrollTo({ top: currentScrollY, behavior: 'instant' });
+          }, 30);
+        });
       };
     }
   }, [isAnyModalOpen]);
