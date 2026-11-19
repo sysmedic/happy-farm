@@ -581,24 +581,40 @@ export default function EntityDetailModal({
                           </div>
                         )}
 
-                        {/* 차기 예정일 (D-day) */}
+                        {/* 다음 일정 (2단 구성: 1단 날짜/시간, 2단 내용) */}
                         {log.nextScheduleDate && (
                           <div style={{ 
-                            marginTop: '0.45rem',
+                            marginTop: '0.5rem',
                             marginBottom: '0.45rem',
-                            padding: '0.4rem 0.65rem',
-                            background: 'rgba(245, 158, 11, 0.1)',
+                            padding: '0.5rem 0.75rem',
+                            background: 'rgba(245, 158, 11, 0.08)',
                             border: '1px solid rgba(245, 158, 11, 0.25)',
                             borderRadius: 'var(--radius-sm)',
-                            fontSize: '0.78rem',
-                            color: 'var(--color-accent)',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '0.4rem',
-                            fontWeight: 600
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '0.2rem',
+                            width: '100%'
                           }}>
-                            <Clock size={13} />
-                            <span>차기 예정: {log.nextScheduleDate}{log.nextScheduleTitle ? ` • ${log.nextScheduleTitle}` : ''}</span>
+                            {/* 1단: 다음 일정: 날짜 - 시간 */}
+                            <div style={{
+                              fontSize: '0.78rem',
+                              color: 'var(--color-accent)',
+                              fontWeight: 700,
+                              letterSpacing: '-0.01em'
+                            }}>
+                              다음 일정: {log.nextScheduleDate}{log.nextScheduleTime ? ` - ${log.nextScheduleTime}` : ''}
+                            </div>
+
+                            {/* 2단: 내용 (작업명) */}
+                            <div style={{
+                              fontSize: '0.88rem',
+                              fontWeight: 700,
+                              color: 'var(--text-main)',
+                              lineHeight: 1.35,
+                              wordBreak: 'break-word'
+                            }}>
+                              {log.nextScheduleTitle || '예정 작업'}
+                            </div>
                           </div>
                         )}
 
