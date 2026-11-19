@@ -685,8 +685,103 @@ export default function DailyDiaryView({
 
                     {scheduledTasks.map(task => {
                       const targetEntity = (entities || []).find(e => e.id === task.entityId || e.tagNumber === task.tagNumber);
+                      const reminderCardId = `reminder-${task.id}`;
                       const isDone = Boolean(task.nextScheduleCompleted);
+                      const isExpanded = expandedCompletedIds.has(reminderCardId);
 
+                      // 1. 완료 상태이면서 접힌 모드: 1행 콤팩트 가로 배치 [체크박스 + 개체번호 + 작업이름(말줄임)]
+                      if (isDone && !isExpanded) {
+                        return (
+                          <div 
+                            key={`sched-${task.id}`}
+                            className="diary-item-card"
+                            onClick={() => toggleExpandCompleted(reminderCardId)}
+                            style={{
+                              background: 'var(--bg-card-subtle)',
+                              border: '1px solid var(--border-color)',
+                              borderRadius: 'var(--radius-md)',
+                              padding: '0.45rem 0.75rem',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              gap: '0.5rem',
+                              opacity: 0.8,
+                              cursor: 'pointer',
+                              transition: 'all 0.2s ease',
+                              minHeight: '36px'
+                            }}
+                            title="클릭하여 상세 내용 펼치기"
+                          >
+                            <div style={{ 
+                              display: 'flex', 
+                              alignItems: 'center', 
+                              gap: '0.5rem', 
+                              minWidth: 0, 
+                              flex: 1,
+                              overflow: 'hidden'
+                            }}>
+                              {/* 완료 체크 원형 토글 버튼 */}
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onToggleReminderComplete?.(task.id);
+                                }}
+                                style={{
+                                  background: 'none',
+                                  border: 'none',
+                                  cursor: 'pointer',
+                                  padding: '4px',
+                                  margin: '-4px',
+                                  color: 'var(--color-primary)',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  flexShrink: 0,
+                                  borderRadius: '50%'
+                                }}
+                                title="미완료로 변경 (원래 카드로 복원)"
+                              >
+                                <CheckCircle2 size={19} color="var(--color-primary)" />
+                              </button>
+
+                              {/* 개체번호 뱃지 */}
+                              <span 
+                                className="badge badge-tag"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onOpenEntityDetail(task.tagNumber);
+                                }}
+                                title="클릭 시 이 개체의 관리 내역으로 이동"
+                                style={{ cursor: 'pointer', fontSize: '0.75rem', padding: '0.15rem 0.45rem', flexShrink: 0 }}
+                              >
+                                {task.tagNumber}
+                              </span>
+
+                              {/* 작업 이름: 박스가 좁으면 표현 가능한 부분까지만 표시 (말줄임) */}
+                              <span style={{ 
+                                fontSize: '0.85rem', 
+                                color: 'var(--text-muted)', 
+                                textDecoration: 'line-through',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                                minWidth: 0,
+                                flex: 1
+                              }}>
+                                {task.nextScheduleTitle || '예정 작업'}
+                              </span>
+                            </div>
+
+                            {/* 우측 펼침 표시 아이콘 */}
+                            <div style={{ display: 'flex', alignItems: 'center', color: 'var(--text-muted)', flexShrink: 0, paddingLeft: '0.2rem' }}>
+                              <ChevronDown size={14} />
+                            </div>
+                          </div>
+                        );
+                      }
+
+                      // 2. 미완료 상태 또는 사용자가 펼친 완료 카드 (2행 배치)
                       return (
                         <div 
                           key={`sched-${task.id}`}
@@ -703,7 +798,7 @@ export default function DailyDiaryView({
                             transition: 'all 0.2s ease'
                           }}
                         >
-                          {/* 1행: [체크박스] [개체번호] [별명]   ...   [기록] 버튼 (우측 상단) */}
+                          {/* 1행: [체크박스] [개체번호] [별명]   ...   [기록] 버튼 & 접기버튼 (우측 상단) */}
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', width: '100%' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap', minWidth: 0, flex: 1 }}>
                               {/* 완료 체크박스 버튼 */}
@@ -755,35 +850,48 @@ export default function DailyDiaryView({
                               </span>
                             </div>
 
-                            {/* 우측 상단: [기록] 버튼 */}
-                            {onOpenCareLogModal && (
-                              <button 
-                                type="button"
-                                className="btn btn-primary btn-sm"
-                                onClick={() => onOpenCareLogModal(
-                                  targetEntity || { tagNumber: task.tagNumber, name: task.entityName, id: task.entityId },
-                                  selectedDate,
-                                  {
-                                    category: task.category || 'treatment',
-                                    title: task.nextScheduleTitle || '',
-                                    date: selectedDate,
-                                    entityId: task.entityId || (targetEntity ? targetEntity.id : '')
-                                  }
-                                )}
-                                style={{ 
-                                  fontSize: '0.75rem', 
-                                  padding: '0.2rem 0.55rem', 
-                                  flexShrink: 0,
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '0.25rem'
-                                }}
-                                title="이 예정 작업으로 새 관리기록 작성 (분류·작업명 자동 입력)"
-                              >
-                                <Plus size={12} />
-                                <span>기록</span>
-                              </button>
-                            )}
+                            {/* 우측 상단: [기록] 버튼 및 다시 접기 버튼 */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', flexShrink: 0 }}>
+                              {isDone && isExpanded && (
+                                <button
+                                  type="button"
+                                  className="btn btn-outline btn-sm btn-icon-only"
+                                  onClick={() => toggleExpandCompleted(reminderCardId)}
+                                  title="다시 1줄로 접기"
+                                  style={{ width: '26px', height: '26px', padding: 0 }}
+                                >
+                                  <ChevronUp size={13} />
+                                </button>
+                              )}
+                              {onOpenCareLogModal && (
+                                <button 
+                                  type="button"
+                                  className="btn btn-primary btn-sm"
+                                  onClick={() => onOpenCareLogModal(
+                                    targetEntity || { tagNumber: task.tagNumber, name: task.entityName, id: task.entityId },
+                                    selectedDate,
+                                    {
+                                      category: task.category || 'treatment',
+                                      title: task.nextScheduleTitle || '',
+                                      date: selectedDate,
+                                      entityId: task.entityId || (targetEntity ? targetEntity.id : '')
+                                    }
+                                  )}
+                                  style={{ 
+                                    fontSize: '0.75rem', 
+                                    padding: '0.2rem 0.55rem', 
+                                    flexShrink: 0,
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '0.25rem'
+                                  }}
+                                  title="이 예정 작업으로 새 관리기록 작성 (분류·작업명 자동 입력)"
+                                >
+                                  <Plus size={12} />
+                                  <span>기록</span>
+                                </button>
+                              )}
+                            </div>
                           </div>
 
                           {/* 2행: 차기 예정 작업명 */}
