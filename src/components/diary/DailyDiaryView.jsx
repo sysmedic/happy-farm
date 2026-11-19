@@ -657,10 +657,10 @@ export default function DailyDiaryView({
                             </div>
                           </div>
 
-                          {/* 2행: 일정 제목 및 시간 (좌측) & 개체번호 있을 때 [수정] 버튼 (우측, 기록 버튼 바로 밑에 수직 정렬) */}
+                          {/* 2행: 일정 제목 및 시간 (좌측) & 개체번호 있을 때 [수정] 버튼 (우측, 기록 버튼 바로 밑에 수직 정렬 - 상단 고정) */}
                           <div style={{
                             display: 'flex',
-                            alignItems: 'center',
+                            alignItems: 'flex-start',
                             justifyContent: 'space-between',
                             gap: '0.5rem',
                             width: '100%',
@@ -990,10 +990,10 @@ export default function DailyDiaryView({
                             </div>
                           </div>
 
-                          {/* 2행: 차기 예정 작업명 및 시간 (좌측) & [수정] 버튼 (우측, 기록 버튼 바로 밑에 수직 정렬) */}
+                          {/* 2행: 차기 예정 작업명 및 시간 (좌측) & [수정] 버튼 (우측, 기록 버튼 바로 밑에 수직 정렬 - 상단 고정) */}
                           <div style={{
                             display: 'flex',
-                            alignItems: 'center',
+                            alignItems: 'flex-start',
                             justifyContent: 'space-between',
                             gap: '0.5rem',
                             width: '100%',
