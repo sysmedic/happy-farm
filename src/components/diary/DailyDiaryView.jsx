@@ -35,6 +35,7 @@ export default function DailyDiaryView({
   onToggleReminderComplete,
   onDeleteSchedule,
   onEditSchedule,
+  onEditCareLog,
   onNavigateToReport
 }) {
   const [selectedDate, setSelectedDate] = useState(getTodayDateString());
@@ -897,7 +898,9 @@ export default function DailyDiaryView({
                                     flexShrink: 0,
                                     display: 'inline-flex',
                                     alignItems: 'center',
-                                    gap: '0.25rem'
+                                    gap: '0.25rem',
+                                    minWidth: '54px',
+                                    justifyContent: 'center'
                                   }}
                                   title="이 예정 작업으로 새 관리기록 작성 (분류·작업명 자동 입력)"
                                 >
@@ -908,17 +911,50 @@ export default function DailyDiaryView({
                             </div>
                           </div>
 
-                          {/* 2행: 차기 예정 작업명 */}
-                          <div style={{ 
-                            fontWeight: 700, 
-                            fontSize: '0.92rem', 
-                            wordBreak: 'break-word',
+                          {/* 2행: 차기 예정 작업명 (좌측) & [수정] 버튼 (우측, 기록 버튼 바로 밑에 수직 정렬) */}
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            gap: '0.5rem',
+                            width: '100%',
                             paddingLeft: 0,
-                            color: 'var(--text-main)',
-                            textDecoration: isDone ? 'line-through' : 'none',
-                            lineHeight: 1.35
+                            marginTop: '0.15rem'
                           }}>
-                            {task.nextScheduleTitle || '예정 작업'}
+                            <div style={{ 
+                              fontWeight: 700, 
+                              fontSize: '0.92rem', 
+                              wordBreak: 'break-word',
+                              color: 'var(--text-main)',
+                              textDecoration: isDone ? 'line-through' : 'none',
+                              lineHeight: 1.35,
+                              flex: 1,
+                              minWidth: 0
+                            }}>
+                              {task.nextScheduleTitle || '예정 작업'}
+                            </div>
+
+                            {onEditCareLog && (
+                              <button
+                                type="button"
+                                className="btn btn-outline btn-sm"
+                                onClick={() => onEditCareLog(task)}
+                                title="이 차기 예정 작업의 원본 관리기록(예정일/작업명 등) 수정"
+                                style={{
+                                  fontSize: '0.75rem',
+                                  padding: '0.2rem 0.55rem',
+                                  flexShrink: 0,
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '0.25rem',
+                                  minWidth: '54px',
+                                  justifyContent: 'center'
+                                }}
+                              >
+                                <Edit2 size={12} />
+                                <span>수정</span>
+                              </button>
+                            )}
                           </div>
                         </div>
                       );

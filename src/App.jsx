@@ -487,6 +487,7 @@ export default function App() {
                 onToggleReminderComplete={handleToggleReminderComplete}
                 onDeleteSchedule={handleDeleteSchedule}
                 onEditSchedule={handleEditSchedule}
+                onEditCareLog={handleOpenEditCareLog}
                 onNavigateToReport={(date) => {
                   setTargetReportDate(date);
                   setActiveTab('report');
