@@ -578,7 +578,7 @@ export default function DailyDiaryView({
                               )}
                             </div>
 
-                            {/* 우측 조작 버튼 (펼침 시 다시 접기 버튼, 수정/삭제 버튼은 임시 비노출) */}
+                            {/* 우측 조작 버튼 (펼침 시 다시 접기 버튼, [+ 기록] 또는 [✏️] 버튼) */}
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', flexShrink: 0 }}>
                               {isDone && isExpanded && (
                                 <button
@@ -591,48 +591,127 @@ export default function DailyDiaryView({
                                   <ChevronUp size={13} />
                                 </button>
                               )}
-                              {/* 수정, 삭제 버튼 임시 가림
+
+                              {/* 개체번호가 있는 경우: [+ 기록] 버튼 */}
+                              {sched.tagNumber && onOpenCareLogModal && (
+                                <button 
+                                  type="button" 
+                                  className="btn btn-primary btn-sm"
+                                  onClick={() => {
+                                    const targetEntity = (entities || []).find(e => e.id === sched.entityId || e.tagNumber === sched.tagNumber);
+                                    onOpenCareLogModal(
+                                      targetEntity || { tagNumber: sched.tagNumber, name: sched.entityName, id: sched.entityId },
+                                      selectedDate,
+                                      {
+                                        category: sched.category || 'routine',
+                                        title: sched.title || '',
+                                        date: selectedDate,
+                                        time: sched.time || undefined,
+                                        entityId: sched.entityId || (targetEntity ? targetEntity.id : '')
+                                      }
+                                    );
+                                  }}
+                                  style={{ 
+                                    fontSize: '0.75rem', 
+                                    padding: '0.2rem 0.55rem', 
+                                    flexShrink: 0,
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '0.25rem',
+                                    minWidth: '54px',
+                                    justifyContent: 'center',
+                                    border: '1px solid #047857',
+                                    boxShadow: '0 1px 3px rgba(4, 120, 87, 0.3)'
+                                  }}
+                                  title="이 일정으로 새 관리기록 작성 (분류·작업명 자동 입력)"
+                                >
+                                  <Plus size={12} />
+                                  <span>기록</span>
+                                </button>
+                              )}
+
+                              {/* 개체번호가 없는 경우: 기록 버튼 대신 해당 위치에 [✏️] 수정 버튼 배치 */}
+                              {!sched.tagNumber && onEditSchedule && (
+                                <button
+                                  type="button"
+                                  className="btn btn-outline btn-sm btn-icon-only"
+                                  onClick={() => onEditSchedule(sched)}
+                                  title="일정 수정"
+                                  style={{
+                                    width: '24px',
+                                    height: '24px',
+                                    padding: 0,
+                                    flexShrink: 0,
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    border: '1px solid var(--text-muted)',
+                                    color: 'var(--text-main)',
+                                    background: 'var(--bg-card)',
+                                    borderRadius: 'var(--radius-sm)'
+                                  }}
+                                >
+                                  <Edit2 size={12} />
+                                </button>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* 2행: 일정 제목 및 시간 (좌측) & 개체번호 있을 때 [수정] 버튼 (우측, 기록 버튼 바로 밑에 수직 정렬) */}
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            gap: '0.5rem',
+                            width: '100%',
+                            paddingLeft: 0,
+                            marginTop: '0.15rem'
+                          }}>
+                            <div style={{
+                              fontWeight: 700,
+                              fontSize: '0.92rem',
+                              wordBreak: 'break-word',
+                              color: 'var(--text-main)',
+                              textDecoration: isDone ? 'line-through' : 'none',
+                              lineHeight: 1.35,
+                              flex: 1,
+                              minWidth: 0
+                            }}>
+                              <span>{sched.title}</span>
+                              {sched.time && (
+                                <span style={{
+                                  paddingLeft: '0.35rem',
+                                  whiteSpace: 'nowrap',
+                                  display: 'inline-block'
+                                }}>
+                                  ({sched.time.startsWith('0') ? sched.time.slice(1) : sched.time})
+                                </span>
+                              )}
+                            </div>
+
+                            {/* 개체번호가 있는 경우: 1행의 [+ 기록] 버튼 바로 밑(2행 우측)에 [✏️] 수정 버튼 배치 */}
+                            {sched.tagNumber && onEditSchedule && (
                               <button
                                 type="button"
                                 className="btn btn-outline btn-sm btn-icon-only"
                                 onClick={() => onEditSchedule(sched)}
                                 title="일정 수정"
-                                style={{ width: '26px', height: '26px', padding: 0 }}
+                                style={{
+                                  width: '24px',
+                                  height: '24px',
+                                  padding: 0,
+                                  flexShrink: 0,
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  border: '1px solid var(--text-muted)',
+                                  color: 'var(--text-main)',
+                                  background: 'var(--bg-card)',
+                                  borderRadius: 'var(--radius-sm)'
+                                }}
                               >
                                 <Edit2 size={12} />
                               </button>
-                              <button
-                                type="button"
-                                className="btn btn-outline btn-sm btn-icon-only"
-                                onClick={() => onDeleteSchedule(sched.id)}
-                                title="일정 삭제"
-                                style={{ width: '26px', height: '26px', padding: 0, color: 'var(--color-danger)' }}
-                              >
-                                <Trash2 size={12} />
-                              </button>
-                              */}
-                            </div>
-                          </div>
-
-                          {/* 2행: 일정 제목 및 시간 (등록된 시간은 제목 뒤에 무조건 노출) */}
-                          <div style={{
-                            fontWeight: 700,
-                            fontSize: '0.92rem',
-                            wordBreak: 'break-word',
-                            paddingLeft: 0,
-                            color: 'var(--text-main)',
-                            textDecoration: isDone ? 'line-through' : 'none',
-                            lineHeight: 1.35
-                          }}>
-                            <span>{sched.title}</span>
-                            {sched.time && (
-                              <span style={{
-                                paddingLeft: '0.35rem',
-                                whiteSpace: 'nowrap',
-                                display: 'inline-block'
-                              }}>
-                                ({sched.time.startsWith('0') ? sched.time.slice(1) : sched.time})
-                              </span>
                             )}
                           </div>
 
