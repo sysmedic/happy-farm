@@ -18,7 +18,7 @@ export const SCHEDULE_CATEGORIES = [
   { id: 'calving', label: '분만예정', icon: '🐮', color: '#10b981' },
   { id: 'treatment', label: '진료·치료', icon: '💊', color: '#ef4444' },
   { id: 'feed', label: '사료·영양', icon: '🌾', color: '#d97706' },
-  { id: 'routine', label: '축사점검·방역', icon: '🛡️', color: '#14b8a6' },
+  { id: 'routine', label: '방역점검', icon: '🛡️', color: '#14b8a6' },
   { id: 'other', label: '기타 일정', icon: '📋', color: '#64748b' },
 ];
 
