@@ -480,7 +480,7 @@ export default function EntityDetailModal({
                           transition: 'all 0.15s ease'
                         }}
                       >
-                        {/* 1행: [관리분류 뱃지] (좌측) & [✏️ 수정] [🗑️ 삭제] 액션 버튼 (우측 끝) */}
+                        {/* 1행: [관리분류 뱃지] + [70% 소프트 블랙 날짜] (좌측) & [✏️ 수정] [🗑️ 삭제] 액션 버튼 (우측 끝) */}
                         <div style={{
                           display: 'flex',
                           alignItems: 'center',
@@ -489,11 +489,23 @@ export default function EntityDetailModal({
                           marginBottom: '0.45rem',
                           width: '100%'
                         }}>
-                          <span className={`badge ${catObj.badgeClass}`}>
-                            {catObj.icon} {catObj.label}
-                          </span>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem', minWidth: 0, flex: 1 }}>
+                            <span className={`badge ${catObj.badgeClass}`} style={{ flexShrink: 0 }}>
+                              {catObj.icon} {catObj.label}
+                            </span>
+                            <span style={{
+                              fontWeight: 700,
+                              fontSize: '0.90rem',
+                              color: 'var(--text-main)',
+                              opacity: 0.7,
+                              whiteSpace: 'nowrap',
+                              flexShrink: 0
+                            }}>
+                              {log.date}
+                            </span>
+                          </div>
 
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexShrink: 0 }}>
                             {onEditCareLog && (
                               <button
                                 type="button"
@@ -543,40 +555,20 @@ export default function EntityDetailModal({
                           </div>
                         </div>
 
-                        {/* 2행: [70% 소프트 블랙 날짜] + [100% 진한 블랙 작업명] */}
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.55rem',
-                          marginBottom: log.details ? '0.35rem' : '0.1rem',
-                          width: '100%'
-                        }}>
-                          <span style={{
-                            fontWeight: 700,
-                            fontSize: '0.92rem',
+                        {/* 2행: [100% 진한 블랙 작업명 (가로 100% 전체 폭 시원하게 활용)] */}
+                        <div 
+                          style={{ 
+                            fontWeight: 700, 
+                            fontSize: '0.96rem', 
                             color: 'var(--text-main)',
-                            opacity: 0.7,
-                            whiteSpace: 'nowrap',
-                            flexShrink: 0
-                          }}>
-                            {log.date}
-                          </span>
-
-                          <div 
-                            style={{ 
-                              fontWeight: 700, 
-                              fontSize: '0.95rem', 
-                              color: 'var(--text-main)',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              whiteSpace: 'nowrap',
-                              flex: 1,
-                              minWidth: 0
-                            }}
-                            title={log.title}
-                          >
-                            {log.title}
-                          </div>
+                            lineHeight: 1.35,
+                            marginBottom: log.details ? '0.35rem' : '0.1rem',
+                            width: '100%',
+                            wordBreak: 'break-word'
+                          }}
+                          title={log.title}
+                        >
+                          {log.title}
                         </div>
 
                         {/* 3행: 상세 내용 */}
