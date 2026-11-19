@@ -42,11 +42,8 @@ export default function DailyDiaryView({
     return { year: today.getFullYear(), month: today.getMonth() };
   });
 
-  // 다이어리 서브 탭: 'schedules'(예정 일정) 또는 'logs'(관리 내역)
+  // 다이어리 서브 탭: 'schedules'(일정) 또는 'logs'(관리 내역)
   const [activeDiaryTab, setActiveDiaryTab] = useState('schedules');
-
-  // 탭 디자인 스타일: 'dock'(독 형태 - 기본 적용) | 'open'(오픈 폴더) | 'binder'(노트 서류철)
-  const [folderStyle, setFolderStyle] = useState('dock');
 
   // 완료된 일정 중 상세 내용을 확인하기 위해 사용자가 탭하여 임시로 펼친 일정 ID 목록
   const [expandedCompletedIds, setExpandedCompletedIds] = useState(new Set());
@@ -272,93 +269,32 @@ export default function DailyDiaryView({
             </div>
           </div>
 
-          {/* 탭 바 및 스타일 비교 스위처 */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', flexWrap: 'wrap', marginBottom: folderStyle === 'dock' ? '0.4rem' : '0' }}>
-            <div className={`diary-browser-tabs variant-${folderStyle}`} style={{ flex: 1, minWidth: '260px' }}>
-              <button
-                type="button"
-                className={`diary-browser-tab ${activeDiaryTab === 'schedules' ? 'active' : ''}`}
-                onClick={() => setActiveDiaryTab('schedules')}
-              >
-                <span>예정 일정</span>
-                <span className="diary-tab-count">
-                  {dailySchedules.length + scheduledTasks.length}
-                </span>
-              </button>
+          {/* 독(Dock) 세그먼트 탭 바 */}
+          <div className="diary-dock-tabs">
+            <button
+              type="button"
+              className={`diary-dock-tab tab-schedules ${activeDiaryTab === 'schedules' ? 'active' : ''}`}
+              onClick={() => setActiveDiaryTab('schedules')}
+            >
+              <span>일정</span>
+              <span className="diary-tab-count">
+                {dailySchedules.length + scheduledTasks.length}
+              </span>
+            </button>
 
-              <button
-                type="button"
-                className={`diary-browser-tab ${activeDiaryTab === 'logs' ? 'active' : ''}`}
-                onClick={() => setActiveDiaryTab('logs')}
-              >
-                <span>관리 내역</span>
-                <span className="diary-tab-count">
-                  {dailyLogs.length}
-                </span>
-              </button>
-            </div>
-
-            {/* 스타일 비교 버튼 (독 형태 / 오픈 폴더 / 노트 서류철) */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem', marginBottom: folderStyle === 'open' ? '1.15rem' : folderStyle === 'binder' ? '0.25rem' : '1.15rem', fontSize: '0.72rem', color: 'var(--text-subtle)' }}>
-              <span style={{ fontWeight: 600 }}>비교:</span>
-              <button
-                type="button"
-                onClick={() => setFolderStyle('dock')}
-                style={{
-                  background: folderStyle === 'dock' ? 'var(--color-primary)' : 'var(--bg-card-subtle)',
-                  color: folderStyle === 'dock' ? '#ffffff' : 'var(--text-muted)',
-                  border: '1px solid var(--border-color)',
-                  borderRadius: '4px',
-                  padding: '0.15rem 0.45rem',
-                  fontSize: '0.7rem',
-                  fontWeight: folderStyle === 'dock' ? 700 : 500,
-                  cursor: 'pointer'
-                }}
-                title="독 형태: 중첩 박스 없이 깔끔한 세그먼트 독 방식"
-              >
-                독 형태
-              </button>
-              <button
-                type="button"
-                onClick={() => setFolderStyle('open')}
-                style={{
-                  background: folderStyle === 'open' ? 'var(--color-primary)' : 'var(--bg-card-subtle)',
-                  color: folderStyle === 'open' ? '#ffffff' : 'var(--text-muted)',
-                  border: '1px solid var(--border-color)',
-                  borderRadius: '4px',
-                  padding: '0.15rem 0.45rem',
-                  fontSize: '0.7rem',
-                  fontWeight: folderStyle === 'open' ? 700 : 500,
-                  cursor: 'pointer'
-                }}
-                title="오픈 폴더: 가로선 위에 탭이 얹히고 카드가 100% 채워지는 방식"
-              >
-                오픈 폴더
-              </button>
-              <button
-                type="button"
-                onClick={() => setFolderStyle('binder')}
-                style={{
-                  background: folderStyle === 'binder' ? 'var(--color-primary)' : 'var(--bg-card-subtle)',
-                  color: folderStyle === 'binder' ? '#ffffff' : 'var(--text-muted)',
-                  border: '1px solid var(--border-color)',
-                  borderRadius: '4px',
-                  padding: '0.15rem 0.45rem',
-                  fontSize: '0.7rem',
-                  fontWeight: folderStyle === 'binder' ? 700 : 500,
-                  cursor: 'pointer'
-                }}
-                title="노트 서류철: 바깥 상자는 두고 내부 개별 박스를 줄구분선으로 바꾼 방식"
-              >
-                노트 서류철
-              </button>
-            </div>
+            <button
+              type="button"
+              className={`diary-dock-tab tab-logs ${activeDiaryTab === 'logs' ? 'active' : ''}`}
+              onClick={() => setActiveDiaryTab('logs')}
+            >
+              <span>관리 내역</span>
+              <span className="diary-tab-count">
+                {dailyLogs.length}
+              </span>
+            </button>
           </div>
 
-          {/* 탭 본문 패널 (A안일 때는 투명/패딩 없음, B안일 때는 서류철 카드) */}
-          <div className={`diary-tab-panel variant-${folderStyle}`}>
-
-          {/* 탭 1: 예정 일정 화면 */}
+          {/* 탭 1: 일정 화면 */}
           {activeDiaryTab === 'schedules' && (
             <div>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
@@ -372,7 +308,7 @@ export default function DailyDiaryView({
                   fontWeight: 700
                 }}>
                   <Clock size={16} />
-                  <span>예정 일정 (총 {dailySchedules.length + scheduledTasks.length}건)</span>
+                  <span>일정 (총 {dailySchedules.length + scheduledTasks.length}건)</span>
                 </h4>
                 <button 
                   className="btn btn-outline btn-sm"
@@ -393,7 +329,7 @@ export default function DailyDiaryView({
                   color: 'var(--text-muted)'
                 }}>
                   <Clock size={36} style={{ opacity: 0.3, marginBottom: '0.5rem', color: 'var(--color-accent)' }} />
-                  <div style={{ fontWeight: 600 }}>{selectedDate}에 등록된 예정 일정이 없습니다.</div>
+                  <div style={{ fontWeight: 600 }}>{selectedDate}에 등록된 일정이 없습니다.</div>
                   <p style={{ fontSize: '0.825rem', marginTop: '0.25rem' }}>
                     새로운 영농 일정이나 진료/사료 계획을 등록해보세요.
                   </p>
@@ -842,7 +778,6 @@ export default function DailyDiaryView({
               )}
             </div>
           )}
-          </div>
         </div>
       </div>
     </div>
