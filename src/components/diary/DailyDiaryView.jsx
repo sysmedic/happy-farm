@@ -705,7 +705,6 @@ export default function DailyDiaryView({
                               alignItems: 'center',
                               justifyContent: 'space-between',
                               gap: '0.5rem',
-                              opacity: 0.8,
                               cursor: 'pointer',
                               transition: 'all 0.2s ease',
                               minHeight: '36px'
@@ -758,10 +757,11 @@ export default function DailyDiaryView({
                                 {task.tagNumber}
                               </span>
 
-                              {/* 작업 이름: 박스가 좁으면 표현 가능한 부분까지만 표시 (말줄임) */}
+                              {/* 작업 이름: 원래 선명한 텍스트 컬러 유지 (var(--text-main)) */}
                               <span style={{ 
-                                fontSize: '0.85rem', 
-                                color: 'var(--text-muted)', 
+                                fontSize: '0.88rem', 
+                                fontWeight: 600,
+                                color: 'var(--text-main)', 
                                 textDecoration: 'none',
                                 overflow: 'hidden',
                                 textOverflow: 'ellipsis',
