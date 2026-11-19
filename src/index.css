@@ -2170,10 +2170,10 @@ form.modal-content {
 }
 
 /* Daily Report Responsive Dual Mode */
-.report-mobile-cards {
+.report-mobile-view {
   display: none;
 }
-.report-desktop-table {
+.report-desktop-view {
   display: block;
 }
 
@@ -2694,23 +2694,12 @@ form.modal-content {
     gap: 0.75rem !important;
   }
 
-  .report-desktop-table {
+  .report-desktop-view {
     display: none !important;
   }
 
-  .report-mobile-cards {
-    display: flex !important;
-    flex-direction: column;
-    gap: 0.65rem;
-    margin: 1rem 0;
-  }
-
-  .report-mobile-card {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: var(--radius-md);
-    padding: 0.75rem 0.85rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  .report-mobile-view {
+    display: block !important;
   }
 }
 
@@ -2737,10 +2726,10 @@ form.modal-content {
   .filter-bar,
   .modal-overlay,
   .nav-tabs,
-  .report-mobile-cards {
+  .report-mobile-view {
     display: none !important;
   }
-  .report-desktop-table {
+  .report-desktop-view {
     display: block !important;
   }
   .print-sheet-container {

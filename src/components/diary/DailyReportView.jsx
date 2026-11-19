@@ -77,34 +77,6 @@ export default function DailyReportView({
 
   return (
     <div>
-      {/* 상단 컨트롤 툴바 (인쇄 시 숨겨짐) */}
-      <div className="filter-bar" style={{ marginBottom: '1.5rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-          <label style={{ fontSize: '0.875rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-            <Calendar size={16} />
-            <span>보고서 기준 일자:</span>
-          </label>
-          <input
-            type="date"
-            className="form-input"
-            style={{ width: 'auto' }}
-            value={reportDate}
-            onChange={(e) => setReportDate(e.target.value)}
-          />
-        </div>
-
-        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-          <button className="btn btn-secondary" onClick={handleShare}>
-            <Share2 size={15} />
-            <span>스마트 공유 / 복사</span>
-          </button>
-          <button className="btn btn-primary" onClick={handlePrint}>
-            <Printer size={15} />
-            <span>A4 보고서 인쇄</span>
-          </button>
-        </div>
-      </div>
-
       {shareFeedback && (
         <div style={{
           background: 'rgba(16, 185, 129, 0.15)',
@@ -120,156 +92,349 @@ export default function DailyReportView({
         </div>
       )}
 
-      {/* A4 인쇄 규격 영농 보고서 양식 */}
-      <div className="print-sheet-container card">
-        {/* 보고서 공식 헤더 */}
-        <div className="print-sheet-header">
-          <div>
-            <div style={{ fontSize: '0.85rem', color: '#059669', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              HAPPY FARM DAILY REPORT
+      {/* 📱 1. 모바일 전용 독립 폼 (스마트폰 화면에서만 단독 표시) */}
+      <div className="report-mobile-view">
+        {/* 1. 초간결 스마트 헤더 */}
+        <div className="card" style={{ padding: '0.85rem 0.95rem', marginBottom: '0.75rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', marginBottom: '0.35rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', minWidth: 0, flex: 1 }}>
+              <Calendar size={18} color="var(--color-primary)" style={{ flexShrink: 0 }} />
+              <input
+                type="date"
+                className="form-input"
+                style={{ width: 'auto', padding: '0.25rem 0.5rem', fontSize: '0.95rem', fontWeight: 700, minWidth: 0 }}
+                value={reportDate}
+                onChange={(e) => setReportDate(e.target.value)}
+              />
             </div>
-            <h1 style={{ fontSize: '1.65rem', fontWeight: 900, color: '#0f172a', margin: '4px 0' }}>
-              행복 농장 일일 관리 보고서
-            </h1>
-            <div style={{ fontSize: '0.9rem', color: '#64748b', fontWeight: 600 }}>
-              일자: {reportDate} • 작성자: 홍길동 대표
+
+            <div style={{ display: 'flex', gap: '0.35rem', flexShrink: 0 }}>
+              <button 
+                type="button" 
+                className="btn btn-secondary btn-sm" 
+                onClick={handleShare}
+                title="스마트폰 공유 및 텍스트 복사"
+                style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
+              >
+                <Share2 size={13} />
+                <span>공유</span>
+              </button>
+              <button 
+                type="button" 
+                className="btn btn-primary btn-sm" 
+                onClick={handlePrint}
+                title="A4 규격 인쇄"
+                style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
+              >
+                <Printer size={13} />
+                <span>인쇄</span>
+              </button>
             </div>
           </div>
 
-          <div style={{ textAlign: 'right' }}>
-            <div style={{ 
-              border: '2px solid #10b981', 
-              color: '#059669', 
-              padding: '0.35rem 0.8rem', 
-              borderRadius: '6px', 
-              fontWeight: 800, 
-              fontSize: '0.85rem',
-              display: 'inline-block' 
-            }}>
-              영농 확인 필 (印)
-            </div>
-            <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '4px' }}>
-              출력일시: {new Date().toLocaleString()}
-            </div>
+          <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+            <span>홍길동 대표</span>
+            <span>•</span>
+            <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>당일 총 {dailyLogs.length}건 처치</span>
           </div>
         </div>
 
-        {/* 요약 통계 지표 */}
+        {/* 2. 슬림 요약 뱃지 바 */}
         <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', 
-          gap: '0.75rem', 
-          marginBottom: '1.5rem',
-          background: '#f8fafc',
-          padding: '1rem',
-          borderRadius: '8px',
-          border: '1px solid #e2e8f0'
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: '0.4rem', 
+          overflowX: 'auto', 
+          paddingBottom: '0.35rem', 
+          marginBottom: '0.85rem',
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none'
         }}>
-          <div>
-            <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>당일 총 처치/작업</span>
-            <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#0f172a' }}>{dailyLogs.length}건</div>
-          </div>
-          <div>
-            <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>예방접종(백신)</span>
-            <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#059669' }}>{categoryStats.vaccine}건</div>
-          </div>
-          <div>
-            <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>진료 및 투약</span>
-            <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#dc2626' }}>{categoryStats.treatment}건</div>
-          </div>
-          <div>
-            <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>번식 / 인공수정</span>
-            <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#0284c7' }}>{categoryStats.breeding}건</div>
-          </div>
-          <div>
-            <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>집행 비용 합계</span>
-            <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#0f172a' }}>{totalCost.toLocaleString()}원</div>
-          </div>
+          <span style={{ 
+            fontSize: '0.78rem', 
+            background: 'var(--bg-card)', 
+            border: '1px solid var(--border-color)', 
+            padding: '0.25rem 0.55rem', 
+            borderRadius: 'var(--radius-sm)', 
+            fontWeight: 700,
+            whiteSpace: 'nowrap',
+            color: 'var(--text-main)'
+          }}>
+            총 작업 {dailyLogs.length}건
+          </span>
+          {categoryStats.vaccine > 0 && (
+            <span style={{ 
+              fontSize: '0.78rem', 
+              background: 'rgba(5, 150, 105, 0.1)', 
+              border: '1px solid rgba(5, 150, 105, 0.25)', 
+              color: '#059669', 
+              padding: '0.25rem 0.55rem', 
+              borderRadius: 'var(--radius-sm)', 
+              fontWeight: 700,
+              whiteSpace: 'nowrap'
+            }}>
+              백신 {categoryStats.vaccine}건
+            </span>
+          )}
+          {categoryStats.treatment > 0 && (
+            <span style={{ 
+              fontSize: '0.78rem', 
+              background: 'rgba(220, 38, 38, 0.1)', 
+              border: '1px solid rgba(220, 38, 38, 0.25)', 
+              color: '#dc2626', 
+              padding: '0.25rem 0.55rem', 
+              borderRadius: 'var(--radius-sm)', 
+              fontWeight: 700,
+              whiteSpace: 'nowrap'
+            }}>
+              진료·치료 {categoryStats.treatment}건
+            </span>
+          )}
+          {categoryStats.breeding > 0 && (
+            <span style={{ 
+              fontSize: '0.78rem', 
+              background: 'rgba(2, 132, 199, 0.1)', 
+              border: '1px solid rgba(2, 132, 199, 0.25)', 
+              color: '#0284c7', 
+              padding: '0.25rem 0.55rem', 
+              borderRadius: 'var(--radius-sm)', 
+              fontWeight: 700,
+              whiteSpace: 'nowrap'
+            }}>
+              수정 {categoryStats.breeding}건
+            </span>
+          )}
+          <span style={{ 
+            fontSize: '0.78rem', 
+            background: 'var(--bg-card)', 
+            border: '1px solid var(--border-color)', 
+            color: 'var(--text-main)', 
+            padding: '0.25rem 0.55rem', 
+            borderRadius: 'var(--radius-sm)', 
+            fontWeight: 700,
+            whiteSpace: 'nowrap'
+          }}>
+            비용 {totalCost.toLocaleString()}원
+          </span>
         </div>
 
-        {/* ⚡ 요구사항 3: 보고서의 개체번호를 클릭하면 개체번호의 관리 내역으로 이동! */}
-        <div style={{ marginBottom: '1.5rem' }}>
+        {/* 3. 세부 관리 내역 섹션 */}
+        <div style={{ marginBottom: '1.25rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>
-              1. 세부 관리 및 처치 내역
-            </h3>
-            <span style={{ fontSize: '0.8rem', color: '#64748b' }}>
-              💡 파란색 개체번호 클릭 시 개체별 전체 이력으로 즉시 이동합니다.
-            </span>
+            <h4 style={{ fontSize: '0.92rem', fontWeight: 800, margin: 0, color: 'var(--text-main)' }}>
+              📋 세부 관리 내역 ({dailyLogs.length}건)
+            </h4>
           </div>
 
           {dailyLogs.length === 0 ? (
-            <div style={{ 
+            <div className="card" style={{ 
               textAlign: 'center', 
-              padding: '2.5rem', 
-              background: '#f8fafc', 
-              border: '1px dashed #cbd5e1', 
-              borderRadius: '8px',
-              color: '#64748b' 
+              padding: '2rem 1rem', 
+              color: 'var(--text-muted)',
+              fontSize: '0.85rem'
             }}>
               {reportDate}에 등록된 영농 관리 내역이 없습니다.
             </div>
           ) : (
-            <>
-              {/* 1. 모바일 전용 카드 리스트 (좌우 스크롤 없이 한눈에 보기) */}
-              <div className="report-mobile-cards">
-                {dailyLogs.map(log => {
-                  const catObj = getCategoryById(log.category, careCategories);
-
-                  return (
-                    <div key={`m-${log.id}`} className="report-mobile-card">
-                      {/* 1행: [시간] [개체번호] [이름] [분류] (좌측) & [담당자] (우측) */}
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.45rem', flexWrap: 'wrap' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap', minWidth: 0 }}>
-                          {log.time && (
-                            <span style={{ fontWeight: 700, fontSize: '0.85rem', color: '#64748b' }}>
-                              {log.time}
-                            </span>
-                          )}
-                          <span 
-                            className="badge badge-tag"
-                            onClick={() => onOpenEntityDetail(log.tagNumber)}
-                            title="클릭 시 이 개체의 관리 내역으로 이동"
-                            style={{ cursor: 'pointer', fontSize: '0.75rem', padding: '0.15rem 0.45rem' }}
-                          >
-                            {log.tagNumber}
-                          </span>
-                          <span style={{ fontWeight: 700, fontSize: '0.88rem', color: '#0f172a' }}>
-                            {log.entityName}
-                          </span>
-                        </div>
-                        {log.operator && (
-                          <span style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 500, flexShrink: 0 }}>
-                            담당: {log.operator}
-                          </span>
-                        )}
-                      </div>
-
-                      {/* 2행: 작업 제목 */}
-                      <div style={{ fontWeight: 800, fontSize: '0.95rem', color: '#0f172a', marginTop: '0.4rem' }}>
-                        {log.title}
-                      </div>
-
-                      {/* 3행: 상세 처치 내용 */}
-                      {log.details && (
-                        <div style={{ fontSize: '0.825rem', color: '#475569', lineHeight: 1.45, marginTop: '0.2rem' }}>
-                          {log.details}
-                        </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+              {dailyLogs.map(log => (
+                <div key={`m-card-${log.id}`} className="card" style={{ padding: '0.75rem 0.85rem' }}>
+                  {/* 1행: [시간] [개체번호] [이름] (좌측) & [담당자] (우측) */}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.45rem', flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap', minWidth: 0 }}>
+                      {log.time && (
+                        <span style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                          {log.time}
+                        </span>
                       )}
-
-                      {/* 4행: 다음 일정 */}
-                      {log.nextScheduleDate && (
-                        <div style={{ fontSize: '0.78rem', color: '#d97706', marginTop: '0.35rem', fontWeight: 700 }}>
-                          다음 일정: {log.nextScheduleDate} {log.nextScheduleTime ? `(${log.nextScheduleTime}) ` : ''}({log.nextScheduleTitle || '예정'})
-                        </div>
-                      )}
+                      <span 
+                        className="badge badge-tag"
+                        onClick={() => onOpenEntityDetail(log.tagNumber)}
+                        title="클릭 시 이 개체의 관리 내역으로 이동"
+                        style={{ cursor: 'pointer', fontSize: '0.75rem', padding: '0.15rem 0.45rem' }}
+                      >
+                        {log.tagNumber}
+                      </span>
+                      <span style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--text-main)' }}>
+                        {log.entityName}
+                      </span>
                     </div>
-                  );
-                })}
-              </div>
+                    {log.operator && (
+                      <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 500, flexShrink: 0 }}>
+                        담당: {log.operator}
+                      </span>
+                    )}
+                  </div>
 
-              {/* 2. PC 및 A4 인쇄용 정통 테이블 */}
-              <div className="report-desktop-table" style={{ overflowX: 'auto' }}>
+                  {/* 2행: 작업 제목 */}
+                  <div style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-main)', marginTop: '0.4rem' }}>
+                    {log.title}
+                  </div>
+
+                  {/* 3행: 상세 처치 내용 */}
+                  {log.details && (
+                    <div style={{ fontSize: '0.825rem', color: 'var(--text-subtle)', lineHeight: 1.45, marginTop: '0.2rem' }}>
+                      {log.details}
+                    </div>
+                  )}
+
+                  {/* 4행: 다음 일정 */}
+                  {log.nextScheduleDate && (
+                    <div style={{ fontSize: '0.78rem', color: '#d97706', marginTop: '0.35rem', fontWeight: 700 }}>
+                      다음 일정: {log.nextScheduleDate} {log.nextScheduleTime ? `(${log.nextScheduleTime}) ` : ''}({log.nextScheduleTitle || '예정'})
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* 4. 모바일 영농 특이사항 */}
+        <div className="card" style={{ padding: '0.85rem 1rem' }}>
+          <h4 style={{ fontSize: '0.92rem', fontWeight: 800, margin: '0 0 0.45rem 0', color: 'var(--text-main)' }}>
+            📝 일일 영농 특이사항
+          </h4>
+          <textarea
+            className="form-textarea"
+            style={{ 
+              background: 'var(--bg-card-subtle)', 
+              border: '1px solid var(--border-color)', 
+              borderRadius: 'var(--radius-sm)',
+              padding: '0.65rem 0.75rem', 
+              fontSize: '0.85rem',
+              lineHeight: 1.5,
+              width: '100%',
+              minHeight: '75px' 
+            }}
+            value={farmNotes}
+            onChange={(e) => setFarmNotes(e.target.value)}
+            placeholder="당일 기상, 사료 섭취 상태, 이상 증상 개체 등 일일 총평을 입력하세요."
+          />
+        </div>
+      </div>
+
+      {/* 🖨️ 2. PC 및 A4 인쇄 전용 공식 뷰 (모바일에서는 숨김, A4 인쇄 시 100% 무결 출력) */}
+      <div className="report-desktop-view">
+        {/* 상단 컨트롤 툴바 (인쇄 시 숨겨짐) */}
+        <div className="filter-bar" style={{ marginBottom: '1.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+            <label style={{ fontSize: '0.875rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <Calendar size={16} />
+              <span>보고서 기준 일자:</span>
+            </label>
+            <input
+              type="date"
+              className="form-input"
+              style={{ width: 'auto' }}
+              value={reportDate}
+              onChange={(e) => setReportDate(e.target.value)}
+            />
+          </div>
+
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+            <button className="btn btn-secondary" onClick={handleShare}>
+              <Share2 size={15} />
+              <span>스마트 공유 / 복사</span>
+            </button>
+            <button className="btn btn-primary" onClick={handlePrint}>
+              <Printer size={15} />
+              <span>A4 보고서 인쇄</span>
+            </button>
+          </div>
+        </div>
+
+        {/* A4 인쇄 규격 영농 보고서 양식 */}
+        <div className="print-sheet-container card">
+          {/* 보고서 공식 헤더 */}
+          <div className="print-sheet-header">
+            <div>
+              <div style={{ fontSize: '0.85rem', color: '#059669', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                HAPPY FARM DAILY REPORT
+              </div>
+              <h1 style={{ fontSize: '1.65rem', fontWeight: 900, color: '#0f172a', margin: '4px 0' }}>
+                행복 농장 일일 관리 보고서
+              </h1>
+              <div style={{ fontSize: '0.9rem', color: '#64748b', fontWeight: 600 }}>
+                일자: {reportDate} • 작성자: 홍길동 대표
+              </div>
+            </div>
+
+            <div style={{ textAlign: 'right' }}>
+              <div style={{ 
+                border: '2px solid #10b981', 
+                color: '#059669', 
+                padding: '0.35rem 0.8rem', 
+                borderRadius: '6px', 
+                fontWeight: 800, 
+                fontSize: '0.85rem',
+                display: 'inline-block' 
+              }}>
+                영농 확인 필 (印)
+              </div>
+              <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '4px' }}>
+                출력일시: {new Date().toLocaleString()}
+              </div>
+            </div>
+          </div>
+
+          {/* 요약 통계 지표 */}
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', 
+            gap: '0.75rem', 
+            marginBottom: '1.5rem',
+            background: '#f8fafc',
+            padding: '1rem',
+            borderRadius: '8px',
+            border: '1px solid #e2e8f0'
+          }}>
+            <div>
+              <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>당일 총 처치/작업</span>
+              <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#0f172a' }}>{dailyLogs.length}건</div>
+            </div>
+            <div>
+              <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>예방접종(백신)</span>
+              <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#059669' }}>{categoryStats.vaccine}건</div>
+            </div>
+            <div>
+              <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>진료 및 투약</span>
+              <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#dc2626' }}>{categoryStats.treatment}건</div>
+            </div>
+            <div>
+              <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>번식 / 인공수정</span>
+              <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#0284c7' }}>{categoryStats.breeding}건</div>
+            </div>
+            <div>
+              <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>집행 비용 합계</span>
+              <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#0f172a' }}>{totalCost.toLocaleString()}원</div>
+            </div>
+          </div>
+
+          {/* ⚡ 요구사항 3: 보고서의 개체번호를 클릭하면 개체번호의 관리 내역으로 이동! */}
+          <div style={{ marginBottom: '1.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>
+                1. 세부 관리 및 처치 내역
+              </h3>
+              <span style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                💡 파란색 개체번호 클릭 시 개체별 전체 이력으로 즉시 이동합니다.
+              </span>
+            </div>
+
+            {dailyLogs.length === 0 ? (
+              <div style={{ 
+                textAlign: 'center', 
+                padding: '2.5rem', 
+                background: '#f8fafc', 
+                border: '1px dashed #cbd5e1', 
+                borderRadius: '8px',
+                color: '#64748b' 
+              }}>
+                {reportDate}에 등록된 영농 관리 내역이 없습니다.
+              </div>
+            ) : (
+              <div style={{ overflowX: 'auto' }}>
                 <table className="print-table">
                   <thead>
                     <tr>
@@ -325,48 +490,48 @@ export default function DailyReportView({
                   </tbody>
                 </table>
               </div>
-            </>
-          )}
-        </div>
+            )}
+          </div>
 
-        {/* 2. 관리자 총평 및 특이사항 */}
-        <div style={{ marginTop: '1.5rem' }}>
-          <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0f172a', marginBottom: '0.5rem' }}>
-            2. 영농 총평 및 일일 특이사항
-          </h3>
+          {/* 2. 관리자 총평 및 특이사항 */}
+          <div style={{ marginTop: '1.5rem' }}>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0f172a', marginBottom: '0.5rem' }}>
+              2. 영농 총평 및 일일 특이사항
+            </h3>
+            <div style={{ 
+              background: '#f8fafc', 
+              border: '1px solid #e2e8f0', 
+              borderRadius: '8px', 
+              padding: '1rem',
+              fontSize: '0.875rem',
+              lineHeight: 1.6,
+              color: '#334155'
+            }}>
+              <textarea
+                className="form-textarea"
+                style={{ background: 'transparent', border: 'none', padding: 0, minHeight: '60px' }}
+                value={farmNotes}
+                onChange={(e) => setFarmNotes(e.target.value)}
+                placeholder="당일 기상, 사료 섭취 상태, 이상 증상 개체 등 일일 총평을 입력하세요."
+              />
+            </div>
+          </div>
+
+          {/* 인쇄용 하단 서명부 */}
           <div style={{ 
-            background: '#f8fafc', 
-            border: '1px solid #e2e8f0', 
-            borderRadius: '8px', 
-            padding: '1rem',
-            fontSize: '0.875rem',
-            lineHeight: 1.6,
-            color: '#334155'
+            marginTop: '2.5rem', 
+            paddingTop: '1.5rem', 
+            borderTop: '2px solid #0f172a',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
           }}>
-            <textarea
-              className="form-textarea"
-              style={{ background: 'transparent', border: 'none', padding: 0, minHeight: '60px' }}
-              value={farmNotes}
-              onChange={(e) => setFarmNotes(e.target.value)}
-              placeholder="당일 기상, 사료 섭취 상태, 이상 증상 개체 등 일일 총평을 입력하세요."
-            />
-          </div>
-        </div>
-
-        {/* 인쇄용 하단 서명부 */}
-        <div style={{ 
-          marginTop: '2.5rem', 
-          paddingTop: '1.5rem', 
-          borderTop: '2px solid #0f172a',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center'
-        }}>
-          <div style={{ fontSize: '0.85rem', color: '#475569' }}>
-            행복 농장 (Happy Farm System) • 고객등록카드 기반 개체식별 관리
-          </div>
-          <div style={{ fontSize: '0.9rem', fontWeight: 700 }}>
-            관리 책임자: 홍길동 (서명 또는 인)
+            <div style={{ fontSize: '0.85rem', color: '#475569' }}>
+              행복 농장 (Happy Farm System) • 고객등록카드 기반 개체식별 관리
+            </div>
+            <div style={{ fontSize: '0.9rem', fontWeight: 700 }}>
+              관리 책임자: 홍길동 (서명 또는 인)
+            </div>
           </div>
         </div>
       </div>
