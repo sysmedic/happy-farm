@@ -257,7 +257,7 @@ export default function DailyDiaryView({
 
         {/* 오른쪽: 선택한 날짜의 다이어리 및 관리 내역 (외부 중첩 박스 제거로 시원한 뷰 제공) */}
         <div className="diary-detail-section">
-          {/* 상단 날짜 및 액션 헤더 */}
+          {/* 상단 날짜 헤더 */}
           <div className="diary-section-header">
             <div>
               <span style={{ fontSize: '0.8rem', color: 'var(--color-primary)', fontWeight: 700, textTransform: 'uppercase' }}>
@@ -266,33 +266,6 @@ export default function DailyDiaryView({
               <h2 style={{ fontSize: '1.35rem', fontWeight: 800, margin: '0.15rem 0 0 0' }}>
                 {getFormattedDateTitle(selectedDate)}
               </h2>
-            </div>
-
-            <div className="diary-header-actions" style={{ display: 'flex', gap: '0.45rem', alignItems: 'center' }}>
-              <button 
-                className="btn btn-secondary btn-sm diary-action-report"
-                onClick={() => onNavigateToReport(selectedDate)}
-                title="이 날짜의 일일 종합 영농 보고서 보기"
-              >
-                <FileText size={15} />
-                <span>일일 보고서 작성</span>
-              </button>
-              <button 
-                className="btn btn-outline btn-sm diary-action-schedule"
-                onClick={() => onOpenScheduleModal(selectedDate)}
-                title="이 날짜에 새 영농 일정 추가"
-              >
-                <Plus size={15} />
-                <span>일정 추가</span>
-              </button>
-              <button 
-                className="btn btn-primary btn-sm diary-action-record"
-                onClick={() => onOpenCareLogModal(null, selectedDate)}
-                title="이 날짜에 실시된 관리 작업 기록 추가"
-              >
-                <Plus size={15} />
-                <span>금일 작업 기록</span>
-              </button>
             </div>
           </div>
 
@@ -737,7 +710,7 @@ export default function DailyDiaryView({
           {/* 탭 2: 관리 내역 화면 */}
           {activeDiaryTab === 'logs' && (
             <div>
-              <div style={{ marginBottom: '0.75rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem', gap: '0.5rem', flexWrap: 'wrap' }}>
                 <h4 style={{ 
                   fontSize: '0.95rem', 
                   fontWeight: 700,
@@ -749,6 +722,16 @@ export default function DailyDiaryView({
                   <CheckCircle2 size={16} color="var(--color-primary)" />
                   <span>관리 내역 ({dailyLogs.length}건)</span>
                 </h4>
+
+                <button 
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => onNavigateToReport(selectedDate)}
+                  title="이 날짜의 일일 종합 영농 보고서 보기"
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', padding: '0.25rem 0.65rem', fontSize: '0.8rem', fontWeight: 600 }}
+                >
+                  <FileText size={14} />
+                  <span>일일 보고서</span>
+                </button>
               </div>
 
               {dailyLogs.length === 0 ? (
