@@ -260,7 +260,7 @@ export default function DailyReportView({
                           )}
                           {log.nextScheduleDate && (
                             <div style={{ fontSize: '0.75rem', color: '#d97706', marginTop: '2px', fontWeight: 600 }}>
-                              👉 차기 예정: {log.nextScheduleDate} {log.nextScheduleTime ? `(${log.nextScheduleTime}) ` : ''}({log.nextScheduleTitle || '예정'})
+                              다음 일정: {log.nextScheduleDate} {log.nextScheduleTime ? `(${log.nextScheduleTime}) ` : ''}({log.nextScheduleTitle || '예정'})
                             </div>
                           )}
                         </td>
