@@ -1516,12 +1516,12 @@ a:hover {
   z-index: 5;
 }
 
-/* 1열: 개체번호 + 별명 + 총 N건 */
+/* 1열: 개체번호 + 별명 (좌측) | 전체보기 버튼 (우측 끝 양끝 정렬) */
 .fullhistory-header-identity-row {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 0.65rem;
-  flex-wrap: wrap;
   width: 100%;
 }
 
@@ -2505,6 +2505,7 @@ form.modal-content {
 
   .fullhistory-header-identity-row {
     gap: 0.45rem !important;
+    justify-content: space-between !important;
   }
 
   .fullhistory-tag {

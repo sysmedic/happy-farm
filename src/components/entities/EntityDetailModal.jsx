@@ -102,10 +102,12 @@ export default function EntityDetailModal({
         {/* 모달 상단 헤더: viewMode에 따른 분기 */}
         {viewMode === 'fullHistory' ? (
           <div className="modal-header entity-detail-header fullhistory-header">
-            {/* 1열: 개체번호 + 별명 + 총 N건 (동등한 박스 규격의 전체보기 버튼) */}
+            {/* 1열: 개체번호 + 별명 (좌측) | 전체보기 버튼 (우측 끝 양끝 정렬) */}
             <div className="fullhistory-header-identity-row">
-              <span className="entity-ear-tag fullhistory-tag">{entity.tagNumber}</span>
-              <h2 className="fullhistory-entity-name">{entity.name}</h2>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', minWidth: 0, flex: 1, overflow: 'hidden' }}>
+                <span className="entity-ear-tag fullhistory-tag" style={{ flexShrink: 0 }}>{entity.tagNumber}</span>
+                <h2 className="fullhistory-entity-name" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{entity.name}</h2>
+              </div>
               <button
                 type="button"
                 className={`fullhistory-total-tag ${selectedCategory === 'all' ? 'active' : ''}`}
