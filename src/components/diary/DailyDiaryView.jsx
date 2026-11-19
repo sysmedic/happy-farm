@@ -392,7 +392,7 @@ export default function DailyDiaryView({
                             className="diary-item-card"
                             onClick={() => toggleExpandCompleted(sched.id)}
                             style={{
-                              background: 'var(--bg-card-subtle)',
+                              background: 'var(--bg-card)',
                               border: '1px solid var(--border-color)',
                               borderRadius: 'var(--radius-md)',
                               padding: '0.45rem 0.75rem',
@@ -403,7 +403,8 @@ export default function DailyDiaryView({
                               cursor: 'pointer',
                               transition: 'all 0.2s ease',
                               minHeight: '36px',
-                              overflow: 'hidden'
+                              overflow: 'hidden',
+                              opacity: 1
                             }}
                             title="클릭하여 상세 내용 펼치기"
                           >
@@ -456,7 +457,7 @@ export default function DailyDiaryView({
                               ) : (
                                 <span style={{
                                   fontSize: '0.75rem',
-                                  color: 'var(--text-muted)',
+                                  color: 'var(--text-main)',
                                   background: 'var(--bg-card-subtle)',
                                   padding: '0.15rem 0.45rem',
                                   borderRadius: '4px',
@@ -464,7 +465,7 @@ export default function DailyDiaryView({
                                   fontWeight: 600,
                                   flexShrink: 0
                                 }}>
-                                  🌾 {sched.entityName || '농장 공통'}
+                                  {sched.entityName || '농장 공통'}
                                 </span>
                               )}
 
@@ -499,14 +500,14 @@ export default function DailyDiaryView({
                           key={sched.id}
                           className="diary-item-card"
                           style={{
-                            background: isDone ? 'var(--bg-card-subtle)' : 'rgba(245, 158, 11, 0.08)',
+                            background: isDone ? 'var(--bg-card)' : 'rgba(245, 158, 11, 0.08)',
                             border: `1px solid ${isDone ? 'var(--border-color)' : 'rgba(245, 158, 11, 0.3)'}`,
                             borderRadius: 'var(--radius-md)',
                             padding: '0.65rem 0.85rem',
                             display: 'flex',
                             flexDirection: 'column',
                             gap: '0.35rem',
-                            opacity: isDone ? 0.8 : 1,
+                            opacity: 1,
                             transition: 'all 0.2s ease'
                           }}
                         >
@@ -552,7 +553,7 @@ export default function DailyDiaryView({
                               ) : (
                                 <span style={{
                                   fontSize: '0.75rem',
-                                  color: 'var(--text-muted)',
+                                  color: 'var(--text-main)',
                                   background: 'var(--bg-card-subtle)',
                                   padding: '0.15rem 0.45rem',
                                   borderRadius: '4px',
@@ -560,7 +561,7 @@ export default function DailyDiaryView({
                                   fontWeight: 600,
                                   flexShrink: 0
                                 }}>
-                                  🌾 {sched.entityName || '농장 공통'}{sched.time ? ` (${sched.time.startsWith('0') ? sched.time.slice(1) : sched.time})` : ''}
+                                  {sched.entityName || '농장 공통'}{sched.time ? ` (${sched.time.startsWith('0') ? sched.time.slice(1) : sched.time})` : ''}
                                 </span>
                               )}
 
@@ -569,7 +570,7 @@ export default function DailyDiaryView({
                                 <span style={{ 
                                   fontSize: '0.825rem', 
                                   fontWeight: 600, 
-                                  color: isDone ? 'var(--text-muted)' : 'var(--text-main)',
+                                  color: 'var(--text-main)',
                                   display: 'inline-flex',
                                   alignItems: 'baseline',
                                   gap: '0.2rem'
@@ -630,7 +631,7 @@ export default function DailyDiaryView({
                             fontSize: '0.92rem',
                             wordBreak: 'break-word',
                             paddingLeft: 0,
-                            color: isDone ? 'var(--text-muted)' : 'var(--text-main)',
+                            color: 'var(--text-main)',
                             textDecoration: isDone ? 'line-through' : 'none',
                             lineHeight: 1.35
                           }}>
@@ -709,7 +710,7 @@ export default function DailyDiaryView({
                             className="diary-item-card"
                             onClick={() => toggleExpandCompleted(reminderCardId)}
                             style={{
-                              background: 'var(--bg-card-subtle)',
+                              background: 'var(--bg-card)',
                               border: '1px solid var(--border-color)',
                               borderRadius: 'var(--radius-md)',
                               padding: '0.45rem 0.75rem',
@@ -719,7 +720,8 @@ export default function DailyDiaryView({
                               gap: '0.5rem',
                               cursor: 'pointer',
                               transition: 'all 0.2s ease',
-                              minHeight: '36px'
+                              minHeight: '36px',
+                              opacity: 1
                             }}
                             title="클릭하여 상세 내용 펼치기"
                           >
@@ -799,14 +801,14 @@ export default function DailyDiaryView({
                           key={`sched-${task.id}`}
                           className="diary-item-card"
                           style={{
-                            background: isDone ? 'var(--bg-card-subtle)' : 'rgba(245, 158, 11, 0.08)',
+                            background: isDone ? 'var(--bg-card)' : 'rgba(245, 158, 11, 0.08)',
                             border: `1px solid ${isDone ? 'var(--border-color)' : 'rgba(245, 158, 11, 0.3)'}`,
                             borderRadius: 'var(--radius-md)',
                             padding: '0.65rem 0.85rem',
                             display: 'flex',
                             flexDirection: 'column',
                             gap: '0.35rem',
-                            opacity: isDone ? 0.8 : 1,
+                            opacity: 1,
                             transition: 'all 0.2s ease'
                           }}
                         >
@@ -856,7 +858,7 @@ export default function DailyDiaryView({
                               <span style={{ 
                                 fontSize: '0.825rem', 
                                 fontWeight: 600, 
-                                color: isDone ? 'var(--text-muted)' : 'var(--text-main)' 
+                                color: 'var(--text-main)' 
                               }}>
                                 {task.entityName}
                               </span>
@@ -912,7 +914,7 @@ export default function DailyDiaryView({
                             fontSize: '0.92rem', 
                             wordBreak: 'break-word',
                             paddingLeft: 0,
-                            color: isDone ? 'var(--text-muted)' : 'var(--text-main)',
+                            color: 'var(--text-main)',
                             textDecoration: isDone ? 'line-through' : 'none',
                             lineHeight: 1.35
                           }}>
