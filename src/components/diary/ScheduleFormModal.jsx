@@ -40,7 +40,8 @@ export default function ScheduleFormModal({
   scheduleToEdit,
   entities = [],
   onClose,
-  onSave
+  onSave,
+  onDelete
 }) {
   const isEditing = Boolean(scheduleToEdit);
 
@@ -52,6 +53,14 @@ export default function ScheduleFormModal({
   const [title, setTitle] = useState(scheduleToEdit?.title || '');
   const [memo, setMemo] = useState(scheduleToEdit?.memo || '');
   const [errorMsg, setErrorMsg] = useState('');
+
+  const handleDelete = () => {
+    if (!scheduleToEdit || !onDelete) return;
+    if (window.confirm('정말 이 일정을 삭제하시겠습니까?\n삭제된 일정은 복구할 수 없습니다.')) {
+      onDelete(scheduleToEdit.id, true);
+      onClose();
+    }
+  };
 
   // 사육 중인 살아있는 개체 목록 필터
   const activeEntities = useMemo(() => {
@@ -352,16 +361,44 @@ export default function ScheduleFormModal({
               type="button" 
               className="btn btn-secondary" 
               onClick={onClose}
+              style={{
+                border: '1px solid var(--text-muted)',
+                color: 'var(--text-main)',
+                fontWeight: 600
+              }}
             >
               취소
             </button>
+            {isEditing && onDelete && (
+              <button 
+                type="button" 
+                className="btn btn-outline"
+                onClick={handleDelete}
+                style={{
+                  border: '1px solid var(--color-danger)',
+                  color: 'var(--color-danger)',
+                  fontWeight: 600,
+                  background: 'var(--bg-card)'
+                }}
+              >
+                삭제
+              </button>
+            )}
             <button 
               type="submit" 
-              className="btn btn-primary"
-              style={{ fontWeight: 700, minWidth: '100px' }}
+              className={`btn ${isEditing ? 'btn-outline' : 'btn-primary'}`}
+              style={{
+                fontWeight: 700,
+                minWidth: '100px',
+                ...(isEditing ? {
+                  border: '1px solid var(--text-muted)',
+                  color: 'var(--text-main)',
+                  background: 'var(--bg-card)'
+                } : {})
+              }}
             >
               <Check size={16} />
-              <span>{isEditing ? '수정 완료' : '일정 등록'}</span>
+              <span>{isEditing ? '수정 사항 저장' : '일정 등록'}</span>
             </button>
           </div>
         </form>

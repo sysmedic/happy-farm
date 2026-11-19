@@ -382,8 +382,8 @@ export default function App() {
   };
 
   // 영농 일정 삭제
-  const handleDeleteSchedule = (scheduleId) => {
-    if (!window.confirm('이 영농 일정을 삭제하시겠습니까?')) return;
+  const handleDeleteSchedule = (scheduleId, skipConfirm = false) => {
+    if (!skipConfirm && !window.confirm('정말 이 일정을 삭제하시겠습니까?\n삭제된 일정은 복구할 수 없습니다.')) return;
     setSchedules(prev => {
       const next = prev.filter(s => s.id !== scheduleId);
       saveSchedules(next);
@@ -608,6 +608,7 @@ export default function App() {
             setScheduleToEdit(null);
           }}
           onSave={handleSaveSchedule}
+          onDelete={handleDeleteSchedule}
         />
       )}
 
