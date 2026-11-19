@@ -1123,30 +1123,60 @@ export default function DailyDiaryView({
                           transition: 'all 0.15s ease'
                         }}
                       >
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                            <span
-                              className="badge badge-tag"
-                              onClick={() => onOpenEntityDetail(log.tagNumber)}
-                              title="클릭 시 이 개체의 관리 내역으로 즉시 이동"
-                            >
-                              {log.tagNumber}
-                            </span>
-                            <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>
-                              {log.entityName}
-                            </span>
-                            <span className={`badge ${catObj.badgeClass}`}>
-                              {catObj.icon} {catObj.label}
-                            </span>
-                          </div>
-
-                          <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-                            {log.time ? `⏰ ${log.time}` : '시간 미지정'}
-                          </div>
+                        {/* 1행: [개체번호] [개체이름] [관리분류] */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.45rem' }}>
+                          <span
+                            className="badge badge-tag"
+                            onClick={() => onOpenEntityDetail(log.tagNumber)}
+                            title="클릭 시 이 개체의 관리 내역으로 즉시 이동"
+                            style={{ cursor: 'pointer' }}
+                          >
+                            {log.tagNumber}
+                          </span>
+                          <span style={{ fontWeight: 700, fontSize: '0.92rem', color: 'var(--text-main)' }}>
+                            {log.entityName}
+                          </span>
+                          <span className={`badge ${catObj.badgeClass}`}>
+                            {catObj.icon} {catObj.label}
+                          </span>
                         </div>
 
-                        <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--text-main)', marginBottom: '0.35rem' }}>
-                          {log.title}
+                        {/* 2행: [관리 작업명 (말줄임)] (좌측) & [시간] (우측 끝, 2행 고정 유지) */}
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          gap: '0.6rem',
+                          marginBottom: log.details ? '0.35rem' : '0.1rem',
+                          width: '100%'
+                        }}>
+                          <div 
+                            style={{ 
+                              fontWeight: 700, 
+                              fontSize: '0.95rem', 
+                              color: 'var(--text-main)',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                              flex: 1,
+                              minWidth: 0
+                            }}
+                            title={log.title}
+                          >
+                            {log.title}
+                          </div>
+
+                          {log.time && (
+                            <div style={{
+                              fontSize: '0.85rem',
+                              color: 'var(--text-muted)',
+                              fontWeight: 600,
+                              whiteSpace: 'nowrap',
+                              flexShrink: 0
+                            }}>
+                              {log.time.startsWith('0') ? log.time.slice(1) : log.time}
+                            </div>
+                          )}
                         </div>
 
                         {log.details && (
