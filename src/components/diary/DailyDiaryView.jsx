@@ -937,26 +937,24 @@ export default function DailyDiaryView({
                             {onEditCareLog && (
                               <button
                                 type="button"
-                                className="btn btn-outline btn-sm"
+                                className="btn btn-outline btn-sm btn-icon-only"
                                 onClick={() => onEditCareLog(task, { focusNextSchedule: true })}
                                 title="이 차기 예정 작업의 원본 관리기록(예정일/작업명 등) 수정"
                                 style={{
-                                  fontSize: '0.75rem',
-                                  padding: '0.2rem 0.55rem',
+                                  width: '28px',
+                                  height: '28px',
+                                  padding: 0,
                                   flexShrink: 0,
                                   display: 'inline-flex',
                                   alignItems: 'center',
-                                  gap: '0.25rem',
-                                  minWidth: '54px',
                                   justifyContent: 'center',
                                   border: '1px solid var(--text-muted)',
                                   color: 'var(--text-main)',
-                                  fontWeight: 600,
-                                  background: 'var(--bg-card)'
+                                  background: 'var(--bg-card)',
+                                  borderRadius: 'var(--radius-sm)'
                                 }}
                               >
-                                <Edit2 size={12} />
-                                <span>수정</span>
+                                <Edit2 size={13} />
                               </button>
                             )}
                           </div>
