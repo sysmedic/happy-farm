@@ -697,18 +697,8 @@ export default function EntityList({
                 </div>
 
                 {/* 액션 버튼 그룹 */}
-                {/* 액션 버튼 그룹: 관리 추가 & 상세 이력 2개로 큼직하고 안전하게 배치 */}
+                {/* 액션 버튼 그룹: 상세 이력(좌) & 관리 추가(우) 배치 */}
                 <div className="entity-card-actions">
-                  <button 
-                    className={`btn ${isHistory ? 'btn-secondary' : 'btn-primary'} btn-sm`}
-                    onClick={() => onOpenCareLogModal(entity)}
-                    title={isShipped ? "출하 완료된 개체 (과거 이력 추가)" : isDeceased ? "폐사/도태된 개체 (과거 이력 추가)" : "이 개체에 관리 기록 추가"}
-                    style={{ flex: 1, height: '36px', fontWeight: 700, gap: '0.4rem' }}
-                  >
-                    <ClipboardList size={15} />
-                    <span>{isHistory ? '이력 추가' : '관리 추가'}</span>
-                  </button>
-
                   <button 
                     className="btn btn-outline btn-sm"
                     onClick={() => onOpenEntityDetail(entity.tagNumber)}
@@ -725,6 +715,16 @@ export default function EntityList({
                   >
                     <History size={15} />
                     <span>상세 이력</span>
+                  </button>
+
+                  <button 
+                    className={`btn ${isHistory ? 'btn-secondary' : 'btn-primary'} btn-sm`}
+                    onClick={() => onOpenCareLogModal(entity)}
+                    title={isShipped ? "출하 완료된 개체 (과거 이력 추가)" : isDeceased ? "폐사/도태된 개체 (과거 이력 추가)" : "이 개체에 관리 기록 추가"}
+                    style={{ flex: 1, height: '36px', fontWeight: 700, gap: '0.4rem' }}
+                  >
+                    <ClipboardList size={15} />
+                    <span>{isHistory ? '이력 추가' : '관리 추가'}</span>
                   </button>
                 </div>
               </div>
