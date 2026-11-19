@@ -494,7 +494,7 @@ export default function EntityDetailModal({
                       className="btn btn-outline btn-sm btn-icon-only"
                       onClick={() => {
                         if (upcomingSchedules[0].type === 'careLog' && onEditCareLog) {
-                          onEditCareLog(upcomingSchedules[0].sourceLog);
+                          onEditCareLog(upcomingSchedules[0].sourceLog, { focusNextSchedule: true });
                         } else if (upcomingSchedules[0].type === 'schedule' && onEditSchedule) {
                           onEditSchedule(upcomingSchedules[0].sourceSchedule);
                         }
@@ -670,7 +670,7 @@ export default function EntityDetailModal({
                               className="btn btn-outline btn-sm btn-icon-only"
                               onClick={() => {
                                 if (item.type === 'careLog' && onEditCareLog) {
-                                  onEditCareLog(item.sourceLog);
+                                  onEditCareLog(item.sourceLog, { focusNextSchedule: true });
                                 } else if (item.type === 'schedule' && onEditSchedule) {
                                   onEditSchedule(item.sourceSchedule);
                                 }
