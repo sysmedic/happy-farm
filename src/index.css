@@ -2283,12 +2283,12 @@ form.modal-content {
     transform: scale(0.9);
   }
 
-  /* 모바일 상단 네비게이션 탭바 (이모지 전용) */
+  /* 모바일 상단 네비게이션 탭바 (4개 탭: 개체관리, 다이어리, 일일보고, 드라이브) */
   .topbar .nav-tabs {
     display: flex !important;
     align-items: center;
-    gap: 8px;
-    padding: 3px 6px;
+    gap: 4px;
+    padding: 3px 5px;
     background: var(--bg-card-subtle);
     border-radius: var(--radius-full);
     border: 1px solid var(--border-color);
@@ -2296,8 +2296,8 @@ form.modal-content {
   }
 
   .topbar .nav-tab-item {
-    padding: 4px 12px;
-    min-width: 46px;
+    padding: 4px 8px;
+    min-width: 38px;
     height: 32px;
     border-radius: var(--radius-full);
     display: flex;
@@ -2318,11 +2318,6 @@ form.modal-content {
 
   /* 모바일에서는 텍스트 레이블 숨김 (이모지/아이콘만 노출하여 최소 공간 차지) */
   .topbar .nav-tab-text {
-    display: none !important;
-  }
-
-  /* 모바일에서는 일일보고 버튼 숨김 */
-  .topbar .nav-tab-report {
     display: none !important;
   }
 

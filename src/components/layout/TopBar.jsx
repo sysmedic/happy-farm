@@ -29,7 +29,7 @@ export default function TopBar({
         </button>
       </div>
 
-      {/* Main Navigation Tabs (모바일에서는 이모지만 표시 & 일일보고 숨김) */}
+      {/* Main Navigation Tabs (모바일에서는 아이콘만 노출, 데스크톱에서는 텍스트 함께 노출) */}
       <nav className="nav-tabs" aria-label="메인 메뉴">
         <button
           className={`nav-tab-item ${activeTab === 'entities' ? 'active' : ''}`}
@@ -51,11 +51,11 @@ export default function TopBar({
           <span className="nav-tab-text">다이어리</span>
         </button>
 
-        {/* 일일보고: 모바일에서는 CSS로 숨김 처리 */}
+        {/* 일일보고: 다이어리와 드라이브 사이 배치 */}
         <button
           className={`nav-tab-item nav-tab-report ${activeTab === 'report' ? 'active' : ''}`}
           onClick={() => onSelectTab('report')}
-          title="일일보고 (영농일지 및 A4 인쇄)"
+          title="일일보고 (영농일지 및 모바일 보고서)"
           aria-label="일일보고"
         >
           <FileText size={17} className="nav-tab-icon" />
