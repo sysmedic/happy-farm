@@ -16,6 +16,204 @@ import {
 } from '../../lib/types.js';
 import { shareFarmReport } from '../../lib/googleDriveService.js';
 
+// 고화질 JPG 이미지 보고서 캔버스 생성기
+function createReportImageBlob({ reportDate, dailyLogs, totalCost, categoryStats, farmNotes }) {
+  return new Promise((resolve) => {
+    const width = 760;
+    // 대략적인 높이 계산
+    let height = 280;
+    dailyLogs.forEach(l => {
+      height += 105;
+      if (l.details) height += 25;
+      if (l.nextScheduleDate) height += 25;
+    });
+    if (farmNotes) height += 120;
+    height += 70;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+
+    // 1. 배경 흰색
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, width, height);
+
+    // 2. 상단 브랜드 헤더 바
+    ctx.fillStyle = '#059669';
+    ctx.fillRect(0, 0, width, 75);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 24px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.fillText('행복 농장 일일 관리 보고서', 30, 46);
+
+    ctx.font = '13px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.fillStyle = '#e2e8f0';
+    ctx.fillText('HAPPY FARM DAILY REPORT', width - 210, 46);
+
+    let y = 110;
+
+    // 3. 일자 및 정보 서브바
+    ctx.fillStyle = '#0f172a';
+    ctx.font = 'bold 17px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.fillText(`일자: ${reportDate}`, 30, y);
+
+    ctx.fillStyle = '#64748b';
+    ctx.font = '14px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.fillText('작성자: 홍길동 대표', 210, y);
+
+    y += 22;
+
+    // 4. 요약 통계 박스
+    ctx.fillStyle = '#f8fafc';
+    ctx.strokeStyle = '#e2e8f0';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    if (ctx.roundRect) {
+      ctx.roundRect(30, y, width - 60, 58, 8);
+    } else {
+      ctx.rect(30, y, width - 60, 58);
+    }
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = '#0f172a';
+    ctx.font = 'bold 15px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.fillText(`총 처치: ${dailyLogs.length}건`, 50, y + 35);
+
+    if (categoryStats.vaccine > 0) {
+      ctx.fillStyle = '#059669';
+      ctx.fillText(`백신: ${categoryStats.vaccine}건`, 180, y + 35);
+    }
+    if (categoryStats.treatment > 0) {
+      ctx.fillStyle = '#dc2626';
+      ctx.fillText(`치료: ${categoryStats.treatment}건`, 290, y + 35);
+    }
+    ctx.fillStyle = '#0284c7';
+    ctx.fillText(`비용: ${totalCost.toLocaleString()}원`, width - 210, y + 35);
+
+    y += 85;
+
+    // 5. 세부 관리 내역 타이틀
+    ctx.fillStyle = '#0f172a';
+    ctx.font = 'bold 17px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.fillText(`세부 관리 내역 (${dailyLogs.length}건)`, 30, y);
+
+    y += 18;
+
+    // 6. 개체별 카드 렌더링
+    if (dailyLogs.length === 0) {
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '14px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      ctx.fillText('등록된 관리 내역이 없습니다.', 50, y + 35);
+      y += 60;
+    } else {
+      dailyLogs.forEach((log) => {
+        let cardH = 80;
+        if (log.operator) cardH += 18;
+        if (log.details) cardH += 22;
+        if (log.nextScheduleDate) cardH += 22;
+
+        ctx.fillStyle = '#ffffff';
+        ctx.strokeStyle = '#cbd5e1';
+        ctx.beginPath();
+        if (ctx.roundRect) {
+          ctx.roundRect(30, y, width - 60, cardH, 8);
+        } else {
+          ctx.rect(30, y, width - 60, cardH);
+        }
+        ctx.fill();
+        ctx.stroke();
+
+        let cardY = y + 25;
+
+        // 1행: 시간 + 개체번호 + 이름
+        ctx.fillStyle = '#64748b';
+        ctx.font = 'bold 14px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+        const timeStr = log.time ? `${log.time}  ` : '';
+        ctx.fillText(timeStr, 48, cardY);
+
+        const timeW = log.time ? ctx.measureText(timeStr).width : 0;
+        ctx.fillStyle = '#0284c7';
+        ctx.font = 'bold 15px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+        ctx.fillText(log.tagNumber, 48 + timeW, cardY);
+
+        const tagW = ctx.measureText(log.tagNumber).width;
+        ctx.fillStyle = '#0f172a';
+        ctx.fillText(`  ${log.entityName}`, 48 + timeW + tagW, cardY);
+
+        // 2행: 담당
+        if (log.operator) {
+          cardY += 19;
+          ctx.fillStyle = '#64748b';
+          ctx.font = '13px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+          ctx.fillText(`담당: ${log.operator}`, 48, cardY);
+        }
+
+        // 3행: 작업 제목
+        cardY += 23;
+        ctx.fillStyle = '#0f172a';
+        ctx.font = 'bold 15px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+        ctx.fillText(`• ${log.title}`, 48, cardY);
+
+        // 4행: 상세 처치
+        if (log.details) {
+          cardY += 19;
+          ctx.fillStyle = '#475569';
+          ctx.font = '13px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+          const truncatedDetails = log.details.length > 55 ? `${log.details.slice(0, 55)}...` : log.details;
+          ctx.fillText(`  ${truncatedDetails}`, 48, cardY);
+        }
+
+        // 5행: 다음 일정
+        if (log.nextScheduleDate) {
+          cardY += 20;
+          ctx.fillStyle = '#d97706';
+          ctx.font = 'bold 13px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+          ctx.fillText(`  다음 일정: ${log.nextScheduleDate} (${log.nextScheduleTitle || '예정'})`, 48, cardY);
+        }
+
+        y += cardH + 10;
+      });
+    }
+
+    y += 10;
+
+    // 7. 영농 특이사항 박스
+    if (farmNotes) {
+      ctx.fillStyle = '#0f172a';
+      ctx.font = 'bold 16px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      ctx.fillText('영농 총평 및 특이사항', 30, y);
+      y += 15;
+
+      ctx.fillStyle = '#f8fafc';
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.beginPath();
+      if (ctx.roundRect) {
+        ctx.roundRect(30, y, width - 60, 58, 8);
+      } else {
+        ctx.rect(30, y, width - 60, 58);
+      }
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#334155';
+      ctx.font = '14px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      ctx.fillText(farmNotes.length > 55 ? `${farmNotes.slice(0, 55)}...` : farmNotes, 48, y + 34);
+      y += 75;
+    }
+
+    // 8. 하단 푸터
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.fillText('행복 농장 (Happy Farm System) • 고객등록카드 기반 개체식별 관리', 30, y + 20);
+
+    canvas.toBlob((blob) => {
+      resolve(blob);
+    }, 'image/jpeg', 0.95);
+  });
+}
+
 export default function DailyReportView({
   targetDate,
   entities,
@@ -59,19 +257,63 @@ export default function DailyReportView({
   };
 
   const handleShare = async () => {
-    let summaryText = `[행복 농장 일일 관리 보고서]\n일자: ${reportDate}\n총 관리 작업: ${dailyLogs.length}건\n총 비용: ${totalCost.toLocaleString()}원\n\n[작업 내역]\n`;
-    dailyLogs.forEach((l, idx) => {
-      summaryText += `${idx + 1}. [${l.tagNumber}] ${l.entityName} - ${l.title} (${l.time || '시간미지정'})\n`;
-    });
-    summaryText += `\n특이사항: ${farmNotes}`;
+    try {
+      setShareFeedback('보고서 사진(JPG) 준비 중...');
+      const imageBlob = await createReportImageBlob({
+        reportDate,
+        dailyLogs,
+        totalCost,
+        categoryStats,
+        farmNotes
+      });
 
-    const res = await shareFarmReport(`행복 농장 일일 보고서 (${reportDate})`, summaryText);
-    if (res.clipboard) {
-      setShareFeedback('보고서 내용이 클립보드에 복사되었습니다! (원하는 곳에 붙여넣기 하세요)');
+      const fileName = `행복농장_일일보고서_${reportDate}.jpg`;
+      const imageFile = imageBlob ? new File([imageBlob], fileName, { type: 'image/jpeg' }) : null;
+
+      // 1. 스마트폰 navigator.share(파일 공유) 지원 시: 카카오톡/문자 사진 공유 창 오픈
+      if (navigator.canShare && imageFile && navigator.canShare({ files: [imageFile] })) {
+        await navigator.share({
+          files: [imageFile],
+          title: `행복 농장 일일 보고서 (${reportDate})`,
+          text: `[행복 농장] ${reportDate} 일일 관리 보고서 사진입니다.`
+        });
+        setShareFeedback('보고서 사진(JPG) 공유가 완료되었습니다!');
+        setTimeout(() => setShareFeedback(''), 3000);
+        return;
+      }
+
+      // 2. 파일 공유 미지원 또는 PC 환경: 고화질 JPG 다운로드 + 텍스트 클립보드 복사
+      if (imageBlob) {
+        const url = URL.createObjectURL(imageBlob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+
+      let summaryText = `[행복 농장 일일 관리 보고서]\n일자: ${reportDate}\n총 관리 작업: ${dailyLogs.length}건\n총 비용: ${totalCost.toLocaleString()}원\n\n[작업 내역]\n`;
+      dailyLogs.forEach((l, idx) => {
+        summaryText += `${idx + 1}. [${l.tagNumber}] ${l.entityName} - ${l.title} (${l.time || '시간미지정'})\n`;
+      });
+      summaryText += `\n특이사항: ${farmNotes}`;
+
+      if (navigator.clipboard) {
+        await navigator.clipboard.writeText(summaryText);
+      }
+
+      setShareFeedback('보고서 사진(JPG)이 저장되고 텍스트가 클립보드에 복사되었습니다!');
       setTimeout(() => setShareFeedback(''), 4000);
-    } else if (res.success) {
-      setShareFeedback('보고서 공유가 완료되었습니다.');
-      setTimeout(() => setShareFeedback(''), 3000);
+    } catch (err) {
+      if (err.name !== 'AbortError') {
+        console.error('Share failed:', err);
+        setShareFeedback('공유 중 오류가 발생했습니다.');
+        setTimeout(() => setShareFeedback(''), 3000);
+      } else {
+        setShareFeedback('');
+      }
     }
   };
 
@@ -94,9 +336,9 @@ export default function DailyReportView({
 
       {/* 📱 1. 모바일 전용 독립 폼 (스마트폰 화면에서만 단독 표시) */}
       <div className="report-mobile-view">
-        {/* 1. 초간결 스마트 헤더 */}
-        <div className="card" style={{ padding: '0.85rem 0.95rem', marginBottom: '0.75rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', marginBottom: '0.35rem' }}>
+        {/* 1. 슬림 1줄 상단 헤더: 날짜 선택 & 공유/인쇄 버튼 */}
+        <div className="card" style={{ padding: '0.65rem 0.85rem', marginBottom: '0.75rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', minWidth: 0, flex: 1 }}>
               <Calendar size={18} color="var(--color-primary)" style={{ flexShrink: 0 }} />
               <input
@@ -113,7 +355,7 @@ export default function DailyReportView({
                 type="button" 
                 className="btn btn-secondary btn-sm" 
                 onClick={handleShare}
-                title="스마트폰 공유 및 텍스트 복사"
+                title="스마트폰 고해상도 이미지 공유 및 텍스트 복사"
                 style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
               >
                 <Share2 size={13} />
@@ -130,12 +372,6 @@ export default function DailyReportView({
                 <span>인쇄</span>
               </button>
             </div>
-          </div>
-
-          <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-            <span>홍길동 대표</span>
-            <span>•</span>
-            <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>당일 총 {dailyLogs.length}건 처치</span>
           </div>
         </div>
 
@@ -239,35 +475,35 @@ export default function DailyReportView({
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
               {dailyLogs.map(log => (
                 <div key={`m-card-${log.id}`} className="card" style={{ padding: '0.75rem 0.85rem' }}>
-                  {/* 1행: [시간] [개체번호] [이름] (좌측) & [담당자] (우측) */}
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.45rem', flexWrap: 'wrap' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap', minWidth: 0 }}>
-                      {log.time && (
-                        <span style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                          {log.time}
-                        </span>
-                      )}
-                      <span 
-                        className="badge badge-tag"
-                        onClick={() => onOpenEntityDetail(log.tagNumber)}
-                        title="클릭 시 이 개체의 관리 내역으로 이동"
-                        style={{ cursor: 'pointer', fontSize: '0.75rem', padding: '0.15rem 0.45rem' }}
-                      >
-                        {log.tagNumber}
-                      </span>
-                      <span style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--text-main)' }}>
-                        {log.entityName}
-                      </span>
-                    </div>
-                    {log.operator && (
-                      <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 500, flexShrink: 0 }}>
-                        담당: {log.operator}
+                  {/* 1행: [시간] [개체번호] [이름] */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap', minWidth: 0 }}>
+                    {log.time && (
+                      <span style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                        {log.time}
                       </span>
                     )}
+                    <span 
+                      className="badge badge-tag"
+                      onClick={() => onOpenEntityDetail(log.tagNumber)}
+                      title="클릭 시 이 개체의 관리 내역으로 이동"
+                      style={{ cursor: 'pointer', fontSize: '0.75rem', padding: '0.15rem 0.45rem' }}
+                    >
+                      {log.tagNumber}
+                    </span>
+                    <span style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--text-main)' }}>
+                      {log.entityName}
+                    </span>
                   </div>
 
-                  {/* 2행: 작업 제목 */}
-                  <div style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-main)', marginTop: '0.4rem' }}>
+                  {/* 2행: 담당 */}
+                  {log.operator && (
+                    <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 500, marginTop: '0.2rem' }}>
+                      담당: {log.operator}
+                    </div>
+                  )}
+
+                  {/* 3행: 작업 제목 */}
+                  <div style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-main)', marginTop: '0.35rem' }}>
                     {log.title}
                   </div>
 
