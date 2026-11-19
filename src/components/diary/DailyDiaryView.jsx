@@ -377,15 +377,14 @@ export default function DailyDiaryView({
                             marginBottom: '0.1rem'
                           }}>
                             <span>📌</span>
-                            <span>등록된 영농 일정 ({dailySchedules.length}건)</span>
+                            <span>등록된 일정 ({dailySchedules.length}건)</span>
                           </div>
                         )}
                         {dailySchedules.map(sched => {
-                      const catDef = SCHEDULE_CATEGORIES.find(c => c.id === sched.category) || SCHEDULE_CATEGORIES[0];
                       const isDone = Boolean(sched.completed);
                       const isExpanded = expandedCompletedIds.has(sched.id);
 
-                      // 1. 완료 상태이면서 접힌 모드인 경우: 가로 한 줄로 콤팩트하게 표시 [체크박스 + 개체번호 + 카테고리아이콘]
+                      // 1. 완료 상태이면서 접힌 모드: 1행 콤팩트 가로 배치 [체크박스 + 개체번호/농장공통 + 일정제목(말줄임)]
                       if (isDone && !isExpanded) {
                         return (
                           <div 
@@ -401,14 +400,20 @@ export default function DailyDiaryView({
                               alignItems: 'center',
                               justifyContent: 'space-between',
                               gap: '0.5rem',
-                              opacity: 0.8,
                               cursor: 'pointer',
                               transition: 'all 0.2s ease',
                               minHeight: '36px'
                             }}
                             title="클릭하여 상세 일정 내용 펼치기"
                           >
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', minWidth: 0, flex: 1 }}>
+                            <div style={{ 
+                              display: 'flex', 
+                              alignItems: 'center', 
+                              gap: '0.5rem', 
+                              minWidth: 0, 
+                              flex: 1, 
+                              overflow: 'hidden' 
+                            }}>
                               {/* 완료 체크 원형 토글 버튼 */}
                               <button
                                 type="button"
@@ -443,32 +448,43 @@ export default function DailyDiaryView({
                                     onOpenEntityDetail(sched.tagNumber);
                                   }}
                                   title="클릭 시 이 개체의 관리 내역으로 이동"
-                                  style={{ cursor: 'pointer', fontSize: '0.75rem', padding: '0.15rem 0.45rem' }}
+                                  style={{ cursor: 'pointer', fontSize: '0.75rem', padding: '0.15rem 0.45rem', flexShrink: 0 }}
                                 >
-                                  {sched.tagNumber} ({sched.entityName})
+                                  {sched.tagNumber}
                                 </span>
                               ) : (
                                 <span style={{
                                   fontSize: '0.75rem',
                                   color: 'var(--text-muted)',
-                                  background: 'var(--bg-card)',
+                                  background: 'var(--bg-card-subtle)',
                                   padding: '0.15rem 0.45rem',
                                   borderRadius: '4px',
                                   border: '1px solid var(--border-color)',
-                                  fontWeight: 600
+                                  fontWeight: 600,
+                                  flexShrink: 0
                                 }}>
-                                  🌾 농장 공통
+                                  🌾 {sched.entityName || '농장 공통'}
                                 </span>
                               )}
 
-                              {/* 카테고리 아이콘 */}
-                              <span style={{ fontSize: '0.95rem' }} title={catDef.label}>
-                                {catDef.icon}
+                              {/* 일정 제목: 원래 선명한 텍스트 컬러 유지 (var(--text-main)), 좁으면 말줄임, 가로줄 없음 */}
+                              <span style={{ 
+                                fontSize: '0.88rem', 
+                                fontWeight: 600,
+                                color: 'var(--text-main)', 
+                                textDecoration: 'none',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                                minWidth: 0,
+                                flex: 1
+                              }}>
+                                {sched.title}
                               </span>
                             </div>
 
                             {/* 우측 펼치기 힌트 아이콘 */}
-                            <div style={{ color: 'var(--text-subtle)', display: 'flex', alignItems: 'center', flexShrink: 0 }} title="상세 내용 펼치기">
+                            <div style={{ color: 'var(--text-subtle)', display: 'flex', alignItems: 'center', flexShrink: 0, paddingLeft: '0.2rem' }} title="상세 내용 펼치기">
                               <ChevronDown size={14} />
                             </div>
                           </div>
@@ -482,21 +498,20 @@ export default function DailyDiaryView({
                           className="diary-item-card"
                           style={{
                             background: isDone ? 'var(--bg-card-subtle)' : 'rgba(245, 158, 11, 0.08)',
-                            border: `1px solid ${isDone ? 'var(--border-color)' : 'rgba(245, 158, 11, 0.35)'}`,
+                            border: `1px solid ${isDone ? 'var(--border-color)' : 'rgba(245, 158, 11, 0.3)'}`,
                             borderRadius: 'var(--radius-md)',
-                            padding: '0.75rem 0.85rem',
+                            padding: '0.65rem 0.85rem',
                             display: 'flex',
                             flexDirection: 'column',
-                            gap: '0.45rem',
-                            opacity: isDone ? 0.75 : 1,
-                            transition: 'all 0.2s ease',
-                            overflow: 'hidden'
+                            gap: '0.35rem',
+                            opacity: isDone ? 0.8 : 1,
+                            transition: 'all 0.2s ease'
                           }}
                         >
-                          {/* 1단 헤더: [원형 완료 체크 토글 + 카테고리 뱃지 + 시간] <---> (우측) [수정/삭제/접기] */}
-                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', minWidth: 0 }}>
-                              {/* 완료 체크 원형 토글 버튼 (글자 제거, 원형 아이콘) */}
+                          {/* 1행: [체크박스] [개체번호 or 농장공통] [별명] [간략한 시간]   ...   [수정][삭제] (우측 상단) */}
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', width: '100%' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap', minWidth: 0, flex: 1 }}>
+                              {/* 완료 체크 원형 토글 버튼 */}
                               <button
                                 type="button"
                                 onClick={() => onToggleScheduleComplete(sched.id)}
@@ -506,48 +521,72 @@ export default function DailyDiaryView({
                                   cursor: 'pointer',
                                   padding: '4px',
                                   margin: '-4px',
-                                  color: isDone ? 'var(--color-primary)' : 'var(--text-subtle)',
+                                  color: isDone ? 'var(--color-primary)' : 'var(--text-muted)',
                                   display: 'inline-flex',
                                   alignItems: 'center',
                                   justifyContent: 'center',
                                   flexShrink: 0,
-                                  borderRadius: '50%',
-                                  transition: 'all 0.15s ease'
+                                  borderRadius: '50%'
                                 }}
-                                title={isDone ? '미완료로 변경' : '완료 처리 (카드 접힘)'}
+                                title={isDone ? '미완료로 변경' : '완료로 표시'}
                               >
                                 {isDone ? (
                                   <CheckCircle2 size={19} color="var(--color-primary)" />
                                 ) : (
-                                  <Circle size={19} strokeWidth={1.8} />
+                                  <Circle size={19} color="var(--text-muted)" />
                                 )}
                               </button>
 
-                              {/* 카테고리 뱃지 */}
-                              <span style={{
-                                fontSize: '0.75rem',
-                                fontWeight: 700,
-                                padding: '0.15rem 0.45rem',
-                                borderRadius: 'var(--radius-sm)',
-                                background: isDone ? 'var(--bg-card)' : 'rgba(245, 158, 11, 0.15)',
-                                color: isDone ? 'var(--text-muted)' : catDef.color,
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '0.25rem'
-                              }}>
-                                <span>{catDef.icon}</span>
-                                <span>{catDef.label}</span>
-                              </span>
+                              {/* 개체번호 뱃지 또는 농장 공통 뱃지 */}
+                              {sched.tagNumber ? (
+                                <span 
+                                  className="badge badge-tag"
+                                  onClick={() => onOpenEntityDetail(sched.tagNumber)}
+                                  title="클릭 시 이 개체의 관리 내역으로 이동"
+                                  style={{ cursor: 'pointer', fontSize: '0.75rem', padding: '0.15rem 0.45rem', flexShrink: 0 }}
+                                >
+                                  {sched.tagNumber}
+                                </span>
+                              ) : (
+                                <span style={{
+                                  fontSize: '0.75rem',
+                                  color: 'var(--text-muted)',
+                                  background: 'var(--bg-card-subtle)',
+                                  padding: '0.15rem 0.45rem',
+                                  borderRadius: '4px',
+                                  border: '1px solid var(--border-color)',
+                                  fontWeight: 600,
+                                  flexShrink: 0
+                                }}>
+                                  🌾 {sched.entityName || '농장 공통'}
+                                </span>
+                              )}
 
-                              {/* 시간 뱃지 */}
+                              {/* 별명 (개체명) */}
+                              {sched.tagNumber && sched.entityName && (
+                                <span style={{ 
+                                  fontSize: '0.825rem', 
+                                  fontWeight: 600, 
+                                  color: isDone ? 'var(--text-muted)' : 'var(--text-main)' 
+                                }}>
+                                  {sched.entityName}
+                                </span>
+                              )}
+
+                              {/* 간략한 시간 표시: 시계 이모지 없이 시간 텍스트만 깔끔하게 (예: 14:30, 9:00) */}
                               {sched.time && (
-                                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-                                  ⏰ {sched.time}
+                                <span style={{ 
+                                  fontSize: '0.78rem', 
+                                  color: 'var(--text-muted)', 
+                                  fontWeight: 500,
+                                  paddingLeft: '0.15rem'
+                                }}>
+                                  {sched.time.startsWith('0') ? sched.time.slice(1) : sched.time}
                                 </span>
                               )}
                             </div>
 
-                            {/* 우측 조작 버튼 (수정, 삭제 및 완료 시 접기 버튼) */}
+                            {/* 우측 조작 버튼 (수정, 삭제 및 펼침 시 다시 접기 버튼) */}
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', flexShrink: 0 }}>
                               {isDone && isExpanded && (
                                 <button
@@ -581,62 +620,31 @@ export default function DailyDiaryView({
                             </div>
                           </div>
 
-                          {/* 2단 본문: 모바일 최적화 세로 3행 레이아웃 */}
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', minWidth: 0, marginTop: '0.1rem' }}>
-                            {/* 1행: 대상 뱃지 */}
-                            <div>
-                              {sched.tagNumber ? (
-                                <span 
-                                  className="badge badge-tag"
-                                  onClick={() => onOpenEntityDetail(sched.tagNumber)}
-                                  title="클릭 시 이 개체의 관리 내역으로 이동"
-                                  style={{ cursor: 'pointer', fontSize: '0.75rem', padding: '0.15rem 0.45rem', display: 'inline-flex', alignItems: 'center' }}
-                                >
-                                  {sched.tagNumber} ({sched.entityName})
-                                </span>
-                              ) : (
-                                <span style={{
-                                  fontSize: '0.75rem',
-                                  color: 'var(--text-muted)',
-                                  background: 'var(--bg-card-subtle)',
-                                  padding: '0.15rem 0.45rem',
-                                  borderRadius: '4px',
-                                  border: '1px solid var(--border-color)',
-                                  fontWeight: 600,
-                                  display: 'inline-flex',
-                                  alignItems: 'center'
-                                }}>
-                                  🌾 농장 공통
-                                </span>
-                              )}
-                            </div>
-
-                            {/* 2행: 일정 제목 (가로 100% 온전히 사용) */}
-                            <div style={{ 
-                              fontWeight: 700, 
-                              fontSize: '0.95rem',
-                              textDecoration: isDone ? 'line-through' : 'none',
-                              color: isDone ? 'var(--text-muted)' : 'var(--text-main)',
-                              wordBreak: 'break-word',
-                              lineHeight: 1.4
-                            }}>
-                              {sched.title}
-                            </div>
-
-                            {/* 3행: 상세 메모 (메모가 있을 때만 렌더링) */}
-                            {sched.memo && (
-                              <div style={{ 
-                                fontSize: '0.8rem', 
-                                color: 'var(--text-muted)', 
-                                marginTop: '0.05rem',
-                                paddingLeft: '0.15rem',
-                                wordBreak: 'break-word',
-                                lineHeight: 1.35
-                              }}>
-                                ※ {sched.memo}
-                              </div>
-                            )}
+                          {/* 2행: 일정 제목 */}
+                          <div style={{ 
+                            fontWeight: 700, 
+                            fontSize: '0.92rem', 
+                            wordBreak: 'break-word',
+                            paddingLeft: '1.75rem',
+                            color: isDone ? 'var(--text-muted)' : 'var(--text-main)',
+                            textDecoration: isDone ? 'line-through' : 'none',
+                            lineHeight: 1.35
+                          }}>
+                            {sched.title}
                           </div>
+
+                          {/* 3행: 상세 메모 (메모가 있을 때만 렌더링) */}
+                          {sched.memo && (
+                            <div style={{ 
+                              fontSize: '0.8rem', 
+                              color: 'var(--text-muted)', 
+                              paddingLeft: '1.75rem',
+                              wordBreak: 'break-word',
+                              lineHeight: 1.35
+                            }}>
+                              ※ {sched.memo}
+                            </div>
+                          )}
                         </div>
                       );
                     })}
