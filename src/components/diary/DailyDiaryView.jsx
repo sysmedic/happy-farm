@@ -941,8 +941,8 @@ export default function DailyDiaryView({
                                 onClick={() => onEditCareLog(task, { focusNextSchedule: true })}
                                 title="이 차기 예정 작업의 원본 관리기록(예정일/작업명 등) 수정"
                                 style={{
-                                  width: '28px',
-                                  height: '28px',
+                                  width: '24px',
+                                  height: '24px',
                                   padding: 0,
                                   flexShrink: 0,
                                   display: 'inline-flex',
@@ -954,7 +954,7 @@ export default function DailyDiaryView({
                                   borderRadius: 'var(--radius-sm)'
                                 }}
                               >
-                                <Edit2 size={13} />
+                                <Edit2 size={12} />
                               </button>
                             )}
                           </div>
