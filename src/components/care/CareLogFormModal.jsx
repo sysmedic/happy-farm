@@ -31,6 +31,7 @@ const getInitialOperator = (logToEdit, careLogs) => {
 export default function CareLogFormModal({
   preselectedEntity,
   logToEdit,
+  initialValues = null,
   entities,
   careLogs,
   careCategories,
@@ -41,11 +42,11 @@ export default function CareLogFormModal({
 }) {
   const isEditing = Boolean(logToEdit);
   const categoriesToDisplay = careCategories || CARE_CATEGORIES;
-  const [selectedEntityId, setSelectedEntityId] = useState(logToEdit?.entityId || preselectedEntity?.id || '');
-  const [date, setDate] = useState(logToEdit?.date || getTodayDateString());
+  const [selectedEntityId, setSelectedEntityId] = useState(logToEdit?.entityId || initialValues?.entityId || preselectedEntity?.id || '');
+  const [date, setDate] = useState(logToEdit?.date || initialValues?.date || getTodayDateString());
   const [time, setTime] = useState(logToEdit?.time || getCurrentTimeString());
-  const [category, setCategory] = useState(logToEdit?.category || 'vaccine');
-  const [title, setTitle] = useState(logToEdit?.title || '');
+  const [category, setCategory] = useState(logToEdit?.category || initialValues?.category || 'vaccine');
+  const [title, setTitle] = useState(logToEdit?.title || initialValues?.title || '');
   const [details, setDetails] = useState(logToEdit?.details || '');
   const [operator, setOperator] = useState(() => getInitialOperator(logToEdit, careLogs));
   const [cost, setCost] = useState(logToEdit?.cost ? String(logToEdit.cost) : '');
@@ -83,6 +84,12 @@ export default function CareLogFormModal({
       setNextScheduleTitle(logToEdit.nextScheduleTitle || '');
     } else {
       setOperator(getInitialOperator(null, careLogs));
+      if (initialValues) {
+        if (initialValues.category) setCategory(initialValues.category);
+        if (initialValues.title) setTitle(initialValues.title);
+        if (initialValues.date) setDate(initialValues.date);
+        if (initialValues.entityId) setSelectedEntityId(initialValues.entityId);
+      }
       if (preselectedEntity) {
         setSelectedEntityId(preselectedEntity.id);
       } else if (entities && entities.length > 0 && !selectedEntityId) {
@@ -90,7 +97,7 @@ export default function CareLogFormModal({
         setSelectedEntityId(firstActive.id);
       }
     }
-  }, [logToEdit, preselectedEntity, entities, selectedEntityId, careLogs]);
+  }, [logToEdit, preselectedEntity, initialValues, entities, selectedEntityId, careLogs]);
 
   // 카테고리 선택 시 권장 작업명 자동 추천
   const handleCategorySelect = (catId) => {

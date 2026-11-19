@@ -721,9 +721,18 @@ export default function DailyDiaryView({
                             <button 
                               type="button"
                               className="btn btn-primary btn-sm"
-                              onClick={() => onOpenCareLogModal(targetEntity || { tagNumber: task.tagNumber, name: task.entityName, id: task.entityId }, selectedDate)}
+                              onClick={() => onOpenCareLogModal(
+                                targetEntity || { tagNumber: task.tagNumber, name: task.entityName, id: task.entityId },
+                                selectedDate,
+                                {
+                                  category: task.category || 'treatment',
+                                  title: task.nextScheduleTitle || '',
+                                  date: selectedDate,
+                                  entityId: task.entityId || (targetEntity ? targetEntity.id : '')
+                                }
+                              )}
                               style={{ fontSize: '0.75rem', padding: '0.25rem 0.55rem', flexShrink: 0 }}
-                              title="이 개체의 새 관리기록 작성창 열기"
+                              title="이 예정 작업으로 새 관리기록 작성 (분류·작업명 자동 입력)"
                             >
                               <Plus size={12} />
                               <span>기록 작성</span>

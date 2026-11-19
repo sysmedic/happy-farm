@@ -54,6 +54,7 @@ export default function App() {
   const [isCareLogModalOpen, setIsCareLogModalOpen] = useState(false);
   const [careLogPreselectedEntity, setCareLogPreselectedEntity] = useState(null);
   const [careLogToEdit, setCareLogToEdit] = useState(null);
+  const [careLogInitialValues, setCareLogInitialValues] = useState(null);
 
   // 영농 일정 모달 상태
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
@@ -456,8 +457,9 @@ export default function App() {
                 careCategories={allCareCategories}
                 schedules={schedules}
                 onOpenEntityDetail={handleOpenEntityDetail}
-                onOpenCareLogModal={(entity = null, date = null) => {
+                onOpenCareLogModal={(entity = null, date = null, initialValues = null) => {
                   setCareLogPreselectedEntity(entity);
+                  setCareLogInitialValues(initialValues);
                   setIsCareLogModalOpen(true);
                 }}
                 onOpenScheduleModal={handleOpenScheduleModal}
@@ -542,6 +544,7 @@ export default function App() {
         <CareLogFormModal
           preselectedEntity={careLogPreselectedEntity}
           logToEdit={careLogToEdit}
+          initialValues={careLogInitialValues}
           entities={entities}
           careLogs={careLogs}
           careCategories={allCareCategories}
@@ -551,6 +554,7 @@ export default function App() {
             setIsCareLogModalOpen(false);
             setCareLogPreselectedEntity(null);
             setCareLogToEdit(null);
+            setCareLogInitialValues(null);
           }}
           onSave={handleSaveCareLog}
         />
