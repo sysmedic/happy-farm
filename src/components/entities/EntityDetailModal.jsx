@@ -464,79 +464,166 @@ export default function EntityDetailModal({
                   </p>
                 </div>
               ) : (
-                <div className="timeline">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
                   {filteredLogs.map(log => {
                     const catObj = getCategoryById(log.category, careCategories);
 
                     return (
-                      <div key={log.id} className="timeline-item">
-                        {/* 타임라인 원형 뱃지 */}
-                        <div className="timeline-dot">
-                          <span style={{ fontSize: '0.75rem' }}>{catObj.icon || '•'}</span>
+                      <div 
+                        key={log.id} 
+                        style={{
+                          background: 'var(--bg-card)',
+                          border: '1px solid var(--border-color)',
+                          borderRadius: 'var(--radius-md)',
+                          padding: '0.65rem 0.85rem',
+                          boxShadow: 'var(--shadow-sm)',
+                          transition: 'all 0.15s ease'
+                        }}
+                      >
+                        {/* 1행: [관리분류 뱃지] (좌측) & [✏️ 수정] [🗑️ 삭제] 액션 버튼 (우측 끝) */}
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          gap: '0.5rem',
+                          marginBottom: '0.45rem',
+                          width: '100%'
+                        }}>
+                          <span className={`badge ${catObj.badgeClass}`}>
+                            {catObj.icon} {catObj.label}
+                          </span>
+
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                            {onEditCareLog && (
+                              <button
+                                type="button"
+                                className="btn btn-outline btn-sm btn-icon-only"
+                                onClick={() => onEditCareLog(log)}
+                                title="관리 기록 수정"
+                                style={{
+                                  width: '26px',
+                                  height: '26px',
+                                  padding: 0,
+                                  flexShrink: 0,
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  border: '1px solid var(--text-muted)',
+                                  color: 'var(--text-main)',
+                                  background: 'var(--bg-card)',
+                                  borderRadius: 'var(--radius-sm)'
+                                }}
+                              >
+                                <Edit3 size={13} />
+                              </button>
+                            )}
+                            {onDeleteCareLog && (
+                              <button
+                                type="button"
+                                className="btn btn-outline btn-sm btn-icon-only"
+                                onClick={() => onDeleteCareLog(log.id)}
+                                title="관리 기록 삭제"
+                                style={{
+                                  width: '26px',
+                                  height: '26px',
+                                  padding: 0,
+                                  flexShrink: 0,
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  border: '1px solid rgba(239, 68, 68, 0.4)',
+                                  color: 'var(--color-danger)',
+                                  background: 'var(--bg-card)',
+                                  borderRadius: 'var(--radius-sm)'
+                                }}
+                              >
+                                <Trash2 size={13} color="var(--color-danger)" />
+                              </button>
+                            )}
+                          </div>
                         </div>
 
-                        <div className="timeline-header">
-                          <div className="timeline-title">
-                            <span>{log.title}</span>
-                            <span className={`badge ${catObj.badgeClass}`}>
-                              {catObj.label}
-                            </span>
-                          </div>
-                          <div style={{ fontSize: '0.825rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-                            {log.date} {log.time && `• ${log.time}`}
+                        {/* 2행: [70% 소프트 블랙 날짜/시간] + [100% 진한 블랙 작업명] */}
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.55rem',
+                          marginBottom: log.details ? '0.35rem' : '0.1rem',
+                          width: '100%'
+                        }}>
+                          <span style={{
+                            fontWeight: 700,
+                            fontSize: '0.92rem',
+                            color: 'var(--text-main)',
+                            opacity: 0.7,
+                            whiteSpace: 'nowrap',
+                            flexShrink: 0
+                          }}>
+                            {log.date}{log.time ? ` ${log.time.startsWith('0') ? log.time.slice(1) : log.time}` : ''}
+                          </span>
+
+                          <div 
+                            style={{ 
+                              fontWeight: 700, 
+                              fontSize: '0.95rem', 
+                              color: 'var(--text-main)',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                              flex: 1,
+                              minWidth: 0
+                            }}
+                            title={log.title}
+                          >
+                            {log.title}
                           </div>
                         </div>
 
-                        {/* 상세 내용 */}
-                        <div className="timeline-details">
-                          {log.details}
-                        </div>
+                        {/* 3행: 상세 내용 */}
+                        {log.details && (
+                          <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.5, marginBottom: '0.45rem', whiteSpace: 'pre-wrap' }}>
+                            {log.details}
+                          </div>
+                        )}
 
                         {/* 차기 예정일 (D-day) */}
                         {log.nextScheduleDate && (
                           <div style={{ 
-                            marginTop: '0.65rem',
-                            padding: '0.45rem 0.75rem',
+                            marginTop: '0.45rem',
+                            marginBottom: '0.45rem',
+                            padding: '0.4rem 0.65rem',
                             background: 'rgba(245, 158, 11, 0.1)',
                             border: '1px solid rgba(245, 158, 11, 0.25)',
                             borderRadius: 'var(--radius-sm)',
-                            fontSize: '0.8rem',
+                            fontSize: '0.78rem',
                             color: 'var(--color-accent)',
-                            display: 'flex',
+                            display: 'inline-flex',
                             alignItems: 'center',
                             gap: '0.4rem',
                             fontWeight: 600
                           }}>
-                            <Clock size={14} />
-                            <span>차기 예정일: {log.nextScheduleDate} {log.nextScheduleTime ? `(${log.nextScheduleTime}) ` : ''}({log.nextScheduleTitle || '예정 작업'})</span>
+                            <Clock size={13} />
+                            <span>차기 예정: {log.nextScheduleDate} {log.nextScheduleTime ? `(${log.nextScheduleTime}) ` : ''}{log.nextScheduleTitle ? `• ${log.nextScheduleTitle}` : ''}</span>
                           </div>
                         )}
 
-                        {/* 하단 담당자 및 삭제 액션 */}
-                        <div className="timeline-footer">
-                          <div>
-                            {log.operator && <span>기록자/담당: {log.operator}</span>}
-                            {log.cost ? <span style={{ marginLeft: '0.75rem' }}>비용: {Number(log.cost).toLocaleString()}원</span> : null}
+                        {/* 하단 기록자 / 비용 */}
+                        {(log.operator || log.cost) && (
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.75rem',
+                            flexWrap: 'wrap',
+                            fontSize: '0.775rem',
+                            color: 'var(--text-subtle)',
+                            borderTop: '1px solid var(--border-color)',
+                            paddingTop: '0.45rem',
+                            marginTop: '0.45rem'
+                          }}>
+                            {log.operator && <span>기록자: {log.operator}</span>}
+                            {log.cost ? <span>비용: {Number(log.cost).toLocaleString()}원</span> : null}
                           </div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                            <button 
-                              className="btn btn-outline btn-sm btn-icon-only"
-                              onClick={() => onEditCareLog && onEditCareLog(log)}
-                              title="기록 수정"
-                              style={{ border: 'none', padding: '0.2rem' }}
-                            >
-                              <Edit3 size={13} color="var(--color-primary)" />
-                            </button>
-                            <button 
-                              className="btn btn-outline btn-sm btn-icon-only"
-                              onClick={() => onDeleteCareLog(log.id)}
-                              title="기록 삭제"
-                              style={{ border: 'none', padding: '0.2rem' }}
-                            >
-                              <Trash2 size={13} color="var(--color-danger)" />
-                            </button>
-                          </div>
-                        </div>
+                        )}
                       </div>
                     );
                   })}
