@@ -612,7 +612,7 @@ export default function CareLogFormModal({
                     onChange={(e) => setHasNextSchedule(e.target.checked)}
                     style={{ width: '18px', height: '18px', accentColor: 'var(--color-primary)' }}
                   />
-                  <span>📅 차기 관리 예정 등록</span>
+                  <span>📅 다음 일정 등록</span>
                 </label>
 
                 {hasNextSchedule && (
@@ -661,7 +661,7 @@ export default function CareLogFormModal({
                       <div className="form-group full-width" style={{ marginBottom: 0 }}>
                         <div style={{ display: 'grid', gridTemplateColumns: '1.15fr 0.85fr', gap: '0.65rem' }}>
                           <div>
-                            <label className="form-label">차기 예정 날짜</label>
+                            <label className="form-label">예정 날짜</label>
                             <input
                               ref={nextScheduleDateInputRef}
                               type="date"
@@ -672,7 +672,7 @@ export default function CareLogFormModal({
                             />
                           </div>
                           <div>
-                            <label className="form-label">차기 예정 시간 (선택)</label>
+                            <label className="form-label">예정 시간 (선택)</label>
                             <input
                               type="time"
                               className="form-input"
@@ -683,7 +683,7 @@ export default function CareLogFormModal({
                         </div>
                       </div>
                       <div className="form-group full-width">
-                        <label className="form-label">차기 예정 작업명</label>
+                        <label className="form-label">예정 작업명</label>
                         <input
                           type="text"
                           className="form-input"
