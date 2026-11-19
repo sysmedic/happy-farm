@@ -8,10 +8,9 @@ import {
   FileText, 
   AlertCircle, 
   CheckCircle2, 
+  Circle,
   Sparkles,
   ArrowRight,
-  CheckSquare,
-  Square,
   Trash2,
   Edit2
 } from 'lucide-react';
@@ -324,31 +323,34 @@ export default function DailyDiaryView({
                             overflow: 'hidden'
                           }}
                         >
-                          {/* 1단 헤더: [완료 체크 버튼 + 카테고리 뱃지 + 시간] <---> (우측) [수정/삭제] */}
+                          {/* 1단 헤더: [원형 완료 체크 토글 + 카테고리 뱃지 + 시간] <---> (우측) [수정/삭제] */}
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap', minWidth: 0 }}>
-                              {/* 완료 체크 토글 버튼 */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', minWidth: 0 }}>
+                              {/* 완료 체크 원형 토글 버튼 (글자 제거, 원형 아이콘) */}
                               <button
                                 type="button"
                                 onClick={() => onToggleScheduleComplete(sched.id)}
                                 style={{
-                                  background: isDone ? 'rgba(16, 185, 129, 0.15)' : 'var(--bg-card)',
-                                  border: isDone ? '1px solid var(--color-primary)' : '1px solid var(--border-color)',
-                                  borderRadius: 'var(--radius-sm)',
+                                  background: 'none',
+                                  border: 'none',
                                   cursor: 'pointer',
-                                  padding: '0.15rem 0.45rem',
-                                  color: isDone ? 'var(--color-primary)' : 'var(--text-muted)',
+                                  padding: '4px',
+                                  margin: '-4px',
+                                  color: isDone ? 'var(--color-primary)' : 'var(--text-subtle)',
                                   display: 'inline-flex',
                                   alignItems: 'center',
-                                  gap: '0.25rem',
-                                  fontSize: '0.75rem',
-                                  fontWeight: 700,
-                                  flexShrink: 0
+                                  justifyContent: 'center',
+                                  flexShrink: 0,
+                                  borderRadius: '50%',
+                                  transition: 'all 0.15s ease'
                                 }}
                                 title={isDone ? '미완료로 변경' : '완료 처리'}
                               >
-                                {isDone ? <CheckSquare size={13} color="var(--color-primary)" /> : <Square size={13} />}
-                                <span>{isDone ? '완료됨' : '완료'}</span>
+                                {isDone ? (
+                                  <CheckCircle2 size={19} color="var(--color-primary)" />
+                                ) : (
+                                  <Circle size={19} strokeWidth={1.8} />
+                                )}
                               </button>
 
                               {/* 카테고리 뱃지 */}
@@ -398,15 +400,16 @@ export default function DailyDiaryView({
                             </div>
                           </div>
 
-                          {/* 2단 본문: [대상 뱃지] + [일정 제목 (가로 100% 온전히 사용)] */}
-                          <div style={{ minWidth: 0 }}>
-                            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.45rem', flexWrap: 'wrap' }}>
+                          {/* 2단 본문: 모바일 최적화 세로 3행 레이아웃 */}
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', minWidth: 0, marginTop: '0.1rem' }}>
+                            {/* 1행: 대상 뱃지 */}
+                            <div>
                               {sched.tagNumber ? (
                                 <span 
                                   className="badge badge-tag"
                                   onClick={() => onOpenEntityDetail(sched.tagNumber)}
                                   title="클릭 시 이 개체의 관리 내역으로 이동"
-                                  style={{ cursor: 'pointer', fontSize: '0.75rem', padding: '0.15rem 0.45rem' }}
+                                  style={{ cursor: 'pointer', fontSize: '0.75rem', padding: '0.15rem 0.45rem', display: 'inline-flex', alignItems: 'center' }}
                                 >
                                   {sched.tagNumber} ({sched.entityName})
                                 </span>
@@ -418,34 +421,36 @@ export default function DailyDiaryView({
                                   padding: '0.15rem 0.45rem',
                                   borderRadius: '4px',
                                   border: '1px solid var(--border-color)',
-                                  fontWeight: 600
+                                  fontWeight: 600,
+                                  display: 'inline-flex',
+                                  alignItems: 'center'
                                 }}>
                                   🌾 농장 공통
                                 </span>
                               )}
-
-                              <span style={{ 
-                                fontWeight: 700, 
-                                fontSize: '0.92rem',
-                                textDecoration: isDone ? 'line-through' : 'none',
-                                color: isDone ? 'var(--text-muted)' : 'var(--text-main)',
-                                wordBreak: 'break-word',
-                                lineHeight: 1.4,
-                                flex: 1,
-                                minWidth: '160px'
-                              }}>
-                                {sched.title}
-                              </span>
                             </div>
 
-                            {/* 상세 메모 */}
+                            {/* 2행: 일정 제목 (가로 100% 온전히 사용) */}
+                            <div style={{ 
+                              fontWeight: 700, 
+                              fontSize: '0.95rem',
+                              textDecoration: isDone ? 'line-through' : 'none',
+                              color: isDone ? 'var(--text-muted)' : 'var(--text-main)',
+                              wordBreak: 'break-word',
+                              lineHeight: 1.4
+                            }}>
+                              {sched.title}
+                            </div>
+
+                            {/* 3행: 상세 메모 (메모가 있을 때만 렌더링) */}
                             {sched.memo && (
                               <div style={{ 
                                 fontSize: '0.8rem', 
                                 color: 'var(--text-muted)', 
-                                marginTop: '0.25rem',
-                                paddingLeft: '0.2rem',
-                                wordBreak: 'break-word'
+                                marginTop: '0.05rem',
+                                paddingLeft: '0.15rem',
+                                wordBreak: 'break-word',
+                                lineHeight: 1.35
                               }}>
                                 ※ {sched.memo}
                               </div>
