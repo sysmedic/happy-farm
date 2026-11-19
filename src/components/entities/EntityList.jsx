@@ -679,20 +679,41 @@ export default function EntityList({
 
                 {/* 최근 관리 이력 미니 프리뷰 */}
                 <div style={{ 
-                  fontSize: '0.8rem', 
-                  color: 'var(--text-muted)', 
+                  fontSize: '0.82rem', 
                   marginBottom: '0.75rem',
                   background: 'var(--bg-hover)',
                   padding: '0.5rem 0.75rem',
                   borderRadius: 'var(--radius-sm)'
                 }}>
                   {latestLog ? (
-                    <div>
-                      <span style={{ fontWeight: 600, color: 'var(--color-primary)' }}>최근 관리 ({latestLog.date}): </span>
-                      <span>{latestLog.title}</span>
+                    <div style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '0.45rem', 
+                      overflow: 'hidden', 
+                      textOverflow: 'ellipsis', 
+                      whiteSpace: 'nowrap' 
+                    }}>
+                      <span style={{ 
+                        fontWeight: 600, 
+                        color: 'var(--text-main)', 
+                        opacity: 0.7, 
+                        flexShrink: 0 
+                      }}>
+                        {latestLog.date}
+                      </span>
+                      <span style={{ 
+                        fontWeight: 600, 
+                        color: 'var(--text-main)', 
+                        overflow: 'hidden', 
+                        textOverflow: 'ellipsis', 
+                        whiteSpace: 'nowrap' 
+                      }}>
+                        {latestLog.title}
+                      </span>
                     </div>
                   ) : (
-                    <span style={{ fontStyle: 'italic', opacity: 0.7 }}>등록된 관리 기록이 없습니다.</span>
+                    <span style={{ fontStyle: 'italic', opacity: 0.7, color: 'var(--text-muted)' }}>등록된 관리 기록이 없습니다.</span>
                   )}
                 </div>
 
