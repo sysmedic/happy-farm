@@ -42,6 +42,9 @@ export default function DailyDiaryView({
     return { year: today.getFullYear(), month: today.getMonth() };
   });
 
+  // 다이어리 서브 탭: 'schedules'(예정 일정) 또는 'logs'(실시된 영농 관리)
+  const [activeDiaryTab, setActiveDiaryTab] = useState('schedules');
+
   // 완료된 일정 중 상세 내용을 확인하기 위해 사용자가 탭하여 임시로 펼친 일정 ID 목록
   const [expandedCompletedIds, setExpandedCompletedIds] = useState(new Set());
 
@@ -293,32 +296,137 @@ export default function DailyDiaryView({
             </div>
           </div>
 
-          {/* 1. 도래한 예정 일정 (독립 영농 일정 + 개체 D-Day 리마인더 통합) */}
-          {(dailySchedules.length > 0 || scheduledTasks.length > 0) && (
-                <div style={{ marginBottom: '1.75rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-                    <h4 style={{ 
-                      fontSize: '0.95rem', 
-                      color: 'var(--color-accent)', 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      gap: '0.4rem',
-                      margin: 0
-                    }}>
-                      <Clock size={16} />
-                      <span>예정 일정 (총 {dailySchedules.length + scheduledTasks.length}건)</span>
-                    </h4>
-                    <button 
-                      className="btn btn-outline btn-sm"
-                      onClick={() => onOpenScheduleModal(selectedDate)}
-                      style={{ fontSize: '0.75rem', padding: '0.2rem 0.5rem' }}
-                    >
-                      <Plus size={12} />
-                      <span>일정 추가</span>
-                    </button>
-                  </div>
+          {/* 상단 서브 탭 (2개 탭 전환: 예정 일정 vs 실시된 영농 관리) */}
+          <div style={{
+            display: 'flex',
+            background: 'var(--bg-card-subtle)',
+            padding: '4px',
+            borderRadius: 'var(--radius-md)',
+            border: '1px solid var(--border-color)',
+            gap: '4px',
+            marginBottom: '1rem'
+          }}>
+            <button
+              type="button"
+              onClick={() => setActiveDiaryTab('schedules')}
+              style={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.45rem',
+                padding: '0.6rem 0.75rem',
+                borderRadius: 'var(--radius-sm)',
+                border: 'none',
+                fontWeight: activeDiaryTab === 'schedules' ? 800 : 600,
+                fontSize: '0.88rem',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+                background: activeDiaryTab === 'schedules' ? 'var(--bg-card)' : 'transparent',
+                color: activeDiaryTab === 'schedules' ? 'var(--color-accent)' : 'var(--text-muted)',
+                boxShadow: activeDiaryTab === 'schedules' ? 'var(--shadow-sm)' : 'none'
+              }}
+            >
+              <Clock size={16} />
+              <span>예정 일정</span>
+              <span style={{
+                fontSize: '0.75rem',
+                padding: '0.1rem 0.45rem',
+                borderRadius: '10px',
+                background: activeDiaryTab === 'schedules' ? 'rgba(245, 158, 11, 0.15)' : 'var(--bg-card)',
+                color: activeDiaryTab === 'schedules' ? 'var(--color-accent)' : 'var(--text-subtle)',
+                fontWeight: 700
+              }}>
+                {dailySchedules.length + scheduledTasks.length}
+              </span>
+            </button>
 
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+            <button
+              type="button"
+              onClick={() => setActiveDiaryTab('logs')}
+              style={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.45rem',
+                padding: '0.6rem 0.75rem',
+                borderRadius: 'var(--radius-sm)',
+                border: 'none',
+                fontWeight: activeDiaryTab === 'logs' ? 800 : 600,
+                fontSize: '0.88rem',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+                background: activeDiaryTab === 'logs' ? 'var(--bg-card)' : 'transparent',
+                color: activeDiaryTab === 'logs' ? 'var(--color-primary)' : 'var(--text-muted)',
+                boxShadow: activeDiaryTab === 'logs' ? 'var(--shadow-sm)' : 'none'
+              }}
+            >
+              <CheckCircle2 size={16} />
+              <span>실시된 영농 관리</span>
+              <span style={{
+                fontSize: '0.75rem',
+                padding: '0.1rem 0.45rem',
+                borderRadius: '10px',
+                background: activeDiaryTab === 'logs' ? 'rgba(16, 185, 129, 0.15)' : 'var(--bg-card)',
+                color: activeDiaryTab === 'logs' ? 'var(--color-primary)' : 'var(--text-subtle)',
+                fontWeight: 700
+              }}>
+                {dailyLogs.length}
+              </span>
+            </button>
+          </div>
+
+          {/* 탭 1: 예정 일정 화면 */}
+          {activeDiaryTab === 'schedules' && (
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+                <h4 style={{ 
+                  fontSize: '0.95rem', 
+                  color: 'var(--color-accent)', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '0.4rem',
+                  margin: 0,
+                  fontWeight: 700
+                }}>
+                  <Clock size={16} />
+                  <span>예정 일정 (총 {dailySchedules.length + scheduledTasks.length}건)</span>
+                </h4>
+                <button 
+                  className="btn btn-outline btn-sm"
+                  onClick={() => onOpenScheduleModal(selectedDate)}
+                  style={{ fontSize: '0.75rem', padding: '0.2rem 0.5rem' }}
+                >
+                  <Plus size={12} />
+                  <span>일정 추가</span>
+                </button>
+              </div>
+
+              {dailySchedules.length === 0 && scheduledTasks.length === 0 ? (
+                <div style={{ 
+                  textAlign: 'center', 
+                  padding: '2.5rem 1rem', 
+                  background: 'var(--bg-card-subtle)',
+                  borderRadius: 'var(--radius-md)',
+                  color: 'var(--text-muted)'
+                }}>
+                  <Clock size={36} style={{ opacity: 0.3, marginBottom: '0.5rem', color: 'var(--color-accent)' }} />
+                  <div style={{ fontWeight: 600 }}>{selectedDate}에 등록된 예정 일정이 없습니다.</div>
+                  <p style={{ fontSize: '0.825rem', marginTop: '0.25rem' }}>
+                    새로운 영농 일정이나 진료/사료 계획을 등록해보세요.
+                  </p>
+                  <button 
+                    className="btn btn-primary btn-sm" 
+                    onClick={() => onOpenScheduleModal(selectedDate)}
+                    style={{ marginTop: '0.75rem' }}
+                  >
+                    <Plus size={14} />
+                    <span>이 날짜에 새 일정 추가</span>
+                  </button>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
                     {/* A. 직접 등록한 영농 스케줄 (완료 시 접힘 지원 & 수직 3행 모바일 최적화 레이아웃) */}
                     {dailySchedules.map(sched => {
                       const catDef = SCHEDULE_CATEGORIES.find(c => c.id === sched.category) || SCHEDULE_CATEGORIES[0];
@@ -624,21 +732,34 @@ export default function DailyDiaryView({
                       </div>
                     ))}
                   </div>
-                </div>
-              )}
+                )}
+              </div>
+          )}
 
-              {/* 2. 오늘 실시한 관리 작업 내역 */}
-              <h4 style={{ 
-                fontSize: '0.95rem', 
-                fontWeight: 700,
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: '0.4rem',
-                marginBottom: '0.75rem' 
-              }}>
-                <CheckCircle2 size={16} color="var(--color-primary)" />
-                <span>실시된 영농 관리 작업 ({dailyLogs.length}건)</span>
-              </h4>
+          {/* 탭 2: 실시된 영농 관리 작업 화면 */}
+          {activeDiaryTab === 'logs' && (
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+                <h4 style={{ 
+                  fontSize: '0.95rem', 
+                  fontWeight: 700,
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '0.4rem',
+                  margin: 0
+                }}>
+                  <CheckCircle2 size={16} color="var(--color-primary)" />
+                  <span>실시된 영농 관리 작업 ({dailyLogs.length}건)</span>
+                </h4>
+                <button 
+                  className="btn btn-primary btn-sm"
+                  onClick={() => onOpenCareLogModal(null, selectedDate)}
+                  style={{ fontSize: '0.75rem', padding: '0.2rem 0.5rem' }}
+                >
+                  <Plus size={12} />
+                  <span>작업 기록 추가</span>
+                </button>
+              </div>
 
               {dailyLogs.length === 0 ? (
                 <div style={{ 
@@ -681,7 +802,6 @@ export default function DailyDiaryView({
                       >
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem', flexWrap: 'wrap', gap: '0.5rem' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                            {/* ⚡ 요구사항 3: 보고서 및 다이어리의 개체번호를 누르면 해당 개체 관리 내역으로 이동! */}
                             <span 
                               className="badge badge-tag"
                               onClick={() => onOpenEntityDetail(log.tagNumber)}
@@ -733,6 +853,8 @@ export default function DailyDiaryView({
                   })}
                 </div>
               )}
+            </div>
+          )}
         </div>
       </div>
     </div>
