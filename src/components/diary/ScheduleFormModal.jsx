@@ -142,7 +142,7 @@ export default function ScheduleFormModal({
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <Calendar size={20} color="var(--color-primary)" />
             <h3 style={{ fontSize: '1.15rem', fontWeight: 800 }}>
-              {isEditing ? '영농 일정 수정' : '새 영농 일정 추가'}
+              {isEditing ? '일정 수정' : '새 일정 추가'}
             </h3>
           </div>
           <button 
