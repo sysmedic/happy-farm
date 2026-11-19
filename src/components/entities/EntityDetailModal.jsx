@@ -112,7 +112,8 @@ export default function EntityDetailModal({
                 onClick={() => setSelectedCategory('all')}
                 title="클릭하여 전체 관리 기록 보기"
               >
-                총 {allEntityLogs.length}건
+                <span>전체</span>
+                <span className="tab-count">{allEntityLogs.length}</span>
               </button>
             </div>
 

@@ -1541,17 +1541,18 @@ a:hover {
   line-height: 1.2;
 }
 
-/* 개체번호 박스와 100% 동등한 박스 규격의 총 N건 버튼 (전체 내역 선택 기능) */
+/* 전체 내역(전체보기) 탭 버튼 - 둥근 알약 쉐입 */
 .fullhistory-total-tag {
-  height: 34px !important;
+  height: 32px !important;
   box-sizing: border-box !important;
   padding: 0 0.75rem !important;
-  border-radius: var(--radius-sm) !important;
-  font-size: 0.95rem !important;
-  font-weight: 800 !important;
+  border-radius: var(--radius-full) !important;
+  font-size: 0.82rem !important;
+  font-weight: 600 !important;
   display: inline-flex !important;
   align-items: center;
   justify-content: center;
+  gap: 0.35rem !important;
   line-height: 1 !important;
   white-space: nowrap;
   background: var(--bg-hover);
@@ -1575,12 +1576,26 @@ a:hover {
   transform: scale(0.97);
 }
 
-/* 전체보기 활성화 상태 (전체 내역 선택 중일 때 에메랄드 강조) */
+.fullhistory-total-tag .tab-count {
+  font-size: 0.75rem;
+  padding: 0.1rem 0.35rem;
+  border-radius: 9999px;
+  background: rgba(0, 0, 0, 0.08);
+  font-weight: 700;
+}
+
+/* 1번 옵션: 시크 다크 차콜 (#1e293b) 활성화 */
 .fullhistory-total-tag.active {
-  background: var(--color-primary);
-  color: #ffffff;
-  border-color: var(--color-primary);
-  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.25);
+  background: #1e293b !important;
+  color: #ffffff !important;
+  border-color: #1e293b !important;
+  font-weight: 700 !important;
+  box-shadow: 0 2px 6px rgba(30, 41, 59, 0.25) !important;
+}
+
+.fullhistory-total-tag.active .tab-count {
+  background: rgba(255, 255, 255, 0.2) !important;
+  color: #ffffff !important;
 }
 
 /* 2열: 관리 분류 탭바 (공간 부족 시 3열로 자동 줄바꿈 확장) */
@@ -1617,12 +1632,13 @@ a:hover {
   border-color: var(--text-subtle);
 }
 
+/* 1번 옵션: 2열 분류 탭도 선택 시 시크 다크 차콜 적용 */
 .fullhistory-tab-btn.active {
-  background: var(--color-primary);
-  color: #ffffff;
-  border-color: var(--color-primary);
-  font-weight: 700;
-  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.25);
+  background: #1e293b !important;
+  color: #ffffff !important;
+  border-color: #1e293b !important;
+  font-weight: 700 !important;
+  box-shadow: 0 2px 6px rgba(30, 41, 59, 0.25) !important;
 }
 
 .fullhistory-tab-btn .tab-count {
@@ -1631,6 +1647,11 @@ a:hover {
   border-radius: 9999px;
   background: rgba(0, 0, 0, 0.08);
   font-weight: 700;
+}
+
+.fullhistory-tab-btn.active .tab-count {
+  background: rgba(255, 255, 255, 0.2) !important;
+  color: #ffffff !important;
 }
 
 .fullhistory-tab-btn.active .tab-count {
@@ -2486,11 +2507,17 @@ form.modal-content {
     gap: 0.45rem !important;
   }
 
-  .fullhistory-tag,
-  .fullhistory-total-tag {
+  .fullhistory-tag {
     height: 30px !important;
     font-size: 0.92rem !important;
     padding: 0 0.5rem !important;
+  }
+
+  .fullhistory-total-tag {
+    height: 30px !important;
+    font-size: 0.8rem !important;
+    padding: 0 0.65rem !important;
+    border-radius: var(--radius-full) !important;
   }
 
   .fullhistory-entity-name {
