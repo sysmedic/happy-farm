@@ -622,8 +622,8 @@ export default function App() {
         />
       )}
 
-      {/* 모바일 전용 우측 하단 플로팅 액션 버튼 (FAB): 다이어리 및 드라이브 화면에서는 화면 가림 방지를 위해 숨김 */}
-      {activeTab !== 'diary' && activeTab !== 'cloud' && (
+      {/* 모바일 전용 우측 하단 플로팅 액션 버튼 (FAB): 개체 관리 탭에서만 노출 (다이어리, 보고서, 드라이브 탭에서는 가림 방지) */}
+      {activeTab === 'entities' && (
         <button
           type="button"
           className="mobile-fab"

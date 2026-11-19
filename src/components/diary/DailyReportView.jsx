@@ -7,8 +7,7 @@ import {
   CheckCircle2, 
   FileText, 
   Sparkles,
-  ArrowRight,
-  CloudUpload
+  ArrowRight
 } from 'lucide-react';
 import { 
   CARE_CATEGORIES, 
@@ -102,10 +101,6 @@ export default function DailyReportView({
           <button className="btn btn-primary" onClick={handlePrint}>
             <Printer size={15} />
             <span>A4 보고서 인쇄</span>
-          </button>
-          <button className="btn btn-outline" onClick={onNavigateToCloud}>
-            <CloudUpload size={15} />
-            <span>구글 드라이브 백업</span>
           </button>
         </div>
       </div>
