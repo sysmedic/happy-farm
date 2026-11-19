@@ -2447,7 +2447,7 @@ form.modal-content {
   }
 
   .modal-header {
-    padding: 0.9rem 1.15rem;
+    padding: 0.9rem 0.85rem;
     padding-top: calc(0.9rem + env(safe-area-inset-top, 0px));
     flex-shrink: 0 !important;
     z-index: 2;
@@ -2456,14 +2456,14 @@ form.modal-content {
 
   /* 모바일 개체 상세 모달 헤더 */
   .entity-detail-header {
-    padding: 0.9rem 1.15rem;
+    padding: 0.9rem 0.85rem;
     padding-top: calc(0.9rem + env(safe-area-inset-top, 0px));
     gap: 0.55rem;
   }
 
   /* 모바일 생애 관리 내역 유동형 탑바 */
   .fullhistory-header {
-    padding: 0.85rem 1rem 0.65rem !important;
+    padding: 0.85rem 0.85rem 0.65rem !important;
     padding-top: calc(0.85rem + env(safe-area-inset-top, 0px)) !important;
     gap: 0.6rem !important;
   }
@@ -2602,7 +2602,7 @@ form.modal-content {
   }
 
   .modal-body {
-    padding: 1.1rem 1.25rem 2.5rem 1.25rem;
+    padding: 1.1rem 0.85rem 2.5rem 0.85rem;
     flex: 1 1 auto;
     min-height: 0;
     overflow-y: auto;
@@ -2610,7 +2610,7 @@ form.modal-content {
   }
 
   .modal-footer {
-    padding: 0.85rem 1.25rem;
+    padding: 0.85rem 0.85rem;
     padding-bottom: calc(0.85rem + max(12px, env(safe-area-inset-bottom, 12px)));
     flex-shrink: 0 !important;
     z-index: 2;
