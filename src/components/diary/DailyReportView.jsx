@@ -55,11 +55,6 @@ export default function DailyReportView({
     return dailyLogs.reduce((acc, l) => acc + (Number(l.cost) || 0), 0);
   }, [dailyLogs]);
 
-  // 엔티티 정보 매핑 헬퍼 (축사, 품종 등)
-  const getEntityInfo = (entityId, tagNumber) => {
-    return entities.find(e => e.id === entityId || e.tagNumber === tagNumber);
-  };
-
   const handlePrint = () => {
     window.print();
   };
@@ -227,7 +222,6 @@ export default function DailyReportView({
                     <th style={{ width: '65px' }}>시간</th>
                     <th style={{ width: '135px' }}>개체번호 (이표)</th>
                     <th style={{ width: '85px' }}>개체명</th>
-                    <th style={{ width: '90px' }}>축사위치</th>
                     <th style={{ width: '90px' }}>분류</th>
                     <th>작업 내용 및 처치 상세</th>
                     <th style={{ width: '75px' }}>담당자</th>
@@ -236,7 +230,6 @@ export default function DailyReportView({
                 <tbody>
                   {dailyLogs.map(log => {
                     const catObj = getCategoryById(log.category, careCategories);
-                    const ent = getEntityInfo(log.entityId, log.tagNumber);
 
                     return (
                       <tr key={log.id}>
@@ -253,7 +246,6 @@ export default function DailyReportView({
                           </span>
                         </td>
                         <td style={{ fontWeight: 700 }}>{log.entityName}</td>
-                        <td style={{ fontSize: '0.8rem', color: '#475569' }}>{ent?.barn || '-'}</td>
                         <td>
                           <span className={`badge ${catObj.badgeClass}`} style={{ fontSize: '0.7rem' }}>
                             {catObj.label}
