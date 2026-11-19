@@ -318,7 +318,30 @@ export default function DailyReportView({
   onNavigateToCloud
 }) {
   const [reportDate, setReportDate] = useState(targetDate || getTodayDateString());
-  const [farmNotes, setFarmNotes] = useState('특이 동태 및 전반적인 사육 상태 양호. 온습도 정상 유지.');
+  
+  // 날짜별 영농 특이사항 로컬스토리지 영구 보관 (안드로이드/모바일 탭 전환 시에도 안전 보존)
+  const [farmNotes, setFarmNotes] = useState(() => {
+    const initialDate = targetDate || getTodayDateString();
+    const saved = localStorage.getItem(`happy_farm_report_note_${initialDate}`);
+    return saved !== null ? saved : '특이 동태 및 전반적인 사육 상태 양호. 온습도 정상 유지.';
+  });
+
+  // 날짜 변경 시 해당 일자의 특이사항 동기화
+  React.useEffect(() => {
+    const saved = localStorage.getItem(`happy_farm_report_note_${reportDate}`);
+    setFarmNotes(saved !== null ? saved : '특이 동태 및 전반적인 사육 상태 양호. 온습도 정상 유지.');
+  }, [reportDate]);
+
+  // 특이사항 변경 시 실시간 자동 저장
+  const handleFarmNotesChange = (newVal) => {
+    setFarmNotes(newVal);
+    try {
+      localStorage.setItem(`happy_farm_report_note_${reportDate}`, newVal);
+    } catch (e) {
+      console.warn('특이사항 저장 실패:', e);
+    }
+  };
+
   const [shareFeedback, setShareFeedback] = useState('');
   const categoriesToUse = careCategories || CARE_CATEGORIES;
 
@@ -429,7 +452,7 @@ export default function DailyReportView({
       )}
 
       {/* 📱 1. 모바일 전용 독립 폼 (스마트폰 화면에서만 단독 표시) */}
-      <div className="report-mobile-view">
+      <div className="report-mobile-view" style={{ paddingBottom: '4rem' }}>
         {/* 1. 슬림 1줄 상단 헤더: 날짜 선택 & 공유/인쇄 버튼 */}
         <div className="card" style={{ padding: '0.65rem 0.85rem', marginBottom: '0.75rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
@@ -469,80 +492,107 @@ export default function DailyReportView({
           </div>
         </div>
 
-        {/* 2. 슬림 요약 뱃지 바 */}
+        {/* 2. 균일 높이 & 자동 줄바꿈 요약 뱃지 바 */}
         <div style={{ 
           display: 'flex', 
           alignItems: 'center', 
-          gap: '0.4rem', 
-          overflowX: 'auto', 
-          paddingBottom: '0.35rem', 
-          marginBottom: '0.85rem',
-          scrollbarWidth: 'none',
-          msOverflowStyle: 'none'
+          flexWrap: 'wrap',
+          gap: '0.35rem 0.45rem', 
+          marginBottom: '0.85rem'
         }}>
           <span style={{ 
-            fontSize: '0.78rem', 
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: '28px',
+            padding: '0 0.65rem',
+            borderRadius: 'var(--radius-sm)',
+            fontSize: '0.8rem', 
+            fontWeight: 700,
+            lineHeight: 1,
+            whiteSpace: 'nowrap',
+            boxSizing: 'border-box',
             background: 'var(--bg-card)', 
             border: '1px solid var(--border-color)', 
-            padding: '0.25rem 0.55rem', 
-            borderRadius: 'var(--radius-sm)', 
-            fontWeight: 700,
-            whiteSpace: 'nowrap',
             color: 'var(--text-main)'
           }}>
             총 작업 {dailyLogs.length}건
           </span>
           {categoryStats.vaccine > 0 && (
             <span style={{ 
-              fontSize: '0.78rem', 
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: '28px',
+              padding: '0 0.65rem',
+              borderRadius: 'var(--radius-sm)',
+              fontSize: '0.8rem', 
+              fontWeight: 700,
+              lineHeight: 1,
+              whiteSpace: 'nowrap',
+              boxSizing: 'border-box',
               background: 'rgba(5, 150, 105, 0.1)', 
               border: '1px solid rgba(5, 150, 105, 0.25)', 
-              color: '#059669', 
-              padding: '0.25rem 0.55rem', 
-              borderRadius: 'var(--radius-sm)', 
-              fontWeight: 700,
-              whiteSpace: 'nowrap'
+              color: '#059669'
             }}>
               백신 {categoryStats.vaccine}건
             </span>
           )}
           {categoryStats.treatment > 0 && (
             <span style={{ 
-              fontSize: '0.78rem', 
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: '28px',
+              padding: '0 0.65rem',
+              borderRadius: 'var(--radius-sm)',
+              fontSize: '0.8rem', 
+              fontWeight: 700,
+              lineHeight: 1,
+              whiteSpace: 'nowrap',
+              boxSizing: 'border-box',
               background: 'rgba(220, 38, 38, 0.1)', 
               border: '1px solid rgba(220, 38, 38, 0.25)', 
-              color: '#dc2626', 
-              padding: '0.25rem 0.55rem', 
-              borderRadius: 'var(--radius-sm)', 
-              fontWeight: 700,
-              whiteSpace: 'nowrap'
+              color: '#dc2626'
             }}>
               진료·치료 {categoryStats.treatment}건
             </span>
           )}
           {categoryStats.breeding > 0 && (
             <span style={{ 
-              fontSize: '0.78rem', 
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: '28px',
+              padding: '0 0.65rem',
+              borderRadius: 'var(--radius-sm)',
+              fontSize: '0.8rem', 
+              fontWeight: 700,
+              lineHeight: 1,
+              whiteSpace: 'nowrap',
+              boxSizing: 'border-box',
               background: 'rgba(2, 132, 199, 0.1)', 
               border: '1px solid rgba(2, 132, 199, 0.25)', 
-              color: '#0284c7', 
-              padding: '0.25rem 0.55rem', 
-              borderRadius: 'var(--radius-sm)', 
-              fontWeight: 700,
-              whiteSpace: 'nowrap'
+              color: '#0284c7'
             }}>
               수정 {categoryStats.breeding}건
             </span>
           )}
           <span style={{ 
-            fontSize: '0.78rem', 
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: '28px',
+            padding: '0 0.65rem',
+            borderRadius: 'var(--radius-sm)',
+            fontSize: '0.8rem', 
+            fontWeight: 700,
+            lineHeight: 1,
+            whiteSpace: 'nowrap',
+            boxSizing: 'border-box',
             background: 'var(--bg-card)', 
             border: '1px solid var(--border-color)', 
-            color: 'var(--text-main)', 
-            padding: '0.25rem 0.55rem', 
-            borderRadius: 'var(--radius-sm)', 
-            fontWeight: 700,
-            whiteSpace: 'nowrap'
+            color: 'var(--text-main)'
           }}>
             비용 {totalCost.toLocaleString()}원
           </span>
@@ -620,12 +670,20 @@ export default function DailyReportView({
           )}
         </div>
 
-        {/* 4. 모바일 영농 특이사항 */}
+        {/* 4. 모바일 영농 특이사항 (날짜별 로컬스토리지 자동 저장) */}
         <div className="card" style={{ padding: '0.85rem 1rem' }}>
-          <h4 style={{ fontSize: '0.92rem', fontWeight: 800, margin: '0 0 0.45rem 0', color: 'var(--text-main)' }}>
-            📝 일일 영농 특이사항
-          </h4>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.45rem' }}>
+            <h4 style={{ fontSize: '0.92rem', fontWeight: 800, margin: 0, color: 'var(--text-main)' }}>
+              📝 일일 영농 특이사항
+            </h4>
+            <span style={{ fontSize: '0.72rem', color: '#10b981', fontWeight: 600 }}>
+              ✓ 자동 저장됨
+            </span>
+          </div>
           <textarea
+            id="mobile-farm-notes"
+            name="mobileFarmNotes"
+            rows={3}
             className="form-textarea"
             style={{ 
               background: 'var(--bg-card-subtle)', 
@@ -638,7 +696,7 @@ export default function DailyReportView({
               minHeight: '75px' 
             }}
             value={farmNotes}
-            onChange={(e) => setFarmNotes(e.target.value)}
+            onChange={(e) => handleFarmNotesChange(e.target.value)}
             placeholder="당일 기상, 사료 섭취 상태, 이상 증상 개체 등 일일 총평을 입력하세요."
           />
         </div>
@@ -841,7 +899,7 @@ export default function DailyReportView({
                 className="form-textarea"
                 style={{ background: 'transparent', border: 'none', padding: 0, minHeight: '60px' }}
                 value={farmNotes}
-                onChange={(e) => setFarmNotes(e.target.value)}
+                onChange={(e) => handleFarmNotesChange(e.target.value)}
                 placeholder="당일 기상, 사료 섭취 상태, 이상 증상 개체 등 일일 총평을 입력하세요."
               />
             </div>
