@@ -479,8 +479,8 @@ export default function DailyDiaryView({
                           key={sched.id}
                           className="diary-item-card"
                           style={{
-                            background: 'var(--bg-card)',
-                            border: '1px solid var(--border-color)',
+                            background: isDone ? 'var(--bg-card)' : 'rgba(245, 158, 11, 0.08)',
+                            border: `1px solid ${isDone ? 'var(--border-color)' : 'rgba(245, 158, 11, 0.3)'}`,
                             borderRadius: 'var(--radius-md)',
                             padding: '0.65rem 0.85rem',
                             display: 'flex',
@@ -1133,10 +1133,10 @@ export default function DailyDiaryView({
                           transition: 'all 0.15s ease'
                         }}
                       >
-                        {/* 1행: [개체번호] [개체이름] [관리분류] (좌측) & [✏️ 수정버튼] (우측 끝) */}
+                        {/* 1행: [개체번호] [개체이름] [관리분류] (좌측) & [✏️ 수정버튼] (우측 끝 - 개체번호 상단 정렬) */}
                         <div style={{
                           display: 'flex',
-                          alignItems: 'center',
+                          alignItems: 'flex-start',
                           justifyContent: 'space-between',
                           gap: '0.5rem',
                           marginBottom: '0.45rem',
@@ -1170,6 +1170,7 @@ export default function DailyDiaryView({
                                 height: '24px',
                                 padding: 0,
                                 flexShrink: 0,
+                                alignSelf: 'flex-start',
                                 display: 'inline-flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
