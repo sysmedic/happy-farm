@@ -45,8 +45,8 @@ export default function DailyDiaryView({
   // 다이어리 서브 탭: 'schedules'(예정 일정) 또는 'logs'(관리 내역)
   const [activeDiaryTab, setActiveDiaryTab] = useState('schedules');
 
-  // 폴더형 중첩 박스 해결 스타일: 'open'(A안: 오픈형 폴더 - 기본 추천) | 'binder'(B안: 노트 서류철)
-  const [folderStyle, setFolderStyle] = useState('open');
+  // 탭 디자인 스타일: 'dock'(독 형태 - 기본 적용) | 'open'(오픈 폴더) | 'binder'(노트 서류철)
+  const [folderStyle, setFolderStyle] = useState('dock');
 
   // 완료된 일정 중 상세 내용을 확인하기 위해 사용자가 탭하여 임시로 펼친 일정 ID 목록
   const [expandedCompletedIds, setExpandedCompletedIds] = useState(new Set());
@@ -272,9 +272,9 @@ export default function DailyDiaryView({
             </div>
           </div>
 
-          {/* 탭 바 및 A안/B안 즉시 비교 스위처 */}
-          <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '0.5rem', flexWrap: 'wrap' }}>
-            <div className={`diary-browser-tabs variant-${folderStyle}`}>
+          {/* 탭 바 및 스타일 비교 스위처 */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', flexWrap: 'wrap', marginBottom: folderStyle === 'dock' ? '0.4rem' : '0' }}>
+            <div className={`diary-browser-tabs variant-${folderStyle}`} style={{ flex: 1, minWidth: '260px' }}>
               <button
                 type="button"
                 className={`diary-browser-tab ${activeDiaryTab === 'schedules' ? 'active' : ''}`}
@@ -298,9 +298,26 @@ export default function DailyDiaryView({
               </button>
             </div>
 
-            {/* A안 vs B안 즉시 비교 버튼 */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', marginBottom: folderStyle === 'open' ? '1.15rem' : '0.25rem', fontSize: '0.75rem', color: 'var(--text-subtle)' }}>
+            {/* 스타일 비교 버튼 (독 형태 / 오픈 폴더 / 노트 서류철) */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem', marginBottom: folderStyle === 'open' ? '1.15rem' : folderStyle === 'binder' ? '0.25rem' : '1.15rem', fontSize: '0.72rem', color: 'var(--text-subtle)' }}>
               <span style={{ fontWeight: 600 }}>비교:</span>
+              <button
+                type="button"
+                onClick={() => setFolderStyle('dock')}
+                style={{
+                  background: folderStyle === 'dock' ? 'var(--color-primary)' : 'var(--bg-card-subtle)',
+                  color: folderStyle === 'dock' ? '#ffffff' : 'var(--text-muted)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: '4px',
+                  padding: '0.15rem 0.45rem',
+                  fontSize: '0.7rem',
+                  fontWeight: folderStyle === 'dock' ? 700 : 500,
+                  cursor: 'pointer'
+                }}
+                title="독 형태: 중첩 박스 없이 깔끔한 세그먼트 독 방식"
+              >
+                독 형태
+              </button>
               <button
                 type="button"
                 onClick={() => setFolderStyle('open')}
@@ -309,14 +326,14 @@ export default function DailyDiaryView({
                   color: folderStyle === 'open' ? '#ffffff' : 'var(--text-muted)',
                   border: '1px solid var(--border-color)',
                   borderRadius: '4px',
-                  padding: '0.2rem 0.55rem',
-                  fontSize: '0.72rem',
+                  padding: '0.15rem 0.45rem',
+                  fontSize: '0.7rem',
                   fontWeight: folderStyle === 'open' ? 700 : 500,
                   cursor: 'pointer'
                 }}
-                title="A안: 바깥 큰 상자를 없애 개별 카드가 가로 100%를 시원하게 채우는 방식"
+                title="오픈 폴더: 가로선 위에 탭이 얹히고 카드가 100% 채워지는 방식"
               >
-                A안 오픈폴더 (추천)
+                오픈 폴더
               </button>
               <button
                 type="button"
@@ -326,14 +343,14 @@ export default function DailyDiaryView({
                   color: folderStyle === 'binder' ? '#ffffff' : 'var(--text-muted)',
                   border: '1px solid var(--border-color)',
                   borderRadius: '4px',
-                  padding: '0.2rem 0.55rem',
-                  fontSize: '0.72rem',
+                  padding: '0.15rem 0.45rem',
+                  fontSize: '0.7rem',
                   fontWeight: folderStyle === 'binder' ? 700 : 500,
                   cursor: 'pointer'
                 }}
-                title="B안: 바깥 상자를 서류철로 유지하고 내부 개별 박스를 줄구분선으로 바꾼 방식"
+                title="노트 서류철: 바깥 상자는 두고 내부 개별 박스를 줄구분선으로 바꾼 방식"
               >
-                B안 노트서류철
+                노트 서류철
               </button>
             </div>
           </div>

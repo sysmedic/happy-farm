@@ -1967,6 +1967,58 @@ form.modal-content {
   border-bottom: none !important;
 }
 
+/* [독 형태] 세그먼트 독 탭 (중첩 박스 없는 현대적인 오픈 독 방식) */
+.diary-browser-tabs.variant-dock {
+  display: flex;
+  background: var(--bg-card-subtle);
+  padding: 4px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  gap: 4px;
+  margin-bottom: 1.15rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.diary-browser-tabs.variant-dock .diary-browser-tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  border-radius: var(--radius-sm);
+  border: none !important;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  background: transparent;
+  color: var(--text-muted);
+  font-weight: 600;
+  padding: 0.6rem 0.75rem;
+  margin: 0;
+  box-shadow: none;
+}
+
+.diary-browser-tabs.variant-dock .diary-browser-tab:hover:not(.active) {
+  background: rgba(0, 0, 0, 0.03);
+  color: var(--text-main);
+}
+
+.diary-browser-tabs.variant-dock .diary-browser-tab.active {
+  background: var(--bg-card) !important;
+  color: var(--color-primary);
+  font-weight: 800;
+  box-shadow: var(--shadow-sm);
+  border: none !important;
+}
+
+.diary-tab-panel.variant-dock {
+  border: none !important;
+  background: transparent !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+}
+
 /* 탭 카운트 뱃지 공통 */
 .diary-tab-count {
   font-size: 0.75rem;
