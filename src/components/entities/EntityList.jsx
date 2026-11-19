@@ -2,11 +2,8 @@ import React, { useState, useMemo } from 'react';
 import { 
   Search, 
   Plus, 
-  Printer, 
   ClipboardList, 
   History, 
-  Edit3, 
-  Trash2,
   Calendar,
   Sparkles,
   Activity,
@@ -700,60 +697,34 @@ export default function EntityList({
                 </div>
 
                 {/* 액션 버튼 그룹 */}
+                {/* 액션 버튼 그룹: 관리 추가 & 상세 이력 2개로 큼직하고 안전하게 배치 */}
                 <div className="entity-card-actions">
-                  {isHistory ? (
-                    <button 
-                      className="btn btn-secondary btn-sm"
-                      onClick={() => onOpenCareLogModal(entity)}
-                      title={isShipped ? "출하 완료된 개체 (과거 이력 추가 가능)" : "폐사/도태된 개체 (과거 이력 추가 가능)"}
-                      style={{ flex: 1, opacity: 0.9 }}
-                    >
-                      <ClipboardList size={14} />
-                      <span>이력 추가</span>
-                    </button>
-                  ) : (
-                    <button 
-                      className="btn btn-secondary btn-sm"
-                      onClick={() => onOpenCareLogModal(entity)}
-                      title="이 개체에 관리 기록 추가"
-                      style={{ flex: 1 }}
-                    >
-                      <ClipboardList size={14} />
-                      <span>관리 추가</span>
-                    </button>
-                  )}
+                  <button 
+                    className={`btn ${isHistory ? 'btn-secondary' : 'btn-primary'} btn-sm`}
+                    onClick={() => onOpenCareLogModal(entity)}
+                    title={isShipped ? "출하 완료된 개체 (과거 이력 추가)" : isDeceased ? "폐사/도태된 개체 (과거 이력 추가)" : "이 개체에 관리 기록 추가"}
+                    style={{ flex: 1, height: '36px', fontWeight: 700, gap: '0.4rem' }}
+                  >
+                    <ClipboardList size={15} />
+                    <span>{isHistory ? '이력 추가' : '관리 추가'}</span>
+                  </button>
 
                   <button 
                     className="btn btn-outline btn-sm"
                     onClick={() => onOpenEntityDetail(entity.tagNumber)}
-                    title="관리 이력 상세 조회"
+                    title="관리 이력 및 상세 프로필 조회"
+                    style={{ 
+                      flex: 1, 
+                      height: '36px', 
+                      fontWeight: 600, 
+                      gap: '0.4rem',
+                      border: '1px solid var(--text-muted)',
+                      color: 'var(--text-main)',
+                      background: 'var(--bg-card)'
+                    }}
                   >
-                    <History size={14} />
-                    <span>이력</span>
-                  </button>
-
-                  <button 
-                    className="btn btn-outline btn-sm btn-icon-only"
-                    onClick={() => onOpenPrintSheet(entity)}
-                    title="개체 관리 카드 A4 인쇄"
-                  >
-                    <Printer size={14} />
-                  </button>
-
-                  <button 
-                    className="btn btn-outline btn-sm btn-icon-only"
-                    onClick={() => onOpenEntityModal(entity)}
-                    title="개체 정보 수정"
-                  >
-                    <Edit3 size={14} />
-                  </button>
-
-                  <button 
-                    className="btn btn-outline btn-sm btn-icon-only"
-                    onClick={() => onDeleteEntity(entity.id, entity.name)}
-                    title="개체 삭제"
-                  >
-                    <Trash2 size={14} color="#ef4444" />
+                    <History size={15} />
+                    <span>상세 이력</span>
                   </button>
                 </div>
               </div>

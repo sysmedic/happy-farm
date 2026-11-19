@@ -16,7 +16,8 @@ export default function EntityFormModal({
   entityToEdit,
   existingEntities,
   onClose,
-  onSave
+  onSave,
+  onDelete
 }) {
   const isEditing = Boolean(entityToEdit && entityToEdit.id);
 
@@ -478,10 +479,25 @@ export default function EntityFormModal({
           </div>
 
           {/* 모달 푸터 */}
-          <div className="modal-footer">
+          <div className="modal-footer" style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.6rem' }}>
             <button type="button" className="btn btn-secondary" onClick={onClose}>
               취소
             </button>
+            {isEditing && onDelete && (
+              <button
+                type="button"
+                className="btn btn-outline"
+                onClick={() => onDelete(entityToEdit.id, entityToEdit.name)}
+                style={{
+                  border: '1px solid var(--color-danger)',
+                  color: 'var(--color-danger)',
+                  fontWeight: 600,
+                  background: 'var(--bg-card)'
+                }}
+              >
+                삭제
+              </button>
+            )}
             <button type="submit" className="btn btn-primary">
               <Save size={16} />
               <span>{isEditing ? '변경사항 저장' : '개체 등록 완료'}</span>

@@ -573,6 +573,14 @@ export default function App() {
             setEntityToEdit(null);
           }}
           onSave={handleSaveEntity}
+          onDelete={(id, name) => {
+            handleDeleteEntity(id, name);
+            setIsEntityModalOpen(false);
+            setEntityToEdit(null);
+            if (selectedEntityForDetail && selectedEntityForDetail.id === id) {
+              setSelectedEntityForDetail(null);
+            }
+          }}
         />
       )}
 
