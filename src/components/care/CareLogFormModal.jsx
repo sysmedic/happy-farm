@@ -25,7 +25,7 @@ const getInitialOperator = (logToEdit, careLogs) => {
     const latestWithOp = careLogs.find(l => l.operator && l.operator.trim());
     if (latestWithOp) return latestWithOp.operator;
   }
-  return '홍길동 대표';
+  return '';
 };
 
 export default function CareLogFormModal({
@@ -544,12 +544,40 @@ export default function CareLogFormModal({
 
               <div className="form-group">
                 <label className="form-label">작업자 / 담당 수의사</label>
-                <input
-                  type="text"
-                  className="form-input"
-                  value={operator}
-                  onChange={(e) => setOperator(e.target.value)}
-                />
+                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                  <input
+                    type="text"
+                    className="form-input"
+                    value={operator}
+                    onChange={(e) => setOperator(e.target.value)}
+                    onClick={() => {
+                      if (operator) setOperator('');
+                    }}
+                    placeholder="예: 홍길동, 김수의사 (선택)"
+                    style={{ paddingRight: operator ? '30px' : '10px' }}
+                  />
+                  {operator && (
+                    <button
+                      type="button"
+                      onClick={() => setOperator('')}
+                      title="입력 내용 지우기"
+                      style={{
+                        position: 'absolute',
+                        right: '8px',
+                        background: 'transparent',
+                        border: 'none',
+                        cursor: 'pointer',
+                        color: 'var(--text-muted)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: '2px'
+                      }}
+                    >
+                      <X size={14} />
+                    </button>
+                  )}
+                </div>
               </div>
 
               <div className="form-group">

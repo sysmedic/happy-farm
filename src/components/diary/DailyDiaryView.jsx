@@ -1250,7 +1250,7 @@ export default function DailyDiaryView({
                           </div>
                         )}
 
-                        {(log.operator || log.cost) && (
+                        {((log.operator && log.operator.trim()) || (log.cost && Number(log.cost) > 0)) ? (
                           <div style={{
                             display: 'flex',
                             alignItems: 'center',
@@ -1262,10 +1262,10 @@ export default function DailyDiaryView({
                             marginTop: '0.45rem',
                             borderTop: '1px dashed var(--border-color)'
                           }}>
-                            {log.operator && <span>작업자: {log.operator}</span>}
-                            {log.cost ? <span>비용: {Number(log.cost).toLocaleString()}원</span> : null}
+                            {log.operator && log.operator.trim() ? <span>작업자: {log.operator.trim()}</span> : null}
+                            {log.cost && Number(log.cost) > 0 ? <span>비용: {Number(log.cost).toLocaleString()}원</span> : null}
                           </div>
-                        )}
+                        ) : null}
                       </div>
                     );
                   })}

@@ -618,8 +618,8 @@ export default function EntityDetailModal({
                           </div>
                         )}
 
-                        {/* 하단 기록자 / 비용 */}
-                        {(log.operator || log.cost) && (
+                        {/* 하단 기록자 / 비용 (비어있으면 전체 영역 숨김) */}
+                        {((log.operator && log.operator.trim()) || (log.cost && Number(log.cost) > 0)) ? (
                           <div style={{
                             display: 'flex',
                             alignItems: 'center',
@@ -631,10 +631,10 @@ export default function EntityDetailModal({
                             paddingTop: '0.45rem',
                             marginTop: '0.45rem'
                           }}>
-                            {log.operator && <span>기록자: {log.operator}</span>}
-                            {log.cost ? <span>비용: {Number(log.cost).toLocaleString()}원</span> : null}
+                            {log.operator && log.operator.trim() ? <span>작업자: {log.operator.trim()}</span> : null}
+                            {log.cost && Number(log.cost) > 0 ? <span>비용: {Number(log.cost).toLocaleString()}원</span> : null}
                           </div>
-                        )}
+                        ) : null}
                       </div>
                     );
                   })}
