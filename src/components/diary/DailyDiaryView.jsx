@@ -363,26 +363,26 @@ export default function DailyDiaryView({
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
-                    {/* A. 직접 등록한 영농 스케줄 영역 */}
-                    {dailySchedules.length > 0 && (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
-                        {scheduledTasks.length > 0 && (
-                          <div style={{ 
-                            display: 'flex', 
-                            alignItems: 'center', 
-                            gap: '0.35rem', 
-                            fontSize: '0.85rem', 
-                            fontWeight: 700, 
-                            color: 'var(--text-main)',
-                            marginBottom: '0.1rem'
-                          }}>
-                            <span>📌</span>
-                            <span>등록된 일정 ({dailySchedules.length}건)</span>
-                          </div>
-                        )}
-                        {dailySchedules.map(sched => {
-                      const isDone = Boolean(sched.completed);
-                      const isExpanded = expandedCompletedIds.has(sched.id);
+                  {/* A. 직접 등록한 영농 스케줄 영역 */}
+                  {dailySchedules.length > 0 && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+                      {scheduledTasks.length > 0 && (
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.35rem',
+                          fontSize: '0.85rem',
+                          fontWeight: 700,
+                          color: 'var(--text-main)',
+                          marginBottom: '0.1rem'
+                        }}>
+                          <span>📌</span>
+                          <span>등록된 일정 ({dailySchedules.length}건)</span>
+                        </div>
+                      )}
+                      {dailySchedules.map(sched => {
+                        const isDone = Boolean(sched.completed);
+                        const isExpanded = expandedCompletedIds.has(sched.id);
 
                       // 1. 완료 상태이면서 접힌 모드: 1행 콤팩트 가로 배치 [체크박스 + 개체번호/농장공통 + 일정제목(말줄임)]
                       if (isDone && !isExpanded) {
@@ -475,7 +475,8 @@ export default function DailyDiaryView({
                                 textOverflow: 'ellipsis',
                                 whiteSpace: 'nowrap',
                                 minWidth: 0,
-                                flex: 1
+                                flex: 1,
+                                overflow: 'hidden'
                               }}>
                                 {sched.title}
                               </span>
@@ -619,9 +620,9 @@ export default function DailyDiaryView({
                           </div>
 
                           {/* 2행: 일정 제목 */}
-                          <div style={{ 
-                            fontWeight: 700, 
-                            fontSize: '0.92rem', 
+                          <div style={{
+                            fontWeight: 700,
+                            fontSize: '0.92rem',
                             wordBreak: 'break-word',
                             paddingLeft: '1.75rem',
                             color: isDone ? 'var(--text-muted)' : 'var(--text-main)',
@@ -633,9 +634,9 @@ export default function DailyDiaryView({
 
                           {/* 3행: 상세 메모 (메모가 있을 때만 렌더링) */}
                           {sched.memo && (
-                            <div style={{ 
-                              fontSize: '0.8rem', 
-                              color: 'var(--text-muted)', 
+                            <div style={{
+                              fontSize: '0.8rem',
+                              color: 'var(--text-muted)',
                               paddingLeft: '1.75rem',
                               wordBreak: 'break-word',
                               lineHeight: 1.35
@@ -646,54 +647,54 @@ export default function DailyDiaryView({
                         </div>
                       );
                     })}
-                  </div>
-                )}
-
-                {/* B. 기존 관리기록에서 자동 파생된 D-Day 차기 예정 작업 (리마인더 분리 영역) */}
-                {scheduledTasks.length > 0 && (
-                  <div style={{ 
-                    marginTop: dailySchedules.length > 0 ? '1rem' : '0', 
-                    paddingTop: dailySchedules.length > 0 ? '1rem' : '0',
-                    borderTop: dailySchedules.length > 0 ? '1px dashed var(--border-color)' : 'none',
-                    display: 'flex', 
-                    flexDirection: 'column', 
-                    gap: '0.65rem' 
-                  }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', marginBottom: '0.1rem' }}>
-                      <div style={{ 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        justifyContent: 'space-between',
-                        gap: '0.4rem', 
-                        fontSize: '0.85rem', 
-                        fontWeight: 700, 
-                        color: 'var(--color-accent)'
-                      }}>
-                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                          <span>🔔</span>
-                          <span>개체 연동 알림 ({scheduledTasks.length}건)</span>
-                        </span>
-                        <span style={{ 
-                          fontSize: '0.72rem', 
-                          color: 'var(--color-accent)', 
-                          background: 'rgba(245, 158, 11, 0.15)',
-                          padding: '0.15rem 0.45rem',
-                          borderRadius: 'var(--radius-sm)',
-                          fontWeight: 700 
-                        }}>
-                          D-Day 오늘
-                        </span>
-                      </div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                        ※ 개체 관리기록에서 지정한 차기 예정일 작업입니다.
-                      </div>
                     </div>
+                  )}
 
-                    {scheduledTasks.map(task => {
-                      const targetEntity = (entities || []).find(e => e.id === task.entityId || e.tagNumber === task.tagNumber);
-                      const reminderCardId = `reminder-${task.id}`;
-                      const isDone = Boolean(task.nextScheduleCompleted);
-                      const isExpanded = expandedCompletedIds.has(reminderCardId);
+                  {/* B. 기존 관리기록에서 자동 파생된 D-Day 차기 예정 작업 (리마인더 분리 영역) */}
+                  {scheduledTasks.length > 0 && (
+                    <div style={{
+                      marginTop: dailySchedules.length > 0 ? '1rem' : '0',
+                      paddingTop: dailySchedules.length > 0 ? '1rem' : '0',
+                      borderTop: dailySchedules.length > 0 ? '1px dashed var(--border-color)' : 'none',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.65rem'
+                    }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', marginBottom: '0.1rem' }}>
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          gap: '0.4rem',
+                          fontSize: '0.85rem',
+                          fontWeight: 700,
+                          color: 'var(--color-accent)'
+                        }}>
+                          <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                            <span>🔔</span>
+                            <span>개체 연동 알림 ({scheduledTasks.length}건)</span>
+                          </span>
+                          <span style={{
+                            fontSize: '0.72rem',
+                            color: 'var(--color-accent)',
+                            background: 'rgba(245, 158, 11, 0.15)',
+                            padding: '0.15rem 0.45rem',
+                            borderRadius: 'var(--radius-sm)',
+                            fontWeight: 700
+                          }}>
+                            D-Day 오늘
+                          </span>
+                        </div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                          ※ 개체 관리기록에서 지정한 차기 예정일 작업입니다.
+                        </div>
+                      </div>
+
+                      {scheduledTasks.map(task => {
+                        const targetEntity = (entities || []).find(e => e.id === task.entityId || e.tagNumber === task.tagNumber);
+                        const reminderCardId = `reminder-${task.id}`;
+                        const isDone = Boolean(task.nextScheduleCompleted);
+                        const isExpanded = expandedCompletedIds.has(reminderCardId);
 
                       // 1. 완료 상태이면서 접힌 모드: 1행 콤팩트 가로 배치 [체크박스 + 개체번호 + 작업이름(말줄임)]
                       if (isDone && !isExpanded) {
