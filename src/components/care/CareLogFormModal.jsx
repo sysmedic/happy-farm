@@ -657,7 +657,16 @@ export default function CareLogFormModal({
             <button type="button" className="btn btn-secondary" onClick={onClose}>
               취소
             </button>
-            <button type="submit" className="btn btn-primary">
+            <button 
+              type="submit" 
+              className={`btn ${isEditing ? 'btn-outline' : 'btn-primary'}`}
+              style={isEditing ? {
+                border: '1px solid var(--text-muted)',
+                color: 'var(--text-main)',
+                fontWeight: 700,
+                background: 'var(--bg-card)'
+              } : {}}
+            >
               <Save size={16} />
               <span>{isEditing ? '수정 사항 저장' : '관리 기록 저장'}</span>
             </button>
