@@ -629,7 +629,7 @@ export default function DailyDiaryView({
                             fontWeight: 700,
                             fontSize: '0.92rem',
                             wordBreak: 'break-word',
-                            paddingLeft: '1.75rem',
+                            paddingLeft: 0,
                             color: isDone ? 'var(--text-muted)' : 'var(--text-main)',
                             textDecoration: isDone ? 'line-through' : 'none',
                             lineHeight: 1.35
@@ -642,7 +642,7 @@ export default function DailyDiaryView({
                             <div style={{
                               fontSize: '0.8rem',
                               color: 'var(--text-muted)',
-                              paddingLeft: '1.75rem',
+                              paddingLeft: 0,
                               wordBreak: 'break-word',
                               lineHeight: 1.35
                             }}>
@@ -911,7 +911,7 @@ export default function DailyDiaryView({
                             fontWeight: 700, 
                             fontSize: '0.92rem', 
                             wordBreak: 'break-word',
-                            paddingLeft: '1.75rem',
+                            paddingLeft: 0,
                             color: isDone ? 'var(--text-muted)' : 'var(--text-main)',
                             textDecoration: isDone ? 'line-through' : 'none',
                             lineHeight: 1.35
