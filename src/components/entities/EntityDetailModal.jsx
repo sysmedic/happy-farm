@@ -114,7 +114,7 @@ export default function EntityDetailModal({
                 onClick={() => setSelectedCategory('all')}
                 title="클릭하여 전체 관리 기록 보기"
               >
-                <span>전체</span>
+                <span>전체 기록</span>
                 <span className="tab-count">{allEntityLogs.length}</span>
               </button>
             </div>
@@ -605,11 +605,12 @@ export default function EntityDetailModal({
                               다음 일정: {log.nextScheduleDate}{log.nextScheduleTime ? ` - ${log.nextScheduleTime}` : ''}
                             </div>
 
-                            {/* 2단: 내용 (작업명) */}
+                            {/* 2단: 내용 (작업명, 70% 소프트 그레이 톤) */}
                             <div style={{
                               fontSize: '0.88rem',
-                              fontWeight: 700,
+                              fontWeight: 600,
                               color: 'var(--text-main)',
+                              opacity: 0.7,
                               lineHeight: 1.35,
                               wordBreak: 'break-word'
                             }}>
