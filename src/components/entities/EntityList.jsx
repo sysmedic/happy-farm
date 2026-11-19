@@ -36,7 +36,7 @@ const ALL_DASHBOARD_CARDS = [
   { id: 'in_heat', label: '발정 / 수정 대기', icon: '🔥', color: '#f97316', bg: 'rgba(249, 115, 22, 0.15)', desc: '발정 징후 관찰 및 적기 인공수정' },
   { id: 'inseminated', label: '수정 완료', icon: '🧬', color: '#0ea5e9', bg: 'rgba(14, 165, 233, 0.15)', desc: '인공수정 후 임신 확인 대기' },
   { id: 'calf', label: '송아지 (자우)', icon: '🐮', color: '#10b981', bg: 'rgba(16, 185, 129, 0.15)', desc: '생후 포유 및 이유기 송아지' },
-  { id: 'steer_beef', label: '비육우 (거세우)', icon: '🌾', color: '#d97706', bg: 'rgba(245, 158, 11, 0.15)', desc: '비육 후기 및 출하 체중 관리' },
+  { id: 'steer_beef', label: '비육우 (거세우)', icon: '🏆', color: '#d97706', bg: 'rgba(245, 158, 11, 0.15)', desc: '비육 후기 및 출하 체중 관리' },
   { id: 'growing', label: '육성우', icon: '🌱', color: '#059669', bg: 'rgba(5, 150, 105, 0.15)', desc: '송아지 이후 성장 단계' },
   { id: 'nursing', label: '포유 / 육아우', icon: '🐄', color: '#14b8a6', bg: 'rgba(20, 184, 166, 0.15)', desc: '분만 후 젖먹이는 어미소' },
   { id: 'scheduled_ship', label: '출하 예정', icon: '🚛', color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.15)', desc: '도축 및 경매 출하 예정' },

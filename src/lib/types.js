@@ -109,10 +109,10 @@ export const DEFAULT_CARE_CATEGORIES = [
   { id: 'vaccine', label: '백신접종', icon: '💉', badgeClass: 'badge-cat-vaccine' },
   { id: 'treatment', label: '진료·치료', icon: '💊', badgeClass: 'badge-cat-treatment' },
   { id: 'breeding', label: '인공수정', icon: '🧬', badgeClass: 'badge-cat-breeding' },
-  { id: 'calving', label: '분만', icon: '🍼', badgeClass: 'badge-cat-calving' },
+  { id: 'calving', label: '분만', icon: '🐮', badgeClass: 'badge-cat-calving' },
   { id: 'feed', label: '사료·영양', icon: '🌾', badgeClass: 'badge-cat-feed' },
   { id: 'weight', label: '체중측정', icon: '⚖️', badgeClass: 'badge-cat-weight' },
-  { id: 'routine', label: '축사점검', icon: '🏡', badgeClass: 'badge-cat-routine' },
+  { id: 'routine', label: '축사점검·방역', icon: '🛡️', badgeClass: 'badge-cat-routine' },
 ];
 
 export const CARE_CATEGORIES = DEFAULT_CARE_CATEGORIES;
