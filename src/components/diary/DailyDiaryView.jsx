@@ -561,30 +561,18 @@ export default function DailyDiaryView({
                                   fontWeight: 600,
                                   flexShrink: 0
                                 }}>
-                                  {sched.entityName || '농장 공통'}{sched.time ? ` (${sched.time.startsWith('0') ? sched.time.slice(1) : sched.time})` : ''}
+                                  {sched.entityName || '농장 공통'}
                                 </span>
                               )}
 
-                              {/* 별명 (개체명) 및 시간 (1안: 이름 옆에 시간을 괄호로 붙여 한 덩어리로 공간 대폭 절약) */}
-                              {sched.tagNumber && (sched.entityName || sched.time) && (
+                              {/* 별명 (개체명) */}
+                              {sched.tagNumber && sched.entityName && (
                                 <span style={{ 
                                   fontSize: '0.825rem', 
                                   fontWeight: 600, 
-                                  color: 'var(--text-main)',
-                                  display: 'inline-flex',
-                                  alignItems: 'baseline',
-                                  gap: '0.2rem'
+                                  color: 'var(--text-main)' 
                                 }}>
-                                  {sched.entityName && <span>{sched.entityName}</span>}
-                                  {sched.time && (
-                                    <span style={{ 
-                                      fontSize: '0.78rem', 
-                                      fontWeight: 500, 
-                                      color: 'var(--text-muted)' 
-                                    }}>
-                                      ({sched.time.startsWith('0') ? sched.time.slice(1) : sched.time})
-                                    </span>
-                                  )}
+                                  {sched.entityName}
                                 </span>
                               )}
                             </div>
@@ -625,7 +613,7 @@ export default function DailyDiaryView({
                             </div>
                           </div>
 
-                          {/* 2행: 일정 제목 */}
+                          {/* 2행: 일정 제목 및 시간 (등록된 시간은 제목 뒤에 무조건 노출) */}
                           <div style={{
                             fontWeight: 700,
                             fontSize: '0.92rem',
@@ -635,7 +623,19 @@ export default function DailyDiaryView({
                             textDecoration: isDone ? 'line-through' : 'none',
                             lineHeight: 1.35
                           }}>
-                            {sched.title}
+                            <span>{sched.title}</span>
+                            {sched.time && (
+                              <span style={{
+                                fontSize: '0.8rem',
+                                fontWeight: 600,
+                                color: 'var(--text-muted)',
+                                paddingLeft: '0.35rem',
+                                whiteSpace: 'nowrap',
+                                display: 'inline-block'
+                              }}>
+                                ({sched.time.startsWith('0') ? sched.time.slice(1) : sched.time})
+                              </span>
+                            )}
                           </div>
 
                           {/* 3행: 상세 메모 (메모가 있을 때만 렌더링) */}
