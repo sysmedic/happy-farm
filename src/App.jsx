@@ -346,6 +346,26 @@ export default function App() {
     showToast('일정 완료 상태가 변경되었습니다 ✅');
   };
 
+  // 차기 예정 작업(리마인더) 완료/미완료 토글
+  const handleToggleReminderComplete = (logId) => {
+    setCareLogs(prev => {
+      const next = prev.map(log => {
+        if (log.id === logId) {
+          const nextCompleted = !log.nextScheduleCompleted;
+          return {
+            ...log,
+            nextScheduleCompleted: nextCompleted,
+            nextScheduleCompletedAt: nextCompleted ? new Date().toISOString() : null
+          };
+        }
+        return log;
+      });
+      saveCareLogs(next);
+      return next;
+    });
+    showToast('예정 작업 완료 상태가 변경되었습니다 ✅');
+  };
+
   // 영농 일정 삭제
   const handleDeleteSchedule = (scheduleId) => {
     if (!window.confirm('이 영농 일정을 삭제하시겠습니까?')) return;
@@ -464,6 +484,7 @@ export default function App() {
                 }}
                 onOpenScheduleModal={handleOpenScheduleModal}
                 onToggleScheduleComplete={handleToggleScheduleComplete}
+                onToggleReminderComplete={handleToggleReminderComplete}
                 onDeleteSchedule={handleDeleteSchedule}
                 onEditSchedule={handleEditSchedule}
                 onNavigateToReport={(date) => {

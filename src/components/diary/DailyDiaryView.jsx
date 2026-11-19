@@ -32,6 +32,7 @@ export default function DailyDiaryView({
   onOpenCareLogModal,
   onOpenScheduleModal,
   onToggleScheduleComplete,
+  onToggleReminderComplete,
   onDeleteSchedule,
   onEditSchedule,
   onNavigateToReport
@@ -84,10 +85,11 @@ export default function DailyDiaryView({
   // 총 일정 건수
   const totalScheduleCount = dailySchedules.length + scheduledTasks.length;
 
-  // 미완료 일정 건수 (체크 해제된 일정 + 차기 예정 작업)
+  // 미완료 일정 건수 (체크 해제된 일정 + 차기 예정 작업 중 미완료)
   const pendingScheduleCount = useMemo(() => {
     const uncompletedDaily = dailySchedules.filter(s => !s.completed).length;
-    return uncompletedDaily + scheduledTasks.length;
+    const uncompletedReminders = scheduledTasks.filter(t => !t.nextScheduleCompleted).length;
+    return uncompletedDaily + uncompletedReminders;
   }, [dailySchedules, scheduledTasks]);
 
   // 달력에 표시할 이벤트 있는 날짜 집합 (완료 로그 또는 예정 일정 전체)
@@ -683,61 +685,119 @@ export default function DailyDiaryView({
 
                     {scheduledTasks.map(task => {
                       const targetEntity = (entities || []).find(e => e.id === task.entityId || e.tagNumber === task.tagNumber);
+                      const isDone = Boolean(task.nextScheduleCompleted);
+
                       return (
                         <div 
                           key={`sched-${task.id}`}
                           className="diary-item-card"
                           style={{
-                            background: 'rgba(245, 158, 11, 0.08)',
-                            border: '1px solid rgba(245, 158, 11, 0.3)',
+                            background: isDone ? 'var(--bg-card-subtle)' : 'rgba(245, 158, 11, 0.08)',
+                            border: `1px solid ${isDone ? 'var(--border-color)' : 'rgba(245, 158, 11, 0.3)'}`,
                             borderRadius: 'var(--radius-md)',
-                            padding: '0.7rem 0.85rem',
+                            padding: '0.65rem 0.85rem',
                             display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            gap: '0.5rem',
-                            flexWrap: 'wrap',
-                            overflow: 'hidden'
+                            flexDirection: 'column',
+                            gap: '0.35rem',
+                            opacity: isDone ? 0.8 : 1,
+                            transition: 'all 0.2s ease'
                           }}
                         >
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', minWidth: 0, flex: 1 }}>
-                            <span 
-                              className="badge badge-tag"
-                              onClick={() => onOpenEntityDetail(task.tagNumber)}
-                              title="클릭 시 이 개체의 관리 내역으로 이동"
-                              style={{ cursor: 'pointer', fontSize: '0.75rem', padding: '0.15rem 0.45rem' }}
-                            >
-                              {task.tagNumber}
-                            </span>
-                            <span style={{ fontWeight: 700, fontSize: '0.9rem', wordBreak: 'break-word' }}>
-                              {task.nextScheduleTitle || '예정 작업'}
-                            </span>
-                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                              ({task.entityName})
-                            </span>
+                          {/* 1행: [체크박스] [개체번호] [별명]   ...   [기록] 버튼 (우측 상단) */}
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', width: '100%' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap', minWidth: 0, flex: 1 }}>
+                              {/* 완료 체크박스 버튼 */}
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onToggleReminderComplete?.(task.id);
+                                }}
+                                style={{
+                                  background: 'none',
+                                  border: 'none',
+                                  cursor: 'pointer',
+                                  padding: '4px',
+                                  margin: '-4px',
+                                  color: isDone ? 'var(--color-primary)' : 'var(--text-muted)',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  flexShrink: 0,
+                                  borderRadius: '50%'
+                                }}
+                                title={isDone ? '미완료로 변경' : '완료로 표시'}
+                              >
+                                {isDone ? (
+                                  <CheckCircle2 size={19} color="var(--color-primary)" />
+                                ) : (
+                                  <Circle size={19} color="var(--text-muted)" />
+                                )}
+                              </button>
+
+                              {/* 개체번호 뱃지 */}
+                              <span 
+                                className="badge badge-tag"
+                                onClick={() => onOpenEntityDetail(task.tagNumber)}
+                                title="클릭 시 이 개체의 관리 내역으로 이동"
+                                style={{ cursor: 'pointer', fontSize: '0.75rem', padding: '0.15rem 0.45rem' }}
+                              >
+                                {task.tagNumber}
+                              </span>
+
+                              {/* 별명 (소 이름) */}
+                              <span style={{ 
+                                fontSize: '0.825rem', 
+                                fontWeight: 600, 
+                                color: isDone ? 'var(--text-muted)' : 'var(--text-main)' 
+                              }}>
+                                {task.entityName}
+                              </span>
+                            </div>
+
+                            {/* 우측 상단: [기록] 버튼 */}
+                            {onOpenCareLogModal && (
+                              <button 
+                                type="button"
+                                className="btn btn-primary btn-sm"
+                                onClick={() => onOpenCareLogModal(
+                                  targetEntity || { tagNumber: task.tagNumber, name: task.entityName, id: task.entityId },
+                                  selectedDate,
+                                  {
+                                    category: task.category || 'treatment',
+                                    title: task.nextScheduleTitle || '',
+                                    date: selectedDate,
+                                    entityId: task.entityId || (targetEntity ? targetEntity.id : '')
+                                  }
+                                )}
+                                style={{ 
+                                  fontSize: '0.75rem', 
+                                  padding: '0.2rem 0.55rem', 
+                                  flexShrink: 0,
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '0.25rem'
+                                }}
+                                title="이 예정 작업으로 새 관리기록 작성 (분류·작업명 자동 입력)"
+                              >
+                                <Plus size={12} />
+                                <span>기록</span>
+                              </button>
+                            )}
                           </div>
 
-                          {onOpenCareLogModal && (
-                            <button 
-                              type="button"
-                              className="btn btn-primary btn-sm"
-                              onClick={() => onOpenCareLogModal(
-                                targetEntity || { tagNumber: task.tagNumber, name: task.entityName, id: task.entityId },
-                                selectedDate,
-                                {
-                                  category: task.category || 'treatment',
-                                  title: task.nextScheduleTitle || '',
-                                  date: selectedDate,
-                                  entityId: task.entityId || (targetEntity ? targetEntity.id : '')
-                                }
-                              )}
-                              style={{ fontSize: '0.75rem', padding: '0.25rem 0.55rem', flexShrink: 0 }}
-                              title="이 예정 작업으로 새 관리기록 작성 (분류·작업명 자동 입력)"
-                            >
-                              <Plus size={12} />
-                              <span>기록 작성</span>
-                            </button>
-                          )}
+                          {/* 2행: 차기 예정 작업명 */}
+                          <div style={{ 
+                            fontWeight: 700, 
+                            fontSize: '0.92rem', 
+                            wordBreak: 'break-word',
+                            paddingLeft: '1.75rem',
+                            color: isDone ? 'var(--text-muted)' : 'var(--text-main)',
+                            textDecoration: isDone ? 'line-through' : 'none',
+                            lineHeight: 1.35
+                          }}>
+                            {task.nextScheduleTitle || '예정 작업'}
+                          </div>
                         </div>
                       );
                     })}
