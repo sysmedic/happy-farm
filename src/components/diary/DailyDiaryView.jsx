@@ -679,7 +679,7 @@ export default function DailyDiaryView({
                         </span>
                       </div>
                       <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                        ※ 이전 진료·인공수정 등 개체 관리기록에서 지정한 차기 예정일 작업입니다.
+                        개체 관리기록에서 지정한 차기 예정일 작업입니다.
                       </div>
                     </div>
 
