@@ -309,7 +309,19 @@ export default function DailyDiaryView({
           {/* 탭 1: 일정 화면 */}
           {activeDiaryTab === 'schedules' && (
             <div>
-              <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '0.75rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+                <h4 style={{
+                  fontSize: '0.92rem',
+                  fontWeight: 700,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.35rem',
+                  margin: 0,
+                  color: 'var(--text-main)'
+                }}>
+                  <span>📌</span>
+                  <span>등록된 일정 ({dailySchedules.length}건)</span>
+                </h4>
                 <button
                   className="btn btn-outline btn-sm"
                   onClick={() => onOpenScheduleModal(selectedDate)}
@@ -347,20 +359,6 @@ export default function DailyDiaryView({
                   {/* A. 직접 등록한 영농 스케줄 영역 */}
                   {dailySchedules.length > 0 && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
-                      {scheduledTasks.length > 0 && (
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.35rem',
-                          fontSize: '0.85rem',
-                          fontWeight: 700,
-                          color: 'var(--text-main)',
-                          marginBottom: '0.1rem'
-                        }}>
-                          <span>📌</span>
-                          <span>등록된 일정 ({dailySchedules.length}건)</span>
-                        </div>
-                      )}
                       {dailySchedules.map(sched => {
                         const isDone = Boolean(sched.completed);
                         const isExpanded = expandedCompletedIds.has(sched.id);
