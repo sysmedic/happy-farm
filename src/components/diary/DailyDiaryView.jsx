@@ -948,7 +948,11 @@ export default function DailyDiaryView({
                                   alignItems: 'center',
                                   gap: '0.25rem',
                                   minWidth: '54px',
-                                  justifyContent: 'center'
+                                  justifyContent: 'center',
+                                  border: '1px solid var(--text-muted)',
+                                  color: 'var(--text-main)',
+                                  fontWeight: 600,
+                                  background: 'var(--bg-card)'
                                 }}
                               >
                                 <Edit2 size={12} />
