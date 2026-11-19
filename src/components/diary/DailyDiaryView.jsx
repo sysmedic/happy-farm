@@ -657,7 +657,7 @@ export default function DailyDiaryView({
                             </div>
                           </div>
 
-                          {/* 2행: 일정 제목 (좌측, 말줄임) & 시간 및 [수정] 버튼 (우측) */}
+                          {/* 2행: [시간] [일정 제목 (말줄임)] (좌측) & [수정] 버튼 (우측) */}
                           <div style={{
                             display: 'flex',
                             alignItems: 'center',
@@ -667,60 +667,67 @@ export default function DailyDiaryView({
                             paddingLeft: 0,
                             marginTop: '0.15rem'
                           }}>
-                            <div 
-                              style={{
-                                fontWeight: 700,
-                                fontSize: '0.92rem',
-                                color: 'var(--text-main)',
-                                textDecoration: isDone ? 'line-through' : 'none',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                whiteSpace: 'nowrap',
-                                flex: 1,
-                                minWidth: 0
-                              }}
-                              title={sched.title}
-                            >
-                              {sched.title}
-                            </div>
-
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.45rem',
+                              flex: 1,
+                              minWidth: 0
+                            }}>
                               {sched.time && (
                                 <span style={{
-                                  fontSize: '0.85rem',
-                                  color: 'var(--text-muted)',
-                                  fontWeight: 600,
-                                  whiteSpace: 'nowrap'
+                                  fontWeight: 700,
+                                  fontSize: '0.92rem',
+                                  color: 'var(--text-main)',
+                                  whiteSpace: 'nowrap',
+                                  flexShrink: 0
                                 }}>
                                   {sched.time.startsWith('0') ? sched.time.slice(1) : sched.time}
                                 </span>
                               )}
 
-                              {/* 개체번호가 있는 경우: 1행의 [+ 기록] 버튼 바로 밑(2행 우측)에 [✏️] 수정 버튼 배치 */}
-                              {sched.tagNumber && onEditSchedule && (
-                                <button
-                                  type="button"
-                                  className="btn btn-outline btn-sm btn-icon-only"
-                                  onClick={() => onEditSchedule(sched)}
-                                  title="일정 수정"
-                                  style={{
-                                    width: '24px',
-                                    height: '24px',
-                                    padding: 0,
-                                    flexShrink: 0,
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    border: '1px solid var(--text-muted)',
-                                    color: 'var(--text-main)',
-                                    background: 'var(--bg-card)',
-                                    borderRadius: 'var(--radius-sm)'
-                                  }}
-                                >
-                                  <Edit2 size={12} />
-                                </button>
-                              )}
+                              <div 
+                                style={{
+                                  fontWeight: 700,
+                                  fontSize: '0.92rem',
+                                  color: 'var(--text-main)',
+                                  textDecoration: isDone ? 'line-through' : 'none',
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis',
+                                  whiteSpace: 'nowrap',
+                                  flex: 1,
+                                  minWidth: 0
+                                }}
+                                title={sched.title}
+                              >
+                                {sched.title}
+                              </div>
                             </div>
+
+                            {/* 개체번호가 있는 경우: 1행의 [+ 기록] 버튼 바로 밑(2행 우측)에 [✏️] 수정 버튼 배치 */}
+                            {sched.tagNumber && onEditSchedule && (
+                              <button
+                                type="button"
+                                className="btn btn-outline btn-sm btn-icon-only"
+                                onClick={() => onEditSchedule(sched)}
+                                title="일정 수정"
+                                style={{
+                                  width: '24px',
+                                  height: '24px',
+                                  padding: 0,
+                                  flexShrink: 0,
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  border: '1px solid var(--text-muted)',
+                                  color: 'var(--text-main)',
+                                  background: 'var(--bg-card)',
+                                  borderRadius: 'var(--radius-sm)'
+                                }}
+                              >
+                                <Edit2 size={12} />
+                              </button>
+                            )}
                           </div>
 
                           {/* 3행: 상세 메모 (메모가 있을 때만 렌더링) */}
@@ -998,7 +1005,7 @@ export default function DailyDiaryView({
                             </div>
                           </div>
 
-                          {/* 2행: 차기 예정 작업명 (좌측, 말줄임) & 시간 및 [수정] 버튼 (우측) */}
+                          {/* 2행: [시간] [차기 예정 작업명 (말줄임)] (좌측) & [수정] 버튼 (우측) */}
                           <div style={{
                             display: 'flex',
                             alignItems: 'center',
@@ -1008,59 +1015,66 @@ export default function DailyDiaryView({
                             paddingLeft: 0,
                             marginTop: '0.15rem'
                           }}>
-                            <div 
-                              style={{ 
-                                fontWeight: 700, 
-                                fontSize: '0.92rem', 
-                                color: 'var(--text-main)',
-                                textDecoration: isDone ? 'line-through' : 'none',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                whiteSpace: 'nowrap',
-                                flex: 1,
-                                minWidth: 0
-                              }}
-                              title={task.nextScheduleTitle || '예정 작업'}
-                            >
-                              {task.nextScheduleTitle || '예정 작업'}
-                            </div>
-
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.45rem',
+                              flex: 1,
+                              minWidth: 0
+                            }}>
                               {task.nextScheduleTime && (
                                 <span style={{
-                                  fontSize: '0.85rem',
-                                  color: 'var(--text-muted)',
-                                  fontWeight: 600,
-                                  whiteSpace: 'nowrap'
+                                  fontWeight: 700,
+                                  fontSize: '0.92rem',
+                                  color: 'var(--text-main)',
+                                  whiteSpace: 'nowrap',
+                                  flexShrink: 0
                                 }}>
                                   {task.nextScheduleTime.startsWith('0') ? task.nextScheduleTime.slice(1) : task.nextScheduleTime}
                                 </span>
                               )}
 
-                              {onEditCareLog && (
-                                <button
-                                  type="button"
-                                  className="btn btn-outline btn-sm btn-icon-only"
-                                  onClick={() => onEditCareLog(task, { focusNextSchedule: true })}
-                                  title="이 차기 예정 작업의 원본 관리기록(예정일/작업명 등) 수정"
-                                  style={{
-                                    width: '24px',
-                                    height: '24px',
-                                    padding: 0,
-                                    flexShrink: 0,
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    border: '1px solid var(--text-muted)',
-                                    color: 'var(--text-main)',
-                                    background: 'var(--bg-card)',
-                                    borderRadius: 'var(--radius-sm)'
-                                  }}
-                                >
-                                  <Edit2 size={12} />
-                                </button>
-                              )}
+                              <div 
+                                style={{ 
+                                  fontWeight: 700, 
+                                  fontSize: '0.92rem', 
+                                  color: 'var(--text-main)',
+                                  textDecoration: isDone ? 'line-through' : 'none',
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis',
+                                  whiteSpace: 'nowrap',
+                                  flex: 1,
+                                  minWidth: 0
+                                }}
+                                title={task.nextScheduleTitle || '예정 작업'}
+                              >
+                                {task.nextScheduleTitle || '예정 작업'}
+                              </div>
                             </div>
+
+                            {onEditCareLog && (
+                              <button
+                                type="button"
+                                className="btn btn-outline btn-sm btn-icon-only"
+                                onClick={() => onEditCareLog(task, { focusNextSchedule: true })}
+                                title="이 차기 예정 작업의 원본 관리기록(예정일/작업명 등) 수정"
+                                style={{
+                                  width: '24px',
+                                  height: '24px',
+                                  padding: 0,
+                                  flexShrink: 0,
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  border: '1px solid var(--text-muted)',
+                                  color: 'var(--text-main)',
+                                  background: 'var(--bg-card)',
+                                  borderRadius: 'var(--radius-sm)'
+                                }}
+                              >
+                                <Edit2 size={12} />
+                              </button>
+                            )}
                           </div>
                         </div>
                       );
@@ -1190,15 +1204,26 @@ export default function DailyDiaryView({
                           )}
                         </div>
 
-                        {/* 2행: [관리 작업명 (말줄임)] (좌측) & [시간] (우측 끝, 2행 고정 유지) */}
+                        {/* 2행: [시간] [관리 작업명 (말줄임)] */}
                         <div style={{
                           display: 'flex',
                           alignItems: 'center',
-                          justifyContent: 'space-between',
-                          gap: '0.6rem',
+                          gap: '0.55rem',
                           marginBottom: log.details ? '0.35rem' : '0.1rem',
                           width: '100%'
                         }}>
+                          {log.time && (
+                            <span style={{
+                              fontWeight: 700,
+                              fontSize: '0.95rem',
+                              color: 'var(--text-main)',
+                              whiteSpace: 'nowrap',
+                              flexShrink: 0
+                            }}>
+                              {log.time.startsWith('0') ? log.time.slice(1) : log.time}
+                            </span>
+                          )}
+
                           <div 
                             style={{ 
                               fontWeight: 700, 
@@ -1214,18 +1239,6 @@ export default function DailyDiaryView({
                           >
                             {log.title}
                           </div>
-
-                          {log.time && (
-                            <div style={{
-                              fontSize: '0.85rem',
-                              color: 'var(--text-muted)',
-                              fontWeight: 600,
-                              whiteSpace: 'nowrap',
-                              flexShrink: 0
-                            }}>
-                              {log.time.startsWith('0') ? log.time.slice(1) : log.time}
-                            </div>
-                          )}
                         </div>
 
                         {log.details && (
