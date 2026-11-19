@@ -1,23 +1,23 @@
 import React, { useState, useMemo } from 'react';
-import { 
-  ChevronLeft, 
-  ChevronRight, 
+import {
+  ChevronLeft,
+  ChevronRight,
   ChevronDown,
   ChevronUp,
-  Calendar as CalendarIcon, 
-  Clock, 
-  Plus, 
-  FileText, 
-  AlertCircle, 
-  CheckCircle2, 
+  Calendar as CalendarIcon,
+  Clock,
+  Plus,
+  FileText,
+  AlertCircle,
+  CheckCircle2,
   Circle,
   Sparkles,
   ArrowRight,
   Trash2,
   Edit2
 } from 'lucide-react';
-import { 
-  CARE_CATEGORIES, 
+import {
+  CARE_CATEGORIES,
   getTodayDateString,
   getCategoryById
 } from '../../lib/types.js';
@@ -178,15 +178,15 @@ export default function DailyDiaryView({
                 {currentYearMonth.year}년 {currentYearMonth.month + 1}월
               </h3>
               <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
-                <button 
-                  className="btn btn-outline btn-sm btn-icon-only" 
+                <button
+                  className="btn btn-outline btn-sm btn-icon-only"
                   onClick={handlePrevMonth}
                   title="이전 달"
                   style={{ width: '32px', height: '32px' }}
                 >
                   <ChevronLeft size={18} />
                 </button>
-                <button 
+                <button
                   className="btn btn-outline btn-sm"
                   onClick={() => {
                     const now = new Date();
@@ -198,8 +198,8 @@ export default function DailyDiaryView({
                 >
                   오늘
                 </button>
-                <button 
-                  className="btn btn-outline btn-sm btn-icon-only" 
+                <button
+                  className="btn btn-outline btn-sm btn-icon-only"
                   onClick={handleNextMonth}
                   title="다음 달"
                   style={{ width: '32px', height: '32px' }}
@@ -237,12 +237,12 @@ export default function DailyDiaryView({
               })}
             </div>
 
-            <div style={{ 
-              marginTop: '1.25rem', 
-              paddingTop: '0.85rem', 
+            <div style={{
+              marginTop: '1.25rem',
+              paddingTop: '0.85rem',
               borderTop: '1px solid var(--border-color)',
-              display: 'flex', 
-              alignItems: 'center', 
+              display: 'flex',
+              alignItems: 'center',
               justifyContent: 'space-between',
               gap: '0.5rem',
               flexWrap: 'wrap',
@@ -253,7 +253,7 @@ export default function DailyDiaryView({
                 <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--color-primary)', display: 'inline-block' }} />
                 일정/작업 기록 있음
               </span>
-              <button 
+              <button
                 className="btn btn-primary btn-sm"
                 onClick={() => onOpenScheduleModal(selectedDate)}
                 style={{ fontSize: '0.75rem', padding: '0.25rem 0.6rem' }}
@@ -309,11 +309,11 @@ export default function DailyDiaryView({
           {activeDiaryTab === 'schedules' && (
             <div>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-                <h4 style={{ 
-                  fontSize: '0.95rem', 
-                  color: 'var(--color-accent)', 
-                  display: 'flex', 
-                  alignItems: 'center', 
+                <h4 style={{
+                  fontSize: '0.95rem',
+                  color: 'var(--color-accent)',
+                  display: 'flex',
+                  alignItems: 'center',
                   gap: '0.4rem',
                   margin: 0,
                   fontWeight: 700
@@ -321,15 +321,15 @@ export default function DailyDiaryView({
                   <Clock size={16} />
                   <span>
                     일정 {totalScheduleCount > 0 ? (
-                      pendingScheduleCount === 0 
-                        ? '(모두 완료됨! 🎉)' 
-                        : pendingScheduleCount < totalScheduleCount 
-                          ? `(${pendingScheduleCount}건 남음 / 총 ${totalScheduleCount}건)` 
+                      pendingScheduleCount === 0
+                        ? '(모두 완료됨! 🎉)'
+                        : pendingScheduleCount < totalScheduleCount
+                          ? `(${pendingScheduleCount}건 남음 / 총 ${totalScheduleCount}건)`
                           : `(총 ${totalScheduleCount}건)`
                     ) : '(0건)'}
                   </span>
                 </h4>
-                <button 
+                <button
                   className="btn btn-outline btn-sm"
                   onClick={() => onOpenScheduleModal(selectedDate)}
                   style={{ fontSize: '0.75rem', padding: '0.2rem 0.5rem' }}
@@ -340,9 +340,9 @@ export default function DailyDiaryView({
               </div>
 
               {dailySchedules.length === 0 && scheduledTasks.length === 0 ? (
-                <div style={{ 
-                  textAlign: 'center', 
-                  padding: '2.5rem 1rem', 
+                <div style={{
+                  textAlign: 'center',
+                  padding: '2.5rem 1rem',
                   background: 'var(--bg-card-subtle)',
                   borderRadius: 'var(--radius-md)',
                   color: 'var(--text-muted)'
@@ -352,8 +352,8 @@ export default function DailyDiaryView({
                   <p style={{ fontSize: '0.825rem', marginTop: '0.25rem' }}>
                     새로운 영농 일정이나 진료/사료 계획을 등록해보세요.
                   </p>
-                  <button 
-                    className="btn btn-primary btn-sm" 
+                  <button
+                    className="btn btn-primary btn-sm"
                     onClick={() => onOpenScheduleModal(selectedDate)}
                     style={{ marginTop: '0.75rem' }}
                   >
@@ -387,24 +387,22 @@ export default function DailyDiaryView({
                       // 1. 완료 상태이면서 접힌 모드: 1행 콤팩트 가로 배치 [체크박스 + 개체번호/농장공통 + 일정제목(말줄임)]
                       if (isDone && !isExpanded) {
                         return (
-                          <div 
+                          <div
                             key={sched.id}
                             className="diary-item-card"
-                            onClick={() => toggleExpandCompleted(sched.id)}
                             style={{
-                              background: 'var(--bg-card-subtle)',
-                              border: '1px solid var(--border-color)',
+                              background: isDone ? 'var(--bg-card-subtle)' : 'rgba(245, 158, 11, 0.08)',
+                              border: `1px solid ${isDone ? 'var(--border-color)' : 'rgba(245, 158, 11, 0.35)'}`,
                               borderRadius: 'var(--radius-md)',
-                              padding: '0.45rem 0.75rem',
+                              padding: '0.75rem 0.85rem',
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'space-between',
                               gap: '0.5rem',
                               cursor: 'pointer',
                               transition: 'all 0.2s ease',
-                              minHeight: '36px'
+                              overflow: 'hidden'
                             }}
-                            title="클릭하여 상세 일정 내용 펼치기"
                           >
                             <div style={{ 
                               display: 'flex', 
@@ -765,7 +763,7 @@ export default function DailyDiaryView({
                                 {task.tagNumber}
                               </span>
 
-                              {/* 작업 이름: 원래 선명한 텍스트 컬러 유지 (var(--text-main)) */}
+                              {/* 작업 이름: 원래 선명한 텍스트 컬러 유지 (var(--text-main)), 좁으면 말줄임, 가로줄 없음 */}
                               <span style={{ 
                                 fontSize: '0.88rem', 
                                 fontWeight: 600,
@@ -781,15 +779,15 @@ export default function DailyDiaryView({
                               </span>
                             </div>
 
-                            {/* 우측 펼침 표시 아이콘 */}
-                            <div style={{ display: 'flex', alignItems: 'center', color: 'var(--text-muted)', flexShrink: 0, paddingLeft: '0.2rem' }}>
+                            {/* 우측 펼치기 힌트 아이콘 */}
+                            <div style={{ color: 'var(--text-subtle)', display: 'flex', alignItems: 'center', flexShrink: 0, paddingLeft: '0.2rem' }} title="상세 내용 펼치기">
                               <ChevronDown size={14} />
                             </div>
                           </div>
                         );
                       }
 
-                      // 2. 미완료 상태 또는 사용자가 펼친 완료 카드 (2행 배치)
+                      // 2. 미완료 상태이거나 사용자가 클릭하여 펼친 경우 (2행 카드)
                       return (
                         <div 
                           key={`sched-${task.id}`}
@@ -916,23 +914,23 @@ export default function DailyDiaryView({
                           </div>
                         </div>
                       );
-                    })}
-                  </div>
-                )}
-                  </div>
-                )}
-              </div>
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           )}
 
           {/* 탭 2: 관리 내역 화면 */}
           {activeDiaryTab === 'logs' && (
             <div>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem', gap: '0.5rem', flexWrap: 'wrap' }}>
-                <h4 style={{ 
-                  fontSize: '0.95rem', 
+                <h4 style={{
+                  fontSize: '0.95rem',
                   fontWeight: 700,
-                  display: 'flex', 
-                  alignItems: 'center', 
+                  display: 'flex',
+                  alignItems: 'center',
                   gap: '0.4rem',
                   margin: 0
                 }}>
@@ -940,7 +938,7 @@ export default function DailyDiaryView({
                   <span>관리 내역 ({dailyLogs.length}건)</span>
                 </h4>
 
-                <button 
+                <button
                   className="btn btn-secondary btn-sm"
                   onClick={() => onNavigateToReport(selectedDate)}
                   title="이 날짜의 일일 종합 영농 보고서 보기"
@@ -952,9 +950,9 @@ export default function DailyDiaryView({
               </div>
 
               {dailyLogs.length === 0 ? (
-                <div style={{ 
-                  textAlign: 'center', 
-                  padding: '2.5rem 1rem', 
+                <div style={{
+                  textAlign: 'center',
+                  padding: '2.5rem 1rem',
                   background: 'var(--bg-card-subtle)',
                   borderRadius: 'var(--radius-md)',
                   color: 'var(--text-muted)'
@@ -964,8 +962,8 @@ export default function DailyDiaryView({
                   <p style={{ fontSize: '0.825rem', marginTop: '0.25rem' }}>
                     작업 내역을 추가하여 당일 영농 다이어리를 작성해보세요.
                   </p>
-                  <button 
-                    className="btn btn-primary btn-sm" 
+                  <button
+                    className="btn btn-primary btn-sm"
                     onClick={() => onOpenCareLogModal(null, selectedDate)}
                     style={{ marginTop: '0.75rem' }}
                   >
@@ -979,8 +977,8 @@ export default function DailyDiaryView({
                     const catObj = getCategoryById(log.category, careCategories);
 
                     return (
-                      <div 
-                        key={log.id} 
+                      <div
+                        key={log.id}
                         className="diary-item-card"
                         style={{
                           background: 'var(--bg-card)',
@@ -993,7 +991,7 @@ export default function DailyDiaryView({
                       >
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem', flexWrap: 'wrap', gap: '0.5rem' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                            <span 
+                            <span
                               className="badge badge-tag"
                               onClick={() => onOpenEntityDetail(log.tagNumber)}
                               title="클릭 시 이 개체의 관리 내역으로 즉시 이동"
@@ -1024,9 +1022,9 @@ export default function DailyDiaryView({
                         )}
 
                         {(log.operator || log.cost) && (
-                          <div style={{ 
-                            display: 'flex', 
-                            alignItems: 'center', 
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
                             gap: '0.75rem',
                             flexWrap: 'wrap',
                             fontSize: '0.775rem',
