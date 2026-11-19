@@ -665,7 +665,7 @@ export default function DailyDiaryView({
                       }}>
                         <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                           <span>🔔</span>
-                          <span>개체 관리 연동 알림 ({scheduledTasks.length}건)</span>
+                          <span>개체 연동 알림 ({scheduledTasks.length}건)</span>
                         </span>
                         <span style={{ 
                           fontSize: '0.72rem', 
