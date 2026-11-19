@@ -1118,7 +1118,7 @@ export default function DailyDiaryView({
                           background: 'var(--bg-card)',
                           border: '1px solid var(--border-color)',
                           borderRadius: 'var(--radius-md)',
-                          padding: '1rem',
+                          padding: '0.65rem 0.85rem',
                           boxShadow: 'var(--shadow-sm)',
                           transition: 'all 0.15s ease'
                         }}
