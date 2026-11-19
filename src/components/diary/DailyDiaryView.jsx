@@ -479,8 +479,8 @@ export default function DailyDiaryView({
                           key={sched.id}
                           className="diary-item-card"
                           style={{
-                            background: isDone ? 'var(--bg-card)' : 'rgba(245, 158, 11, 0.08)',
-                            border: `1px solid ${isDone ? 'var(--border-color)' : 'rgba(245, 158, 11, 0.3)'}`,
+                            background: 'var(--bg-card)',
+                            border: '1px solid var(--border-color)',
                             borderRadius: 'var(--radius-md)',
                             padding: '0.65rem 0.85rem',
                             display: 'flex',
