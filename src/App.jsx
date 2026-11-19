@@ -595,19 +595,21 @@ export default function App() {
         />
       )}
 
-      {/* 모바일 전용 우측 하단 플로팅 액션 버튼 (FAB) */}
-      <button
-        type="button"
-        className="mobile-fab"
-        onClick={() => {
-          setCareLogPreselectedEntity(null);
-          setIsCareLogModalOpen(true);
-        }}
-        title="현장 관리 기록 빠른 추가"
-        aria-label="현장 관리 기록 빠른 추가"
-      >
-        <Plus size={26} color="#ffffff" strokeWidth={2.5} />
-      </button>
+      {/* 모바일 전용 우측 하단 플로팅 액션 버튼 (FAB): 다이어리 화면에서는 카드 가림 방지를 위해 숨김 */}
+      {activeTab !== 'diary' && (
+        <button
+          type="button"
+          className="mobile-fab"
+          onClick={() => {
+            setCareLogPreselectedEntity(null);
+            setIsCareLogModalOpen(true);
+          }}
+          title="현장 관리 기록 빠른 추가"
+          aria-label="현장 관리 기록 빠른 추가"
+        >
+          <Plus size={26} color="#ffffff" strokeWidth={2.5} />
+        </button>
+      )}
     </div>
   );
 }
