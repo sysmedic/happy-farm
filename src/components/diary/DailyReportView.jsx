@@ -215,62 +215,125 @@ export default function DailyReportView({
               {reportDate}에 등록된 영농 관리 내역이 없습니다.
             </div>
           ) : (
-            <div style={{ overflowX: 'auto' }}>
-              <table className="print-table">
-                <thead>
-                  <tr>
-                    <th style={{ width: '65px' }}>시간</th>
-                    <th style={{ width: '135px' }}>개체번호 (이표)</th>
-                    <th style={{ width: '85px' }}>개체명</th>
-                    <th style={{ width: '75px' }}>분류</th>
-                    <th>작업 내용 및 처치 상세</th>
-                    <th style={{ width: '90px' }}>담당자</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {dailyLogs.map(log => {
-                    const catObj = getCategoryById(log.category, careCategories);
+            <>
+              {/* 1. 모바일 전용 카드 리스트 (좌우 스크롤 없이 한눈에 보기) */}
+              <div className="report-mobile-cards">
+                {dailyLogs.map(log => {
+                  const catObj = getCategoryById(log.category, careCategories);
 
-                    return (
-                      <tr key={log.id}>
-                        <td style={{ fontWeight: 600 }}>{log.time || '-'}</td>
-                        {/* ⚡ 클릭 시 해당 개체의 전체 관리 내역으로 이동하는 관계형 링크 */}
-                        <td>
+                  return (
+                    <div key={`m-${log.id}`} className="report-mobile-card">
+                      {/* 1행: [시간] [개체번호] [이름] [분류] (좌측) & [담당자] (우측) */}
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.45rem', flexWrap: 'wrap' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap', minWidth: 0 }}>
+                          {log.time && (
+                            <span style={{ fontWeight: 700, fontSize: '0.85rem', color: '#64748b' }}>
+                              {log.time}
+                            </span>
+                          )}
                           <span 
                             className="badge badge-tag"
                             onClick={() => onOpenEntityDetail(log.tagNumber)}
                             title="클릭 시 이 개체의 관리 내역으로 이동"
-                            style={{ cursor: 'pointer' }}
+                            style={{ cursor: 'pointer', fontSize: '0.75rem', padding: '0.15rem 0.45rem' }}
                           >
                             {log.tagNumber}
                           </span>
-                        </td>
-                        <td style={{ fontWeight: 700 }}>{log.entityName}</td>
-                        <td>
-                          <span className={`badge ${catObj.badgeClass}`} style={{ fontSize: '0.7rem' }}>
-                            {catObj.label}
+                          <span style={{ fontWeight: 700, fontSize: '0.88rem', color: '#0f172a' }}>
+                            {log.entityName}
                           </span>
-                        </td>
-                        <td>
-                          <div style={{ fontWeight: 700, color: '#0f172a', marginBottom: '2px' }}>{log.title}</div>
-                          {log.details && (
-                            <div style={{ fontSize: '0.785rem', color: '#475569', lineHeight: 1.4 }}>
-                              {log.details}
-                            </div>
-                          )}
-                          {log.nextScheduleDate && (
-                            <div style={{ fontSize: '0.75rem', color: '#d97706', marginTop: '2px', fontWeight: 600 }}>
-                              다음 일정: {log.nextScheduleDate} {log.nextScheduleTime ? `(${log.nextScheduleTime}) ` : ''}({log.nextScheduleTitle || '예정'})
-                            </div>
-                          )}
-                        </td>
-                        <td style={{ fontSize: '0.8rem' }}>{log.operator || '-'}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+                          <span className={`badge ${catObj.badgeClass}`} style={{ fontSize: '0.68rem', padding: '0.15rem 0.4rem' }}>
+                            {catObj.icon} {catObj.label}
+                          </span>
+                        </div>
+                        {log.operator && (
+                          <span style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 500, flexShrink: 0 }}>
+                            담당: {log.operator}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* 2행: 작업 제목 */}
+                      <div style={{ fontWeight: 800, fontSize: '0.95rem', color: '#0f172a', marginTop: '0.4rem' }}>
+                        {log.title}
+                      </div>
+
+                      {/* 3행: 상세 처치 내용 */}
+                      {log.details && (
+                        <div style={{ fontSize: '0.825rem', color: '#475569', lineHeight: 1.45, marginTop: '0.2rem' }}>
+                          {log.details}
+                        </div>
+                      )}
+
+                      {/* 4행: 다음 일정 */}
+                      {log.nextScheduleDate && (
+                        <div style={{ fontSize: '0.78rem', color: '#d97706', marginTop: '0.35rem', fontWeight: 700 }}>
+                          다음 일정: {log.nextScheduleDate} {log.nextScheduleTime ? `(${log.nextScheduleTime}) ` : ''}({log.nextScheduleTitle || '예정'})
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* 2. PC 및 A4 인쇄용 정통 테이블 */}
+              <div className="report-desktop-table" style={{ overflowX: 'auto' }}>
+                <table className="print-table">
+                  <thead>
+                    <tr>
+                      <th style={{ width: '65px' }}>시간</th>
+                      <th style={{ width: '135px' }}>개체번호 (이표)</th>
+                      <th style={{ width: '85px' }}>개체명</th>
+                      <th style={{ width: '75px' }}>분류</th>
+                      <th>작업 내용 및 처치 상세</th>
+                      <th style={{ width: '90px' }}>담당자</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {dailyLogs.map(log => {
+                      const catObj = getCategoryById(log.category, careCategories);
+
+                      return (
+                        <tr key={log.id}>
+                          <td style={{ fontWeight: 600 }}>{log.time || '-'}</td>
+                          {/* ⚡ 클릭 시 해당 개체의 전체 관리 내역으로 이동하는 관계형 링크 */}
+                          <td>
+                            <span 
+                              className="badge badge-tag"
+                              onClick={() => onOpenEntityDetail(log.tagNumber)}
+                              title="클릭 시 이 개체의 관리 내역으로 이동"
+                              style={{ cursor: 'pointer' }}
+                            >
+                              {log.tagNumber}
+                            </span>
+                          </td>
+                          <td style={{ fontWeight: 700 }}>{log.entityName}</td>
+                          <td>
+                            <span className={`badge ${catObj.badgeClass}`} style={{ fontSize: '0.7rem' }}>
+                              {catObj.label}
+                            </span>
+                          </td>
+                          <td>
+                            <div style={{ fontWeight: 700, color: '#0f172a', marginBottom: '2px' }}>{log.title}</div>
+                            {log.details && (
+                              <div style={{ fontSize: '0.785rem', color: '#475569', lineHeight: 1.4 }}>
+                                {log.details}
+                              </div>
+                            )}
+                            {log.nextScheduleDate && (
+                              <div style={{ fontSize: '0.75rem', color: '#d97706', marginTop: '2px', fontWeight: 600 }}>
+                                다음 일정: {log.nextScheduleDate} {log.nextScheduleTime ? `(${log.nextScheduleTime}) ` : ''}({log.nextScheduleTitle || '예정'})
+                              </div>
+                            )}
+                          </td>
+                          <td style={{ fontSize: '0.8rem' }}>{log.operator || '-'}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
         </div>
 

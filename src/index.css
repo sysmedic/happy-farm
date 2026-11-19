@@ -2169,6 +2169,14 @@ form.modal-content {
   margin: 0 auto;
 }
 
+/* Daily Report Responsive Dual Mode */
+.report-mobile-cards {
+  display: none;
+}
+.report-desktop-table {
+  display: block;
+}
+
 .print-sheet-header {
   display: flex;
   align-items: center;
@@ -2672,6 +2680,38 @@ form.modal-content {
   .category-picker-grid {
     grid-template-columns: repeat(3, 1fr);
   }
+
+  /* 모바일 일일 보고서 A4 컨테이너 여백 다이어트 & 반응형 듀얼 모드 */
+  .print-sheet-container {
+    padding: 0.85rem !important;
+    box-shadow: var(--shadow-sm) !important;
+    border-radius: var(--radius-md) !important;
+  }
+
+  .print-sheet-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.75rem !important;
+  }
+
+  .report-desktop-table {
+    display: none !important;
+  }
+
+  .report-mobile-cards {
+    display: flex !important;
+    flex-direction: column;
+    gap: 0.65rem;
+    margin: 1rem 0;
+  }
+
+  .report-mobile-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: var(--radius-md);
+    padding: 0.75rem 0.85rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  }
 }
 
 @keyframes slideUpBottom {
@@ -2696,8 +2736,12 @@ form.modal-content {
   .btn,
   .filter-bar,
   .modal-overlay,
-  .nav-tabs {
+  .nav-tabs,
+  .report-mobile-cards {
     display: none !important;
+  }
+  .report-desktop-table {
+    display: block !important;
   }
   .print-sheet-container {
     box-shadow: none !important;
