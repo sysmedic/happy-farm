@@ -679,6 +679,7 @@ export default function DailyDiaryView({
                                   fontWeight: 700,
                                   fontSize: '0.92rem',
                                   color: 'var(--text-main)',
+                                  opacity: 0.7,
                                   whiteSpace: 'nowrap',
                                   flexShrink: 0
                                 }}>
@@ -1027,6 +1028,7 @@ export default function DailyDiaryView({
                                   fontWeight: 700,
                                   fontSize: '0.92rem',
                                   color: 'var(--text-main)',
+                                  opacity: 0.7,
                                   whiteSpace: 'nowrap',
                                   flexShrink: 0
                                 }}>
@@ -1217,6 +1219,7 @@ export default function DailyDiaryView({
                               fontWeight: 700,
                               fontSize: '0.95rem',
                               color: 'var(--text-main)',
+                              opacity: 0.7,
                               whiteSpace: 'nowrap',
                               flexShrink: 0
                             }}>
