@@ -1896,21 +1896,20 @@ form.modal-content {
   box-shadow: var(--shadow-sm);
 }
 
-/* [일정] 탭 활성화 시: 테마에 맞춘 화사한 황색/호박색 계열 */
+/* [일정] 탭 활성화 시: 테마에 맞춘 화사한 오렌지/호박색 공식 컬러 */
 .diary-dock-tab.active.tab-schedules {
-  color: #d97706;
-}
-[data-theme='dark'] .diary-dock-tab.active.tab-schedules {
-  color: #fbbf24;
+  color: var(--color-accent, #f59e0b) !important;
 }
 
 .diary-dock-tab.tab-schedules .diary-tab-count {
   background: rgba(245, 158, 11, 0.15);
-  color: #d97706;
+  color: var(--color-accent, #f59e0b);
+  border: 1px solid rgba(245, 158, 11, 0.3);
 }
 [data-theme='dark'] .diary-dock-tab.tab-schedules .diary-tab-count {
   background: rgba(245, 158, 11, 0.25);
   color: #fbbf24;
+  border-color: rgba(245, 158, 11, 0.45);
 }
 
 /* [관리 내역] 탭 활성화 시: 테마에 맞춘 산뜻한 에메랄드 초록 계열 */

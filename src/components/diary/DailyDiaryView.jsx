@@ -81,6 +81,15 @@ export default function DailyDiaryView({
       .sort((a, b) => (a.time || '').localeCompare(b.time || ''));
   }, [schedules, selectedDate]);
 
+  // 총 일정 건수
+  const totalScheduleCount = dailySchedules.length + scheduledTasks.length;
+
+  // 미완료 일정 건수 (체크 해제된 일정 + 차기 예정 작업)
+  const pendingScheduleCount = useMemo(() => {
+    const uncompletedDaily = dailySchedules.filter(s => !s.completed).length;
+    return uncompletedDaily + scheduledTasks.length;
+  }, [dailySchedules, scheduledTasks]);
+
   // 달력에 표시할 이벤트 있는 날짜 집합 (완료 로그 또는 예정 일정 전체)
   const datesWithActivity = useMemo(() => {
     const set = new Set();
@@ -278,7 +287,7 @@ export default function DailyDiaryView({
             >
               <span>일정</span>
               <span className="diary-tab-count">
-                {dailySchedules.length + scheduledTasks.length}
+                {pendingScheduleCount}
               </span>
             </button>
 
@@ -308,7 +317,15 @@ export default function DailyDiaryView({
                   fontWeight: 700
                 }}>
                   <Clock size={16} />
-                  <span>일정 (총 {dailySchedules.length + scheduledTasks.length}건)</span>
+                  <span>
+                    일정 {totalScheduleCount > 0 ? (
+                      pendingScheduleCount === 0 
+                        ? '(모두 완료됨! 🎉)' 
+                        : pendingScheduleCount < totalScheduleCount 
+                          ? `(${pendingScheduleCount}건 남음 / 총 ${totalScheduleCount}건)` 
+                          : `(총 ${totalScheduleCount}건)`
+                    ) : '(0건)'}
+                  </span>
                 </h4>
                 <button 
                   className="btn btn-outline btn-sm"
