@@ -560,30 +560,30 @@ export default function DailyDiaryView({
                                   fontWeight: 600,
                                   flexShrink: 0
                                 }}>
-                                  🌾 {sched.entityName || '농장 공통'}
+                                  🌾 {sched.entityName || '농장 공통'}{sched.time ? ` (${sched.time.startsWith('0') ? sched.time.slice(1) : sched.time})` : ''}
                                 </span>
                               )}
 
-                              {/* 별명 (개체명) */}
-                              {sched.tagNumber && sched.entityName && (
+                              {/* 별명 (개체명) 및 시간 (1안: 이름 옆에 시간을 괄호로 붙여 한 덩어리로 공간 대폭 절약) */}
+                              {sched.tagNumber && (sched.entityName || sched.time) && (
                                 <span style={{ 
                                   fontSize: '0.825rem', 
                                   fontWeight: 600, 
-                                  color: isDone ? 'var(--text-muted)' : 'var(--text-main)' 
+                                  color: isDone ? 'var(--text-muted)' : 'var(--text-main)',
+                                  display: 'inline-flex',
+                                  alignItems: 'baseline',
+                                  gap: '0.2rem'
                                 }}>
-                                  {sched.entityName}
-                                </span>
-                              )}
-
-                              {/* 간략한 시간 표시: 시계 이모지 없이 시간 텍스트만 깔끔하게 (예: 14:30, 9:00) */}
-                              {sched.time && (
-                                <span style={{ 
-                                  fontSize: '0.78rem', 
-                                  color: 'var(--text-muted)', 
-                                  fontWeight: 500,
-                                  paddingLeft: '0.15rem'
-                                }}>
-                                  {sched.time.startsWith('0') ? sched.time.slice(1) : sched.time}
+                                  {sched.entityName && <span>{sched.entityName}</span>}
+                                  {sched.time && (
+                                    <span style={{ 
+                                      fontSize: '0.78rem', 
+                                      fontWeight: 500, 
+                                      color: 'var(--text-muted)' 
+                                    }}>
+                                      ({sched.time.startsWith('0') ? sched.time.slice(1) : sched.time})
+                                    </span>
+                                  )}
                                 </span>
                               )}
                             </div>
