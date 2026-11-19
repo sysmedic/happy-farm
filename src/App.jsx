@@ -164,7 +164,7 @@ export default function App() {
   // 개체 삭제 (2중 경고 적용)
   const handleDeleteEntity = (id, name) => {
     // 1차 경고: 대상 개체 확인
-    if (!window.confirm(`정말 개체 [${name}]을(를) 삭제하시겠습니까?\n(관련된 관리 기록은 보존됩니다.)`)) {
+    if (!window.confirm(`정말 개체 [${name}]을(를) 삭제하시겠습니까?`)) {
       return;
     }
     // 2차 재확인: 영구 삭제 경고
