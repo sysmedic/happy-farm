@@ -232,11 +232,12 @@ export default function App() {
     setCareLogToEdit(null);
   };
 
-  // 관리 내역 수정 모달 오픈
-  const handleOpenEditCareLog = (log) => {
+  // 관리 내역 수정 모달 오픈 (options: { focusNextSchedule?: boolean })
+  const handleOpenEditCareLog = (log, options = null) => {
     const ent = entities.find(e => e.id === log.entityId || e.tagNumber === log.tagNumber);
     setCareLogPreselectedEntity(ent || null);
     setCareLogToEdit(log);
+    setCareLogInitialValues(options ? { focusNextSchedule: Boolean(options.focusNextSchedule) } : null);
     setIsCareLogModalOpen(true);
   };
 

@@ -938,7 +938,7 @@ export default function DailyDiaryView({
                               <button
                                 type="button"
                                 className="btn btn-outline btn-sm"
-                                onClick={() => onEditCareLog(task)}
+                                onClick={() => onEditCareLog(task, { focusNextSchedule: true })}
                                 title="이 차기 예정 작업의 원본 관리기록(예정일/작업명 등) 수정"
                                 style={{
                                   fontSize: '0.75rem',

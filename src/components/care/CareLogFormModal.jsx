@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   X, 
   Save, 
@@ -65,6 +65,24 @@ export default function CareLogFormModal({
   const [updateStatus, setUpdateStatus] = useState('');
 
   const [errorMsg, setErrorMsg] = useState('');
+
+  // 차기 일정 등록 섹션 자동 스크롤 및 포커스 참조
+  const nextScheduleRef = useRef(null);
+  const nextScheduleDateInputRef = useRef(null);
+
+  useEffect(() => {
+    if (initialValues?.focusNextSchedule) {
+      const timer = setTimeout(() => {
+        if (nextScheduleRef.current) {
+          nextScheduleRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        if (nextScheduleDateInputRef.current) {
+          nextScheduleDateInputRef.current.focus();
+        }
+      }, 250);
+      return () => clearTimeout(timer);
+    }
+  }, [initialValues]);
 
   const activeEntities = useMemo(() => entities ? entities.filter(e => e.status !== 'shipped' && e.status !== 'deceased') : [], [entities]);
   const historyEntities = useMemo(() => entities ? entities.filter(e => e.status === 'shipped' || e.status === 'deceased') : [], [entities]);
@@ -540,7 +558,17 @@ export default function CareLogFormModal({
             </div>
 
             {/* 차기 예정일 (일정 다이어리 자동 연동) 섹션 */}
-            <div className="card" style={{ marginTop: '1.25rem', background: 'var(--bg-card-subtle)', borderStyle: 'dashed' }}>
+            <div 
+              ref={nextScheduleRef}
+              className="card" 
+              style={{ 
+                marginTop: '1.25rem', 
+                background: initialValues?.focusNextSchedule ? 'rgba(245, 158, 11, 0.08)' : 'var(--bg-card-subtle)', 
+                border: initialValues?.focusNextSchedule ? '2px dashed var(--color-accent)' : '1px dashed var(--border-color)',
+                borderRadius: 'var(--radius-md)',
+                transition: 'all 0.3s ease'
+              }}
+            >
               <div className="card-body" style={{ padding: '1rem 1.25rem' }}>
                 <label style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', cursor: 'pointer', fontWeight: 700 }}>
                   <input
@@ -598,6 +626,7 @@ export default function CareLogFormModal({
                       <div className="form-group">
                         <label className="form-label">차기 예정 날짜</label>
                         <input
+                          ref={nextScheduleDateInputRef}
                           type="date"
                           className="form-input"
                           value={nextScheduleDate}
