@@ -712,29 +712,22 @@ export default function DailyDiaryView({
                           </div>
                         )}
 
-                        <div style={{ 
-                          display: 'flex', 
-                          alignItems: 'center', 
-                          justifyContent: 'space-between', 
-                          fontSize: '0.775rem',
-                          color: 'var(--text-subtle)',
-                          paddingTop: '0.45rem',
-                          borderTop: '1px dashed var(--border-color)'
-                        }}>
-                          <div>
+                        {(log.operator || log.cost) && (
+                          <div style={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            gap: '0.75rem',
+                            flexWrap: 'wrap',
+                            fontSize: '0.775rem',
+                            color: 'var(--text-subtle)',
+                            paddingTop: '0.45rem',
+                            marginTop: '0.45rem',
+                            borderTop: '1px dashed var(--border-color)'
+                          }}>
                             {log.operator && <span>작업자: {log.operator}</span>}
-                            {log.cost ? <span style={{ marginLeft: '0.65rem' }}>비용: {Number(log.cost).toLocaleString()}원</span> : null}
+                            {log.cost ? <span>비용: {Number(log.cost).toLocaleString()}원</span> : null}
                           </div>
-
-                          <button 
-                            className="btn btn-outline btn-sm"
-                            onClick={() => onOpenEntityDetail(log.tagNumber)}
-                            style={{ fontSize: '0.75rem', padding: '0.2rem 0.5rem' }}
-                          >
-                            <span>개체 이력서 보기</span>
-                            <ArrowRight size={12} />
-                          </button>
-                        </div>
+                        )}
                       </div>
                     );
                   })}
