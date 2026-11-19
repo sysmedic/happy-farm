@@ -717,30 +717,18 @@ export default function DailyDiaryView({
                             </span>
                           </div>
 
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexShrink: 0 }}>
-                            {onOpenCareLogModal && (
-                              <button 
-                                type="button"
-                                className="btn btn-primary btn-sm"
-                                onClick={() => onOpenCareLogModal(targetEntity || { tagNumber: task.tagNumber, name: task.entityName, id: task.entityId }, selectedDate)}
-                                style={{ fontSize: '0.75rem', padding: '0.2rem 0.5rem' }}
-                                title="이 개체의 새 관리기록 작성창 열기"
-                              >
-                                <Plus size={12} />
-                                <span>기록 작성</span>
-                              </button>
-                            )}
+                          {onOpenCareLogModal && (
                             <button 
                               type="button"
-                              className="btn btn-outline btn-sm"
-                              onClick={() => onOpenEntityDetail(task.tagNumber)}
-                              style={{ fontSize: '0.75rem', padding: '0.2rem 0.5rem' }}
-                              title="개체 이력 상세 보기"
+                              className="btn btn-primary btn-sm"
+                              onClick={() => onOpenCareLogModal(targetEntity || { tagNumber: task.tagNumber, name: task.entityName, id: task.entityId }, selectedDate)}
+                              style={{ fontSize: '0.75rem', padding: '0.25rem 0.55rem', flexShrink: 0 }}
+                              title="이 개체의 새 관리기록 작성창 열기"
                             >
-                              <span>이력 보기</span>
-                              <ArrowRight size={12} />
+                              <Plus size={12} />
+                              <span>기록 작성</span>
                             </button>
-                          </div>
+                          )}
                         </div>
                       );
                     })}
