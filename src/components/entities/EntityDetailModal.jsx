@@ -198,7 +198,7 @@ export default function EntityDetailModal({
                   <span>출력</span>
                 </button>
                 <button 
-                  className="btn btn-primary btn-sm detail-edit-btn"
+                  className="btn btn-outline btn-sm detail-edit-btn"
                   onClick={() => onOpenEntityModal(entity)}
                   title="개체 기본 정보 수정"
                 >
