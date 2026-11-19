@@ -296,7 +296,7 @@ export default function DailyDiaryView({
             </div>
           </div>
 
-          {/* 상단 서브 탭 (2개 탭 전환: 예정 일정 vs 실시된 영농 관리) */}
+          {/* 상단 서브 탭 (2개 탭 전환: 예정 일정 vs 관리 내역) */}
           <div style={{
             display: 'flex',
             background: 'var(--bg-card-subtle)',
@@ -327,7 +327,6 @@ export default function DailyDiaryView({
                 boxShadow: activeDiaryTab === 'schedules' ? 'var(--shadow-sm)' : 'none'
               }}
             >
-              <Clock size={16} />
               <span>예정 일정</span>
               <span style={{
                 fontSize: '0.75rem',
@@ -362,8 +361,7 @@ export default function DailyDiaryView({
                 boxShadow: activeDiaryTab === 'logs' ? 'var(--shadow-sm)' : 'none'
               }}
             >
-              <CheckCircle2 size={16} />
-              <span>실시된 영농 관리</span>
+              <span>관리 내역</span>
               <span style={{
                 fontSize: '0.75rem',
                 padding: '0.1rem 0.45rem',
@@ -736,10 +734,10 @@ export default function DailyDiaryView({
               </div>
           )}
 
-          {/* 탭 2: 실시된 영농 관리 작업 화면 */}
+          {/* 탭 2: 관리 내역 화면 */}
           {activeDiaryTab === 'logs' && (
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+              <div style={{ marginBottom: '0.75rem' }}>
                 <h4 style={{ 
                   fontSize: '0.95rem', 
                   fontWeight: 700,
@@ -749,16 +747,8 @@ export default function DailyDiaryView({
                   margin: 0
                 }}>
                   <CheckCircle2 size={16} color="var(--color-primary)" />
-                  <span>실시된 영농 관리 작업 ({dailyLogs.length}건)</span>
+                  <span>관리 내역 ({dailyLogs.length}건)</span>
                 </h4>
-                <button 
-                  className="btn btn-primary btn-sm"
-                  onClick={() => onOpenCareLogModal(null, selectedDate)}
-                  style={{ fontSize: '0.75rem', padding: '0.2rem 0.5rem' }}
-                >
-                  <Plus size={12} />
-                  <span>작업 기록 추가</span>
-                </button>
               </div>
 
               {dailyLogs.length === 0 ? (
