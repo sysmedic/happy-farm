@@ -622,8 +622,8 @@ export default function App() {
         />
       )}
 
-      {/* 모바일 전용 우측 하단 플로팅 액션 버튼 (FAB): 다이어리 화면에서는 카드 가림 방지를 위해 숨김 */}
-      {activeTab !== 'diary' && (
+      {/* 모바일 전용 우측 하단 플로팅 액션 버튼 (FAB): 다이어리 및 드라이브 화면에서는 화면 가림 방지를 위해 숨김 */}
+      {activeTab !== 'diary' && activeTab !== 'cloud' && (
         <button
           type="button"
           className="mobile-fab"
