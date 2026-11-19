@@ -222,9 +222,9 @@ export default function DailyReportView({
                     <th style={{ width: '65px' }}>시간</th>
                     <th style={{ width: '135px' }}>개체번호 (이표)</th>
                     <th style={{ width: '85px' }}>개체명</th>
-                    <th style={{ width: '90px' }}>분류</th>
+                    <th style={{ width: '75px' }}>분류</th>
                     <th>작업 내용 및 처치 상세</th>
-                    <th style={{ width: '75px' }}>담당자</th>
+                    <th style={{ width: '90px' }}>담당자</th>
                   </tr>
                 </thead>
                 <tbody>
