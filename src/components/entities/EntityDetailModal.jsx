@@ -543,7 +543,7 @@ export default function EntityDetailModal({
                           </div>
                         </div>
 
-                        {/* 2행: [70% 소프트 블랙 날짜/시간] + [100% 진한 블랙 작업명] */}
+                        {/* 2행: [70% 소프트 블랙 날짜] + [100% 진한 블랙 작업명] */}
                         <div style={{
                           display: 'flex',
                           alignItems: 'center',
@@ -559,7 +559,7 @@ export default function EntityDetailModal({
                             whiteSpace: 'nowrap',
                             flexShrink: 0
                           }}>
-                            {log.date}{log.time ? ` ${log.time.startsWith('0') ? log.time.slice(1) : log.time}` : ''}
+                            {log.date}
                           </span>
 
                           <div 
@@ -603,7 +603,7 @@ export default function EntityDetailModal({
                             fontWeight: 600
                           }}>
                             <Clock size={13} />
-                            <span>차기 예정: {log.nextScheduleDate} {log.nextScheduleTime ? `(${log.nextScheduleTime}) ` : ''}{log.nextScheduleTitle ? `• ${log.nextScheduleTitle}` : ''}</span>
+                            <span>차기 예정: {log.nextScheduleDate}{log.nextScheduleTitle ? ` • ${log.nextScheduleTitle}` : ''}</span>
                           </div>
                         )}
 
