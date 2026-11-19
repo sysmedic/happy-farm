@@ -762,7 +762,7 @@ export default function DailyDiaryView({
                               <span style={{ 
                                 fontSize: '0.85rem', 
                                 color: 'var(--text-muted)', 
-                                textDecoration: 'line-through',
+                                textDecoration: 'none',
                                 overflow: 'hidden',
                                 textOverflow: 'ellipsis',
                                 whiteSpace: 'nowrap',
