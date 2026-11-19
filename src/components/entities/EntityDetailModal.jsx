@@ -508,7 +508,7 @@ export default function EntityDetailModal({
                             fontWeight: 600
                           }}>
                             <Clock size={14} />
-                            <span>차기 예정일: {log.nextScheduleDate} ({log.nextScheduleTitle || '예정 작업'})</span>
+                            <span>차기 예정일: {log.nextScheduleDate} {log.nextScheduleTime ? `(${log.nextScheduleTime}) ` : ''}({log.nextScheduleTitle || '예정 작업'})</span>
                           </div>
                         )}
 

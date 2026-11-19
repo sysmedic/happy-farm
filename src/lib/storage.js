@@ -778,7 +778,7 @@ export function getSchedulesForDate(dateStr, allLogs) {
   const logs = allLogs || loadCareLogs();
   return logs
     .filter(log => log.nextScheduleDate === dateStr)
-    .sort((a, b) => (a.time || '').localeCompare(b.time || ''));
+    .sort((a, b) => (a.nextScheduleTime || a.time || '').localeCompare(b.nextScheduleTime || b.time || ''));
 }
 
 // Full Database Export / Import

@@ -58,6 +58,7 @@ export default function CareLogFormModal({
   // 차기 일정 등록 (일정 다이어리 자동 연동)
   const [hasNextSchedule, setHasNextSchedule] = useState(Boolean(logToEdit?.nextScheduleDate));
   const [nextScheduleDate, setNextScheduleDate] = useState(logToEdit?.nextScheduleDate || '');
+  const [nextScheduleTime, setNextScheduleTime] = useState(logToEdit?.nextScheduleTime || '');
   const [nextScheduleTitle, setNextScheduleTitle] = useState(logToEdit?.nextScheduleTitle || '');
 
   // 체중 또는 상태 즉시 업데이트
@@ -99,6 +100,7 @@ export default function CareLogFormModal({
       setCost(logToEdit.cost ? String(logToEdit.cost) : '');
       setHasNextSchedule(Boolean(logToEdit.nextScheduleDate));
       setNextScheduleDate(logToEdit.nextScheduleDate || '');
+      setNextScheduleTime(logToEdit.nextScheduleTime || '');
       setNextScheduleTitle(logToEdit.nextScheduleTitle || '');
     } else {
       setOperator(getInitialOperator(null, careLogs));
@@ -106,6 +108,7 @@ export default function CareLogFormModal({
         if (initialValues.category) setCategory(initialValues.category);
         if (initialValues.title) setTitle(initialValues.title);
         if (initialValues.date) setDate(initialValues.date);
+        if (initialValues.time) setTime(initialValues.time);
         if (initialValues.entityId) setSelectedEntityId(initialValues.entityId);
       }
       if (preselectedEntity) {
@@ -245,6 +248,7 @@ export default function CareLogFormModal({
       operator: trimmedOperator,
       cost: cost ? Number(cost) : 0,
       nextScheduleDate: hasNextSchedule ? nextScheduleDate : null,
+      nextScheduleTime: hasNextSchedule ? (nextScheduleTime || null) : null,
       nextScheduleTitle: hasNextSchedule ? nextScheduleTitle.trim() : null,
       completed: true,
       createdAt: logToEdit?.createdAt || new Date().toISOString(),
@@ -635,6 +639,15 @@ export default function CareLogFormModal({
                         />
                       </div>
                       <div className="form-group">
+                        <label className="form-label">차기 예정 시간 (선택)</label>
+                        <input
+                          type="time"
+                          className="form-input"
+                          value={nextScheduleTime}
+                          onChange={(e) => setNextScheduleTime(e.target.value)}
+                        />
+                      </div>
+                      <div className="form-group full-width">
                         <label className="form-label">차기 예정 작업명</label>
                         <input
                           type="text"

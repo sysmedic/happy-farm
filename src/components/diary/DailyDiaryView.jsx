@@ -73,7 +73,7 @@ export default function DailyDiaryView({
   const scheduledTasks = useMemo(() => {
     return careLogs
       .filter(l => l.nextScheduleDate === selectedDate)
-      .sort((a, b) => (a.time || '').localeCompare(b.time || ''));
+      .sort((a, b) => (a.nextScheduleTime || a.time || '').localeCompare(b.nextScheduleTime || b.time || ''));
   }, [careLogs, selectedDate]);
 
   // 선택한 날짜에 등록된 독립 영농 일정
@@ -889,6 +889,7 @@ export default function DailyDiaryView({
                                       category: task.category || 'treatment',
                                       title: task.nextScheduleTitle || '',
                                       date: selectedDate,
+                                      time: task.nextScheduleTime || undefined,
                                       entityId: task.entityId || (targetEntity ? targetEntity.id : '')
                                     }
                                   )}
@@ -913,7 +914,7 @@ export default function DailyDiaryView({
                             </div>
                           </div>
 
-                          {/* 2행: 차기 예정 작업명 (좌측) & [수정] 버튼 (우측, 기록 버튼 바로 밑에 수직 정렬) */}
+                          {/* 2행: 차기 예정 작업명 및 시간 (좌측) & [수정] 버튼 (우측, 기록 버튼 바로 밑에 수직 정렬) */}
                           <div style={{
                             display: 'flex',
                             alignItems: 'center',
@@ -933,7 +934,19 @@ export default function DailyDiaryView({
                               flex: 1,
                               minWidth: 0
                             }}>
-                              {task.nextScheduleTitle || '예정 작업'}
+                              <span>{task.nextScheduleTitle || '예정 작업'}</span>
+                              {task.nextScheduleTime && (
+                                <span style={{
+                                  fontSize: '0.8rem',
+                                  fontWeight: 600,
+                                  color: 'var(--text-muted)',
+                                  paddingLeft: '0.35rem',
+                                  whiteSpace: 'nowrap',
+                                  display: 'inline-block'
+                                }}>
+                                  ({task.nextScheduleTime.startsWith('0') ? task.nextScheduleTime.slice(1) : task.nextScheduleTime})
+                                </span>
+                              )}
                             </div>
 
                             {onEditCareLog && (
