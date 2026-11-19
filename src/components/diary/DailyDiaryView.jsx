@@ -361,8 +361,24 @@ export default function DailyDiaryView({
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
-                    {/* A. 직접 등록한 영농 스케줄 (완료 시 접힘 지원 & 수직 3행 모바일 최적화 레이아웃) */}
-                    {dailySchedules.map(sched => {
+                    {/* A. 직접 등록한 영농 스케줄 영역 */}
+                    {dailySchedules.length > 0 && (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+                        {scheduledTasks.length > 0 && (
+                          <div style={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            gap: '0.35rem', 
+                            fontSize: '0.85rem', 
+                            fontWeight: 700, 
+                            color: 'var(--text-main)',
+                            marginBottom: '0.1rem'
+                          }}>
+                            <span>📌</span>
+                            <span>등록된 영농 일정 ({dailySchedules.length}건)</span>
+                          </div>
+                        )}
+                        {dailySchedules.map(sched => {
                       const catDef = SCHEDULE_CATEGORIES.find(c => c.id === sched.category) || SCHEDULE_CATEGORIES[0];
                       const isDone = Boolean(sched.completed);
                       const isExpanded = expandedCompletedIds.has(sched.id);
@@ -622,52 +638,114 @@ export default function DailyDiaryView({
                         </div>
                       );
                     })}
+                  </div>
+                )}
 
-                    {/* B. 기존 관리기록에서 자동 파생된 D-Day 차기 예정 작업 */}
-                    {scheduledTasks.map(task => (
-                      <div 
-                        key={`sched-${task.id}`}
-                        className="diary-item-card"
-                        style={{
-                          background: 'rgba(245, 158, 11, 0.08)',
-                          border: '1px solid rgba(245, 158, 11, 0.3)',
-                          borderRadius: 'var(--radius-md)',
-                          padding: '0.75rem 0.85rem',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          gap: '0.5rem',
-                          flexWrap: 'wrap',
-                          overflow: 'hidden'
-                        }}
-                      >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', minWidth: 0, flex: 1 }}>
-                          <span 
-                            className="badge badge-tag"
-                            onClick={() => onOpenEntityDetail(task.tagNumber)}
-                            title="클릭 시 이 개체의 관리 내역으로 이동"
-                            style={{ cursor: 'pointer', fontSize: '0.75rem', padding: '0.15rem 0.45rem' }}
-                          >
-                            {task.tagNumber}
-                          </span>
-                          <span style={{ fontWeight: 700, fontSize: '0.9rem', wordBreak: 'break-word' }}>
-                            {task.nextScheduleTitle || '예정 작업'}
-                          </span>
-                          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                            ({task.entityName})
-                          </span>
-                        </div>
-
-                        <button 
-                          className="btn btn-outline btn-sm"
-                          onClick={() => onOpenEntityDetail(task.tagNumber)}
-                          style={{ fontSize: '0.75rem', padding: '0.2rem 0.5rem', flexShrink: 0 }}
-                        >
-                          <span>개체 이동</span>
-                          <ArrowRight size={12} />
-                        </button>
+                {/* B. 기존 관리기록에서 자동 파생된 D-Day 차기 예정 작업 (리마인더 분리 영역) */}
+                {scheduledTasks.length > 0 && (
+                  <div style={{ 
+                    marginTop: dailySchedules.length > 0 ? '1rem' : '0', 
+                    paddingTop: dailySchedules.length > 0 ? '1rem' : '0',
+                    borderTop: dailySchedules.length > 0 ? '1px dashed var(--border-color)' : 'none',
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    gap: '0.65rem' 
+                  }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', marginBottom: '0.1rem' }}>
+                      <div style={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'space-between',
+                        gap: '0.4rem', 
+                        fontSize: '0.85rem', 
+                        fontWeight: 700, 
+                        color: 'var(--color-accent)'
+                      }}>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                          <span>🔔</span>
+                          <span>개체 관리 연동 알림 ({scheduledTasks.length}건)</span>
+                        </span>
+                        <span style={{ 
+                          fontSize: '0.72rem', 
+                          color: 'var(--color-accent)', 
+                          background: 'rgba(245, 158, 11, 0.15)',
+                          padding: '0.15rem 0.45rem',
+                          borderRadius: 'var(--radius-sm)',
+                          fontWeight: 700 
+                        }}>
+                          D-Day 오늘
+                        </span>
                       </div>
-                    ))}
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                        ※ 이전 진료·인공수정 등 개체 관리기록에서 지정한 차기 예정일 작업입니다.
+                      </div>
+                    </div>
+
+                    {scheduledTasks.map(task => {
+                      const targetEntity = (entities || []).find(e => e.id === task.entityId || e.tagNumber === task.tagNumber);
+                      return (
+                        <div 
+                          key={`sched-${task.id}`}
+                          className="diary-item-card"
+                          style={{
+                            background: 'rgba(245, 158, 11, 0.08)',
+                            border: '1px solid rgba(245, 158, 11, 0.3)',
+                            borderRadius: 'var(--radius-md)',
+                            padding: '0.7rem 0.85rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            gap: '0.5rem',
+                            flexWrap: 'wrap',
+                            overflow: 'hidden'
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', minWidth: 0, flex: 1 }}>
+                            <span 
+                              className="badge badge-tag"
+                              onClick={() => onOpenEntityDetail(task.tagNumber)}
+                              title="클릭 시 이 개체의 관리 내역으로 이동"
+                              style={{ cursor: 'pointer', fontSize: '0.75rem', padding: '0.15rem 0.45rem' }}
+                            >
+                              {task.tagNumber}
+                            </span>
+                            <span style={{ fontWeight: 700, fontSize: '0.9rem', wordBreak: 'break-word' }}>
+                              {task.nextScheduleTitle || '예정 작업'}
+                            </span>
+                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                              ({task.entityName})
+                            </span>
+                          </div>
+
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexShrink: 0 }}>
+                            {onOpenCareLogModal && (
+                              <button 
+                                type="button"
+                                className="btn btn-primary btn-sm"
+                                onClick={() => onOpenCareLogModal(targetEntity || { tagNumber: task.tagNumber, name: task.entityName, id: task.entityId }, selectedDate)}
+                                style={{ fontSize: '0.75rem', padding: '0.2rem 0.5rem' }}
+                                title="이 개체의 새 관리기록 작성창 열기"
+                              >
+                                <Plus size={12} />
+                                <span>기록 작성</span>
+                              </button>
+                            )}
+                            <button 
+                              type="button"
+                              className="btn btn-outline btn-sm"
+                              onClick={() => onOpenEntityDetail(task.tagNumber)}
+                              style={{ fontSize: '0.75rem', padding: '0.2rem 0.5rem' }}
+                              title="개체 이력 상세 보기"
+                            >
+                              <span>이력 보기</span>
+                              <ArrowRight size={12} />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
                   </div>
                 )}
               </div>
