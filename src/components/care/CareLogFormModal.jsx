@@ -495,25 +495,28 @@ export default function CareLogFormModal({
 
             {/* 작업 일시 및 작업명 */}
             <div className="form-grid">
-              <div className="form-group">
-                <label className="form-label">작업 일자 <span className="required">*</span></label>
-                <input
-                  type="date"
-                  className="form-input"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">작업 시간</label>
-                <input
-                  type="time"
-                  className="form-input"
-                  value={time}
-                  onChange={(e) => setTime(e.target.value)}
-                />
+              <div className="form-group full-width" style={{ marginBottom: 0 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1.15fr 0.85fr', gap: '0.65rem' }}>
+                  <div>
+                    <label className="form-label">작업 일자 <span className="required">*</span></label>
+                    <input
+                      type="date"
+                      className="form-input"
+                      value={date}
+                      onChange={(e) => setDate(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="form-label">작업 시간</label>
+                    <input
+                      type="time"
+                      className="form-input"
+                      value={time}
+                      onChange={(e) => setTime(e.target.value)}
+                    />
+                  </div>
+                </div>
               </div>
 
               <div className="form-group full-width">
@@ -627,25 +630,29 @@ export default function CareLogFormModal({
                     </div>
 
                     <div className="form-grid">
-                      <div className="form-group">
-                        <label className="form-label">차기 예정 날짜</label>
-                        <input
-                          ref={nextScheduleDateInputRef}
-                          type="date"
-                          className="form-input"
-                          value={nextScheduleDate}
-                          onChange={(e) => setNextScheduleDate(e.target.value)}
-                          required={hasNextSchedule}
-                        />
-                      </div>
-                      <div className="form-group">
-                        <label className="form-label">차기 예정 시간 (선택)</label>
-                        <input
-                          type="time"
-                          className="form-input"
-                          value={nextScheduleTime}
-                          onChange={(e) => setNextScheduleTime(e.target.value)}
-                        />
+                      <div className="form-group full-width" style={{ marginBottom: 0 }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1.15fr 0.85fr', gap: '0.65rem' }}>
+                          <div>
+                            <label className="form-label">차기 예정 날짜</label>
+                            <input
+                              ref={nextScheduleDateInputRef}
+                              type="date"
+                              className="form-input"
+                              value={nextScheduleDate}
+                              onChange={(e) => setNextScheduleDate(e.target.value)}
+                              required={hasNextSchedule}
+                            />
+                          </div>
+                          <div>
+                            <label className="form-label">차기 예정 시간 (선택)</label>
+                            <input
+                              type="time"
+                              className="form-input"
+                              value={nextScheduleTime}
+                              onChange={(e) => setNextScheduleTime(e.target.value)}
+                            />
+                          </div>
+                        </div>
                       </div>
                       <div className="form-group full-width">
                         <label className="form-label">차기 예정 작업명</label>
