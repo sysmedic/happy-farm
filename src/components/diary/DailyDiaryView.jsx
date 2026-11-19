@@ -45,8 +45,8 @@ export default function DailyDiaryView({
   // 다이어리 서브 탭: 'schedules'(예정 일정) 또는 'logs'(관리 내역)
   const [activeDiaryTab, setActiveDiaryTab] = useState('schedules');
 
-  // 탭 브라우징 디자인 스타일: 'folder'(1안: 정통 브라우저 폴더형) | 'underline'(2안: 모던 언더라인) | 'dock'(3안: 세그먼트 독)
-  const [tabVariant, setTabVariant] = useState('folder');
+  // 폴더형 중첩 박스 해결 스타일: 'open'(A안: 오픈형 폴더 - 기본 추천) | 'binder'(B안: 노트 서류철)
+  const [folderStyle, setFolderStyle] = useState('open');
 
   // 완료된 일정 중 상세 내용을 확인하기 위해 사용자가 탭하여 임시로 펼친 일정 ID 목록
   const [expandedCompletedIds, setExpandedCompletedIds] = useState(new Set());
@@ -272,9 +272,9 @@ export default function DailyDiaryView({
             </div>
           </div>
 
-          {/* 브라우저 탭 바 (1안 정통 폴더형 기본 + 2안/3안 즉시 비교 스위치) */}
+          {/* 탭 바 및 A안/B안 즉시 비교 스위처 */}
           <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '0.5rem', flexWrap: 'wrap' }}>
-            <div className={`diary-browser-tabs ${tabVariant !== 'folder' ? `variant-${tabVariant}` : ''}`} style={{ flex: tabVariant === 'dock' ? 1 : 'none' }}>
+            <div className={`diary-browser-tabs variant-${folderStyle}`}>
               <button
                 type="button"
                 className={`diary-browser-tab ${activeDiaryTab === 'schedules' ? 'active' : ''}`}
@@ -298,38 +298,48 @@ export default function DailyDiaryView({
               </button>
             </div>
 
-            {/* 1안/2안/3안 스타일 즉시 비교 툴 */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem', marginBottom: tabVariant === 'folder' ? '0.25rem' : '1.1rem', fontSize: '0.72rem', color: 'var(--text-subtle)' }}>
-              <span style={{ marginRight: '0.15rem' }}>보기:</span>
-              {[
-                { id: 'folder', label: '1안 폴더' },
-                { id: 'underline', label: '2안 라인' },
-                { id: 'dock', label: '3안 독' }
-              ].map(st => (
-                <button
-                  key={st.id}
-                  type="button"
-                  onClick={() => setTabVariant(st.id)}
-                  style={{
-                    background: tabVariant === st.id ? 'var(--color-primary)' : 'var(--bg-card-subtle)',
-                    color: tabVariant === st.id ? '#ffffff' : 'var(--text-muted)',
-                    border: '1px solid var(--border-color)',
-                    borderRadius: '4px',
-                    padding: '0.15rem 0.4rem',
-                    fontSize: '0.7rem',
-                    fontWeight: tabVariant === st.id ? 700 : 500,
-                    cursor: 'pointer'
-                  }}
-                  title={`${st.label} 스타일로 즉시 변경`}
-                >
-                  {st.label}
-                </button>
-              ))}
+            {/* A안 vs B안 즉시 비교 버튼 */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', marginBottom: folderStyle === 'open' ? '1.15rem' : '0.25rem', fontSize: '0.75rem', color: 'var(--text-subtle)' }}>
+              <span style={{ fontWeight: 600 }}>비교:</span>
+              <button
+                type="button"
+                onClick={() => setFolderStyle('open')}
+                style={{
+                  background: folderStyle === 'open' ? 'var(--color-primary)' : 'var(--bg-card-subtle)',
+                  color: folderStyle === 'open' ? '#ffffff' : 'var(--text-muted)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: '4px',
+                  padding: '0.2rem 0.55rem',
+                  fontSize: '0.72rem',
+                  fontWeight: folderStyle === 'open' ? 700 : 500,
+                  cursor: 'pointer'
+                }}
+                title="A안: 바깥 큰 상자를 없애 개별 카드가 가로 100%를 시원하게 채우는 방식"
+              >
+                A안 오픈폴더 (추천)
+              </button>
+              <button
+                type="button"
+                onClick={() => setFolderStyle('binder')}
+                style={{
+                  background: folderStyle === 'binder' ? 'var(--color-primary)' : 'var(--bg-card-subtle)',
+                  color: folderStyle === 'binder' ? '#ffffff' : 'var(--text-muted)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: '4px',
+                  padding: '0.2rem 0.55rem',
+                  fontSize: '0.72rem',
+                  fontWeight: folderStyle === 'binder' ? 700 : 500,
+                  cursor: 'pointer'
+                }}
+                title="B안: 바깥 상자를 서류철로 유지하고 내부 개별 박스를 줄구분선으로 바꾼 방식"
+              >
+                B안 노트서류철
+              </button>
             </div>
           </div>
 
-          {/* 탭 본문 패널 (1안 폴더형일 때 탭과 한 몸으로 이어지는 카드 서피스) */}
-          <div className={`diary-tab-panel ${tabVariant !== 'folder' ? `variant-${tabVariant}` : ''}`}>
+          {/* 탭 본문 패널 (A안일 때는 투명/패딩 없음, B안일 때는 서류철 카드) */}
+          <div className={`diary-tab-panel variant-${folderStyle}`}>
 
           {/* 탭 1: 예정 일정 화면 */}
           {activeDiaryTab === 'schedules' && (
@@ -392,6 +402,7 @@ export default function DailyDiaryView({
                         return (
                           <div 
                             key={sched.id}
+                            className="diary-item-card"
                             onClick={() => toggleExpandCompleted(sched.id)}
                             style={{
                               background: 'var(--bg-card-subtle)',
@@ -480,6 +491,7 @@ export default function DailyDiaryView({
                       return (
                         <div 
                           key={sched.id}
+                          className="diary-item-card"
                           style={{
                             background: isDone ? 'var(--bg-card-subtle)' : 'rgba(245, 158, 11, 0.08)',
                             border: `1px solid ${isDone ? 'var(--border-color)' : 'rgba(245, 158, 11, 0.35)'}`,
@@ -645,6 +657,7 @@ export default function DailyDiaryView({
                     {scheduledTasks.map(task => (
                       <div 
                         key={`sched-${task.id}`}
+                        className="diary-item-card"
                         style={{
                           background: 'rgba(245, 158, 11, 0.08)',
                           border: '1px solid rgba(245, 158, 11, 0.3)',
@@ -747,6 +760,7 @@ export default function DailyDiaryView({
                     return (
                       <div 
                         key={log.id} 
+                        className="diary-item-card"
                         style={{
                           background: 'var(--bg-card)',
                           border: '1px solid var(--border-color)',
