@@ -349,7 +349,7 @@ export default function DailyReportView({
   onNavigateToCloud
 }) {
   const [reportDate, setReportDate] = useState(targetDate || getTodayDateString());
-  const [farmNotes, setFarmNotes] = useState('특이 동태 및 전반적인 사육 상태 양호. 온습도 정상 유지.');
+  const [farmNotes, setFarmNotes] = useState('');
 
   const [shareFeedback, setShareFeedback] = useState('');
   const categoriesToUse = careCategories || CARE_CATEGORIES;
