@@ -705,44 +705,187 @@ a:hover {
   transform: scale(0.97);
 }
 
-/* 사육 중 vs 사육 이력 세그먼트 스위치 탭 */
+/* 사육 중 vs 사육 이력 세그먼트 스위치 탭 공통 */
 .view-segment-tabs {
   display: flex;
-  gap: 0.5rem;
   margin-bottom: 0.85rem;
 }
 
 .view-segment-btn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.45rem;
-  padding: 0.55rem 1.15rem;
+  padding: 0.5rem 1.15rem;
   border-radius: var(--radius-full);
   font-size: 0.92rem;
   font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+}
+
+/* 🎨 스타일 1: 애플/토스 트랙형 (컨테이너 음각 + 선택 탭 양각 카드) */
+.view-segment-tabs.theme-style1 {
+  gap: 4px;
+  padding: 4px;
+  background: var(--bg-card-subtle);
   border: 1px solid var(--border-color);
+  border-radius: var(--radius-full);
+}
+
+.theme-style1 .view-segment-btn {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid transparent;
+  box-shadow: none;
+}
+
+.theme-style1 .view-segment-btn.active {
+  background: var(--bg-card);
+  color: var(--text-main);
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.theme-style1 .segment-count {
+  font-size: 0.82rem;
+  font-weight: 800;
+  padding: 1px 7px;
+  border-radius: var(--radius-full);
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--text-muted);
+}
+
+.theme-style1 .view-segment-btn.active .segment-count {
+  background: rgba(16, 185, 129, 0.15);
+  color: #059669;
+}
+
+.theme-style1 .view-segment-btn.active.history-active .segment-count {
+  background: rgba(100, 116, 139, 0.15);
+  color: #475569;
+}
+
+[data-theme="dark"] .theme-style1 .view-segment-btn.active {
+  background: var(--bg-card);
+  color: #f8fafc;
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .theme-style1 .segment-count {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-muted);
+}
+
+[data-theme="dark"] .theme-style1 .view-segment-btn.active .segment-count {
+  background: rgba(52, 211, 153, 0.25);
+  color: #6ee7b7;
+}
+
+[data-theme="dark"] .theme-style1 .view-segment-btn.active.history-active .segment-count {
+  background: rgba(148, 163, 184, 0.25);
+  color: #cbd5e1;
+}
+
+/* 🎨 스타일 2: 은은한 파스텔 틴트형 (소프트 그린 & 소프트 슬레이트) */
+.view-segment-tabs.theme-style2 {
+  gap: 0.5rem;
+}
+
+.theme-style2 .view-segment-btn {
   background: var(--bg-card);
   color: var(--text-muted);
-  cursor: pointer;
-  transition: all 0.15s ease;
+  border: 1px solid var(--border-color);
 }
 
-.view-segment-btn:hover {
-  background: var(--bg-card-subtle);
-  color: var(--text-main);
+.theme-style2 .view-segment-btn.active {
+  background: rgba(16, 185, 129, 0.12);
+  color: #059669;
+  border: 1.5px solid #10b981;
+  box-shadow: 0 1px 4px rgba(16, 185, 129, 0.18);
 }
 
-.view-segment-btn.active {
-  background: var(--color-primary);
+.theme-style2 .view-segment-btn.active.history-active {
+  background: rgba(100, 116, 139, 0.12);
+  color: #334155;
+  border: 1.5px solid #64748b;
+  box-shadow: 0 1px 4px rgba(100, 116, 139, 0.18);
+}
+
+.theme-style2 .segment-count {
+  font-size: 0.82rem;
+  font-weight: 800;
+  padding: 1px 7px;
+  border-radius: var(--radius-full);
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.theme-style2 .view-segment-btn.active .segment-count {
+  background: rgba(16, 185, 129, 0.22);
+  color: #047857;
+}
+
+.theme-style2 .view-segment-btn.active.history-active .segment-count {
+  background: rgba(100, 116, 139, 0.22);
+  color: #1e293b;
+}
+
+[data-theme="dark"] .theme-style2 .view-segment-btn.active {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  border-color: #34d399;
+}
+
+[data-theme="dark"] .theme-style2 .view-segment-btn.active.history-active {
+  background: rgba(100, 116, 139, 0.25);
+  color: #cbd5e1;
+  border-color: #94a3b8;
+}
+
+/* 🎨 스타일 3: 프리미엄 차콜/다크형 (단단한 프로 툴 느낌) */
+.view-segment-tabs.theme-style3 {
+  gap: 0.5rem;
+}
+
+.theme-style3 .view-segment-btn {
+  background: var(--bg-card);
+  color: var(--text-muted);
+  border: 1px solid var(--border-color);
+}
+
+.theme-style3 .view-segment-btn.active {
+  background: #1e293b;
   color: #ffffff;
-  border-color: var(--color-primary);
-  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.35);
+  border-color: #1e293b;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
-.view-segment-btn.active.history-active {
+.theme-style3 .view-segment-btn.active.history-active {
   background: #475569;
+  color: #ffffff;
   border-color: #475569;
-  box-shadow: 0 2px 6px rgba(71, 85, 105, 0.35);
+  box-shadow: 0 2px 6px rgba(71, 85, 105, 0.3);
+}
+
+.theme-style3 .segment-count {
+  font-size: 0.82rem;
+  font-weight: 800;
+  padding: 1px 7px;
+  border-radius: var(--radius-full);
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.theme-style3 .view-segment-btn.active .segment-count {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+[data-theme="dark"] .theme-style3 .view-segment-btn.active {
+  background: #0f172a;
+  color: #ffffff;
+  border-color: #38bdf8;
 }
 
 

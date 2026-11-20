@@ -98,6 +98,22 @@ export default function EntityList({
     });
   };
 
+  // 세그먼트 탭 스타일 테마 비교 ('style1': 애플/토스 | 'style2': 파스텔 | 'style3': 차콜)
+  const [segmentTheme, setSegmentTheme] = useState(() => {
+    try {
+      return localStorage.getItem('happy_farm_segment_theme') || 'style1';
+    } catch (e) {
+      return 'style1';
+    }
+  });
+
+  const handleSelectTheme = (themeId) => {
+    setSegmentTheme(themeId);
+    try {
+      localStorage.setItem('happy_farm_segment_theme', themeId);
+    } catch (e) {}
+  };
+
   const [isCustomizeOpen, setIsCustomizeOpen] = useState(false);
 
   // 1단계: 현재 선택된 상태(selectedStatus)에 해당하는 개체군 추출
@@ -405,8 +421,41 @@ export default function EntityList({
 
   return (
     <div>
+      {/* 스타일 비교용 미니 스위처 */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.45rem', padding: '0 2px' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)' }}>
+          🎨 탭 컬러 비교:
+        </span>
+        <div style={{ display: 'flex', gap: '4px' }}>
+          {[
+            { id: 'style1', label: '1. 애플/토스' },
+            { id: 'style2', label: '2. 파스텔' },
+            { id: 'style3', label: '3. 차콜' }
+          ].map(s => (
+            <button
+              key={s.id}
+              type="button"
+              onClick={() => handleSelectTheme(s.id)}
+              style={{
+                fontSize: '0.72rem',
+                fontWeight: segmentTheme === s.id ? 800 : 500,
+                padding: '2px 8px',
+                borderRadius: '9999px',
+                border: segmentTheme === s.id ? '1px solid var(--color-primary)' : '1px solid var(--border-color)',
+                background: segmentTheme === s.id ? 'var(--color-primary-light)' : 'var(--bg-card)',
+                color: segmentTheme === s.id ? 'var(--color-primary)' : 'var(--text-muted)',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              {s.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* 0. 사육 중 vs 출하/폐사 세그먼트 스위치 탭 (총 사육 두수 및 이력 카운트 직관적 표기) */}
-      <div className="view-segment-tabs">
+      <div className={`view-segment-tabs theme-${segmentTheme}`}>
         <button
           type="button"
           className={`view-segment-btn ${!isHistoryMode ? 'active' : ''}`}
