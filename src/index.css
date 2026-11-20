@@ -2093,7 +2093,7 @@ form.modal-content {
 }
 
 /* 모바일 & 태블릿 반응형 레이아웃 */
-@media (max-width: 900px) {
+@media screen and (max-width: 900px) {
   .diary-container {
     grid-template-columns: 1fr;
     gap: 1.25rem;
@@ -2135,7 +2135,7 @@ form.modal-content {
   }
 }
 
-@media (max-width: 600px) {
+@media screen and (max-width: 600px) {
   .calendar-card {
     padding: 1rem 0.75rem;
     margin: 0 auto;
@@ -2232,7 +2232,7 @@ form.modal-content {
 /* ==========================================================================
    Mobile Responsive Breakpoint (스마트폰 & 태블릿 최적화)
    ========================================================================== */
-@media (max-width: 768px) {
+@media screen and (max-width: 768px) {
   :root {
     --header-height: calc(44px + env(safe-area-inset-top, 0px));
   }
@@ -2787,6 +2787,31 @@ form.modal-content {
   .print-sheet-container > div {
     page-break-inside: avoid !important;
     break-inside: avoid !important;
+  }
+
+  /* 헤더 좌우 1열 배치 강제 고정 (모바일 스타일 간섭 차단 및 출력일시 우측 정렬 유지) */
+  .print-sheet-header {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: flex-end !important;
+    width: 100% !important;
+    border-bottom: 2px solid #e2e8f0 !important;
+    padding-bottom: 0.95rem !important;
+    margin-bottom: 1.25rem !important;
+  }
+
+  /* 요약 통계 지표 5칸 가로 1줄 고정 (A4 인쇄 시 줄바꿈 방지) */
+  .report-summary-grid {
+    display: grid !important;
+    grid-template-columns: repeat(5, 1fr) !important;
+    gap: 0.5rem !important;
+    width: 100% !important;
+    background: #f8fafc !important;
+    padding: 0.85rem 1rem !important;
+    border-radius: 8px !important;
+    border: 1px solid #e2e8f0 !important;
+    margin-bottom: 1.5rem !important;
   }
 
   /* 인쇄 시 텍스트 밑줄 제거하여 한층 더 깔끔한 공문서 느낌 제공 */

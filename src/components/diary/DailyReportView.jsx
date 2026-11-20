@@ -757,7 +757,7 @@ export default function DailyReportView({
         {/* A4 인쇄 규격 영농 보고서 양식 */}
         <div className="print-sheet-container card">
           {/* 1안: 모던 레포트 헤더 (도장 박스 삭제, 좌측 타이틀 & 우측 출력일시, 구분선) */}
-          <div className="print-sheet-header" style={{ borderBottom: '2px solid #e2e8f0', paddingBottom: '0.95rem', marginBottom: '1.25rem', alignItems: 'flex-end' }}>
+          <div className="print-sheet-header" style={{ borderBottom: '2px solid #e2e8f0', paddingBottom: '0.95rem', marginBottom: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', width: '100%' }}>
             <div style={{ display: 'inline-flex', flexDirection: 'column' }}>
               <h1 style={{ fontSize: '1.5rem', fontWeight: 900, color: '#0f172a', margin: '0 0 0.35rem 0', display: 'flex', alignItems: 'center', gap: '0.45rem', whiteSpace: 'nowrap' }}>
                 <span style={{ fontSize: '1.35rem' }}>🌱</span>
@@ -769,43 +769,46 @@ export default function DailyReportView({
               </div>
             </div>
 
-            <div style={{ textAlign: 'right', paddingBottom: '2px' }}>
-              <div style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
+            <div style={{ textAlign: 'right', paddingBottom: '2px', flexShrink: 0 }}>
+              <div style={{ fontSize: '0.78rem', color: '#94a3b8', whiteSpace: 'nowrap' }}>
                 출력일시: {new Date().toLocaleString()}
               </div>
             </div>
           </div>
 
-          {/* 요약 통계 지표 */}
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', 
-            gap: '0.75rem', 
-            marginBottom: '1.5rem',
-            background: '#f8fafc',
-            padding: '1rem',
-            borderRadius: '8px',
-            border: '1px solid #e2e8f0'
-          }}>
+          {/* 요약 통계 지표 (A4 인쇄 및 웹 화면 5열 1줄 완전 일치) */}
+          <div 
+            className="report-summary-grid"
+            style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(5, 1fr)', 
+              gap: '0.65rem', 
+              marginBottom: '1.5rem',
+              background: '#f8fafc',
+              padding: '0.85rem 1rem',
+              borderRadius: '8px',
+              border: '1px solid #e2e8f0'
+            }}
+          >
             <div>
-              <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>당일 총 처치/작업</span>
-              <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#0f172a' }}>{dailyLogs.length}건</div>
+              <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600, display: 'block', whiteSpace: 'nowrap' }}>당일 총 처치/작업</span>
+              <div style={{ fontSize: '1.3rem', fontWeight: 800, color: '#0f172a' }}>{dailyLogs.length}건</div>
             </div>
             <div>
-              <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>예방접종(백신)</span>
-              <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#059669' }}>{categoryStats.vaccine}건</div>
+              <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600, display: 'block', whiteSpace: 'nowrap' }}>예방접종(백신)</span>
+              <div style={{ fontSize: '1.3rem', fontWeight: 800, color: '#059669' }}>{categoryStats.vaccine}건</div>
             </div>
             <div>
-              <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>진료 및 투약</span>
-              <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#dc2626' }}>{categoryStats.treatment}건</div>
+              <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600, display: 'block', whiteSpace: 'nowrap' }}>진료 및 투약</span>
+              <div style={{ fontSize: '1.3rem', fontWeight: 800, color: '#dc2626' }}>{categoryStats.treatment}건</div>
             </div>
             <div>
-              <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>번식 / 인공수정</span>
-              <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#0284c7' }}>{categoryStats.breeding}건</div>
+              <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600, display: 'block', whiteSpace: 'nowrap' }}>번식 / 인공수정</span>
+              <div style={{ fontSize: '1.3rem', fontWeight: 800, color: '#0284c7' }}>{categoryStats.breeding}건</div>
             </div>
             <div>
-              <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>집행 비용 합계</span>
-              <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#0f172a' }}>{totalCost.toLocaleString()}원</div>
+              <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600, display: 'block', whiteSpace: 'nowrap' }}>집행 비용 합계</span>
+              <div style={{ fontSize: '1.3rem', fontWeight: 800, color: '#0f172a' }}>{totalCost.toLocaleString()}원</div>
             </div>
           </div>
 
