@@ -715,8 +715,8 @@ export default function DailyReportView({
 
       {/* 🖨️ 2. PC 및 A4 인쇄 전용 공식 뷰 (모바일에서는 숨김, A4 인쇄 시 100% 무결 출력) */}
       <div className="report-desktop-view">
-        {/* 상단 컨트롤 툴바 (인쇄 시 숨겨짐) */}
-        <div className="filter-bar" style={{ marginBottom: '1.5rem' }}>
+        {/* 상단 컨트롤 툴바 (A4 규격인 820px에 꼭 맞추어 완벽한 좌우 대칭 정렬) */}
+        <div className="filter-bar" style={{ maxWidth: '820px', margin: '0 auto 1.5rem auto' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
             <label style={{ fontSize: '0.875rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
               <Calendar size={16} />
