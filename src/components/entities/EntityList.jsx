@@ -43,7 +43,7 @@ const ALL_DASHBOARD_CARDS = [
   { id: 'inseminated', label: '수정 완료', icon: '🧬', color: '#0ea5e9', bg: 'rgba(14, 165, 233, 0.15)', desc: '인공수정 후 임신 확인 대기 (21일 재발정 관찰)' },
   { id: 'nursing', label: '포유/육아', icon: '🐄', color: '#14b8a6', bg: 'rgba(20, 184, 166, 0.15)', desc: '분만 후 젖먹이는 어미소 및 자우' },
   { id: 'scheduled_ship', label: '출하 예정', icon: '🚛', color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.15)', desc: '도축 및 경매 출하 예정 개체' },
-  { id: 'healthy', label: '건강/양호', icon: '💚', color: '#10b981', bg: 'rgba(16, 185, 129, 0.15)', desc: '특이 질환 없이 건강한 정상 개체' },
+  { id: 'healthy', label: '건강/양호', icon: '💚', color: '#16a34a', bg: 'rgba(22, 163, 74, 0.15)', desc: '특이 질환 없이 건강한 정상 개체' },
   { id: 'shipped', label: '출하 완료', icon: '🏷️', color: '#64748b', bg: 'rgba(100, 116, 139, 0.15)', desc: '농장에서 출하 완료된 종료 개체' },
   { id: 'deceased', label: '폐사/도태', icon: '🪦', color: '#475569', bg: 'rgba(71, 85, 105, 0.15)', desc: '질병 또는 사고로 폐사된 종료 개체' },
 ];
