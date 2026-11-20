@@ -492,84 +492,96 @@ export default function DailyReportView({
           </div>
         </div>
 
-        {/* 2. 균일 대칭 모바일 타일 카드 그리드 (3열 균일 박스 규격) */}
+        {/* 2. 슬림 1단 모바일 타일 카드 그리드 (3열 균일 높이/너비 대칭 규격) */}
         <div style={{ 
           display: 'grid', 
           gridTemplateColumns: 'repeat(3, 1fr)', 
-          gap: '0.45rem', 
+          gap: '0.4rem', 
           marginBottom: '0.85rem' 
         }}>
           {/* 1. 총 작업 */}
           <div className="card" style={{ 
-            padding: '0.5rem 0.25rem', 
-            textAlign: 'center', 
+            height: '34px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.3rem',
+            padding: '0 0.35rem', 
             borderRadius: 'var(--radius-sm)',
             border: '1px solid var(--border-color)',
-            background: 'var(--bg-card)'
+            background: 'var(--bg-card)',
+            boxSizing: 'border-box'
           }}>
-            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>총 작업</div>
-            <div style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-main)', marginTop: '0.15rem' }}>
-              {dailyLogs.length}<span style={{ fontSize: '0.75rem', fontWeight: 600 }}>건</span>
-            </div>
+            <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)', fontWeight: 600 }}>총작업</span>
+            <span style={{ fontSize: '0.86rem', fontWeight: 800, color: 'var(--text-main)' }}>{dailyLogs.length}건</span>
           </div>
 
           {/* 2. 백신 */}
           <div className="card" style={{ 
-            padding: '0.5rem 0.25rem', 
-            textAlign: 'center', 
+            height: '34px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.3rem',
+            padding: '0 0.35rem', 
             borderRadius: 'var(--radius-sm)',
             border: '1px solid rgba(5, 150, 105, 0.25)',
-            background: 'rgba(5, 150, 105, 0.06)'
+            background: 'rgba(5, 150, 105, 0.06)',
+            boxSizing: 'border-box'
           }}>
-            <div style={{ fontSize: '0.72rem', color: '#059669', fontWeight: 600 }}>백신</div>
-            <div style={{ fontSize: '1rem', fontWeight: 800, color: '#059669', marginTop: '0.15rem' }}>
-              {categoryStats.vaccine || 0}<span style={{ fontSize: '0.75rem', fontWeight: 600 }}>건</span>
-            </div>
+            <span style={{ fontSize: '0.74rem', color: '#059669', fontWeight: 600 }}>백신</span>
+            <span style={{ fontSize: '0.86rem', fontWeight: 800, color: '#059669' }}>{categoryStats.vaccine || 0}건</span>
           </div>
 
           {/* 3. 진료·치료 */}
           <div className="card" style={{ 
-            padding: '0.5rem 0.25rem', 
-            textAlign: 'center', 
+            height: '34px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.25rem',
+            padding: '0 0.25rem', 
             borderRadius: 'var(--radius-sm)',
             border: '1px solid rgba(220, 38, 38, 0.25)',
-            background: 'rgba(220, 38, 38, 0.06)'
+            background: 'rgba(220, 38, 38, 0.06)',
+            boxSizing: 'border-box'
           }}>
-            <div style={{ fontSize: '0.72rem', color: '#dc2626', fontWeight: 600 }}>진료·치료</div>
-            <div style={{ fontSize: '1rem', fontWeight: 800, color: '#dc2626', marginTop: '0.15rem' }}>
-              {categoryStats.treatment || 0}<span style={{ fontSize: '0.75rem', fontWeight: 600 }}>건</span>
-            </div>
+            <span style={{ fontSize: '0.72rem', color: '#dc2626', fontWeight: 600 }}>진료·치료</span>
+            <span style={{ fontSize: '0.86rem', fontWeight: 800, color: '#dc2626' }}>{categoryStats.treatment || 0}건</span>
           </div>
 
           {/* 4. 수정 */}
           <div className="card" style={{ 
-            padding: '0.5rem 0.25rem', 
-            textAlign: 'center', 
+            height: '34px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.3rem',
+            padding: '0 0.35rem', 
             borderRadius: 'var(--radius-sm)',
             border: '1px solid rgba(2, 132, 199, 0.25)',
-            background: 'rgba(2, 132, 199, 0.06)'
+            background: 'rgba(2, 132, 199, 0.06)',
+            boxSizing: 'border-box'
           }}>
-            <div style={{ fontSize: '0.72rem', color: '#0284c7', fontWeight: 600 }}>수정</div>
-            <div style={{ fontSize: '1rem', fontWeight: 800, color: '#0284c7', marginTop: '0.15rem' }}>
-              {categoryStats.breeding || 0}<span style={{ fontSize: '0.75rem', fontWeight: 600 }}>건</span>
-            </div>
+            <span style={{ fontSize: '0.74rem', color: '#0284c7', fontWeight: 600 }}>수정</span>
+            <span style={{ fontSize: '0.86rem', fontWeight: 800, color: '#0284c7' }}>{categoryStats.breeding || 0}건</span>
           </div>
 
           {/* 5. 총 비용 (2칸 차지) */}
           <div className="card" style={{ 
             gridColumn: 'span 2',
-            padding: '0.5rem 0.75rem', 
+            height: '34px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
+            padding: '0 0.75rem', 
             borderRadius: 'var(--radius-sm)',
             border: '1px solid var(--border-color)',
-            background: 'var(--bg-card)'
+            background: 'var(--bg-card)',
+            boxSizing: 'border-box'
           }}>
-            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>총 비용</div>
-            <div style={{ fontSize: '0.98rem', fontWeight: 800, color: 'var(--text-main)' }}>
-              {totalCost.toLocaleString()}<span style={{ fontSize: '0.75rem', fontWeight: 600 }}>원</span>
-            </div>
+            <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)', fontWeight: 600 }}>총 비용</span>
+            <span style={{ fontSize: '0.88rem', fontWeight: 800, color: 'var(--text-main)' }}>{totalCost.toLocaleString()}원</span>
           </div>
         </div>
 
