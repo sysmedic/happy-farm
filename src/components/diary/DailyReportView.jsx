@@ -50,33 +50,33 @@ function createReportImageBlob({ reportDate, dailyLogs, totalCost, categoryStats
     const mCtx = measureCanvas.getContext('2d');
     mCtx.font = '12.5px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
 
-    // 각 카드별 높이 사전 계산 (실제 텍스트 렌더링과 1:1 정밀 일치)
+    // 각 카드별 높이 사전 계산 (상단 12px : 하단 12px 정밀 대칭)
     const cardHeights = dailyLogs.map(log => {
-      let h = 14; // 상단 내부 여백
+      let h = 12; // 상단 내부 여백
       h += 18; // 1행 (시간, 이표, 이름)
-      if (log.operator) h += 18; // 2행 (담당)
-      h += 20; // 3행 (제목)
+      if (log.operator) h += 17; // 2행 (담당)
+      h += 19; // 3행 (제목)
       if (log.details) {
         const lines = getWrappedLines(mCtx, log.details, contentWidth - 24);
-        h += lines.length * 17; // 4행 (상세 내용 각 줄당 17px)
+        h += lines.length * 16; // 4행 (상세 내용 각 줄당 16px)
       }
       if (log.nextScheduleDate) {
         const scheduleTitle = log.nextScheduleTitle ? ` (${log.nextScheduleTitle})` : '';
         const fullScheduleText = `다음 일정: ${log.nextScheduleDate}${scheduleTitle}`;
         mCtx.font = 'bold 11.5px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
         const sLines = getWrappedLines(mCtx, fullScheduleText, contentWidth - 24);
-        h += 18 + (sLines.length - 1) * 16; // 5행 (첫줄 18px + 추가줄당 16px)
+        h += 17 + (sLines.length - 1) * 15; // 5행 (첫줄 17px + 추가줄당 15px)
       }
-      h += 13; // 하단 내부 여백
+      h += 12; // 하단 내부 여백 (상단과 동일 대칭)
       return h;
     });
 
-    // 특이사항 높이 계산
+    // 특이사항 높이 계산 (과다 여백 제거, 상하 12px 정밀 밀착)
     let farmNotesLines = [];
     let farmNotesHeight = 0;
     if (farmNotes && farmNotes.trim()) {
       farmNotesLines = getWrappedLines(mCtx, farmNotes.trim(), contentWidth - 24);
-      farmNotesHeight = 30 + (Math.max(1, farmNotesLines.length) * 18) + 20;
+      farmNotesHeight = 24 + (farmNotesLines.length * 17);
     }
 
     // 전체 세로 높이 동적 계산 (모바일 세로 비율)
@@ -221,14 +221,14 @@ function createReportImageBlob({ reportDate, dailyLogs, totalCost, categoryStats
         ctx.fill();
         ctx.stroke();
 
-        let cardY = y + 14;
+        let cardY = y + 12;
 
         // 1행: [시간] [개체번호 뱃지] [개체이름]
         let row1X = padding + 12;
         if (log.time) {
           ctx.fillStyle = '#64748b';
           ctx.font = 'bold 12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-          ctx.fillText(log.time, row1X, cardY + 10);
+          ctx.fillText(log.time, row1X, cardY + 11);
           row1X += ctx.measureText(log.time).width + 8;
         }
 
@@ -239,33 +239,33 @@ function createReportImageBlob({ reportDate, dailyLogs, totalCost, categoryStats
         ctx.fillStyle = '#e0f2fe';
         ctx.strokeStyle = '#bae6fd';
         ctx.beginPath();
-        if (ctx.roundRect) ctx.roundRect(row1X, cardY - 2, tagW, 17, 4);
-        else ctx.rect(row1X, cardY - 2, tagW, 17);
+        if (ctx.roundRect) ctx.roundRect(row1X, cardY - 1, tagW, 17, 4);
+        else ctx.rect(row1X, cardY - 1, tagW, 17);
         ctx.fill();
         ctx.stroke();
 
         ctx.fillStyle = '#0369a1';
-        ctx.fillText(tagText, row1X + 5, cardY + 10);
+        ctx.fillText(tagText, row1X + 5, cardY + 11);
         row1X += tagW + 7;
 
         // 개체 이름
         ctx.fillStyle = '#0f172a';
         ctx.font = 'bold 13px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-        ctx.fillText(log.entityName || '', row1X, cardY + 10);
+        ctx.fillText(log.entityName || '', row1X, cardY + 11);
 
         // 2행: 담당
         if (log.operator) {
-          cardY += 18;
+          cardY += 17;
           ctx.fillStyle = '#64748b';
           ctx.font = '11.5px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-          ctx.fillText(`담당: ${log.operator}`, padding + 12, cardY + 10);
+          ctx.fillText(`담당: ${log.operator}`, padding + 12, cardY + 11);
         }
 
         // 3행: 작업 제목
-        cardY += 20;
+        cardY += 19;
         ctx.fillStyle = '#0f172a';
         ctx.font = 'bold 13.5px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-        ctx.fillText(log.title, padding + 12, cardY + 10);
+        ctx.fillText(log.title, padding + 12, cardY + 11);
 
         // 4행: 상세 처치 내용 (줄바꿈 지원)
         if (log.details) {
@@ -273,22 +273,22 @@ function createReportImageBlob({ reportDate, dailyLogs, totalCost, categoryStats
           ctx.font = '12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
           const detailLines = getWrappedLines(ctx, log.details, contentWidth - 24);
           detailLines.forEach(line => {
-            cardY += 17;
-            ctx.fillText(line, padding + 12, cardY + 10);
+            cardY += 16;
+            ctx.fillText(line, padding + 12, cardY + 11);
           });
         }
 
         // 5행: 다음 일정 (긴 텍스트 자동 줄바꿈 및 박스 넘침 방지)
         if (log.nextScheduleDate) {
-          cardY += 18;
+          cardY += 17;
           ctx.fillStyle = '#d97706';
           ctx.font = 'bold 11.5px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
           const scheduleTitle = log.nextScheduleTitle ? ` (${log.nextScheduleTitle})` : '';
           const fullScheduleText = `다음 일정: ${log.nextScheduleDate}${scheduleTitle}`;
           const sLines = getWrappedLines(ctx, fullScheduleText, contentWidth - 24);
           sLines.forEach((line, sIdx) => {
-            if (sIdx > 0) cardY += 16;
-            ctx.fillText(line, padding + 12, cardY + 10);
+            if (sIdx > 0) cardY += 15;
+            ctx.fillText(line, padding + 12, cardY + 11);
           });
         }
 
@@ -296,34 +296,34 @@ function createReportImageBlob({ reportDate, dailyLogs, totalCost, categoryStats
       });
     }
 
-    // 6. 일일 영농 특이사항 (내용 있을 때만 표시)
+    // 6. 일일 영농 특이사항 (내용 있을 때만 표시, 콤팩트 슬림 밀착)
     if (farmNotesHeight > 0) {
       y += 4;
       ctx.fillStyle = '#0f172a';
       ctx.font = 'bold 14px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
       ctx.fillText('📝 일일 영농 특이사항', padding, y);
-      y += 12;
+      y += 10;
 
       ctx.fillStyle = '#ffffff';
       ctx.strokeStyle = '#e2e8f0';
       ctx.beginPath();
       if (ctx.roundRect) {
-        ctx.roundRect(padding, y, contentWidth, farmNotesHeight - 20, 8);
+        ctx.roundRect(padding, y, contentWidth, farmNotesHeight, 8);
       } else {
-        ctx.rect(padding, y, contentWidth, farmNotesHeight - 20);
+        ctx.rect(padding, y, contentWidth, farmNotesHeight);
       }
       ctx.fill();
       ctx.stroke();
 
       ctx.fillStyle = '#334155';
-      ctx.font = '12.5px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-      let noteY = y + 16;
+      ctx.font = '12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      let noteY = y + 12;
       farmNotesLines.forEach(line => {
-        ctx.fillText(line, padding + 12, noteY);
-        noteY += 18;
+        ctx.fillText(line, padding + 12, noteY + 11);
+        noteY += 17;
       });
 
-      y += farmNotesHeight;
+      y += farmNotesHeight + 14;
     }
 
     // 7. 하단 안내 푸터 (가로 정중앙 배치)
