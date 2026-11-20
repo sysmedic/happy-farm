@@ -2377,25 +2377,67 @@ form.modal-content {
     justify-content: center;
   }
 
-  /* 2열 통계 카드 */
+  /* 모바일 슬림 콤팩트 칩 (가로 1열 스와이프 알약 칩 형태) */
   .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.65rem;
+    display: flex !important;
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch;
+    gap: 0.45rem !important;
+    margin-bottom: 0.75rem !important;
+    padding: 0.15rem 0.15rem 0.4rem 0.15rem !important;
+    scrollbar-width: none;
+  }
+
+  .stats-grid::-webkit-scrollbar {
+    display: none;
   }
 
   .stat-card {
-    padding: 0.85rem;
-    gap: 0.65rem;
+    padding: 0.45rem 0.85rem !important;
+    border-radius: var(--radius-full) !important;
+    gap: 0.4rem !important;
+    flex-shrink: 0 !important;
+    height: 38px !important;
+    box-sizing: border-box !important;
+    white-space: nowrap !important;
+    display: inline-flex !important;
+    align-items: center !important;
   }
 
   .stat-icon-wrapper {
-    width: 38px;
-    height: 38px;
-    font-size: 1.1rem;
+    width: 24px !important;
+    height: 24px !important;
+    font-size: 0.85rem !important;
+    border-radius: var(--radius-full) !important;
+  }
+
+  .stat-info {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: baseline !important;
+    gap: 0.35rem !important;
+  }
+
+  .stat-label {
+    font-size: 0.8rem !important;
+    font-weight: 600 !important;
   }
 
   .stat-value {
-    font-size: 1.25rem;
+    font-size: 0.95rem !important;
+    font-weight: 800 !important;
+  }
+
+  .stat-card-add {
+    padding: 0.45rem 0.85rem !important;
+    border-radius: var(--radius-full) !important;
+    height: 38px !important;
+    font-size: 0.8rem !important;
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+    box-sizing: border-box !important;
   }
 
   /* 모바일 필터 바 */

@@ -31,6 +31,7 @@ const DEFAULT_DASHBOARD_CARDS = ['total', 'pregnant', 'treatment', 'in_heat'];
 
 const ALL_DASHBOARD_CARDS = [
   { id: 'total', label: '사육 두수', icon: '🐂', color: '#10b981', bg: 'rgba(16, 185, 129, 0.15)', isFixed: true, desc: '현재 축사에서 사육 중인 전체 한우' },
+  { id: 'breeding_cow', label: '번식우 (암소)', icon: '🐄', color: '#ec4899', bg: 'rgba(236, 72, 153, 0.15)', desc: '번식 공우 및 후보 암소 전체' },
   { id: 'pregnant', label: '임신 / 수태 개체', icon: '💖', color: '#8b5cf6', bg: 'rgba(139, 92, 246, 0.15)', desc: '임신 감정 완료 및 출산 대기' },
   { id: 'treatment', label: '치료 / 집중 관찰', icon: '💊', color: '#ef4444', bg: 'rgba(239, 68, 68, 0.15)', desc: '치료 투약 및 특별 관리' },
   { id: 'in_heat', label: '발정 / 수정 대기', icon: '🔥', color: '#f97316', bg: 'rgba(249, 115, 22, 0.15)', desc: '발정 징후 관찰 및 적기 인공수정' },
@@ -113,6 +114,7 @@ export default function EntityList({
     const scheduledShip = activeEntities.filter(e => e.status === 'scheduled_ship').length;
 
     // 사육 단계별 두수
+    const breedingCow = activeEntities.filter(e => (e.breed || '').includes('번식') || (e.breed || '').includes('암소')).length;
     const calf = activeEntities.filter(e => (e.breed || '').includes('송아지') || (e.breed || '').includes('자우')).length;
     const steerBeef = activeEntities.filter(e => (e.breed || '').includes('거세') || (e.breed || '').includes('비육')).length;
     const growing = activeEntities.filter(e => (e.breed || '').includes('육성')).length;
@@ -130,6 +132,7 @@ export default function EntityList({
       inseminated, 
       nursing, 
       scheduledShip,
+      breedingCow,
       calf, 
       steerBeef, 
       growing, 
@@ -143,6 +146,7 @@ export default function EntityList({
   const getCardValue = (cardId) => {
     switch (cardId) {
       case 'total': return stats.total;
+      case 'breeding_cow': return stats.breedingCow;
       case 'pregnant': return stats.pregnant;
       case 'treatment': return stats.treatment;
       case 'in_heat': return stats.inHeat;
@@ -268,7 +272,7 @@ export default function EntityList({
     } else if (cardId === 'deceased') {
       setSelectedStatus(prev => prev === 'deceased' ? 'active' : 'deceased');
       setSelectedBarn('all');
-    } else if (['calf', 'steer_beef', 'growing'].includes(cardId)) {
+    } else if (['calf', 'steer_beef', 'growing', 'breeding_cow'].includes(cardId)) {
       setSelectedBreed(prev => prev === cardId ? 'all' : cardId);
       if (selectedStatus === 'history' || selectedStatus === 'shipped' || selectedStatus === 'deceased') {
         setSelectedStatus('active');
@@ -282,7 +286,7 @@ export default function EntityList({
     if (['pregnant', 'treatment', 'in_heat', 'inseminated', 'nursing', 'scheduled_ship', 'history', 'shipped', 'deceased'].includes(cardId)) {
       return selectedStatus === cardId;
     }
-    if (['calf', 'steer_beef', 'growing'].includes(cardId)) {
+    if (['calf', 'steer_beef', 'growing', 'breeding_cow'].includes(cardId)) {
       return selectedBreed === cardId;
     }
     return false;
@@ -329,6 +333,11 @@ export default function EntityList({
             <div 
               key={cardDef.id}
               className={`stat-card stat-card-interactive ${active ? 'active-custom' : ''}`}
+              style={active ? {
+                borderColor: cardDef.color,
+                background: cardDef.bg,
+                boxShadow: `0 0 0 2px ${cardDef.color}`
+              } : {}}
               onClick={() => handleCardClick(cardDef.id)}
               title={`클릭 시 ${cardDef.label} 개체 필터링 (다시 누르면 해제)`}
               role="button"
