@@ -585,16 +585,8 @@ export default function DailyReportView({
           </div>
         </div>
 
-        {/* 1안: 상단 타일과 개체 카드 목록 사이 은은한 구분선 */}
-        <div style={{ 
-          height: '1px', 
-          background: 'var(--border-color)', 
-          margin: '0.85rem 0 0.75rem 0',
-          opacity: 0.85
-        }} />
-
-        {/* 3. 개체별 관리 내역 카드 목록 */}
-        <div style={{ marginBottom: '1.25rem' }}>
+        {/* 2안: 선 없이 자연스러운 여백으로 분리 */}
+        <div style={{ marginBottom: '1.25rem', marginTop: '0.15rem' }}>
           {dailyLogs.length === 0 ? (
             <div className="card" style={{ 
               textAlign: 'center', 
