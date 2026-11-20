@@ -694,7 +694,6 @@ export default function DailyReportView({
           </div>
           <textarea
             id="mobile-farm-notes"
-            name="mobileFarmNotes"
             rows={3}
             className="form-textarea"
             style={{ 
@@ -702,23 +701,14 @@ export default function DailyReportView({
               border: '1.5px solid var(--border-color)', 
               borderRadius: 'var(--radius-sm)',
               padding: '0.65rem 0.75rem', 
-              fontSize: '16px', // 모바일 브라우저 자동 확대 튕김 방지 (반드시 16px 이상)
+              fontSize: '16px', // 모바일 브라우저 자동 확대 방지
               lineHeight: 1.5,
               width: '100%',
               minHeight: '80px',
-              touchAction: 'manipulation',
-              userSelect: 'text',
-              WebkitUserSelect: 'text',
               boxSizing: 'border-box'
             }}
             value={farmNotes}
             onChange={(e) => handleFarmNotesChange(e.target.value)}
-            onFocus={(e) => {
-              // 안드로이드 키보드 오픈 시 키보드 위 중앙으로 부드럽게 스크롤
-              setTimeout(() => {
-                e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              }, 300);
-            }}
             placeholder="당일 기상, 사료 섭취 상태, 이상 증상 개체 등 특이사항을 터치하여 입력하세요."
           />
         </div>
