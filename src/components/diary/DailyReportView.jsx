@@ -756,33 +756,20 @@ export default function DailyReportView({
 
         {/* A4 인쇄 규격 영농 보고서 양식 */}
         <div className="print-sheet-container card">
-          {/* 보고서 공식 헤더 */}
-          <div className="print-sheet-header">
+          {/* 1안: 모던 레포트 헤더 (도장 박스 삭제, 좌측 타이틀 & 우측 출력일시, 구분선) */}
+          <div className="print-sheet-header" style={{ borderBottom: '2px solid #e2e8f0', paddingBottom: '0.95rem', marginBottom: '1.25rem', alignItems: 'flex-end' }}>
             <div>
-              <div style={{ fontSize: '0.85rem', color: '#059669', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                HAPPY FARM DAILY REPORT
-              </div>
-              <h1 style={{ fontSize: '1.65rem', fontWeight: 900, color: '#0f172a', margin: '4px 0' }}>
-                행복 농장 일일 관리 보고서
+              <h1 style={{ fontSize: '1.5rem', fontWeight: 900, color: '#0f172a', margin: '0 0 0.35rem 0', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                <span style={{ fontSize: '1.35rem' }}>🌱</span>
+                <span>행복 농장 일일 관리 보고서</span>
               </h1>
-              <div style={{ fontSize: '0.9rem', color: '#64748b', fontWeight: 600 }}>
-                일자: {reportDate} • 작성자: 홍길동 대표
+              <div style={{ fontSize: '0.88rem', color: '#64748b', fontWeight: 600 }}>
+                기준 일자: <strong style={{ color: '#0f172a' }}>{reportDate}</strong> &nbsp;|&nbsp; 작성: 홍길동 대표
               </div>
             </div>
 
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ 
-                border: '2px solid #10b981', 
-                color: '#059669', 
-                padding: '0.35rem 0.8rem', 
-                borderRadius: '6px', 
-                fontWeight: 800, 
-                fontSize: '0.85rem',
-                display: 'inline-block' 
-              }}>
-                영농 확인 필 (印)
-              </div>
-              <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '4px' }}>
+            <div style={{ textAlign: 'right', paddingBottom: '2px' }}>
+              <div style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
                 출력일시: {new Date().toLocaleString()}
               </div>
             </div>
