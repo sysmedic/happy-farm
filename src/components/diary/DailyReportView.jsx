@@ -60,7 +60,13 @@ function createReportImageBlob({ reportDate, dailyLogs, totalCost, categoryStats
         const lines = getWrappedLines(mCtx, log.details, contentWidth - 24);
         h += Math.max(1, lines.length) * 17 + 4; // 4행 (상세 내용 줄바꿈)
       }
-      if (log.nextScheduleDate) h += 22; // 5행 (다음 일정)
+      if (log.nextScheduleDate) {
+        const scheduleTitle = log.nextScheduleTitle ? ` (${log.nextScheduleTitle})` : '';
+        const fullScheduleText = `다음 일정: ${log.nextScheduleDate}${scheduleTitle}`;
+        mCtx.font = 'bold 11.5px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+        const sLines = getWrappedLines(mCtx, fullScheduleText, contentWidth - 24);
+        h += Math.max(1, sLines.length) * 16 + 5; // 5행 (다음 일정 동적 줄바꿈 높이)
+      }
       h += 12; // 하단 내부 여백
       return h;
     });
@@ -272,13 +278,18 @@ function createReportImageBlob({ reportDate, dailyLogs, totalCost, categoryStats
           });
         }
 
-        // 5행: 다음 일정
+        // 5행: 다음 일정 (긴 텍스트 자동 줄바꿈 및 박스 넘침 방지)
         if (log.nextScheduleDate) {
           cardY += 21;
           ctx.fillStyle = '#d97706';
           ctx.font = 'bold 11.5px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
           const scheduleTitle = log.nextScheduleTitle ? ` (${log.nextScheduleTitle})` : '';
-          ctx.fillText(`다음 일정: ${log.nextScheduleDate}${scheduleTitle}`, padding + 12, cardY + 7);
+          const fullScheduleText = `다음 일정: ${log.nextScheduleDate}${scheduleTitle}`;
+          const sLines = getWrappedLines(ctx, fullScheduleText, contentWidth - 24);
+          sLines.forEach((line, sIdx) => {
+            if (sIdx > 0) cardY += 15;
+            ctx.fillText(line, padding + 12, cardY + 7);
+          });
         }
 
         y += cardH + 10;
@@ -661,7 +672,7 @@ export default function DailyReportView({
 
                   {/* 4행: 다음 일정 */}
                   {log.nextScheduleDate && (
-                    <div style={{ fontSize: '0.78rem', color: '#d97706', marginTop: '0.35rem', fontWeight: 700 }}>
+                    <div style={{ fontSize: '0.78rem', color: '#d97706', marginTop: '0.35rem', fontWeight: 700, wordBreak: 'break-all', lineHeight: 1.4 }}>
                       다음 일정: {log.nextScheduleDate} {log.nextScheduleTime ? `(${log.nextScheduleTime}) ` : ''}({log.nextScheduleTitle || '예정'})
                     </div>
                   )}
