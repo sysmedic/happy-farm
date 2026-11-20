@@ -303,7 +303,7 @@ export default function EntityFormModal({
                 <label className="form-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <span>성별 <span className="required">*</span></span>
                   {genderLockInfo.isFixed && (
-                    <span style={{ fontSize: '0.8rem', color: 'var(--color-primary)', fontWeight: 700 }}>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>
                       🔒 성별 자동 확정
                     </span>
                   )}
@@ -317,34 +317,7 @@ export default function EntityFormModal({
                       <button
                         key={g.id}
                         type="button"
-                        className={`btn btn-sm ${isSelected ? 'active-gender-btn' : 'btn-outline'}`}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          gap: '0.35rem',
-                          padding: '0.5rem 0.3rem',
-                          fontWeight: 700,
-                          fontSize: '0.875rem',
-                          ...(isSelected ? {
-                            background: g.id === 'female' 
-                              ? 'linear-gradient(135deg, #ec4899 0%, #db2777 100%)' 
-                              : g.id === 'male' 
-                              ? 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)' 
-                              : 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
-                            color: '#ffffff',
-                            borderColor: 'transparent',
-                            boxShadow: '0 2px 6px rgba(0,0,0,0.18)'
-                          } : isDisabled ? {
-                            opacity: 0.35,
-                            cursor: 'not-allowed',
-                            background: 'var(--bg-card-subtle)',
-                            color: 'var(--text-muted)'
-                          } : {
-                            color: g.color,
-                            borderColor: 'var(--border-color)'
-                          })
-                        }}
+                        className={`gender-select-btn gender-${g.id} ${isSelected ? 'active' : ''} ${isDisabled ? 'disabled' : ''}`}
                         disabled={genderLockInfo.isFixed}
                         onClick={() => handleGenderSelect(g.id)}
                         title={genderLockInfo.isFixed ? genderLockInfo.message : `${g.label} 선택`}
@@ -358,8 +331,8 @@ export default function EntityFormModal({
                 {genderLockInfo.message && (
                   <span className="form-hint" style={{ 
                     marginTop: '0.2rem', 
-                    color: genderLockInfo.isFixed ? 'var(--text-muted)' : 'var(--color-primary)',
-                    fontWeight: genderLockInfo.isFixed ? 500 : 700,
+                    color: 'var(--text-muted)',
+                    fontWeight: 500,
                     display: 'block'
                   }}>
                     {genderLockInfo.isFixed ? `ℹ️ ${genderLockInfo.message}` : `👉 ${genderLockInfo.message}`}
@@ -409,7 +382,7 @@ export default function EntityFormModal({
                   value={formData.birthDate}
                   onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
                 />
-                <span className="form-hint" style={{ color: 'var(--color-primary)', fontWeight: 600 }}>
+                <span className="form-hint" style={{ color: 'var(--text-muted)', fontWeight: 600 }}>
                   현재 {agePreview.text}
                 </span>
               </div>

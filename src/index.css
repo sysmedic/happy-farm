@@ -1123,6 +1123,75 @@ a:hover {
 
 
 
+/* 개체 등록/수정 모달 - 성별 버튼 소프트 파스텔 틴트 */
+.gender-select-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.5rem 0.3rem;
+  font-weight: 700;
+  font-size: 0.875rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  color: var(--text-muted);
+  transition: all 0.18s ease;
+  cursor: pointer;
+}
+
+.gender-select-btn:hover:not(:disabled) {
+  border-color: var(--text-subtle);
+  background: var(--bg-hover);
+}
+
+.gender-select-btn.disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  background: var(--bg-card-subtle);
+  color: var(--text-muted);
+  border-color: var(--border-color);
+}
+
+.gender-select-btn.gender-female.active {
+  background: rgba(244, 63, 94, 0.12) !important;
+  color: #e11d48 !important;
+  border: 1.5px solid #fb7185 !important;
+  box-shadow: 0 1px 4px rgba(244, 63, 94, 0.12);
+}
+
+[data-theme='dark'] .gender-select-btn.gender-female.active {
+  background: rgba(244, 63, 94, 0.18) !important;
+  color: #fb7185 !important;
+  border: 1.5px solid #f43f5e !important;
+}
+
+.gender-select-btn.gender-male.active {
+  background: rgba(14, 165, 233, 0.12) !important;
+  color: #0284c7 !important;
+  border: 1.5px solid #38bdf8 !important;
+  box-shadow: 0 1px 4px rgba(14, 165, 233, 0.12);
+}
+
+[data-theme='dark'] .gender-select-btn.gender-male.active {
+  background: rgba(14, 165, 233, 0.18) !important;
+  color: #38bdf8 !important;
+  border: 1.5px solid #0ea5e9 !important;
+}
+
+.gender-select-btn.gender-castrated.active {
+  background: rgba(139, 92, 246, 0.12) !important;
+  color: #7c3aed !important;
+  border: 1.5px solid #a78bfa !important;
+  box-shadow: 0 1px 4px rgba(139, 92, 246, 0.12);
+}
+
+[data-theme='dark'] .gender-select-btn.gender-castrated.active {
+  background: rgba(139, 92, 246, 0.18) !important;
+  color: #c084fc !important;
+  border: 1.5px solid #8b5cf6 !important;
+}
+
 .entity-card-dot {
   font-size: 1.15rem;
   font-weight: 400;
