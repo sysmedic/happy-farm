@@ -1021,12 +1021,14 @@ a:hover {
 .entity-card-top .badge {
   font-size: 1.05rem;
   font-weight: 700;
-  padding: 0.3rem 0.85rem;
-  border-radius: var(--radius-full);
+  height: 38px;
+  box-sizing: border-box;
+  padding: 0 0.85rem;
+  border-radius: var(--radius-sm);
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  line-height: 1.2;
+  line-height: 1;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
   flex-shrink: 0;
 }
@@ -1119,16 +1121,7 @@ a:hover {
   border-bottom-color: var(--color-primary);
 }
 
-/* 상태 뱃지 형태: 방안 A (이표박스처럼 단정한 둥근 사각 태그형) vs 방안 B (기존 알약형) */
-.entity-card-top .badge.shape-tag {
-  height: 38px;
-  box-sizing: border-box;
-  border-radius: var(--radius-sm);
-  padding: 0 0.85rem;
-  display: inline-flex;
-  align-items: center;
-  line-height: 1;
-}
+
 
 .entity-card-dot {
   font-size: 1.15rem;
@@ -2817,7 +2810,7 @@ form.modal-content {
   }
 
   .entity-ear-tag,
-  .entity-card-top .badge.shape-tag,
+  .entity-card-top .badge,
   .status-banner-btn,
   .detail-edit-btn {
     height: 33px !important;
@@ -2829,7 +2822,7 @@ form.modal-content {
   }
 
   .entity-ear-tag,
-  .entity-card-top .badge.shape-tag,
+  .entity-card-top .badge,
   .status-banner-btn {
     font-size: 0.95rem !important;
     padding: 0 0.55rem !important;
