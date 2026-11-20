@@ -715,28 +715,39 @@ export default function DailyReportView({
 
       {/* 🖨️ 2. PC 및 A4 인쇄 전용 공식 뷰 (모바일에서는 숨김, A4 인쇄 시 100% 무결 출력) */}
       <div className="report-desktop-view">
-        {/* 상단 컨트롤 툴바 (A4 규격인 820px에 꼭 맞추어 완벽한 좌우 대칭 정렬) */}
-        <div className="filter-bar" style={{ maxWidth: '820px', margin: '0 auto 1.5rem auto' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-            <label style={{ fontSize: '0.875rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              <Calendar size={16} />
+        {/* 상단 컨트롤 툴바 (A4 규격 820px & 시원한 1열 가로 양끝 정렬) */}
+        <div 
+          className="filter-bar" 
+          style={{ 
+            maxWidth: '820px', 
+            margin: '0 auto 1.5rem auto',
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '1rem',
+            padding: '0.75rem 1.15rem'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+            <label style={{ fontSize: '0.875rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-main)', whiteSpace: 'nowrap' }}>
+              <Calendar size={16} color="var(--color-primary)" />
               <span>보고서 기준 일자:</span>
             </label>
             <input
               type="date"
               className="form-input"
-              style={{ width: 'auto' }}
+              style={{ width: 'auto', padding: '0.35rem 0.65rem', fontWeight: 700 }}
               value={reportDate}
               onChange={(e) => setReportDate(e.target.value)}
             />
           </div>
 
-          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-            <button className="btn btn-secondary" onClick={handleShare}>
+          <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
+            <button className="btn btn-secondary" onClick={handleShare} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
               <Share2 size={15} />
               <span>스마트 공유 / 복사</span>
             </button>
-            <button className="btn btn-primary" onClick={handlePrint}>
+            <button className="btn btn-primary" onClick={handlePrint} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
               <Printer size={15} />
               <span>A4 보고서 인쇄</span>
             </button>
