@@ -26,24 +26,21 @@ import {
   isHistoricalStatus
 } from '../../lib/types.js';
 
-const DASHBOARD_CARDS_STORAGE_KEY = 'happy_farm_active_dashboard_cards';
-const DEFAULT_DASHBOARD_CARDS = ['total', 'pregnant', 'treatment', 'in_heat'];
+const DASHBOARD_CARDS_STORAGE_KEY = 'happy_farm_active_dashboard_cards_v3';
+const DEFAULT_DASHBOARD_CARDS = ['total', 'pregnant', 'treatment', 'in_heat', 'inseminated', 'healthy'];
 
+// 개체 카드 상태(ENTITY_STATUSES)와 100% 동일한 명칭, 이모지, 테마 컬러 매핑
 const ALL_DASHBOARD_CARDS = [
   { id: 'total', label: '사육 두수', icon: '🐂', color: '#10b981', bg: 'rgba(16, 185, 129, 0.15)', isFixed: true, desc: '현재 축사에서 사육 중인 전체 한우' },
-  { id: 'breeding_cow', label: '번식우 (암소)', icon: '🐄', color: '#ec4899', bg: 'rgba(236, 72, 153, 0.15)', desc: '번식 공우 및 후보 암소 전체' },
-  { id: 'pregnant', label: '임신 / 수태 개체', icon: '💖', color: '#8b5cf6', bg: 'rgba(139, 92, 246, 0.15)', desc: '임신 감정 완료 및 출산 대기' },
-  { id: 'treatment', label: '치료 / 집중 관찰', icon: '💊', color: '#ef4444', bg: 'rgba(239, 68, 68, 0.15)', desc: '치료 투약 및 특별 관리' },
-  { id: 'in_heat', label: '발정 / 수정 대기', icon: '🔥', color: '#f97316', bg: 'rgba(249, 115, 22, 0.15)', desc: '발정 징후 관찰 및 적기 인공수정' },
+  { id: 'healthy', label: '건강/양호', icon: '💚', color: '#10b981', bg: 'rgba(16, 185, 129, 0.15)', desc: '특이 질환 없이 건강한 정상 개체' },
+  { id: 'pregnant', label: '임신/수태', icon: '💖', color: '#8b5cf6', bg: 'rgba(139, 92, 246, 0.15)', desc: '임신 감정 완료 및 출산 대기' },
+  { id: 'treatment', label: '치료/투약중', icon: '💊', color: '#ef4444', bg: 'rgba(239, 68, 68, 0.15)', desc: '치료 투약 및 집중 관리 개체' },
+  { id: 'in_heat', label: '발정 관찰', icon: '🔥', color: '#f97316', bg: 'rgba(249, 115, 22, 0.15)', desc: '발정 징후 관찰 및 적기 인공수정' },
   { id: 'inseminated', label: '수정 완료', icon: '🧬', color: '#0ea5e9', bg: 'rgba(14, 165, 233, 0.15)', desc: '인공수정 후 임신 확인 대기' },
-  { id: 'calf', label: '송아지 (자우)', icon: '🐮', color: '#10b981', bg: 'rgba(16, 185, 129, 0.15)', desc: '생후 포유 및 이유기 송아지' },
-  { id: 'steer_beef', label: '비육우 (거세우)', icon: '🏆', color: '#d97706', bg: 'rgba(245, 158, 11, 0.15)', desc: '비육 후기 및 출하 체중 관리' },
-  { id: 'growing', label: '육성우', icon: '🌱', color: '#059669', bg: 'rgba(5, 150, 105, 0.15)', desc: '송아지 이후 성장 단계' },
-  { id: 'nursing', label: '포유 / 육아우', icon: '🐄', color: '#14b8a6', bg: 'rgba(20, 184, 166, 0.15)', desc: '분만 후 젖먹이는 어미소' },
+  { id: 'nursing', label: '포유/육아', icon: '🐄', color: '#14b8a6', bg: 'rgba(20, 184, 166, 0.15)', desc: '분만 후 젖먹이는 어미소' },
   { id: 'scheduled_ship', label: '출하 예정', icon: '🚛', color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.15)', desc: '도축 및 경매 출하 예정' },
-  { id: 'history', label: '사육 이력', icon: '📜', color: '#64748b', bg: 'rgba(100, 116, 139, 0.15)', desc: '출하 완료 및 폐사된 종료 개체' },
-  { id: 'shipped', label: '출하 완료', icon: '🏷️', color: '#64748b', bg: 'rgba(100, 116, 139, 0.15)', desc: '농장에서 출하 완료된 개체' },
-  { id: 'deceased', label: '폐사 / 도태', icon: '🪦', color: '#475569', bg: 'rgba(71, 85, 105, 0.15)', desc: '질병 또는 사고로 폐사된 개체' },
+  { id: 'shipped', label: '출하 완료', icon: '🏷️', color: '#64748b', bg: 'rgba(100, 116, 139, 0.15)', desc: '농장에서 출하 완료된 종료 개체' },
+  { id: 'deceased', label: '폐사/도태', icon: '🪦', color: '#475569', bg: 'rgba(71, 85, 105, 0.15)', desc: '질병 또는 사고로 폐사된 종료 개체' },
 ];
 
 export default function EntityList({
@@ -106,18 +103,13 @@ export default function EntityList({
   const stats = useMemo(() => {
     const activeEntities = entities.filter(e => !isHistoricalStatus(e.status));
     const total = activeEntities.length;
+    const healthy = activeEntities.filter(e => e.status === 'healthy').length;
     const pregnant = activeEntities.filter(e => e.status === 'pregnant').length;
     const treatment = activeEntities.filter(e => e.status === 'treatment').length;
     const inHeat = activeEntities.filter(e => e.status === 'in_heat').length;
     const inseminated = activeEntities.filter(e => e.status === 'inseminated').length;
     const nursing = activeEntities.filter(e => e.status === 'nursing').length;
     const scheduledShip = activeEntities.filter(e => e.status === 'scheduled_ship').length;
-
-    // 사육 단계별 두수
-    const breedingCow = activeEntities.filter(e => (e.breed || '').includes('번식') || (e.breed || '').includes('암소')).length;
-    const calf = activeEntities.filter(e => (e.breed || '').includes('송아지') || (e.breed || '').includes('자우')).length;
-    const steerBeef = activeEntities.filter(e => (e.breed || '').includes('거세') || (e.breed || '').includes('비육')).length;
-    const growing = activeEntities.filter(e => (e.breed || '').includes('육성')).length;
 
     // 사육 이력(출하 및 폐사)
     const shippedCount = entities.filter(e => e.status === 'shipped').length;
@@ -126,16 +118,13 @@ export default function EntityList({
 
     return { 
       total, 
+      healthy,
       pregnant, 
       treatment, 
       inHeat, 
       inseminated, 
       nursing, 
       scheduledShip,
-      breedingCow,
-      calf, 
-      steerBeef, 
-      growing, 
       shippedCount, 
       deceasedCount, 
       historyCount 
@@ -146,17 +135,13 @@ export default function EntityList({
   const getCardValue = (cardId) => {
     switch (cardId) {
       case 'total': return stats.total;
-      case 'breeding_cow': return stats.breedingCow;
+      case 'healthy': return stats.healthy;
       case 'pregnant': return stats.pregnant;
       case 'treatment': return stats.treatment;
       case 'in_heat': return stats.inHeat;
       case 'inseminated': return stats.inseminated;
       case 'nursing': return stats.nursing;
       case 'scheduled_ship': return stats.scheduledShip;
-      case 'calf': return stats.calf;
-      case 'steer_beef': return stats.steerBeef;
-      case 'growing': return stats.growing;
-      case 'history': return stats.historyCount;
       case 'shipped': return stats.shippedCount;
       case 'deceased': return stats.deceasedCount;
       default: return 0;
@@ -259,35 +244,22 @@ export default function EntityList({
   const handleCardClick = (cardId) => {
     if (cardId === 'total') {
       setSelectedStatus('active');
-      setSelectedBreed('all');
-    } else if (['pregnant', 'treatment', 'in_heat', 'inseminated', 'nursing', 'scheduled_ship'].includes(cardId)) {
+    } else if (['healthy', 'pregnant', 'treatment', 'in_heat', 'inseminated', 'nursing', 'scheduled_ship'].includes(cardId)) {
       setSelectedStatus(prev => prev === cardId ? 'active' : cardId);
-      setSelectedBreed('all');
-    } else if (cardId === 'history') {
-      setSelectedStatus(prev => prev === 'history' ? 'active' : 'history');
-      setSelectedBarn('all');
     } else if (cardId === 'shipped') {
       setSelectedStatus(prev => prev === 'shipped' ? 'active' : 'shipped');
       setSelectedBarn('all');
     } else if (cardId === 'deceased') {
       setSelectedStatus(prev => prev === 'deceased' ? 'active' : 'deceased');
       setSelectedBarn('all');
-    } else if (['calf', 'steer_beef', 'growing', 'breeding_cow'].includes(cardId)) {
-      setSelectedBreed(prev => prev === cardId ? 'all' : cardId);
-      if (selectedStatus === 'history' || selectedStatus === 'shipped' || selectedStatus === 'deceased') {
-        setSelectedStatus('active');
-      }
     }
   };
 
   // 대시보드 카드 활성화 여부 판정
   const isCardActive = (cardId) => {
-    if (cardId === 'total') return selectedStatus === 'active' && selectedBreed === 'all';
-    if (['pregnant', 'treatment', 'in_heat', 'inseminated', 'nursing', 'scheduled_ship', 'history', 'shipped', 'deceased'].includes(cardId)) {
+    if (cardId === 'total') return selectedStatus === 'active';
+    if (['healthy', 'pregnant', 'treatment', 'in_heat', 'inseminated', 'nursing', 'scheduled_ship', 'shipped', 'deceased'].includes(cardId)) {
       return selectedStatus === cardId;
-    }
-    if (['calf', 'steer_beef', 'growing', 'breeding_cow'].includes(cardId)) {
-      return selectedBreed === cardId;
     }
     return false;
   };
