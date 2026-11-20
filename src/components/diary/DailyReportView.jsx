@@ -758,13 +758,14 @@ export default function DailyReportView({
         <div className="print-sheet-container card">
           {/* 1안: 모던 레포트 헤더 (도장 박스 삭제, 좌측 타이틀 & 우측 출력일시, 구분선) */}
           <div className="print-sheet-header" style={{ borderBottom: '2px solid #e2e8f0', paddingBottom: '0.95rem', marginBottom: '1.25rem', alignItems: 'flex-end' }}>
-            <div>
-              <h1 style={{ fontSize: '1.5rem', fontWeight: 900, color: '#0f172a', margin: '0 0 0.35rem 0', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+            <div style={{ display: 'inline-flex', flexDirection: 'column' }}>
+              <h1 style={{ fontSize: '1.5rem', fontWeight: 900, color: '#0f172a', margin: '0 0 0.35rem 0', display: 'flex', alignItems: 'center', gap: '0.45rem', whiteSpace: 'nowrap' }}>
                 <span style={{ fontSize: '1.35rem' }}>🌱</span>
                 <span>행복 농장 일일 관리 보고서</span>
               </h1>
-              <div style={{ fontSize: '0.88rem', color: '#64748b', fontWeight: 600 }}>
-                기준 일자: <strong style={{ color: '#0f172a' }}>{reportDate}</strong> &nbsp;|&nbsp; 작성: 홍길동 대표
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', fontSize: '0.88rem', color: '#64748b', fontWeight: 600 }}>
+                <span>기준 일자: <strong style={{ color: '#0f172a' }}>{reportDate}</strong></span>
+                <span>작성: 홍길동 대표</span>
               </div>
             </div>
 
