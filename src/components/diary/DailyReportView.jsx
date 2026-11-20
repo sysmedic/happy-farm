@@ -50,24 +50,24 @@ function createReportImageBlob({ reportDate, dailyLogs, totalCost, categoryStats
     const mCtx = measureCanvas.getContext('2d');
     mCtx.font = '12.5px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
 
-    // 각 카드별 높이 사전 계산
+    // 각 카드별 높이 사전 계산 (실제 텍스트 렌더링과 1:1 정밀 일치)
     const cardHeights = dailyLogs.map(log => {
       let h = 14; // 상단 내부 여백
-      h += 20; // 1행 (시간, 이표, 이름)
-      if (log.operator) h += 17; // 2행 (담당)
+      h += 18; // 1행 (시간, 이표, 이름)
+      if (log.operator) h += 18; // 2행 (담당)
       h += 20; // 3행 (제목)
       if (log.details) {
         const lines = getWrappedLines(mCtx, log.details, contentWidth - 24);
-        h += Math.max(1, lines.length) * 17 + 4; // 4행 (상세 내용 줄바꿈)
+        h += lines.length * 17; // 4행 (상세 내용 각 줄당 17px)
       }
       if (log.nextScheduleDate) {
         const scheduleTitle = log.nextScheduleTitle ? ` (${log.nextScheduleTitle})` : '';
         const fullScheduleText = `다음 일정: ${log.nextScheduleDate}${scheduleTitle}`;
         mCtx.font = 'bold 11.5px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
         const sLines = getWrappedLines(mCtx, fullScheduleText, contentWidth - 24);
-        h += Math.max(1, sLines.length) * 16 + 5; // 5행 (다음 일정 동적 줄바꿈 높이)
+        h += 18 + (sLines.length - 1) * 16; // 5행 (첫줄 18px + 추가줄당 16px)
       }
-      h += 12; // 하단 내부 여백
+      h += 13; // 하단 내부 여백
       return h;
     });
 
@@ -221,14 +221,14 @@ function createReportImageBlob({ reportDate, dailyLogs, totalCost, categoryStats
         ctx.fill();
         ctx.stroke();
 
-        let cardY = y + 15;
+        let cardY = y + 14;
 
         // 1행: [시간] [개체번호 뱃지] [개체이름]
         let row1X = padding + 12;
         if (log.time) {
           ctx.fillStyle = '#64748b';
           ctx.font = 'bold 12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-          ctx.fillText(log.time, row1X, cardY + 9);
+          ctx.fillText(log.time, row1X, cardY + 10);
           row1X += ctx.measureText(log.time).width + 8;
         }
 
@@ -255,17 +255,17 @@ function createReportImageBlob({ reportDate, dailyLogs, totalCost, categoryStats
 
         // 2행: 담당
         if (log.operator) {
-          cardY += 20;
+          cardY += 18;
           ctx.fillStyle = '#64748b';
           ctx.font = '11.5px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-          ctx.fillText(`담당: ${log.operator}`, padding + 12, cardY + 8);
+          ctx.fillText(`담당: ${log.operator}`, padding + 12, cardY + 10);
         }
 
         // 3행: 작업 제목
-        cardY += 19;
+        cardY += 20;
         ctx.fillStyle = '#0f172a';
         ctx.font = 'bold 13.5px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-        ctx.fillText(log.title, padding + 12, cardY + 9);
+        ctx.fillText(log.title, padding + 12, cardY + 10);
 
         // 4행: 상세 처치 내용 (줄바꿈 지원)
         if (log.details) {
@@ -274,21 +274,21 @@ function createReportImageBlob({ reportDate, dailyLogs, totalCost, categoryStats
           const detailLines = getWrappedLines(ctx, log.details, contentWidth - 24);
           detailLines.forEach(line => {
             cardY += 17;
-            ctx.fillText(line, padding + 12, cardY + 8);
+            ctx.fillText(line, padding + 12, cardY + 10);
           });
         }
 
         // 5행: 다음 일정 (긴 텍스트 자동 줄바꿈 및 박스 넘침 방지)
         if (log.nextScheduleDate) {
-          cardY += 21;
+          cardY += 18;
           ctx.fillStyle = '#d97706';
           ctx.font = 'bold 11.5px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
           const scheduleTitle = log.nextScheduleTitle ? ` (${log.nextScheduleTitle})` : '';
           const fullScheduleText = `다음 일정: ${log.nextScheduleDate}${scheduleTitle}`;
           const sLines = getWrappedLines(ctx, fullScheduleText, contentWidth - 24);
           sLines.forEach((line, sIdx) => {
-            if (sIdx > 0) cardY += 15;
-            ctx.fillText(line, padding + 12, cardY + 7);
+            if (sIdx > 0) cardY += 16;
+            ctx.fillText(line, padding + 12, cardY + 10);
           });
         }
 
