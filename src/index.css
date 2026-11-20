@@ -2707,33 +2707,91 @@ form.modal-content {
   }
 }
 
-/* Print Media Query */
+/* Print Media Query (A4 규격 무결 인쇄 & 화면과 1:1 완벽 일치 & 박스 그림자 잔상 제거) */
+@page {
+  size: A4 portrait;
+  margin: 12mm 15mm;
+}
+
 @media print {
+  *,
+  *::before,
+  *::after {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  html,
   body {
     background: #ffffff !important;
-    color: #000000 !important;
+    color: #0f172a !important;
+    width: 100% !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 11pt !important;
   }
+
   .topbar,
   .topbar-actions,
   .mobile-bottom-bar,
   .mobile-fab-btn,
+  .mobile-fab,
   .btn,
   .filter-bar,
   .modal-overlay,
   .nav-tabs,
-  .report-mobile-view {
+  .report-mobile-view,
+  .mobile-only {
     display: none !important;
   }
-  .report-desktop-view {
-    display: block !important;
-  }
-  .print-sheet-container {
-    box-shadow: none !important;
-    padding: 0 !important;
-    max-width: 100% !important;
-  }
+
   .main-content {
     padding: 0 !important;
+    margin: 0 !important;
     max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  .report-desktop-view {
+    display: block !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .print-sheet-container {
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    background: transparent !important;
+  }
+
+  .print-table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+  }
+
+  .print-table th,
+  .print-table td {
+    border: 1px solid #cbd5e1 !important;
+  }
+
+  .print-table tr,
+  .print-sheet-header,
+  .print-sheet-container > div {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* 인쇄 시 텍스트 밑줄 제거하여 한층 더 깔끔한 공문서 느낌 제공 */
+  .print-table a,
+  .print-table span[style*="text-decoration: underline"] {
+    text-decoration: none !important;
   }
 }
