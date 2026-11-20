@@ -44,6 +44,7 @@ export default function EntityDetailModal({
   const [isStatusMenuOpen, setIsStatusMenuOpen] = useState(false);
   const [isEditingMemo, setIsEditingMemo] = useState(false);
   const [memoDraft, setMemoDraft] = useState(entity?.memo || '');
+  const [headerStyleMode, setHeaderStyleMode] = useState('padding'); // 'padding' (방안 A: 여백형) | 'title' (방안 B: 타이틀형)
   const statusMenuRef = useRef(null);
 
   // 모달 오픈 시 또는 initialViewMode 변경 시 초기 뷰 모드 동기화
@@ -218,7 +219,36 @@ export default function EntityDetailModal({
             </div>
           </div>
         ) : (
-          <div className="modal-header entity-detail-header">
+          <div className={`modal-header entity-detail-header mode-${headerStyleMode}`}>
+            {/* 디자인 비교 토글 바 (실시간 검토용) */}
+            <div className="design-comparison-toggle-bar">
+              <span className="comparison-badge">디자인 비교</span>
+              <div className="comparison-tabs">
+                <button
+                  type="button"
+                  className={`comparison-tab-btn ${headerStyleMode === 'padding' ? 'active' : ''}`}
+                  onClick={() => setHeaderStyleMode('padding')}
+                >
+                  🌿 방안 A (시원한 여백형)
+                </button>
+                <button
+                  type="button"
+                  className={`comparison-tab-btn ${headerStyleMode === 'title' ? 'active' : ''}`}
+                  onClick={() => setHeaderStyleMode('title')}
+                >
+                  🏷️ 방안 B (타이틀 추가형)
+                </button>
+              </div>
+            </div>
+
+            {/* 방안 B 선택 시 표시되는 간결한 상단 타이틀 바 */}
+            {headerStyleMode === 'title' && (
+              <div className="detail-modal-eyebrow-row">
+                <span className="eyebrow-title">🐂 개체 상세 프로필</span>
+                <span className="eyebrow-desc">식별 및 생애 주기 관리</span>
+              </div>
+            )}
+
             {/* 1행: 이표번호 & 상태 배너 (좌측 한 줄 일체화) | 정보 수정 & 닫기 버튼 (우측) */}
             <div className="detail-header-top-row">
               <div className="detail-header-tag" style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'nowrap', flexShrink: 0 }}>
