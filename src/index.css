@@ -2417,11 +2417,11 @@ form.modal-content {
     display: flex !important;
     flex-direction: row !important;
     overflow-x: auto !important;
-    overflow-y: hidden !important;
+    overflow-y: visible !important;
     -webkit-overflow-scrolling: touch;
     gap: 0.45rem !important;
     margin-bottom: 0.75rem !important;
-    padding: 0.15rem 0.15rem 0.4rem 0.15rem !important;
+    padding: 0.35rem 0.25rem 0.45rem 0.25rem !important;
     scrollbar-width: none;
   }
 

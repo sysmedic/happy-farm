@@ -308,7 +308,7 @@ export default function EntityList({
               style={active ? {
                 borderColor: cardDef.color,
                 background: cardDef.bg,
-                boxShadow: `0 0 0 2px ${cardDef.color}`
+                boxShadow: `0 0 0 1.5px ${cardDef.color}`
               } : {}}
               onClick={() => handleCardClick(cardDef.id)}
               title={`클릭 시 ${cardDef.label} 개체 필터링 (다시 누르면 해제)`}
@@ -325,7 +325,6 @@ export default function EntityList({
                 <span className="stat-label">{cardDef.label}</span>
                 <span className="stat-value" style={{ color: cardDef.color }}>
                   {val}
-                  <small style={{ fontSize: '0.9rem', fontWeight: 500 }}> 두</small>
                 </span>
               </div>
             </div>
