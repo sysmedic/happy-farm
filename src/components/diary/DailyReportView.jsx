@@ -19,10 +19,10 @@ import { shareFarmReport } from '../../lib/googleDriveService.js';
 // 고화질 스마트폰 비율(모바일 카드형) JPG 이미지 보고서 캔버스 생성기
 function createReportImageBlob({ reportDate, dailyLogs, totalCost, categoryStats, farmNotes }) {
   return new Promise((resolve) => {
-    // 모바일 스마트폰 화면 기준 가로폭 (420px) & 선명한 레티나 2배수 렌더링 (840px 해상도)
-    const viewWidth = 420;
+    // 모바일 스마트폰 화면 기준 가로폭 (370px) & 선명한 레티나 2배수 렌더링 (740px 해상도)
+    const viewWidth = 370;
     const scale = 2;
-    const padding = 16;
+    const padding = 14;
     const contentWidth = viewWidth - (padding * 2);
 
     // 텍스트 줄바꿈 헬퍼
