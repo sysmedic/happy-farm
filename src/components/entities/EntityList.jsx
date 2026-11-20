@@ -104,22 +104,6 @@ export default function EntityList({
     });
   };
 
-  // 출하·폐사 시 칩 바 동작 비교 ('plan1': 딤드 비활성화 | 'plan2': 전용 칩 전환)
-  const [historyChipPlan, setHistoryChipPlan] = useState(() => {
-    try {
-      return localStorage.getItem('happy_farm_history_chip_plan') || 'plan2';
-    } catch (e) {
-      return 'plan2';
-    }
-  });
-
-  const handleSelectPlan = (plan) => {
-    setHistoryChipPlan(plan);
-    try {
-      localStorage.setItem('happy_farm_history_chip_plan', plan);
-    } catch (e) {}
-  };
-
   const [isCustomizeOpen, setIsCustomizeOpen] = useState(false);
 
   // 1단계: 현재 선택된 상태(selectedStatus)에 해당하는 개체군 추출
@@ -427,49 +411,6 @@ export default function EntityList({
 
   return (
     <div>
-      {/* 출하·폐사 모드 동작 비교용 미니 스위처 */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.45rem', padding: '0 2px' }}>
-        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)' }}>
-          🔍 출하·폐사 시 칩 동작:
-        </span>
-        <div style={{ display: 'flex', gap: '4px' }}>
-          <button
-            type="button"
-            onClick={() => handleSelectPlan('plan1')}
-            style={{
-              fontSize: '0.72rem',
-              fontWeight: historyChipPlan === 'plan1' ? 800 : 500,
-              padding: '2px 8px',
-              borderRadius: '9999px',
-              border: historyChipPlan === 'plan1' ? '1.5px solid var(--color-primary)' : '1px solid var(--border-color)',
-              background: historyChipPlan === 'plan1' ? 'var(--color-primary-light)' : 'var(--bg-card)',
-              color: historyChipPlan === 'plan1' ? 'var(--color-primary)' : 'var(--text-muted)',
-              cursor: 'pointer',
-              transition: 'all 0.15s ease'
-            }}
-          >
-            방안 1: 딤드(잠금)
-          </button>
-          <button
-            type="button"
-            onClick={() => handleSelectPlan('plan2')}
-            style={{
-              fontSize: '0.72rem',
-              fontWeight: historyChipPlan === 'plan2' ? 800 : 500,
-              padding: '2px 8px',
-              borderRadius: '9999px',
-              border: historyChipPlan === 'plan2' ? '1.5px solid var(--color-primary)' : '1px solid var(--border-color)',
-              background: historyChipPlan === 'plan2' ? 'var(--color-primary-light)' : 'var(--bg-card)',
-              color: historyChipPlan === 'plan2' ? 'var(--color-primary)' : 'var(--text-muted)',
-              cursor: 'pointer',
-              transition: 'all 0.15s ease'
-            }}
-          >
-            방안 2: 전용 칩 전환(추천)
-          </button>
-        </div>
-      </div>
-
       {/* 0. 사육 중 vs 출하/폐사 세그먼트 스위치 탭 (총 사육 두수 및 이력 카운트 직관적 표기) */}
       <div className="view-segment-tabs">
         <button
@@ -502,42 +443,8 @@ export default function EntityList({
       </div>
 
       {/* 1. 상단 맞춤형 통계 현황판 (원클릭 필터링 + 지표 추가) */}
-      {isHistoryMode && historyChipPlan === 'plan1' ? (
-        // [방안 1] 딤드(Dimmed) 잠금 처리
-        <div>
-          <div 
-            className="stats-grid" 
-            style={{ 
-              opacity: 0.35, 
-              pointerEvents: 'none', 
-              filter: 'grayscale(0.6)', 
-              cursor: 'not-allowed',
-              userSelect: 'none'
-            }}
-          >
-            {activeCardIds.map(cardId => {
-              const cardDef = ALL_DASHBOARD_CARDS.find(c => c.id === cardId);
-              if (!cardDef) return null;
-              const val = getCardValue(cardDef.id);
-              return (
-                <div key={cardDef.id} className="stat-card">
-                  <div className="stat-icon-wrapper" style={{ background: cardDef.bg, color: cardDef.color }}>
-                    {cardDef.icon}
-                  </div>
-                  <div className="stat-info">
-                    {!hideChipText && <span className="stat-label">{cardDef.label}</span>}
-                    <span className="stat-value" style={{ color: cardDef.color }}>{val}</span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-          <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '-0.35rem', marginBottom: '0.65rem', textAlign: 'center' }}>
-            🔒 출하·폐사 이력 조회 중에는 현재 사육 상태 필터가 잠금(비활성화)됩니다.
-          </div>
-        </div>
-      ) : isHistoryMode && historyChipPlan === 'plan2' ? (
-        // [방안 2] 출하/폐사 전용 스마트 칩으로 전환
+      {isHistoryMode ? (
+        // [출하·폐사 모드: 전용 칩 2개 노출 & 항상 텍스트 유지]
         <div className="stats-grid">
           {HISTORY_DASHBOARD_CARDS.map(cardDef => {
             const active = isCardActive(cardDef.id);
@@ -553,7 +460,7 @@ export default function EntityList({
                   background: cardDef.bg
                 } : {}}
                 onClick={() => handleCardClick(cardDef.id)}
-                title={hideChipText ? `${cardDef.label}: ${val} (클릭 시 필터링)` : `클릭 시 ${cardDef.label} 개체 필터링 (다시 누르면 해제)`}
+                title={`클릭 시 ${cardDef.label} 개체 필터링 (다시 누르면 해제)`}
                 role="button"
                 tabIndex={0}
               >
@@ -564,7 +471,7 @@ export default function EntityList({
                   {cardDef.icon}
                 </div>
                 <div className="stat-info">
-                  {!hideChipText && <span className="stat-label">{cardDef.label}</span>}
+                  <span className="stat-label">{cardDef.label}</span>
                   <span className="stat-value" style={{ color: cardDef.color }}>
                     {val}
                   </span>
@@ -574,7 +481,7 @@ export default function EntityList({
           })}
         </div>
       ) : (
-        // [일반 모드: 사육 중]
+        // [사육 중 모드: 사용자 맞춤 지표 칩 + 지표 추가 버튼]
         <div className="stats-grid">
           {activeCardIds.map(cardId => {
             const cardDef = ALL_DASHBOARD_CARDS.find(c => c.id === cardId);
