@@ -35,7 +35,7 @@ const DEFAULT_DASHBOARD_CARDS = ['total', 'treatment', 'in_heat', 'pregnant', 'i
 
 // 중요 관리 대상 우선 순서 정의
 const ALL_DASHBOARD_CARDS = [
-  { id: 'total', label: '사육 두수', icon: '🐂', color: '#10b981', bg: 'rgba(16, 185, 129, 0.15)', isFixed: true, desc: '현재 축사에서 사육 중인 전체 한우' },
+  { id: 'total', label: '전체', icon: '🐂', color: '#10b981', bg: 'rgba(16, 185, 129, 0.15)', isFixed: true, desc: '현재 축사에서 사육 중인 전체 한우' },
   { id: 'treatment', label: '치료/투약중', icon: '💊', color: '#ef4444', bg: 'rgba(239, 68, 68, 0.15)', desc: '치료 투약 및 집중 관리 개체 (최우선 관리)' },
   { id: 'in_heat', label: '발정 관찰', icon: '🔥', color: '#f97316', bg: 'rgba(249, 115, 22, 0.15)', desc: '발정 징후 관찰 및 적기 인공수정 대상' },
   { id: 'pregnant', label: '임신/수태', icon: '💖', color: '#8b5cf6', bg: 'rgba(139, 92, 246, 0.15)', desc: '임신 감정 완료 및 출산 대기 개체' },
@@ -81,11 +81,53 @@ export default function EntityList({
 
   const [isCustomizeOpen, setIsCustomizeOpen] = useState(false);
 
-  // 축사 고유 목록 추출 (현재 사육 중인 개체의 축사 기준 정제)
-  const uniqueBarns = useMemo(() => {
+  // 1단계: 현재 선택된 상태(selectedStatus)에 해당하는 개체군 추출
+  const statusFilteredEntities = useMemo(() => {
+    return entities.filter(entity => {
+      if (selectedStatus === 'active') {
+        return !isHistoricalStatus(entity.status);
+      } else if (selectedStatus === 'history') {
+        return isHistoricalStatus(entity.status);
+      } else if (selectedStatus === 'all') {
+        return true;
+      } else {
+        return entity.status === selectedStatus;
+      }
+    });
+  }, [entities, selectedStatus]);
+
+  // 2단계: 1단계 상태 개체군에 실제로 존재하는 사육 구분(품종) 목록만 동적 추출
+  const availableBreeds = useMemo(() => {
+    return HANWOO_BREEDS.filter(breed => {
+      return statusFilteredEntities.some(e => {
+        const b = e.breed || '';
+        if (breed.id === 'steer_beef') return b.includes('거세') || b.includes('비육');
+        if (breed.id === 'breeding_cow') return b.includes('번식') || b.includes('암소');
+        if (breed.id === 'calf') return b.includes('송아지') || b.includes('자우');
+        if (breed.id === 'growing') return b.includes('육성');
+        if (breed.id === 'bull') return b.includes('씨수소') || b.includes('종모우');
+        return b.includes(breed.id);
+      });
+    });
+  }, [statusFilteredEntities]);
+
+  // 3단계: 1단계 상태 + 2단계 사육 구분에 실제로 존재하는 축사 위치만 동적 추출
+  const availableBarns = useMemo(() => {
     const set = new Set();
-    entities.forEach(e => {
-      if (!isHistoricalStatus(e.status) && e.barn) {
+    statusFilteredEntities.forEach(e => {
+      if (selectedBreed !== 'all') {
+        const b = e.breed || '';
+        let match = false;
+        if (selectedBreed === 'steer_beef') match = b.includes('거세') || b.includes('비육');
+        else if (selectedBreed === 'breeding_cow') match = b.includes('번식') || b.includes('암소');
+        else if (selectedBreed === 'calf') match = b.includes('송아지') || b.includes('자우');
+        else if (selectedBreed === 'growing') match = b.includes('육성');
+        else if (selectedBreed === 'bull') match = b.includes('씨수소') || b.includes('종모우');
+        else match = b.includes(selectedBreed);
+        if (!match) return;
+      }
+
+      if (e.barn) {
         const trimmed = e.barn.trim();
         if (trimmed && !trimmed.includes('출하') && !trimmed.includes('퇴농') && !trimmed.includes('폐사')) {
           set.add(trimmed);
@@ -93,14 +135,19 @@ export default function EntityList({
       }
     });
     return Array.from(set).sort();
-  }, [entities]);
+  }, [statusFilteredEntities, selectedBreed]);
 
-  // 상태 변경 핸들러
+  // 1단계 상태 변경 핸들러 (상태 변경 시 하위 사육구분 및 축사 위치 연쇄 자동 리셋)
   const handleStatusChange = (newStatus) => {
     setSelectedStatus(newStatus);
-    if (newStatus === 'shipped' || newStatus === 'deceased' || newStatus === 'history') {
-      setSelectedBarn('all');
-    }
+    setSelectedBreed('all');
+    setSelectedBarn('all');
+  };
+
+  // 2단계 사육 구분 변경 핸들러 (사육 구분 변경 시 하위 축사 위치 자동 기본값 복귀)
+  const handleBreedChange = (newBreed) => {
+    setSelectedBreed(newBreed);
+    setSelectedBarn('all');
   };
 
   // 통계 계산: 출하 및 폐사 개체는 사육 두수에서 제외하여 실제 축사 사육 두수만 집계
@@ -244,7 +291,7 @@ export default function EntityList({
     return logs.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
   };
 
-  // 대시보드 카드 클릭 시 원클릭 필터링 (토글 지원)
+  // 대시보드 카드 클릭 시 원클릭 필터링 (토글 지원 및 하위 필터 연쇄 자동 리셋)
   const handleCardClick = (cardId) => {
     if (cardId === 'total') {
       setSelectedStatus('active');
@@ -252,11 +299,12 @@ export default function EntityList({
       setSelectedStatus(prev => prev === cardId ? 'active' : cardId);
     } else if (cardId === 'shipped') {
       setSelectedStatus(prev => prev === 'shipped' ? 'active' : 'shipped');
-      setSelectedBarn('all');
     } else if (cardId === 'deceased') {
       setSelectedStatus(prev => prev === 'deceased' ? 'active' : 'deceased');
-      setSelectedBarn('all');
     }
+    // 1단계 상태 칩 변경 시 하위 사육구분 및 축사 위치 연쇄 자동 리셋
+    setSelectedBreed('all');
+    setSelectedBarn('all');
   };
 
   // 대시보드 카드 활성화 여부 판정
@@ -432,30 +480,30 @@ export default function EntityList({
             <option value="all">모든 개체 (총 {entities.length}두)</option>
           </select>
 
-          {/* 2. 한우 사육 단계 필터: 사육 구분 */}
+          {/* 2. 한우 사육 단계 필터: 사육 구분 (1단계 상태에 해당하는 품종만 동적 노출 & 변경 시 축사 자동 리셋) */}
           <select 
             className="filter-select"
             value={selectedBreed}
-            onChange={(e) => setSelectedBreed(e.target.value)}
+            onChange={(e) => handleBreedChange(e.target.value)}
           >
             <option value="all">사육 구분</option>
-            {HANWOO_BREEDS.map(breed => (
+            {availableBreeds.map(breed => (
               <option key={breed.id} value={breed.id}>{breed.label}</option>
             ))}
           </select>
 
-          {/* 3. 축사 위치 필터 (사육 이력 시 딤드 처리 & 항시 3분할 유지) */}
+          {/* 3. 축사 위치 필터 (1·2단계 조건에 해당하는 축사만 동적 노출) */}
           <select 
             className="filter-select"
             value={selectedBarn}
             onChange={(e) => setSelectedBarn(e.target.value)}
-            disabled={isHistoryMode || uniqueBarns.length === 0}
+            disabled={isHistoryMode || availableBarns.length === 0}
             title={isHistoryMode ? "사육 종료된 개체는 축사 위치 필터가 적용되지 않습니다" : "축사 위치 필터"}
           >
             <option value="all">
               {isHistoryMode ? "축사 위치 (사육 종료)" : "축사 위치"}
             </option>
-            {uniqueBarns.map(b => (
+            {availableBarns.map(b => (
               <option key={b} value={b}>{b}</option>
             ))}
           </select>
