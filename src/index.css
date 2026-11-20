@@ -1160,57 +1160,6 @@ a:hover {
   border: 1.5px solid #10b981 !important;
 }
 
-/* 사육구분 명칭 스마트 미리보기 뱃지 (방안 A) */
-.breed-preview-badge-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: var(--bg-card-subtle);
-  padding: 0.5rem 0.75rem;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border-color);
-  margin-top: 0.45rem;
-  box-sizing: border-box;
-}
-
-.breed-preview-badge-label {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  font-size: 0.85rem;
-  color: var(--text-muted);
-}
-
-.breed-preview-badge-value {
-  font-weight: 700;
-  color: var(--text-main);
-  background: var(--bg-card);
-  padding: 0.2rem 0.6rem;
-  border-radius: 4px;
-  border: 1px solid var(--border-color);
-  font-size: 0.88rem;
-  line-height: 1.2;
-}
-
-.breed-edit-toggle-btn {
-  background: transparent;
-  border: none;
-  color: var(--color-primary);
-  font-size: 0.8rem;
-  font-weight: 700;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  transition: all 0.15s ease;
-}
-
-.breed-edit-toggle-btn:hover {
-  background: var(--color-primary-light);
-}
-
 /* 개체 등록/수정 모달 - 성별 버튼 소프트 파스텔 틴트 */
 .gender-select-btn {
   display: flex;

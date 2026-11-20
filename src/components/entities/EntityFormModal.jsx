@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, AlertCircle, Save, Pencil, RotateCcw, Trash2 } from 'lucide-react';
+import { X, AlertCircle, Save, Trash2 } from 'lucide-react';
 import { 
   ENTITY_STATUSES, 
   GENDER_OPTIONS, 
@@ -9,7 +9,8 @@ import {
   formatDisplayBreed,
   formatTagNumber,
   getAvailableStatuses,
-  isStatusAllowed
+  isStatusAllowed,
+  buildBreedName
 } from '../../lib/types.js';
 
 export default function EntityFormModal({
@@ -25,7 +26,7 @@ export default function EntityFormModal({
     tagNumber: '',
     name: '',
     category: 'hanwoo',
-    breed: '번식우 - 암',
+    breed: '번식우',
     gender: 'female',
     birthDate: getTodayDateString(),
     barn: '',
@@ -37,7 +38,6 @@ export default function EntityFormModal({
   });
 
   const [errorMsg, setErrorMsg] = useState('');
-  const [isCustomBreedOpen, setIsCustomBreedOpen] = useState(false);
 
   useEffect(() => {
     if (entityToEdit) {
@@ -73,21 +73,46 @@ export default function EntityFormModal({
   const getGenderLockInfo = (breedString) => {
     const b = (breedString || '').toLowerCase();
     if (b.includes('번식') || b.includes('암소')) {
-      return { isFixed: true, fixedGender: 'female', message: '번식우는 암컷으로 성별이 자동 확정됩니다.' };
+      return { 
+        isFixed: true, 
+        allowedGenders: ['female'],
+        fixedGender: 'female', 
+        message: '번식우는 암컷으로 성별이 자동 확정됩니다.' 
+      };
     }
     if (b.includes('비육') || b.includes('거세')) {
-      return { isFixed: true, fixedGender: 'castrated', message: '비육우는 거세로 성별이 자동 확정됩니다.' };
+      return { 
+        isFixed: false, 
+        allowedGenders: ['castrated', 'female'],
+        fixedGender: null, 
+        message: '비육우의 성별(거세 / 암컷)을 선택하세요.' 
+      };
     }
     if (b.includes('씨수소') || b.includes('종모우')) {
-      return { isFixed: true, fixedGender: 'male', message: '씨수소(종모우)는 수컷으로 성별이 자동 확정됩니다.' };
+      return { 
+        isFixed: true, 
+        allowedGenders: ['male'],
+        fixedGender: 'male', 
+        message: '씨수소(종모우)는 수컷으로 성별이 자동 확정됩니다.' 
+      };
     }
     if (b.includes('송아지')) {
-      return { isFixed: false, fixedGender: null, message: '송아지의 성별(암컷 / 수컷)을 선택하세요.' };
+      return { 
+        isFixed: false, 
+        allowedGenders: ['female', 'male'],
+        fixedGender: null, 
+        message: '송아지의 성별(암컷 / 수컷)을 선택하세요.' 
+      };
     }
     if (b.includes('육성')) {
-      return { isFixed: false, fixedGender: null, message: '육성우의 성별을 선택하세요.' };
+      return { 
+        isFixed: false, 
+        allowedGenders: ['female', 'male', 'castrated'],
+        fixedGender: null, 
+        message: '육성우의 성별을 선택하세요.' 
+      };
     }
-    return { isFixed: false, fixedGender: null, message: null };
+    return { isFixed: false, allowedGenders: ['female', 'male', 'castrated'], fixedGender: null, message: null };
   };
 
   const genderLockInfo = getGenderLockInfo(formData.breed);
@@ -95,17 +120,16 @@ export default function EntityFormModal({
   // 사육 단계 버튼 클릭 시 '사육단계 - 성별' 표준 포맷으로 자동 완성 및 상태 안전 검증
   const handleBreedSelect = (item) => {
     const stage = item.shortLabel || item.label;
+    const lockInfo = getGenderLockInfo(stage);
+    
     let gender = formData.gender;
-    if (item.isGenderFixed) {
-      gender = item.defaultGender;
-    } else {
-      if (gender === 'castrated') {
-        gender = 'female';
-      }
+    if (lockInfo.isFixed) {
+      gender = lockInfo.fixedGender;
+    } else if (lockInfo.allowedGenders && !lockInfo.allowedGenders.includes(gender)) {
+      gender = item.defaultGender || lockInfo.allowedGenders[0];
     }
-    const genderLabel = gender === 'female' ? '암' : gender === 'male' ? '수' : '거세';
-    const newBreed = `${stage} - ${genderLabel}`;
-    // 송아지이거나 수컷/거세우인 경우 번식 상태 불가능 -> '건강/양호'로 자동 안전 전환
+
+    const newBreed = buildBreedName(stage, gender);
     const safeStatus = isStatusAllowed(formData.status, newBreed, gender) ? formData.status : 'healthy';
 
     setFormData(prev => ({
@@ -120,30 +144,16 @@ export default function EntityFormModal({
   // 성별 버튼 클릭 시 '사육단계 - 성별' 실시간 동적 연동 및 상태 안전 검증
   const handleGenderSelect = (genderId) => {
     if (genderLockInfo.isFixed) return;
+    if (genderLockInfo.allowedGenders && !genderLockInfo.allowedGenders.includes(genderId)) return;
+
     const stage = extractStage(formData.breed);
-    const genderLabel = genderId === 'female' ? '암' : genderId === 'male' ? '수' : '거세';
-    const newBreed = `${stage} - ${genderLabel}`;
+    const newBreed = buildBreedName(stage, genderId);
     const safeStatus = isStatusAllowed(formData.status, newBreed, genderId) ? formData.status : 'healthy';
 
     setFormData(prev => ({
       ...prev,
       gender: genderId,
       breed: newBreed,
-      status: safeStatus
-    }));
-  };
-
-  const handleBreedInputChange = (value) => {
-    const lockInfo = getGenderLockInfo(value);
-    let newGender = formData.gender;
-    if (lockInfo.isFixed) {
-      newGender = lockInfo.fixedGender;
-    }
-    const safeStatus = isStatusAllowed(formData.status, value, newGender) ? formData.status : 'healthy';
-    setFormData(prev => ({
-      ...prev,
-      breed: value,
-      gender: newGender,
       status: safeStatus
     }));
   };
@@ -305,16 +315,17 @@ export default function EntityFormModal({
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.45rem' }}>
                   {GENDER_OPTIONS.map(g => {
                     const isSelected = formData.gender === g.id;
-                    const isDisabled = genderLockInfo.isFixed && !isSelected;
+                    const isAllowed = !genderLockInfo.allowedGenders || genderLockInfo.allowedGenders.includes(g.id);
+                    const isDisabled = genderLockInfo.isFixed || !isAllowed;
 
                     return (
                       <button
                         key={g.id}
                         type="button"
                         className={`gender-select-btn gender-${g.id} ${isSelected ? 'active' : ''} ${isDisabled ? 'disabled' : ''}`}
-                        disabled={genderLockInfo.isFixed}
+                        disabled={isDisabled}
                         onClick={() => handleGenderSelect(g.id)}
-                        title={genderLockInfo.isFixed ? genderLockInfo.message : `${g.label} 선택`}
+                        title={isDisabled ? (genderLockInfo.isFixed ? genderLockInfo.message : `${g.label} 선택 불가`) : `${g.label} 선택`}
                       >
                         <span style={{ fontSize: '1rem', lineHeight: 1 }}>{g.symbol}</span>
                         <span>{g.label}</span>
@@ -333,57 +344,6 @@ export default function EntityFormModal({
                   </span>
                 )}
               </div>
-
-              {/* 사육구분 명칭: 방안 A (스마트 미리보기 뱃지 + 직접 수정 토글) */}
-              {!isCustomBreedOpen ? (
-                <div className="form-group full-width" style={{ marginBottom: '0.75rem' }}>
-                  <div className="breed-preview-badge-row">
-                    <div className="breed-preview-badge-label">
-                      <span>자동 생성 명칭:</span>
-                      <span className="breed-preview-badge-value">{formData.breed || '미지정'}</span>
-                    </div>
-                    <button
-                      type="button"
-                      className="breed-edit-toggle-btn"
-                      onClick={() => setIsCustomBreedOpen(true)}
-                      title="사육구분 명칭을 직접 수정"
-                    >
-                      <Pencil size={13} />
-                      <span>직접 수정</span>
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="form-group full-width" style={{ marginBottom: '0.75rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.35rem' }}>
-                    <label className="form-label" style={{ margin: 0 }}>
-                      사육구분 명칭 직접 입력 <span className="required">*</span>
-                    </label>
-                    <button
-                      type="button"
-                      className="breed-edit-toggle-btn"
-                      onClick={() => {
-                        setIsCustomBreedOpen(false);
-                        const autoBreed = `${extractStage(formData.breed)} - ${GENDER_OPTIONS.find(g => g.id === formData.gender)?.label || ''}`;
-                        setFormData(prev => ({ ...prev, breed: autoBreed }));
-                      }}
-                      style={{ color: 'var(--text-muted)' }}
-                      title="기본 자동 생성 명칭으로 되돌리기"
-                    >
-                      <RotateCcw size={12} />
-                      <span>자동명칭으로 복귀</span>
-                    </button>
-                  </div>
-                  <input
-                    type="text"
-                    className="form-input"
-                    placeholder="예: 번식우 - 암, 비육우 - 거세"
-                    value={formData.breed}
-                    onChange={(e) => handleBreedInputChange(e.target.value)}
-                    required
-                  />
-                </div>
-              )}
 
               {/* 현재 상태 (사육단계 및 성별에 따라 번식 상태 자동 필터링) */}
               <div className="form-group">

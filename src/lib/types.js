@@ -7,25 +7,51 @@ export const ENTITY_CATEGORIES = [
 ];
 
 export const HANWOO_BREEDS = [
-  { id: 'breeding_cow', label: '번식우', shortLabel: '번식우', defaultGender: 'female', isGenderFixed: true },
-  { id: 'steer_beef', label: '비육우', shortLabel: '비육우', defaultGender: 'castrated', isGenderFixed: true },
-  { id: 'calf', label: '송아지', shortLabel: '송아지', defaultGender: 'female', isGenderFixed: false },
-  { id: 'growing', label: '육성우', shortLabel: '육성우', defaultGender: 'female', isGenderFixed: false },
-  { id: 'bull', label: '씨수소', shortLabel: '씨수소', defaultGender: 'male', isGenderFixed: true },
+  { id: 'breeding_cow', label: '번식우', shortLabel: '번식우', defaultGender: 'female', isGenderFixed: true, allowedGenders: ['female'] },
+  { id: 'steer_beef', label: '비육우', shortLabel: '비육우', defaultGender: 'castrated', isGenderFixed: false, allowedGenders: ['castrated', 'female'] },
+  { id: 'calf', label: '송아지', shortLabel: '송아지', defaultGender: 'female', isGenderFixed: false, allowedGenders: ['female', 'male'] },
+  { id: 'growing', label: '육성우', shortLabel: '육성우', defaultGender: 'female', isGenderFixed: false, allowedGenders: ['female', 'male', 'castrated'] },
+  { id: 'bull', label: '씨수소', shortLabel: '씨수소', defaultGender: 'male', isGenderFixed: true, allowedGenders: ['male'] },
 ];
 
-// 사육구분 표시 포맷터 (예: '번식우 - 암', '비육우 - 거세', '씨수소 - 수')
+// 사육구분 표시 포맷터: 성별 고정 품종(번식우, 씨수소)은 성별 꼬리표 제거, 가변 품종은 '단계 - 성별' 유지
 export function formatDisplayBreed(breedStr) {
   if (!breedStr) return '번식우';
-  if (breedStr.includes(' - ')) {
-    return breedStr.replace(' - 암컷', ' - 암').replace(' - 수컷', ' - 수');
+  
+  // 1) 번식우(암소 100% 고정)는 뒤의 성별 꼬리표 완전 제거
+  if (breedStr.includes('번식') || breedStr.includes('암소')) {
+    return '번식우';
   }
-  if (breedStr.includes('번식') || breedStr.includes('암소')) return '번식우 - 암';
-  if (breedStr.includes('거세') || breedStr.includes('비육')) return '비육우 - 거세';
-  if (breedStr.includes('씨수소') || breedStr.includes('종모우')) return '씨수소 - 수';
-  if (breedStr.includes('송아지')) return (breedStr.includes('수컷') || breedStr.includes(' - 수')) ? '송아지 - 수' : '송아지 - 암';
-  if (breedStr.includes('육성')) return (breedStr.includes('수컷') || breedStr.includes(' - 수')) ? '육성우 - 수' : '육성우 - 암';
-  return breedStr;
+  // 2) 씨수소(수소 100% 고정)도 성별 꼬리표 완전 제거
+  if (breedStr.includes('씨수소') || breedStr.includes('종모우')) {
+    return '씨수소';
+  }
+  // 3) 비육우 (거세 또는 암컷 비육)
+  if (breedStr.includes('비육') || breedStr.includes('거세')) {
+    if (breedStr.includes('암')) return '비육우 - 암';
+    return '비육우 - 거세';
+  }
+  // 4) 송아지
+  if (breedStr.includes('송아지')) {
+    return (breedStr.includes('수컷') || breedStr.includes(' - 수')) ? '송아지 - 수' : '송아지 - 암';
+  }
+  // 5) 육성우
+  if (breedStr.includes('육성')) {
+    if (breedStr.includes('거세')) return '육성우 - 거세';
+    return (breedStr.includes('수컷') || breedStr.includes(' - 수')) ? '육성우 - 수' : '육성우 - 암';
+  }
+  
+  return breedStr.replace(' - 암컷', ' - 암').replace(' - 수컷', ' - 수');
+}
+
+// 사육단계(stage)와 성별(gender)로부터 표준 사육구분 명칭 생성
+export function buildBreedName(stage, gender) {
+  const cleanStage = (stage || '번식우').trim();
+  if (cleanStage.includes('번식') || cleanStage === '번식우') return '번식우';
+  if (cleanStage.includes('씨수소') || cleanStage === '씨수소') return '씨수소';
+  
+  const genderLabel = gender === 'female' ? '암' : gender === 'male' ? '수' : '거세';
+  return `${cleanStage} - ${genderLabel}`;
 }
 
 // 개체식별번호(이표번호 12자리: 002-XXXX-XXXX-X) 숫자 자동 하이픈 포맷팅
