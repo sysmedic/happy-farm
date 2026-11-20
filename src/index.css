@@ -1443,15 +1443,35 @@ a:hover {
   width: 100%;
 }
 
-.detail-edit-btn {
-  background: var(--bg-card);
-  color: var(--text-main);
-  border: 1px solid var(--text-muted);
-  font-weight: 700;
-  box-shadow: none;
+/* 개체 상세 모달 하단 푸터 (좌측: 정보 수정 / 우측: 닫기 + 관리 기록 추가) */
+.detail-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between !important;
+  width: 100%;
+  gap: 0.6rem;
 }
 
-.detail-edit-btn:hover {
+.detail-modal-footer .modal-footer-left,
+.detail-modal-footer .modal-footer-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.detail-footer-edit-btn {
+  background: var(--bg-card);
+  color: var(--text-main);
+  border: 1.5px solid var(--border-color);
+  font-weight: 700;
+  box-shadow: none;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.detail-footer-edit-btn:hover {
   background: var(--bg-hover);
   border-color: var(--text-main);
   color: var(--text-main);
@@ -3100,6 +3120,23 @@ form.modal-content {
     padding-bottom: calc(0.85rem + max(12px, env(safe-area-inset-bottom, 12px)));
     flex-shrink: 0 !important;
     z-index: 2;
+  }
+
+  /* 모바일 개체 상세 모달 하단 푸터 */
+  .detail-modal-footer {
+    padding: 0.75rem 0.85rem !important;
+    gap: 0.4rem !important;
+  }
+
+  .detail-modal-footer .modal-footer-left,
+  .detail-modal-footer .modal-footer-right {
+    gap: 0.35rem !important;
+  }
+
+  .detail-footer-edit-btn {
+    padding: 0 0.65rem !important;
+    font-size: 0.82rem !important;
+    height: 38px !important;
   }
 
   /* 폼 1열 배치 (터치 용이성) */

@@ -283,8 +283,8 @@ export default function EntityDetailModal({
                     </div>
                   </div>
 
-                  {/* 우측 상단 액션 버튼 그룹: 출력 및 정보 수정 버튼 */}
-                  <div className="entity-detail-header-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  {/* 우측 상단 액션 버튼: 인쇄 출력 버튼 (데스크톱 전용) */}
+                  <div className="entity-detail-header-actions" style={{ display: 'flex', alignItems: 'center' }}>
                     <button 
                       className="btn btn-outline btn-sm detail-print-btn"
                       onClick={() => onOpenPrintSheet(entity)}
@@ -292,14 +292,6 @@ export default function EntityDetailModal({
                     >
                       <Printer size={15} />
                       <span>출력</span>
-                    </button>
-                    <button 
-                      className="btn btn-outline btn-sm detail-edit-btn"
-                      onClick={() => onOpenEntityModal(entity)}
-                      title="개체 기본 정보 수정"
-                    >
-                      <Edit3 size={15} />
-                      <span>정보 수정</span>
                     </button>
                   </div>
                 </div>
@@ -860,40 +852,72 @@ export default function EntityDetailModal({
           )}
         </div>
 
-        {/* 모달 푸터 */}
-        <div className="modal-footer">
-          {viewMode === 'fullHistory' ? (
-            <button 
-              className="btn btn-secondary" 
-              onClick={() => {
-                if (initialViewMode === 'fullHistory') {
-                  onClose();
-                } else {
-                  setViewMode('summary');
-                }
-              }} 
-              title={initialViewMode === 'fullHistory' ? "개체 목록으로 돌아가기" : "요약 정보로 돌아가기"}
-            >
-              <ChevronLeft size={16} />
-              <span>돌아가기</span>
-            </button>
-          ) : (
-            <button className="btn btn-secondary" onClick={onClose} title="개체 목록 화면으로 돌아가기">
-              <ChevronLeft size={16} />
-              <span>돌아가기</span>
-            </button>
-          )}
-          {(entity.status === 'shipped' || entity.status === 'deceased') ? (
-            <button className="btn btn-outline" onClick={() => onOpenCareLogModal(entity)}>
-              <Plus size={16} />
-              <span>과거 관리 기록 추가</span>
-            </button>
-          ) : (
-            <button className="btn btn-primary" onClick={() => onOpenCareLogModal(entity)}>
-              <Plus size={16} />
-              <span>관리 기록 추가</span>
-            </button>
-          )}
+        {/* 모달 푸터: 좌측에 개체 정보 수정, 우측에 닫기/돌아가기 및 관리 기록 추가 */}
+        <div className="modal-footer detail-modal-footer">
+          {/* 좌측: 개체 정보 수정 버튼 (기본 뷰일 때 상시 노출) */}
+          <div className="modal-footer-left">
+            {viewMode === 'summary' && onOpenEntityModal && (
+              <button
+                type="button"
+                className="btn btn-outline detail-footer-edit-btn"
+                onClick={() => onOpenEntityModal(entity)}
+                title="개체 기본 정보 수정"
+              >
+                <Edit3 size={15} />
+                <span>정보 수정</span>
+              </button>
+            )}
+          </div>
+
+          {/* 우측: 닫기/돌아가기 + 관리 기록 추가 */}
+          <div className="modal-footer-right">
+            {viewMode === 'fullHistory' ? (
+              <button 
+                type="button"
+                className="btn btn-secondary" 
+                onClick={() => {
+                  if (initialViewMode === 'fullHistory') {
+                    onClose();
+                  } else {
+                    setViewMode('summary');
+                  }
+                }} 
+                title={initialViewMode === 'fullHistory' ? "개체 목록으로 돌아가기" : "요약 정보로 돌아가기"}
+              >
+                <ChevronLeft size={16} />
+                <span>돌아가기</span>
+              </button>
+            ) : (
+              <button 
+                type="button" 
+                className="btn btn-secondary" 
+                onClick={onClose} 
+                title="창 닫기"
+              >
+                <span>닫기</span>
+              </button>
+            )}
+
+            {(entity.status === 'shipped' || entity.status === 'deceased') ? (
+              <button 
+                type="button"
+                className="btn btn-outline" 
+                onClick={() => onOpenCareLogModal(entity)}
+              >
+                <Plus size={16} />
+                <span>과거 기록 추가</span>
+              </button>
+            ) : (
+              <button 
+                type="button"
+                className="btn btn-primary" 
+                onClick={() => onOpenCareLogModal(entity)}
+              >
+                <Plus size={16} />
+                <span>관리 기록 추가</span>
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>
