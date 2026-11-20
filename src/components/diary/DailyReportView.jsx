@@ -74,9 +74,9 @@ function createReportImageBlob({ reportDate, dailyLogs, totalCost, categoryStats
     }
 
     // 전체 세로 높이 동적 계산 (모바일 세로 비율)
-    let totalHeight = 70; // 상단 헤더
-    totalHeight += 50; // 요약 뱃지 바
-    totalHeight += 32; // 세부 관리 내역 제목
+    let totalHeight = 68; // 1. 상단 헤더
+    totalHeight += 84; // 2. 3열 1단 슬림 타일 카드 2행 (34 + 6 + 34 + 10)
+    totalHeight += 12; // 3. 자연스러운 여백 (세부내역 제목 완전 삭제)
 
     if (dailyLogs.length === 0) {
       totalHeight += 70;
@@ -107,64 +107,82 @@ function createReportImageBlob({ reportDate, dailyLogs, totalCost, categoryStats
     ctx.fillStyle = '#059669';
     ctx.fillRect(0, 0, viewWidth, 68);
 
+    // [헤더 중앙 배치] 앱 새싹 아이콘(🌱) + 타이틀 가로 정중앙
+    ctx.textAlign = 'center';
     ctx.fillStyle = '#ffffff';
     ctx.font = 'bold 17px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-    ctx.fillText('🌿 행복농장 일일 영농보고서', padding, 32);
+    ctx.fillText('🌱 행복농장 일일 영농보고서', viewWidth / 2, 33);
 
+    // [헤더 우측 하단] '일자:' 및 '작성자' 삭제 ➡️ 날짜 숫자만 우측 배치
+    ctx.textAlign = 'right';
     ctx.font = '12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
     ctx.fillStyle = '#d1fae5';
-    ctx.fillText(`일자: ${reportDate}`, padding, 52);
-    ctx.fillText('작성: 홍길동 대표', viewWidth - padding - 95, 52);
+    ctx.fillText(reportDate, viewWidth - padding, 54);
+    ctx.textAlign = 'left'; // 기본 정렬 복귀
 
-    let y = 80;
+    let y = 78;
 
-    // 3. 요약 통계 뱃지 바 (가로 칩 스타일)
-    ctx.fillStyle = '#ffffff';
-    ctx.strokeStyle = '#e2e8f0';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    if (ctx.roundRect) {
-      ctx.roundRect(padding, y, contentWidth, 38, 8);
-    } else {
-      ctx.rect(padding, y, contentWidth, 38);
-    }
-    ctx.fill();
-    ctx.stroke();
+    // 3. 3열 1단 슬림 타일 카드 그리드 (화면과 100% 동일 규격)
+    const colGap = 5;
+    const colW = Math.floor((contentWidth - (colGap * 2)) / 3);
+    const rowH = 34;
 
-    ctx.font = 'bold 12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-    ctx.fillStyle = '#0f172a';
-    ctx.fillText(`총 처치 ${dailyLogs.length}건`, padding + 12, y + 23);
+    // 타일 박스 그리기 헬퍼
+    const drawTileBox = (x, boxY, w, h, bg, border, label, labelColor, val, valColor, isSpan2 = false) => {
+      ctx.fillStyle = bg;
+      ctx.strokeStyle = border;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(x, boxY, w, h, 6);
+      else ctx.rect(x, boxY, w, h);
+      ctx.fill();
+      ctx.stroke();
 
-    let badgeX = padding + 85;
-    if (categoryStats.vaccine > 0) {
-      ctx.fillStyle = '#059669';
-      ctx.fillText(`백신 ${categoryStats.vaccine}`, badgeX, y + 23);
-      badgeX += 50;
-    }
-    if (categoryStats.treatment > 0) {
-      ctx.fillStyle = '#dc2626';
-      ctx.fillText(`치료 ${categoryStats.treatment}`, badgeX, y + 23);
-      badgeX += 50;
-    }
-    if (categoryStats.breeding > 0) {
-      ctx.fillStyle = '#0284c7';
-      ctx.fillText(`수정 ${categoryStats.breeding}`, badgeX, y + 23);
-      badgeX += 50;
-    }
+      if (isSpan2) {
+        // 총 비용 (양쪽 정렬)
+        ctx.textAlign = 'left';
+        ctx.font = '600 11.5px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+        ctx.fillStyle = labelColor;
+        ctx.fillText(label, x + 10, boxY + 21);
 
-    ctx.fillStyle = '#475569';
-    const costText = `${totalCost.toLocaleString()}원`;
-    const costW = ctx.measureText(costText).width;
-    ctx.fillText(costText, viewWidth - padding - costW - 12, y + 23);
+        ctx.textAlign = 'right';
+        ctx.font = 'bold 13px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+        ctx.fillStyle = valColor;
+        ctx.fillText(val, x + w - 10, boxY + 21);
+        ctx.textAlign = 'left';
+      } else {
+        // 중앙 정렬 1단 (라벨 + 건수)
+        ctx.textAlign = 'center';
+        ctx.font = '600 11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+        ctx.fillStyle = labelColor;
+        ctx.fillText(label, x + (w / 2) - 15, boxY + 21);
 
-    y += 50;
+        ctx.font = 'bold 12.5px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+        ctx.fillStyle = valColor;
+        ctx.fillText(val, x + (w / 2) + 16, boxY + 21);
+        ctx.textAlign = 'left';
+      }
+    };
 
-    // 4. 세부 관리 내역 섹션 타이틀
-    ctx.fillStyle = '#0f172a';
-    ctx.font = 'bold 14px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-    ctx.fillText(`📋 세부 관리 내역 (${dailyLogs.length}건)`, padding, y);
+    // 1행: [총작업] [백신] [진료·치료]
+    const row1Y = y;
+    const col0X = padding;
+    const col1X = padding + colW + colGap;
+    const col2X = padding + (colW + colGap) * 2;
 
-    y += 14;
+    drawTileBox(col0X, row1Y, colW, rowH, '#ffffff', '#e2e8f0', '총작업', '#64748b', `${dailyLogs.length}건`, '#0f172a');
+    drawTileBox(col1X, row1Y, colW, rowH, 'rgba(5, 150, 105, 0.08)', 'rgba(5, 150, 105, 0.25)', '백신', '#059669', `${categoryStats.vaccine || 0}건`, '#059669');
+    drawTileBox(col2X, row1Y, colW, rowH, 'rgba(220, 38, 38, 0.08)', 'rgba(220, 38, 38, 0.25)', '진료·치료', '#dc2626', `${categoryStats.treatment || 0}건`, '#dc2626');
+
+    // 2행: [수정] [총 비용 (2칸)]
+    const row2Y = y + rowH + 6;
+    const span2W = contentWidth - colW - colGap;
+
+    drawTileBox(col0X, row2Y, colW, rowH, 'rgba(2, 132, 199, 0.08)', 'rgba(2, 132, 199, 0.25)', '수정', '#0284c7', `${categoryStats.breeding || 0}건`, '#0284c7');
+    drawTileBox(col1X, row2Y, span2W, rowH, '#ffffff', '#e2e8f0', '총 비용', '#64748b', `${totalCost.toLocaleString()}원`, '#0f172a', true);
+
+    // 4. 개체 카드 시작 위치 ('세부 관리 내역' 제목 삭제 및 시원한 자연 여백)
+    y = row2Y + rowH + 14;
 
     // 5. 개체별 관리 카드
     if (dailyLogs.length === 0) {
@@ -297,10 +315,12 @@ function createReportImageBlob({ reportDate, dailyLogs, totalCost, categoryStats
       y += farmNotesHeight;
     }
 
-    // 7. 하단 안내 푸터
+    // 7. 하단 안내 푸터 (가로 정중앙 배치)
+    ctx.textAlign = 'center';
     ctx.fillStyle = '#94a3b8';
     ctx.font = '11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-    ctx.fillText('행복 농장 • 고객등록카드 기반 개체식별 관리시스템', padding, y + 16);
+    ctx.fillText('행복 농장 • 고객등록카드 기반 개체식별 관리시스템', viewWidth / 2, y + 16);
+    ctx.textAlign = 'left'; // 기본 정렬 복귀
 
     canvas.toBlob((blob) => {
       resolve(blob);
