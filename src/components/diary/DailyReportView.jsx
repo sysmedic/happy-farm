@@ -808,16 +808,11 @@ export default function DailyReportView({
             </div>
           </div>
 
-          {/* ⚡ 요구사항 3: 보고서의 개체번호를 클릭하면 개체번호의 관리 내역으로 이동! */}
+          {/* 세부 관리 및 처치 내역 테이블 */}
           <div style={{ marginBottom: '1.5rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>
-                1. 세부 관리 및 처치 내역
-              </h3>
-              <span style={{ fontSize: '0.8rem', color: '#64748b' }}>
-                💡 파란색 개체번호 클릭 시 개체별 전체 이력으로 즉시 이동합니다.
-              </span>
-            </div>
+            <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.45rem 0' }}>
+              1. 세부 관리 및 처치 내역
+            </h3>
 
             {dailyLogs.length === 0 ? (
               <div style={{ 
@@ -832,7 +827,7 @@ export default function DailyReportView({
               </div>
             ) : (
               <div style={{ overflowX: 'auto' }}>
-                <table className="print-table">
+                <table className="print-table" style={{ margin: '0.25rem 0 0 0' }}>
                   <thead>
                     <tr>
                       <th style={{ width: '65px' }}>시간</th>
