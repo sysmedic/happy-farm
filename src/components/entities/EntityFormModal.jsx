@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, AlertCircle, Save } from 'lucide-react';
+import { X, AlertCircle, Save, Pencil, RotateCcw } from 'lucide-react';
 import { 
   ENTITY_STATUSES, 
   GENDER_OPTIONS, 
@@ -37,6 +37,7 @@ export default function EntityFormModal({
   });
 
   const [errorMsg, setErrorMsg] = useState('');
+  const [isCustomBreedOpen, setIsCustomBreedOpen] = useState(false);
 
   useEffect(() => {
     if (entityToEdit) {
@@ -269,7 +270,7 @@ export default function EntityFormModal({
                 />
               </div>
 
-              {/* 사육 단계 선택 (박스 제거, 다른 필드와 100% 동일한 톤의 표준 form-group) */}
+              {/* 사육 단계 선택 (소프트 에메랄드 틴트 적용) */}
               <div className="form-group full-width">
                 <label className="form-label">
                   사육 단계 <span className="required">*</span>
@@ -281,15 +282,8 @@ export default function EntityFormModal({
                       <button
                         key={item.id}
                         type="button"
-                        className={`btn btn-sm ${isSelected ? 'btn-primary' : 'btn-outline'}`}
+                        className={`stage-select-btn ${isSelected ? 'active' : ''}`}
                         onClick={() => handleBreedSelect(item)}
-                        style={{
-                          fontWeight: isSelected ? 800 : 600,
-                          padding: '0.5rem 0.2rem',
-                          fontSize: '0.875rem',
-                          textAlign: 'center',
-                          whiteSpace: 'nowrap'
-                        }}
                       >
                         {item.shortLabel}
                       </button>
@@ -298,7 +292,7 @@ export default function EntityFormModal({
                 </div>
               </div>
 
-              {/* 성별 선택 (박스 제거, 사육 단계 바로 밑에 표준 톤으로 배치) */}
+              {/* 성별 선택 (소프트 파스텔 틴트) */}
               <div className="form-group full-width">
                 <label className="form-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <span>성별 <span className="required">*</span></span>
@@ -340,20 +334,56 @@ export default function EntityFormModal({
                 )}
               </div>
 
-              {/* 사육구분 명칭 (직접 수정 가능) */}
-              <div className="form-group full-width">
-                <label className="form-label">
-                  사육구분 명칭 (직접 수정 가능) <span className="required">*</span>
-                </label>
-                <input
-                  type="text"
-                  className="form-input"
-                  placeholder="예: 번식우 - 암, 비육우 - 거세"
-                  value={formData.breed}
-                  onChange={(e) => handleBreedInputChange(e.target.value)}
-                  required
-                />
-              </div>
+              {/* 사육구분 명칭: 방안 A (스마트 미리보기 뱃지 + 직접 수정 토글) */}
+              {!isCustomBreedOpen ? (
+                <div className="form-group full-width" style={{ marginBottom: '0.75rem' }}>
+                  <div className="breed-preview-badge-row">
+                    <div className="breed-preview-badge-label">
+                      <span>자동 생성 명칭:</span>
+                      <span className="breed-preview-badge-value">{formData.breed || '미지정'}</span>
+                    </div>
+                    <button
+                      type="button"
+                      className="breed-edit-toggle-btn"
+                      onClick={() => setIsCustomBreedOpen(true)}
+                      title="사육구분 명칭을 직접 수정"
+                    >
+                      <Pencil size={13} />
+                      <span>직접 수정</span>
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="form-group full-width" style={{ marginBottom: '0.75rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.35rem' }}>
+                    <label className="form-label" style={{ margin: 0 }}>
+                      사육구분 명칭 직접 입력 <span className="required">*</span>
+                    </label>
+                    <button
+                      type="button"
+                      className="breed-edit-toggle-btn"
+                      onClick={() => {
+                        setIsCustomBreedOpen(false);
+                        const autoBreed = `${extractStage(formData.breed)} - ${GENDER_OPTIONS.find(g => g.id === formData.gender)?.label || ''}`;
+                        setFormData(prev => ({ ...prev, breed: autoBreed }));
+                      }}
+                      style={{ color: 'var(--text-muted)' }}
+                      title="기본 자동 생성 명칭으로 되돌리기"
+                    >
+                      <RotateCcw size={12} />
+                      <span>자동명칭으로 복귀</span>
+                    </button>
+                  </div>
+                  <input
+                    type="text"
+                    className="form-input"
+                    placeholder="예: 번식우 - 암, 비육우 - 거세"
+                    value={formData.breed}
+                    onChange={(e) => handleBreedInputChange(e.target.value)}
+                    required
+                  />
+                </div>
+              )}
 
               {/* 현재 상태 (사육단계 및 성별에 따라 번식 상태 자동 필터링) */}
               <div className="form-group">

@@ -1123,6 +1123,94 @@ a:hover {
 
 
 
+/* 개체 등록/수정 모달 - 사육 단계 버튼 소프트 에메랄드 틴트 */
+.stage-select-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 0.2rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  color: var(--text-muted);
+  transition: all 0.18s ease;
+  cursor: pointer;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.stage-select-btn:hover {
+  border-color: var(--text-subtle);
+  background: var(--bg-hover);
+}
+
+.stage-select-btn.active {
+  background: rgba(16, 185, 129, 0.12) !important;
+  color: #059669 !important;
+  border: 1.5px solid #10b981 !important;
+  font-weight: 700;
+  box-shadow: 0 1px 4px rgba(16, 185, 129, 0.12);
+}
+
+[data-theme='dark'] .stage-select-btn.active {
+  background: rgba(16, 185, 129, 0.18) !important;
+  color: #34d399 !important;
+  border: 1.5px solid #10b981 !important;
+}
+
+/* 사육구분 명칭 스마트 미리보기 뱃지 (방안 A) */
+.breed-preview-badge-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-card-subtle);
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  margin-top: 0.45rem;
+  box-sizing: border-box;
+}
+
+.breed-preview-badge-label {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.breed-preview-badge-value {
+  font-weight: 700;
+  color: var(--text-main);
+  background: var(--bg-card);
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  font-size: 0.88rem;
+  line-height: 1.2;
+}
+
+.breed-edit-toggle-btn {
+  background: transparent;
+  border: none;
+  color: var(--color-primary);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.breed-edit-toggle-btn:hover {
+  background: var(--color-primary-light);
+}
+
 /* 개체 등록/수정 모달 - 성별 버튼 소프트 파스텔 틴트 */
 .gender-select-btn {
   display: flex;
