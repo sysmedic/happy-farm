@@ -683,16 +683,20 @@ export default function EntityList({
                   marginBottom: '0.75rem',
                   background: 'var(--bg-hover)',
                   padding: '0.5rem 0.75rem',
-                  borderRadius: 'var(--radius-sm)'
+                  borderRadius: 'var(--radius-sm)',
+                  width: '100%',
+                  minWidth: 0,
+                  boxSizing: 'border-box',
+                  overflow: 'hidden'
                 }}>
                   {latestLog ? (
                     <div style={{ 
                       display: 'flex', 
                       alignItems: 'center', 
                       gap: '0.45rem', 
-                      overflow: 'hidden', 
-                      whiteSpace: 'nowrap',
-                      minWidth: 0
+                      width: '100%',
+                      minWidth: 0,
+                      overflow: 'hidden'
                     }}>
                       <span style={{ 
                         fontWeight: 600, 
@@ -702,7 +706,8 @@ export default function EntityList({
                       }}>
                         {latestLog.date}
                       </span>
-                      <span 
+                      <div 
+                        className="recent-log-title"
                         style={{ 
                           fontWeight: 600, 
                           color: 'var(--text-main)', 
@@ -715,7 +720,7 @@ export default function EntityList({
                         title={latestLog.title}
                       >
                         {latestLog.title}
-                      </span>
+                      </div>
                     </div>
                   ) : (
                     <span style={{ fontStyle: 'italic', opacity: 0.7, color: 'var(--text-muted)' }}>등록된 관리 기록이 없습니다.</span>
