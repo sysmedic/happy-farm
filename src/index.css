@@ -1631,7 +1631,7 @@ a:hover {
   line-height: 1.25;
 }
 
-/* 특이사항 메모: 타이틀/이모지 제거, 본문 선명 노출 */
+/* 특이사항 메모 (클릭 투 에딧: 카드 전체 터치 수정 지원) */
 .modal-spec-memo-card {
   background: var(--bg-card-subtle);
   border-left: 3.5px solid var(--color-primary);
@@ -1644,6 +1644,38 @@ a:hover {
   line-height: 1.5;
   word-break: keep-all;
   box-shadow: var(--shadow-sm);
+  border-top: 1px solid var(--border-color);
+  border-right: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+  transition: all 0.18s ease;
+}
+
+.modal-spec-memo-card.clickable-memo {
+  cursor: pointer;
+}
+
+.modal-spec-memo-card.clickable-memo:hover {
+  background: var(--bg-hover);
+  border-top-color: var(--color-primary-border);
+  border-right-color: var(--color-primary-border);
+  border-bottom-color: var(--color-primary-border);
+  box-shadow: 0 1px 4px rgba(16, 185, 129, 0.1);
+}
+
+.memo-edit-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  opacity: 0.7;
+  transition: all 0.18s ease;
+}
+
+.modal-spec-memo-card.clickable-memo:hover .memo-edit-hint {
+  color: var(--color-primary);
+  opacity: 1;
 }
 
 /* 생애 관리 내역 전체보기 버튼 카드 */

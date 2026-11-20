@@ -348,59 +348,45 @@ export default function EntityDetailModal({
                 </div>
               </div>
 
-              {/* 특이사항 / 사양 관리 메모 (모달 내 원클릭 인라인 직접 수정 지원) */}
-              <div className="modal-spec-memo-card" style={{ position: 'relative' }}>
+              {/* 특이사항 / 사양 관리 메모 (클릭 투 에딧: 버튼 삭제, 타이틀 및 본문 터치 시 인플레이스 수정) */}
+              <div 
+                className={`modal-spec-memo-card ${!isEditingMemo ? 'clickable-memo' : ''}`} 
+                style={{ position: 'relative' }}
+                onClick={() => {
+                  if (!isEditingMemo) {
+                    setMemoDraft(entity.memo || '');
+                    setIsEditingMemo(true);
+                  }
+                }}
+                title={!isEditingMemo ? "여기를 터치하여 특이사항 메모를 바로 수정합니다" : undefined}
+              >
                 {!isEditingMemo ? (
-                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '0.75rem' }}>
-                    <div 
-                      style={{ flex: 1, cursor: 'pointer' }}
-                      onClick={() => {
-                        setMemoDraft(entity.memo || '');
-                        setIsEditingMemo(true);
-                      }}
-                      title="클릭하여 특이사항 메모를 바로 수정합니다"
-                    >
-                      <div style={{ 
-                        fontSize: '0.8rem', 
-                        color: 'var(--color-primary)', 
-                        fontWeight: 700, 
-                        marginBottom: '0.35rem', 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        gap: '0.35rem' 
-                      }}>
+                  <div>
+                    <div style={{ 
+                      fontSize: '0.8rem', 
+                      color: 'var(--color-primary)', 
+                      fontWeight: 700, 
+                      marginBottom: '0.35rem', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'space-between'
+                    }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                         <span>📝 특이사항 / 사양 관리 메모</span>
-                      </div>
-                      <div style={{ 
-                        color: entity.memo ? 'var(--text-main)' : 'var(--text-muted)', 
-                        fontStyle: entity.memo ? 'normal' : 'italic',
-                        whiteSpace: 'pre-wrap',
-                        lineHeight: 1.55
-                      }}>
-                        {entity.memo || '등록된 특이사항 메모가 없습니다. (여기를 터치하여 메모 입력)'}
-                      </div>
+                      </span>
+                      <span className="memo-edit-hint">
+                        <Edit3 size={12} />
+                        <span>터치하여 수정</span>
+                      </span>
                     </div>
-                    <button
-                      type="button"
-                      className="btn btn-outline btn-sm"
-                      style={{ 
-                        padding: '0.3rem 0.6rem', 
-                        fontSize: '0.78rem', 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        gap: '0.3rem', 
-                        flexShrink: 0,
-                        fontWeight: 600
-                      }}
-                      onClick={() => {
-                        setMemoDraft(entity.memo || '');
-                        setIsEditingMemo(true);
-                      }}
-                      title="특이사항 메모 수정"
-                    >
-                      <Edit3 size={13} />
-                      <span>메모 수정</span>
-                    </button>
+                    <div style={{ 
+                      color: entity.memo ? 'var(--text-main)' : 'var(--text-muted)', 
+                      fontStyle: entity.memo ? 'normal' : 'italic',
+                      whiteSpace: 'pre-wrap',
+                      lineHeight: 1.55
+                    }}>
+                      {entity.memo || '등록된 특이사항 메모가 없습니다. (여기를 터치하여 메모 입력)'}
+                    </div>
                   </div>
                 ) : (
                   <div>
