@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   Printer, 
   Share2, 
@@ -349,48 +349,7 @@ export default function DailyReportView({
   onNavigateToCloud
 }) {
   const [reportDate, setReportDate] = useState(targetDate || getTodayDateString());
-  
-  // 날짜별 영농 특이사항 로컬스토리지 보관 (삼성폰 키패드 즉시 팝업 + 한글 조합 100% 보장)
-  const getSavedNoteForDate = (date) => {
-    try {
-      const saved = localStorage.getItem(`happy_farm_report_note_${date}`);
-      return saved !== null ? saved : '';
-    } catch {
-      return '';
-    }
-  };
-
-  const farmNotesRef = useRef(getSavedNoteForDate(reportDate));
-  const mobileTextareaRef = useRef(null);
-  const desktopTextareaRef = useRef(null);
-
-  // 날짜 변경 시 해당 일자의 특이사항 동기화
-  useEffect(() => {
-    const saved = getSavedNoteForDate(reportDate);
-    farmNotesRef.current = saved;
-    if (mobileTextareaRef.current) {
-      mobileTextareaRef.current.value = saved;
-    }
-    if (desktopTextareaRef.current) {
-      desktopTextareaRef.current.value = saved;
-    }
-  }, [reportDate]);
-
-  // 타이핑 시: 오직 메모리(ref)만 갱신 (스토리지 I/O 차단으로 한글 조합 100% 무결 보장)
-  const handleFarmNotesInput = (e) => {
-    farmNotesRef.current = e.target.value;
-  };
-
-  // 포커스 벗어날 때 안전 자동 저장
-  const handleFarmNotesSave = (e) => {
-    const val = e.target.value;
-    farmNotesRef.current = val;
-    try {
-      localStorage.setItem(`happy_farm_report_note_${reportDate}`, val);
-    } catch (err) {
-      console.warn('특이사항 저장 실패:', err);
-    }
-  };
+  const [farmNotes, setFarmNotes] = useState('특이 동태 및 전반적인 사육 상태 양호. 온습도 정상 유지.');
 
   const [shareFeedback, setShareFeedback] = useState('');
   const categoriesToUse = careCategories || CARE_CATEGORIES;
@@ -426,17 +385,12 @@ export default function DailyReportView({
   const handleShare = async () => {
     try {
       setShareFeedback('보고서 사진(JPG) 준비 중...');
-      const currentNotes = farmNotesRef.current || '';
-      try {
-        localStorage.setItem(`happy_farm_report_note_${reportDate}`, currentNotes);
-      } catch (e) {}
-
       const imageBlob = await createReportImageBlob({
         reportDate,
         dailyLogs,
         totalCost,
         categoryStats,
-        farmNotes: currentNotes
+        farmNotes
       });
 
       const fileName = `행복농장_일일보고서_${reportDate}.jpg`;
@@ -470,8 +424,8 @@ export default function DailyReportView({
       dailyLogs.forEach((l, idx) => {
         summaryText += `${idx + 1}. [${l.tagNumber}] ${l.entityName} - ${l.title} (${l.time || '시간미지정'})\n`;
       });
-      if (currentNotes.trim()) {
-        summaryText += `\n특이사항: ${currentNotes}`;
+      if (farmNotes.trim()) {
+        summaryText += `\n특이사항: ${farmNotes}`;
       }
 
       if (navigator.clipboard) {
@@ -708,33 +662,26 @@ export default function DailyReportView({
           )}
         </div>
 
-        {/* 4. 모바일 영농 특이사항 (삼성폰 키패드 즉시 팝업 + 한글 조합 100% 보장) */}
+        {/* 4. 모바일 영농 특이사항 */}
         <div className="card" style={{ padding: '0.85rem 1rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.45rem' }}>
-            <h4 style={{ fontSize: '0.92rem', fontWeight: 800, margin: 0, color: 'var(--text-main)' }}>
-              📝 일일 영농 특이사항
-            </h4>
-            <span style={{ fontSize: '0.72rem', color: '#10b981', fontWeight: 600 }}>
-              ✓ 자동 저장 지원
-            </span>
-          </div>
+          <h4 style={{ fontSize: '0.92rem', fontWeight: 800, margin: '0 0 0.45rem 0', color: 'var(--text-main)' }}>
+            📝 일일 영농 특이사항
+          </h4>
           <textarea
-            ref={mobileTextareaRef}
-            id="mobile-farm-notes"
-            key={`mobile-note-${reportDate}`}
-            defaultValue={farmNotesRef.current}
-            rows={3}
             className="form-textarea"
             style={{ 
-              fontSize: '16px', // 모바일 브라우저 자동 확대 방지
+              background: 'var(--bg-card-subtle)', 
+              border: '1px solid var(--border-color)', 
+              borderRadius: 'var(--radius-sm)',
+              padding: '0.65rem 0.75rem', 
+              fontSize: '0.85rem',
               lineHeight: 1.5,
               width: '100%',
-              minHeight: '80px',
-              boxSizing: 'border-box'
+              minHeight: '75px' 
             }}
-            onInput={handleFarmNotesInput}
-            onBlur={handleFarmNotesSave}
-            placeholder="당일 기상, 사료 섭취 상태, 이상 증상 개체 등 특이사항을 터치하여 입력하세요."
+            value={farmNotes}
+            onChange={(e) => setFarmNotes(e.target.value)}
+            placeholder="당일 기상, 사료 섭취 상태, 이상 증상 개체 등 일일 총평을 입력하세요."
           />
         </div>
       </div>
@@ -942,13 +889,10 @@ export default function DailyReportView({
               color: '#334155'
             }}>
               <textarea
-                ref={desktopTextareaRef}
-                key={`desktop-note-${reportDate}`}
-                defaultValue={farmNotesRef.current}
                 className="form-textarea"
                 style={{ background: 'transparent', border: 'none', padding: 0, minHeight: '60px' }}
-                onInput={handleFarmNotesInput}
-                onBlur={handleFarmNotesSave}
+                value={farmNotes}
+                onChange={(e) => setFarmNotes(e.target.value)}
                 placeholder="당일 기상, 사료 섭취 상태, 이상 증상 개체 등 일일 총평을 입력하세요."
               />
             </div>
