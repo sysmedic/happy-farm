@@ -836,11 +836,10 @@ export default function DailyReportView({
                   <thead>
                     <tr>
                       <th style={{ width: '65px' }}>시간</th>
-                      <th style={{ width: '135px' }}>개체번호 (이표)</th>
-                      <th style={{ width: '85px' }}>개체명</th>
+                      <th style={{ width: '155px' }}>개체 (이표 · 이름)</th>
                       <th style={{ width: '75px' }}>분류</th>
                       <th>작업 내용 및 처치 상세</th>
-                      <th style={{ width: '90px' }}>담당자</th>
+                      <th style={{ width: '115px' }}>담당자</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -850,18 +849,22 @@ export default function DailyReportView({
                       return (
                         <tr key={log.id}>
                           <td style={{ fontWeight: 600 }}>{log.time || '-'}</td>
-                          {/* ⚡ 클릭 시 해당 개체의 전체 관리 내역으로 이동하는 관계형 링크 */}
+                          {/* ⚡ 클릭 시 해당 개체의 전체 관리 내역으로 이동하는 개체번호 뱃지 + 개체이름 1칸 통합 */}
                           <td>
-                            <span 
-                              className="badge badge-tag"
-                              onClick={() => onOpenEntityDetail(log.tagNumber)}
-                              title="클릭 시 이 개체의 관리 내역으로 이동"
-                              style={{ cursor: 'pointer' }}
-                            >
-                              {log.tagNumber}
-                            </span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap' }}>
+                              <span 
+                                className="badge badge-tag"
+                                onClick={() => onOpenEntityDetail(log.tagNumber)}
+                                title="클릭 시 이 개체의 관리 내역으로 이동"
+                                style={{ cursor: 'pointer', fontSize: '0.75rem', padding: '0.15rem 0.45rem' }}
+                              >
+                                {log.tagNumber}
+                              </span>
+                              <span style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.85rem' }}>
+                                {log.entityName}
+                              </span>
+                            </div>
                           </td>
-                          <td style={{ fontWeight: 700 }}>{log.entityName}</td>
                           <td>
                             <span className={`badge ${catObj.badgeClass}`} style={{ fontSize: '0.7rem' }}>
                               {catObj.label}
@@ -880,7 +883,7 @@ export default function DailyReportView({
                               </div>
                             )}
                           </td>
-                          <td style={{ fontSize: '0.8rem' }}>{log.operator || '-'}</td>
+                          <td style={{ fontSize: '0.85rem', fontWeight: 600, color: '#334155' }}>{log.operator || '-'}</td>
                         </tr>
                       );
                     })}
