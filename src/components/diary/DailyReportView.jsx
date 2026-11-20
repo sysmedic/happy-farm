@@ -350,42 +350,39 @@ export default function DailyReportView({
 }) {
   const [reportDate, setReportDate] = useState(targetDate || getTodayDateString());
   
-  // 날짜별 영농 특이사항 로컬스토리지 영구 보관 (기기/키보드 종류 불문 100% 네이티브 무결 타이핑 보장)
-  const getSavedNoteForDate = (date) => {
+  // 날짜별 영농 특이사항 (순수 메모리 상태 관리로 한글 IME 조합 100% 보장)
+  const [farmNotes, setFarmNotes] = useState(() => {
     try {
-      const saved = localStorage.getItem(`happy_farm_report_note_${date}`);
+      const initialDate = targetDate || getTodayDateString();
+      const saved = localStorage.getItem(`happy_farm_report_note_${initialDate}`);
       return saved !== null ? saved : '';
     } catch {
       return '';
     }
-  };
-
-  const farmNotesRef = useRef(getSavedNoteForDate(reportDate));
-  const mobileTextareaRef = useRef(null);
-  const desktopTextareaRef = useRef(null);
+  });
 
   // 날짜 변경 시 해당 일자의 특이사항 동기화
-  React.useEffect(() => {
-    const saved = getSavedNoteForDate(reportDate);
-    farmNotesRef.current = saved;
-    if (mobileTextareaRef.current) {
-      mobileTextareaRef.current.value = saved;
-    }
-    if (desktopTextareaRef.current) {
-      desktopTextareaRef.current.value = saved;
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(`happy_farm_report_note_${reportDate}`);
+      setFarmNotes(saved !== null ? saved : '');
+    } catch {
+      setFarmNotes('');
     }
   }, [reportDate]);
 
-  // 실시간 입력 처리 (리액트 리렌더링 간섭을 차단하여 안드로이드 키보드 충돌 0% 보장)
-  const handleFarmNotesInput = (e) => {
-    const newVal = e.target.value;
-    farmNotesRef.current = newVal;
-    try {
-      localStorage.setItem(`happy_farm_report_note_${reportDate}`, newVal);
-    } catch (err) {
-      console.warn('특이사항 저장 실패:', err);
-    }
-  };
+  // 타이핑 중단 500ms 후 백그라운드 안전 자동 저장 (타이핑 중 스토리지 I/O 차단으로 한글 씹힘 원천 제거)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      try {
+        localStorage.setItem(`happy_farm_report_note_${reportDate}`, farmNotes);
+      } catch (err) {
+        console.warn('특이사항 자동 저장 실패:', err);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [farmNotes, reportDate]);
 
   const [shareFeedback, setShareFeedback] = useState('');
   const categoriesToUse = careCategories || CARE_CATEGORIES;
@@ -421,14 +418,16 @@ export default function DailyReportView({
   const handleShare = async () => {
     try {
       setShareFeedback('보고서 사진(JPG) 준비 중...');
-      const currentNotes = farmNotesRef.current || '';
+      try {
+        localStorage.setItem(`happy_farm_report_note_${reportDate}`, farmNotes);
+      } catch (e) {}
 
       const imageBlob = await createReportImageBlob({
         reportDate,
         dailyLogs,
         totalCost,
         categoryStats,
-        farmNotes: currentNotes
+        farmNotes
       });
 
       const fileName = `행복농장_일일보고서_${reportDate}.jpg`;
@@ -462,8 +461,8 @@ export default function DailyReportView({
       dailyLogs.forEach((l, idx) => {
         summaryText += `${idx + 1}. [${l.tagNumber}] ${l.entityName} - ${l.title} (${l.time || '시간미지정'})\n`;
       });
-      if (currentNotes.trim()) {
-        summaryText += `\n특이사항: ${currentNotes}`;
+      if (farmNotes.trim()) {
+        summaryText += `\n특이사항: ${farmNotes}`;
       }
 
       if (navigator.clipboard) {
@@ -700,36 +699,34 @@ export default function DailyReportView({
           )}
         </div>
 
-        {/* 4. 모바일 영농 특이사항 (기기/키보드 종류 불문 100% 네이티브 무결 타이핑 보장) */}
+        {/* 4. 모바일 영농 특이사항 (타이핑 시 I/O 지연 없는 순수 메모리 입력 + 0.5초 디바운스 자동 저장) */}
         <div className="card" style={{ padding: '0.85rem 1rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.45rem' }}>
             <h4 style={{ fontSize: '0.92rem', fontWeight: 800, margin: 0, color: 'var(--text-main)' }}>
               📝 일일 영농 특이사항
             </h4>
-            <span style={{ fontSize: '0.72rem', color: '#10b981', fontWeight: 600 }}>
-              ✓ 실시간 자동 저장됨
+            <span style={{ fontSize: '0.72rem', color: farmNotes ? '#10b981' : 'var(--text-muted)', fontWeight: 600 }}>
+              {farmNotes ? '✓ 자동 저장됨' : '미작성'}
             </span>
           </div>
           <textarea
-            ref={mobileTextareaRef}
             id="mobile-farm-notes"
-            key={`mobile-note-${reportDate}`}
-            defaultValue={farmNotesRef.current}
             rows={3}
             className="form-textarea"
             style={{ 
-              background: 'var(--bg-card)', 
-              border: '1.5px solid var(--border-color)', 
-              borderRadius: 'var(--radius-sm)',
-              padding: '0.65rem 0.75rem', 
               fontSize: '16px', // 모바일 브라우저 자동 확대 방지
               lineHeight: 1.5,
               width: '100%',
               minHeight: '80px',
               boxSizing: 'border-box'
             }}
-            onInput={handleFarmNotesInput}
-            onChange={handleFarmNotesInput}
+            value={farmNotes}
+            onChange={(e) => setFarmNotes(e.target.value)}
+            onBlur={(e) => {
+              try {
+                localStorage.setItem(`happy_farm_report_note_${reportDate}`, e.target.value);
+              } catch (err) {}
+            }}
             placeholder="당일 기상, 사료 섭취 상태, 이상 증상 개체 등 특이사항을 터치하여 입력하세요."
           />
         </div>
@@ -938,13 +935,15 @@ export default function DailyReportView({
               color: '#334155'
             }}>
               <textarea
-                ref={desktopTextareaRef}
-                key={`desktop-note-${reportDate}`}
-                defaultValue={farmNotesRef.current}
                 className="form-textarea"
                 style={{ background: 'transparent', border: 'none', padding: 0, minHeight: '60px' }}
-                onInput={handleFarmNotesInput}
-                onChange={handleFarmNotesInput}
+                value={farmNotes}
+                onChange={(e) => setFarmNotes(e.target.value)}
+                onBlur={(e) => {
+                  try {
+                    localStorage.setItem(`happy_farm_report_note_${reportDate}`, e.target.value);
+                  } catch (err) {}
+                }}
                 placeholder="당일 기상, 사료 섭취 상태, 이상 증상 개체 등 일일 총평을 입력하세요."
               />
             </div>
