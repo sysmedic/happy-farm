@@ -219,9 +219,9 @@ export default function EntityDetailModal({
           </div>
         ) : (
           <div className="modal-header entity-detail-header">
-            {/* 1행: 이표번호 & 상태 배너 (좌측) | 출력 & 정보 수정 버튼 (우측) */}
+            {/* 1행: 이표번호 & 상태 배너 (좌측 한 줄 일체화) | 정보 수정 & 닫기 버튼 (우측) */}
             <div className="detail-header-top-row">
-              <div className="detail-header-tag" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+              <div className="detail-header-tag" style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'nowrap', flexShrink: 0 }}>
                 <span className="entity-ear-tag">{entity.tagNumber}</span>
 
                 {/* 상태 배너 (이표 크기와 동등화 & 이모지 제거하여 순수 텍스트로 배치) */}
@@ -285,7 +285,7 @@ export default function EntityDetailModal({
                   title="개체 기본 정보 수정"
                 >
                   <Edit3 size={15} />
-                  <span>정보 수정</span>
+                  <span>수정</span>
                 </button>
                 <button 
                   type="button" 

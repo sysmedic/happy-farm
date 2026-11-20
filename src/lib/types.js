@@ -142,11 +142,13 @@ export function saveCustomCareCategories(cats) {
 
 export function getCategoryById(catId, customCategories = []) {
   const all = [...DEFAULT_CARE_CATEGORIES, ...customCategories];
-  const found = all.find(c => c.id === catId);
+  // 영문 레거시/저장소 ID 정규화 (medication -> treatment 등)
+  const normalizedId = catId === 'medication' ? 'treatment' : catId;
+  const found = all.find(c => c.id === normalizedId || c.id === catId);
   if (found) return found;
   return {
     id: catId,
-    label: catId || '기타 관리',
+    label: catId === 'medication' ? '진료·치료' : (catId || '기타 관리'),
     icon: '📋',
     badgeClass: 'badge-cat-custom'
   };
