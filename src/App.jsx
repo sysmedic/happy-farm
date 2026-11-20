@@ -48,6 +48,7 @@ export default function App() {
 
   // 모달 및 뷰 제어 상태
   const [selectedEntityForDetail, setSelectedEntityForDetail] = useState(null);
+  const [entityDetailInitialView, setEntityDetailInitialView] = useState('summary');
   const [isEntityModalOpen, setIsEntityModalOpen] = useState(false);
   const [entityToEdit, setEntityToEdit] = useState(null);
 
@@ -124,13 +125,14 @@ export default function App() {
   };
 
   // ⚡ 요구사항 3: 보고서나 일정 다이어리에서 개체번호를 클릭하면 해당 개체 관리 내역으로 이동!
-  const handleOpenEntityDetail = (tagNumberOrId) => {
+  const handleOpenEntityDetail = (tagNumberOrId, initialView = 'summary') => {
     if (!tagNumberOrId) return;
     const found = entities.find(
       e => e.tagNumber.toLowerCase() === tagNumberOrId.toLowerCase() || e.id === tagNumberOrId
     );
     if (found) {
       setSelectedEntityForDetail(found);
+      setEntityDetailInitialView(initialView);
       // 만약 인쇄 시트가 열려있었다면 닫고 상세 모달 오픈
       setPrintSheetEntity(null);
     } else {
@@ -543,7 +545,11 @@ export default function App() {
           careLogs={careLogs}
           careCategories={allCareCategories}
           schedules={schedules}
-          onClose={() => setSelectedEntityForDetail(null)}
+          initialViewMode={entityDetailInitialView}
+          onClose={() => {
+            setSelectedEntityForDetail(null);
+            setEntityDetailInitialView('summary');
+          }}
           onOpenCareLogModal={(entity) => {
             setCareLogPreselectedEntity(entity);
             setIsCareLogModalOpen(true);

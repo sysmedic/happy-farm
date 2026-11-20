@@ -938,11 +938,11 @@ export default function EntityList({
                   </div>
                 </div>
 
-                {/* 최근 관리 이력 미니 프리뷰 (클릭 시 상세 관리내역으로 점프) */}
+                {/* 최근 관리 이력 미니 프리뷰 (클릭 시 전체 관리내역으로 다이렉트 점프) */}
                 <div 
                   className="recent-log-preview-box"
-                  onClick={() => onOpenEntityDetail(entity.tagNumber)}
-                  title="클릭 시 이 개체의 상세 관리내역(타임라인)으로 이동"
+                  onClick={() => onOpenEntityDetail(entity.tagNumber, 'fullHistory')}
+                  title="클릭 시 이 개체의 전체 관리내역으로 바로 이동"
                   role="button"
                   tabIndex={0}
                 >

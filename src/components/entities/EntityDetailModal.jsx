@@ -27,6 +27,7 @@ export default function EntityDetailModal({
   careLogs,
   careCategories,
   schedules = [],
+  initialViewMode = 'summary',
   onClose,
   onOpenCareLogModal,
   onOpenEntityModal,
@@ -38,12 +39,17 @@ export default function EntityDetailModal({
   onUpdateEntityMemo
 }) {
   const categoriesToDisplay = careCategories || CARE_CATEGORIES;
-  const [viewMode, setViewMode] = useState('summary'); // 'summary' | 'fullHistory'
+  const [viewMode, setViewMode] = useState(initialViewMode); // 'summary' | 'fullHistory'
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [isStatusMenuOpen, setIsStatusMenuOpen] = useState(false);
   const [isEditingMemo, setIsEditingMemo] = useState(false);
   const [memoDraft, setMemoDraft] = useState(entity?.memo || '');
   const statusMenuRef = useRef(null);
+
+  // 모달 오픈 시 또는 initialViewMode 변경 시 초기 뷰 모드 동기화
+  useEffect(() => {
+    setViewMode(initialViewMode || 'summary');
+  }, [initialViewMode, entity?.id]);
 
   // 개체 정보가 변경되거나 모달 열릴 때 메모 초기화
   useEffect(() => {
@@ -873,7 +879,17 @@ export default function EntityDetailModal({
         {/* 모달 푸터 */}
         <div className="modal-footer">
           {viewMode === 'fullHistory' ? (
-            <button className="btn btn-secondary" onClick={() => setViewMode('summary')} title="요약 정보로 돌아가기">
+            <button 
+              className="btn btn-secondary" 
+              onClick={() => {
+                if (initialViewMode === 'fullHistory') {
+                  onClose();
+                } else {
+                  setViewMode('summary');
+                }
+              }} 
+              title={initialViewMode === 'fullHistory' ? "개체 목록으로 돌아가기" : "요약 정보로 돌아가기"}
+            >
               <ChevronLeft size={16} />
               <span>돌아가기</span>
             </button>
