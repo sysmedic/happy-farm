@@ -269,7 +269,7 @@ export default function EntityDetailModal({
                 </div>
               </div>
 
-              {/* 우측 상단 액션 버튼 그룹: 출력, 정보 수정 및 닫기/돌아가기 버튼 */}
+              {/* 우측 상단 액션 버튼 그룹: 출력 및 정보 수정 버튼 (불필요한 X버튼 제거, 수정 버튼이 우측 끝으로 안착) */}
               <div className="entity-detail-header-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                 <button 
                   className="btn btn-outline btn-sm detail-print-btn"
@@ -285,17 +285,7 @@ export default function EntityDetailModal({
                   title="개체 기본 정보 수정"
                 >
                   <Edit3 size={15} />
-                  <span>수정</span>
-                </button>
-                <button 
-                  type="button" 
-                  className="modal-close-btn"
-                  onClick={onClose}
-                  title="개체 목록으로 돌아가기"
-                  aria-label="닫기"
-                  style={{ marginLeft: '0.2rem' }}
-                >
-                  <X size={20} />
+                  <span>정보 수정</span>
                 </button>
               </div>
             </div>
