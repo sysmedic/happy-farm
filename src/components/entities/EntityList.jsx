@@ -14,7 +14,9 @@ import {
   Settings,
   X,
   Check,
-  ArrowUpDown
+  ArrowUpDown,
+  ChevronUp,
+  ChevronDown
 } from 'lucide-react';
 import { 
   ENTITY_STATUSES, 
@@ -26,19 +28,21 @@ import {
   isHistoricalStatus
 } from '../../lib/types.js';
 
-const DASHBOARD_CARDS_STORAGE_KEY = 'happy_farm_active_dashboard_cards_v3';
-const DEFAULT_DASHBOARD_CARDS = ['total', 'pregnant', 'treatment', 'in_heat', 'inseminated', 'healthy'];
+const DASHBOARD_CARDS_STORAGE_KEY = 'happy_farm_active_dashboard_cards_v4';
 
-// 개체 카드 상태(ENTITY_STATUSES)와 100% 동일한 명칭, 이모지, 테마 컬러 매핑
+// 기본적인 배치는 중요 관리 대상 우선 (치료 💊 -> 발정 🔥 -> 임신 💖 -> 수정 🧬 -> 건강 💚)
+const DEFAULT_DASHBOARD_CARDS = ['total', 'treatment', 'in_heat', 'pregnant', 'inseminated', 'healthy'];
+
+// 중요 관리 대상 우선 순서 정의
 const ALL_DASHBOARD_CARDS = [
   { id: 'total', label: '사육 두수', icon: '🐂', color: '#10b981', bg: 'rgba(16, 185, 129, 0.15)', isFixed: true, desc: '현재 축사에서 사육 중인 전체 한우' },
+  { id: 'treatment', label: '치료/투약중', icon: '💊', color: '#ef4444', bg: 'rgba(239, 68, 68, 0.15)', desc: '치료 투약 및 집중 관리 개체 (최우선 관리)' },
+  { id: 'in_heat', label: '발정 관찰', icon: '🔥', color: '#f97316', bg: 'rgba(249, 115, 22, 0.15)', desc: '발정 징후 관찰 및 적기 인공수정 대상' },
+  { id: 'pregnant', label: '임신/수태', icon: '💖', color: '#8b5cf6', bg: 'rgba(139, 92, 246, 0.15)', desc: '임신 감정 완료 및 출산 대기 개체' },
+  { id: 'inseminated', label: '수정 완료', icon: '🧬', color: '#0ea5e9', bg: 'rgba(14, 165, 233, 0.15)', desc: '인공수정 후 임신 확인 대기 (21일 재발정 관찰)' },
+  { id: 'nursing', label: '포유/육아', icon: '🐄', color: '#14b8a6', bg: 'rgba(20, 184, 166, 0.15)', desc: '분만 후 젖먹이는 어미소 및 자우' },
+  { id: 'scheduled_ship', label: '출하 예정', icon: '🚛', color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.15)', desc: '도축 및 경매 출하 예정 개체' },
   { id: 'healthy', label: '건강/양호', icon: '💚', color: '#10b981', bg: 'rgba(16, 185, 129, 0.15)', desc: '특이 질환 없이 건강한 정상 개체' },
-  { id: 'pregnant', label: '임신/수태', icon: '💖', color: '#8b5cf6', bg: 'rgba(139, 92, 246, 0.15)', desc: '임신 감정 완료 및 출산 대기' },
-  { id: 'treatment', label: '치료/투약중', icon: '💊', color: '#ef4444', bg: 'rgba(239, 68, 68, 0.15)', desc: '치료 투약 및 집중 관리 개체' },
-  { id: 'in_heat', label: '발정 관찰', icon: '🔥', color: '#f97316', bg: 'rgba(249, 115, 22, 0.15)', desc: '발정 징후 관찰 및 적기 인공수정' },
-  { id: 'inseminated', label: '수정 완료', icon: '🧬', color: '#0ea5e9', bg: 'rgba(14, 165, 233, 0.15)', desc: '인공수정 후 임신 확인 대기' },
-  { id: 'nursing', label: '포유/육아', icon: '🐄', color: '#14b8a6', bg: 'rgba(20, 184, 166, 0.15)', desc: '분만 후 젖먹이는 어미소' },
-  { id: 'scheduled_ship', label: '출하 예정', icon: '🚛', color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.15)', desc: '도축 및 경매 출하 예정' },
   { id: 'shipped', label: '출하 완료', icon: '🏷️', color: '#64748b', bg: 'rgba(100, 116, 139, 0.15)', desc: '농장에서 출하 완료된 종료 개체' },
   { id: 'deceased', label: '폐사/도태', icon: '🪦', color: '#475569', bg: 'rgba(71, 85, 105, 0.15)', desc: '질병 또는 사고로 폐사된 종료 개체' },
 ];
@@ -289,6 +293,47 @@ export default function EntityList({
     } catch (e) {}
   };
 
+  // 칩 순서 앞으로 이동 (위로 이동)
+  const moveCardUp = (cardId) => {
+    setActiveCardIds(prev => {
+      const idx = prev.indexOf(cardId);
+      if (idx <= 1) return prev; // 사육 두수(0) 다음인 1번 인덱스는 더 위로 못 감
+      const next = [...prev];
+      const temp = next[idx - 1];
+      next[idx - 1] = next[idx];
+      next[idx] = temp;
+      try {
+        localStorage.setItem(DASHBOARD_CARDS_STORAGE_KEY, JSON.stringify(next));
+      } catch (e) {}
+      return next;
+    });
+  };
+
+  // 칩 순서 뒤로 이동 (아래로 이동)
+  const moveCardDown = (cardId) => {
+    setActiveCardIds(prev => {
+      const idx = prev.indexOf(cardId);
+      if (idx < 1 || idx >= prev.length - 1) return prev;
+      const next = [...prev];
+      const temp = next[idx + 1];
+      next[idx + 1] = next[idx];
+      next[idx] = temp;
+      try {
+        localStorage.setItem(DASHBOARD_CARDS_STORAGE_KEY, JSON.stringify(next));
+      } catch (e) {}
+      return next;
+    });
+  };
+
+  // 모달에 보여줄 지표 리스트: 활성화된 칩들을 순서대로 상단에 배치
+  const modalDisplayItems = useMemo(() => {
+    const activeItems = activeCardIds
+      .map(id => ALL_DASHBOARD_CARDS.find(c => c.id === id))
+      .filter(Boolean);
+    const inactiveItems = ALL_DASHBOARD_CARDS.filter(c => !activeCardIds.includes(c.id));
+    return [...activeItems, ...inactiveItems];
+  }, [activeCardIds]);
+
   const isHistoryMode = selectedStatus === 'history' || selectedStatus === 'shipped' || selectedStatus === 'deceased';
 
   return (
@@ -441,30 +486,40 @@ export default function EntityList({
 
             <div className="modal-body" style={{ maxHeight: '60vh', overflowY: 'auto' }}>
               <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
-                상단 대시보드 현황판에 표시할 관리 지표를 선택하세요. (체크 시 즉시 반영)
+                상단 대시보드에 표시할 지표를 선택하고, <strong>[▲] [▼] 버튼</strong>으로 노출 순서를 자유롭게 변경하세요.
               </p>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                {ALL_DASHBOARD_CARDS.map(item => {
+                {modalDisplayItems.map(item => {
                   const isChecked = activeCardIds.includes(item.id);
+                  const activeIdx = activeCardIds.indexOf(item.id);
                   const count = getCardValue(item.id);
 
                   return (
-                    <label 
+                    <div 
                       key={item.id}
                       style={{
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'space-between',
-                        padding: '0.75rem 0.9rem',
+                        padding: '0.65rem 0.85rem',
                         borderRadius: 'var(--radius-md)',
                         background: isChecked ? 'var(--color-primary-light)' : 'var(--bg-card-subtle)',
                         border: `1px solid ${isChecked ? 'var(--color-primary)' : 'var(--border-color)'}`,
-                        cursor: item.isFixed ? 'default' : 'pointer',
                         transition: 'all 0.15s ease'
                       }}
                     >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                      {/* 좌측: 체크박스 + 라벨 + 설명 */}
+                      <label 
+                        style={{ 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          gap: '0.75rem', 
+                          cursor: item.isFixed ? 'default' : 'pointer',
+                          flex: 1,
+                          minWidth: 0
+                        }}
+                      >
                         <input
                           type="checkbox"
                           checked={isChecked}
@@ -472,7 +527,7 @@ export default function EntityList({
                           onChange={() => handleToggleCard(item.id)}
                           style={{ width: '18px', height: '18px', accentColor: 'var(--color-primary)', cursor: item.isFixed ? 'default' : 'pointer' }}
                         />
-                        <div>
+                        <div style={{ minWidth: 0, overflow: 'hidden' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontWeight: 700, fontSize: '0.92rem' }}>
                             <span>{item.icon}</span>
                             <span>{item.label}</span>
@@ -482,16 +537,72 @@ export default function EntityList({
                               </span>
                             )}
                           </div>
-                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                             {item.desc}
                           </div>
                         </div>
-                      </div>
+                      </label>
 
-                      <span style={{ fontWeight: 800, fontSize: '0.95rem', color: item.color }}>
-                        {count}두
-                      </span>
-                    </label>
+                      {/* 우측: 순서 이동 버튼 그룹 + 두수 카운트 */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
+                        {isChecked && !item.isFixed && (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
+                            <button
+                              type="button"
+                              disabled={activeIdx <= 1}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                moveCardUp(item.id);
+                              }}
+                              style={{
+                                padding: '3px 5px',
+                                borderRadius: '4px',
+                                border: '1px solid var(--border-color)',
+                                background: 'var(--bg-card)',
+                                color: activeIdx <= 1 ? 'var(--text-subtle)' : 'var(--text-main)',
+                                opacity: activeIdx <= 1 ? 0.3 : 1,
+                                cursor: activeIdx <= 1 ? 'not-allowed' : 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                              }}
+                              title="앞(위)으로 순서 이동"
+                            >
+                              <ChevronUp size={15} />
+                            </button>
+                            <button
+                              type="button"
+                              disabled={activeIdx >= activeCardIds.length - 1}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                moveCardDown(item.id);
+                              }}
+                              style={{
+                                padding: '3px 5px',
+                                borderRadius: '4px',
+                                border: '1px solid var(--border-color)',
+                                background: 'var(--bg-card)',
+                                color: activeIdx >= activeCardIds.length - 1 ? 'var(--text-subtle)' : 'var(--text-main)',
+                                opacity: activeIdx >= activeCardIds.length - 1 ? 0.3 : 1,
+                                cursor: activeIdx >= activeCardIds.length - 1 ? 'not-allowed' : 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                              }}
+                              title="뒤(아래)로 순서 이동"
+                            >
+                              <ChevronDown size={15} />
+                            </button>
+                          </div>
+                        )}
+
+                        <span style={{ fontWeight: 800, fontSize: '0.95rem', color: item.color, minWidth: '32px', textAlign: 'right' }}>
+                          {count}
+                        </span>
+                      </div>
+                    </div>
                   );
                 })}
               </div>
