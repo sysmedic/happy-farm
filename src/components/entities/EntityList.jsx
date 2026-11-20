@@ -559,20 +559,20 @@ export default function EntityList({
 
         {/* 2행: 3대 필터 드롭다운 (항시 정확한 3분할 33.3% 유지) */}
         <div className="filter-dropdowns-row">
-          {/* 1. 상태 필터: 사육 두수 / 개별 상태 / 출하 완료 / 폐사 / 사육 이력 전체 */}
+          {/* 1. 상태 필터: 사육 중 / 개별 상태 / 출하·폐사 / 출하 완료 / 폐사 / 농장 전체 이력 */}
           <select 
             className="filter-select"
             value={selectedStatus}
             onChange={(e) => handleStatusChange(e.target.value)}
           >
-            <option value="active">사육 두수 ({stats.total}두)</option>
+            <option value="active">🐂 사육 중 ({stats.total}두)</option>
             {ENTITY_STATUSES.filter(st => !isHistoricalStatus(st.id)).map(st => (
               <option key={st.id} value={st.id}>{st.icon} {st.label}</option>
             ))}
-            <option value="history">📜 사육 이력 전체 ({stats.historyCount}두)</option>
-            <option value="shipped">🏷️ 출하 완료 ({stats.shippedCount}두)</option>
-            <option value="deceased">🪦 폐사 / 도태 ({stats.deceasedCount}두)</option>
-            <option value="all">모든 개체 (총 {entities.length}두)</option>
+            <option value="history">🏷️ 출하·폐사 ({stats.historyCount}두)</option>
+            <option value="shipped">🏷️ 출하 완료</option>
+            <option value="deceased">🪦 폐사 / 도태</option>
+            <option value="all">📜 농장 전체 이력 (총 {entities.length}두)</option>
           </select>
 
           {/* 2. 한우 사육 단계 필터: 사육 구분 (1단계 상태에 해당하는 품종만 동적 노출 & 변경 시 축사 자동 리셋) */}
