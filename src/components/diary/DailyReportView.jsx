@@ -319,17 +319,17 @@ export default function DailyReportView({
 }) {
   const [reportDate, setReportDate] = useState(targetDate || getTodayDateString());
   
-  // 날짜별 영농 특이사항 로컬스토리지 영구 보관 (안드로이드/모바일 탭 전환 시에도 안전 보존)
+  // 날짜별 영농 특이사항 로컬스토리지 영구 보관 (기본 빈칸 시작으로 터치 즉시 타이핑 지원)
   const [farmNotes, setFarmNotes] = useState(() => {
     const initialDate = targetDate || getTodayDateString();
     const saved = localStorage.getItem(`happy_farm_report_note_${initialDate}`);
-    return saved !== null ? saved : '특이 동태 및 전반적인 사육 상태 양호. 온습도 정상 유지.';
+    return saved !== null ? saved : '';
   });
 
   // 날짜 변경 시 해당 일자의 특이사항 동기화
   React.useEffect(() => {
     const saved = localStorage.getItem(`happy_farm_report_note_${reportDate}`);
-    setFarmNotes(saved !== null ? saved : '특이 동태 및 전반적인 사육 상태 양호. 온습도 정상 유지.');
+    setFarmNotes(saved !== null ? saved : '');
   }, [reportDate]);
 
   // 특이사항 변경 시 실시간 자동 저장
@@ -492,110 +492,85 @@ export default function DailyReportView({
           </div>
         </div>
 
-        {/* 2. 균일 높이 & 자동 줄바꿈 요약 뱃지 바 */}
+        {/* 2. 균일 대칭 모바일 타일 카드 그리드 (3열 균일 박스 규격) */}
         <div style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          flexWrap: 'wrap',
-          gap: '0.35rem 0.45rem', 
-          marginBottom: '0.85rem'
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(3, 1fr)', 
+          gap: '0.45rem', 
+          marginBottom: '0.85rem' 
         }}>
-          <span style={{ 
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            height: '28px',
-            padding: '0 0.65rem',
+          {/* 1. 총 작업 */}
+          <div className="card" style={{ 
+            padding: '0.5rem 0.25rem', 
+            textAlign: 'center', 
             borderRadius: 'var(--radius-sm)',
-            fontSize: '0.8rem', 
-            fontWeight: 700,
-            lineHeight: 1,
-            whiteSpace: 'nowrap',
-            boxSizing: 'border-box',
-            background: 'var(--bg-card)', 
-            border: '1px solid var(--border-color)', 
-            color: 'var(--text-main)'
+            border: '1px solid var(--border-color)',
+            background: 'var(--bg-card)'
           }}>
-            총 작업 {dailyLogs.length}건
-          </span>
-          {categoryStats.vaccine > 0 && (
-            <span style={{ 
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              height: '28px',
-              padding: '0 0.65rem',
-              borderRadius: 'var(--radius-sm)',
-              fontSize: '0.8rem', 
-              fontWeight: 700,
-              lineHeight: 1,
-              whiteSpace: 'nowrap',
-              boxSizing: 'border-box',
-              background: 'rgba(5, 150, 105, 0.1)', 
-              border: '1px solid rgba(5, 150, 105, 0.25)', 
-              color: '#059669'
-            }}>
-              백신 {categoryStats.vaccine}건
-            </span>
-          )}
-          {categoryStats.treatment > 0 && (
-            <span style={{ 
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              height: '28px',
-              padding: '0 0.65rem',
-              borderRadius: 'var(--radius-sm)',
-              fontSize: '0.8rem', 
-              fontWeight: 700,
-              lineHeight: 1,
-              whiteSpace: 'nowrap',
-              boxSizing: 'border-box',
-              background: 'rgba(220, 38, 38, 0.1)', 
-              border: '1px solid rgba(220, 38, 38, 0.25)', 
-              color: '#dc2626'
-            }}>
-              진료·치료 {categoryStats.treatment}건
-            </span>
-          )}
-          {categoryStats.breeding > 0 && (
-            <span style={{ 
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              height: '28px',
-              padding: '0 0.65rem',
-              borderRadius: 'var(--radius-sm)',
-              fontSize: '0.8rem', 
-              fontWeight: 700,
-              lineHeight: 1,
-              whiteSpace: 'nowrap',
-              boxSizing: 'border-box',
-              background: 'rgba(2, 132, 199, 0.1)', 
-              border: '1px solid rgba(2, 132, 199, 0.25)', 
-              color: '#0284c7'
-            }}>
-              수정 {categoryStats.breeding}건
-            </span>
-          )}
-          <span style={{ 
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            height: '28px',
-            padding: '0 0.65rem',
+            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>총 작업</div>
+            <div style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-main)', marginTop: '0.15rem' }}>
+              {dailyLogs.length}<span style={{ fontSize: '0.75rem', fontWeight: 600 }}>건</span>
+            </div>
+          </div>
+
+          {/* 2. 백신 */}
+          <div className="card" style={{ 
+            padding: '0.5rem 0.25rem', 
+            textAlign: 'center', 
             borderRadius: 'var(--radius-sm)',
-            fontSize: '0.8rem', 
-            fontWeight: 700,
-            lineHeight: 1,
-            whiteSpace: 'nowrap',
-            boxSizing: 'border-box',
-            background: 'var(--bg-card)', 
-            border: '1px solid var(--border-color)', 
-            color: 'var(--text-main)'
+            border: '1px solid rgba(5, 150, 105, 0.25)',
+            background: 'rgba(5, 150, 105, 0.06)'
           }}>
-            비용 {totalCost.toLocaleString()}원
-          </span>
+            <div style={{ fontSize: '0.72rem', color: '#059669', fontWeight: 600 }}>백신</div>
+            <div style={{ fontSize: '1rem', fontWeight: 800, color: '#059669', marginTop: '0.15rem' }}>
+              {categoryStats.vaccine || 0}<span style={{ fontSize: '0.75rem', fontWeight: 600 }}>건</span>
+            </div>
+          </div>
+
+          {/* 3. 진료·치료 */}
+          <div className="card" style={{ 
+            padding: '0.5rem 0.25rem', 
+            textAlign: 'center', 
+            borderRadius: 'var(--radius-sm)',
+            border: '1px solid rgba(220, 38, 38, 0.25)',
+            background: 'rgba(220, 38, 38, 0.06)'
+          }}>
+            <div style={{ fontSize: '0.72rem', color: '#dc2626', fontWeight: 600 }}>진료·치료</div>
+            <div style={{ fontSize: '1rem', fontWeight: 800, color: '#dc2626', marginTop: '0.15rem' }}>
+              {categoryStats.treatment || 0}<span style={{ fontSize: '0.75rem', fontWeight: 600 }}>건</span>
+            </div>
+          </div>
+
+          {/* 4. 수정 */}
+          <div className="card" style={{ 
+            padding: '0.5rem 0.25rem', 
+            textAlign: 'center', 
+            borderRadius: 'var(--radius-sm)',
+            border: '1px solid rgba(2, 132, 199, 0.25)',
+            background: 'rgba(2, 132, 199, 0.06)'
+          }}>
+            <div style={{ fontSize: '0.72rem', color: '#0284c7', fontWeight: 600 }}>수정</div>
+            <div style={{ fontSize: '1rem', fontWeight: 800, color: '#0284c7', marginTop: '0.15rem' }}>
+              {categoryStats.breeding || 0}<span style={{ fontSize: '0.75rem', fontWeight: 600 }}>건</span>
+            </div>
+          </div>
+
+          {/* 5. 총 비용 (2칸 차지) */}
+          <div className="card" style={{ 
+            gridColumn: 'span 2',
+            padding: '0.5rem 0.75rem', 
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            borderRadius: 'var(--radius-sm)',
+            border: '1px solid var(--border-color)',
+            background: 'var(--bg-card)'
+          }}>
+            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>총 비용</div>
+            <div style={{ fontSize: '0.98rem', fontWeight: 800, color: 'var(--text-main)' }}>
+              {totalCost.toLocaleString()}<span style={{ fontSize: '0.75rem', fontWeight: 600 }}>원</span>
+            </div>
+          </div>
         </div>
 
         {/* 3. 세부 관리 내역 섹션 */}
@@ -670,14 +645,14 @@ export default function DailyReportView({
           )}
         </div>
 
-        {/* 4. 모바일 영농 특이사항 (날짜별 로컬스토리지 자동 저장) */}
+        {/* 4. 모바일 영농 특이사항 (안드로이드 16px 줌 튕김 방지 및 날짜별 로컬스토리지 자동 저장) */}
         <div className="card" style={{ padding: '0.85rem 1rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.45rem' }}>
             <h4 style={{ fontSize: '0.92rem', fontWeight: 800, margin: 0, color: 'var(--text-main)' }}>
               📝 일일 영농 특이사항
             </h4>
-            <span style={{ fontSize: '0.72rem', color: '#10b981', fontWeight: 600 }}>
-              ✓ 자동 저장됨
+            <span style={{ fontSize: '0.72rem', color: farmNotes ? '#10b981' : 'var(--text-muted)', fontWeight: 600 }}>
+              {farmNotes ? '✓ 실시간 저장됨' : '미작성'}
             </span>
           </div>
           <textarea
@@ -686,18 +661,28 @@ export default function DailyReportView({
             rows={3}
             className="form-textarea"
             style={{ 
-              background: 'var(--bg-card-subtle)', 
-              border: '1px solid var(--border-color)', 
+              background: 'var(--bg-card)', 
+              border: '1.5px solid var(--border-color)', 
               borderRadius: 'var(--radius-sm)',
               padding: '0.65rem 0.75rem', 
-              fontSize: '0.85rem',
+              fontSize: '16px', // 모바일 브라우저 자동 확대 튕김 방지 (반드시 16px 이상)
               lineHeight: 1.5,
               width: '100%',
-              minHeight: '75px' 
+              minHeight: '80px',
+              touchAction: 'manipulation',
+              userSelect: 'text',
+              WebkitUserSelect: 'text',
+              boxSizing: 'border-box'
             }}
             value={farmNotes}
             onChange={(e) => handleFarmNotesChange(e.target.value)}
-            placeholder="당일 기상, 사료 섭취 상태, 이상 증상 개체 등 일일 총평을 입력하세요."
+            onFocus={(e) => {
+              // 안드로이드 키보드 오픈 시 키보드 위 중앙으로 부드럽게 스크롤
+              setTimeout(() => {
+                e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }, 300);
+            }}
+            placeholder="당일 기상, 사료 섭취 상태, 이상 증상 개체 등 특이사항을 터치하여 입력하세요."
           />
         </div>
       </div>
