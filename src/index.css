@@ -1096,8 +1096,38 @@ a:hover {
 .entity-card-breed {
   font-size: 1.15rem;
   font-weight: 700;
-  color: var(--color-primary);
+  color: #475569;
   line-height: 1.25;
+}
+
+[data-theme='dark'] .entity-card-breed {
+  color: #94a3b8;
+}
+
+/* 스펙 박스 내 모체 링크 스타일 (초록색 형광 밑줄 제거, 정갈한 대시 밑줄) */
+.spec-link-mother {
+  color: var(--text-main);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border-bottom: 1px dashed var(--text-muted);
+  line-height: 1.2;
+}
+
+.spec-link-mother:hover {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
+
+/* 상태 뱃지 형태: 방안 A (이표박스처럼 단정한 둥근 사각 태그형) vs 방안 B (기존 알약형) */
+.entity-card-top .badge.shape-tag {
+  height: 38px;
+  box-sizing: border-box;
+  border-radius: var(--radius-sm);
+  padding: 0 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
 }
 
 .entity-card-dot {
@@ -1614,7 +1644,7 @@ a:hover {
 .recent-log-preview-content {
   display: flex;
   align-items: center;
-  gap: 0.45rem;
+  gap: 0.65rem;
   width: 100%;
   min-width: 0;
   overflow: hidden;
@@ -2787,6 +2817,7 @@ form.modal-content {
   }
 
   .entity-ear-tag,
+  .entity-card-top .badge.shape-tag,
   .status-banner-btn,
   .detail-edit-btn {
     height: 33px !important;
@@ -2798,6 +2829,7 @@ form.modal-content {
   }
 
   .entity-ear-tag,
+  .entity-card-top .badge.shape-tag,
   .status-banner-btn {
     font-size: 0.95rem !important;
     padding: 0 0.55rem !important;

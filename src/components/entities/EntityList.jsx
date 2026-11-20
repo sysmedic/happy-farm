@@ -31,6 +31,7 @@ import {
 
 const DASHBOARD_CARDS_STORAGE_KEY = 'happy_farm_active_dashboard_cards_v5';
 const HIDE_CHIP_TEXT_STORAGE_KEY = 'happy_farm_hide_chip_text';
+const BADGE_SHAPE_STORAGE_KEY = 'happy_farm_badge_shape_mode';
 
 // 기본적인 배치는 중요 관리 대상 우선 (치료 💊 -> 발정 🔥 -> 임신 💖 -> 수정 🧬 -> 건강 💚)
 const DEFAULT_DASHBOARD_CARDS = ['treatment', 'in_heat', 'pregnant', 'inseminated', 'healthy'];
@@ -103,6 +104,22 @@ export default function EntityList({
       } catch (e) {}
       return next;
     });
+  };
+
+  // 상태 뱃지 형태 비교 모드 ('tag': 이표박스처럼 단정한 둥근 사각 태그 vs 'pill': 기존 알약형)
+  const [badgeShape, setBadgeShape] = useState(() => {
+    try {
+      return localStorage.getItem(BADGE_SHAPE_STORAGE_KEY) || 'tag';
+    } catch (e) {
+      return 'tag';
+    }
+  });
+
+  const handleSelectBadgeShape = (shape) => {
+    setBadgeShape(shape);
+    try {
+      localStorage.setItem(BADGE_SHAPE_STORAGE_KEY, shape);
+    } catch (e) {}
   };
 
   const [isCustomizeOpen, setIsCustomizeOpen] = useState(false);
@@ -814,20 +831,75 @@ export default function EntityList({
           )}
         </div>
 
-        <div className="sort-control-group">
-          <ArrowUpDown size={14} className="sort-icon" />
-          <select 
-            className="sort-select"
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-            aria-label="개체 정렬 순서 선택"
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+          {/* 상태 뱃지 형태 실시간 비교 스위처 */}
+          <div 
+            className="badge-shape-switcher"
+            style={{ 
+              display: 'inline-flex', 
+              alignItems: 'center', 
+              background: 'var(--bg-card-subtle)', 
+              padding: '2px', 
+              borderRadius: 'var(--radius-sm)', 
+              border: '1px solid var(--border-color)',
+              gap: '2px'
+            }}
           >
-            <option value="latest">최신 등록순</option>
-            <option value="tag_asc">개체번호순 (오름차순)</option>
-            <option value="age_asc">월령 어린순 (송아지 먼저)</option>
-            <option value="age_desc">월령 많은순 (성우 먼저)</option>
-            <option value="barn_asc">축사 위치순 (1축사부터)</option>
-          </select>
+            <button
+              type="button"
+              onClick={() => handleSelectBadgeShape('tag')}
+              title="상태 뱃지를 이표박스처럼 단정한 둥근 사각 태그로 표시"
+              style={{
+                border: 'none',
+                background: badgeShape === 'tag' ? 'var(--bg-card)' : 'transparent',
+                color: badgeShape === 'tag' ? 'var(--color-primary)' : 'var(--text-muted)',
+                padding: '3px 7px',
+                borderRadius: '4px',
+                fontSize: '0.76rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                boxShadow: badgeShape === 'tag' ? '0 1px 2px rgba(0,0,0,0.08)' : 'none',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              🏷️ 사각 뱃지 (추천)
+            </button>
+            <button
+              type="button"
+              onClick={() => handleSelectBadgeShape('pill')}
+              title="상태 뱃지를 기존의 둥근 알약형으로 표시"
+              style={{
+                border: 'none',
+                background: badgeShape === 'pill' ? 'var(--bg-card)' : 'transparent',
+                color: badgeShape === 'pill' ? 'var(--color-primary)' : 'var(--text-muted)',
+                padding: '3px 7px',
+                borderRadius: '4px',
+                fontSize: '0.76rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                boxShadow: badgeShape === 'pill' ? '0 1px 2px rgba(0,0,0,0.08)' : 'none',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              💊 알약 뱃지 (기존)
+            </button>
+          </div>
+
+          <div className="sort-control-group">
+            <ArrowUpDown size={14} className="sort-icon" />
+            <select 
+              className="sort-select"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              aria-label="개체 정렬 순서 선택"
+            >
+              <option value="latest">최신 등록순</option>
+              <option value="tag_asc">개체번호순 (오름차순)</option>
+              <option value="age_asc">월령 어린순 (송아지 먼저)</option>
+              <option value="age_desc">월령 많은순 (성우 먼저)</option>
+              <option value="barn_asc">축사 위치순 (1축사부터)</option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -886,7 +958,7 @@ export default function EntityList({
                       {entity.tagNumber}
                     </span>
                   </div>
-                  <span className={`badge ${statusObj.colorClass}`}>
+                  <span className={`badge ${statusObj.colorClass} ${badgeShape === 'tag' ? 'shape-tag' : ''}`}>
                     {statusObj.icon} {statusObj.label}
                   </span>
                 </div>
@@ -924,8 +996,9 @@ export default function EntityList({
                     <span className="spec-item-value">
                       {entity.motherTag ? (
                         <span 
-                          style={{ color: 'var(--color-primary)', cursor: 'pointer', textDecoration: 'underline' }}
+                          className="spec-link-mother"
                           onClick={() => onOpenEntityDetail(entity.motherTag)}
+                          title="클릭 시 모체(어미소) 정보로 이동"
                         >
                           {entity.motherTag}
                         </span>
