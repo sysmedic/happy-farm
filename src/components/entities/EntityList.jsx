@@ -417,8 +417,8 @@ export default function EntityList({
           }}
           title="현재 사육 중인 전체 개체 보기 (필터 초기화)"
         >
-          <span>🐂</span>
-          <span>사육 중 ({stats.total})</span>
+          <span className="segment-label">사육 중</span>
+          <span className="segment-count">{stats.total}</span>
         </button>
 
         <button
@@ -431,8 +431,8 @@ export default function EntityList({
           }}
           title="출하 및 폐사 이력 개체 보기"
         >
-          <span>🏷️</span>
-          <span>출하·폐사 ({stats.historyCount})</span>
+          <span className="segment-label">출하·폐사</span>
+          <span className="segment-count">{stats.historyCount}</span>
         </button>
       </div>
 
