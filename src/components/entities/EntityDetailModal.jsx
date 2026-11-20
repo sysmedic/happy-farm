@@ -44,7 +44,6 @@ export default function EntityDetailModal({
   const [isStatusMenuOpen, setIsStatusMenuOpen] = useState(false);
   const [isEditingMemo, setIsEditingMemo] = useState(false);
   const [memoDraft, setMemoDraft] = useState(entity?.memo || '');
-  const [headerStyleMode, setHeaderStyleMode] = useState('padding'); // 'padding' (방안 A: 여백형) | 'title' (방안 B: 타이틀형)
   const statusMenuRef = useRef(null);
 
   // 모달 오픈 시 또는 initialViewMode 변경 시 초기 뷰 모드 동기화
@@ -168,38 +167,45 @@ export default function EntityDetailModal({
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content modal-content-lg" onClick={(e) => e.stopPropagation()}>
-        {/* 모달 상단 헤더: viewMode에 따른 분기 */}
-        {viewMode === 'fullHistory' ? (
-          <div className="modal-header entity-detail-header fullhistory-header">
-              {/* 1열: 개체번호 + 별명 (좌측) | 전체보기 버튼 및 닫기 버튼 (우측 끝 양끝 정렬) */}
-              <div className="fullhistory-header-identity-row">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', minWidth: 0, flex: 1, overflow: 'hidden' }}>
-                  <span className="entity-ear-tag fullhistory-tag" style={{ flexShrink: 0 }}>{entity.tagNumber}</span>
-                  <h2 className="fullhistory-entity-name" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{entity.name}</h2>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-                  <button
-                    type="button"
-                    className={`fullhistory-total-tag ${selectedCategory === 'all' ? 'active' : ''}`}
-                    onClick={() => setSelectedCategory('all')}
-                    title="클릭하여 전체 관리 기록 보기"
-                  >
-                    <span>전체 기록</span>
-                    <span className="tab-count">{allEntityLogs.length}</span>
-                  </button>
-                  <button
-                    type="button"
-                    className="modal-close-btn"
-                    onClick={onClose}
-                    title="개체 목록으로 돌아가기"
-                    aria-label="돌아가기"
-                  >
-                    <X size={20} />
-                  </button>
-                </div>
-              </div>
+        {/* 표준 모달 헤더: 신규 개체 등록 모달과 100% 동일한 헤더 규격 적용 */}
+        <div className="modal-header">
+          <div className="modal-header-title">
+            <span style={{ fontWeight: 800, fontSize: '1.25rem' }}>
+              {viewMode === 'fullHistory' ? '생애 관리 내역' : '개체 상세 정보'}
+            </span>
+          </div>
+          <button 
+            type="button" 
+            className="modal-close-btn" 
+            onClick={onClose}
+            title="창 닫기"
+            aria-label="닫기"
+          >
+            <X size={20} />
+          </button>
+        </div>
 
-            {/* 2열: 세부 관리 분류 (공간 부족 시 3열로 자동 줄바꿈 확장) */}
+        {/* 생애 관리 내역 전면 뷰 전용 서브 필터 바 */}
+        {viewMode === 'fullHistory' && (
+          <div className="fullhistory-header-bar">
+            {/* 1열: 개체번호 + 별명 (좌측) | 전체 기록 버튼 (우측) */}
+            <div className="fullhistory-header-identity-row">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', minWidth: 0, flex: 1, overflow: 'hidden' }}>
+                <span className="entity-ear-tag fullhistory-tag" style={{ flexShrink: 0 }}>{entity.tagNumber}</span>
+                <h2 className="fullhistory-entity-name" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{entity.name}</h2>
+              </div>
+              <button
+                type="button"
+                className={`fullhistory-total-tag ${selectedCategory === 'all' ? 'active' : ''}`}
+                onClick={() => setSelectedCategory('all')}
+                title="클릭하여 전체 관리 기록 보기"
+              >
+                <span>전체 기록</span>
+                <span className="tab-count">{allEntityLogs.length}</span>
+              </button>
+            </div>
+
+            {/* 2열: 세부 관리 분류 탭 */}
             <div className="fullhistory-filter-bar">
               {categoriesToDisplay.map(cat => {
                 const count = allEntityLogs.filter(l => l.category === cat.id).length;
@@ -218,123 +224,95 @@ export default function EntityDetailModal({
               })}
             </div>
           </div>
-        ) : (
-          <div className={`modal-header entity-detail-header mode-${headerStyleMode}`}>
-            {/* 디자인 비교 토글 바 (실시간 검토용) */}
-            <div className="design-comparison-toggle-bar">
-              <span className="comparison-badge">디자인 비교</span>
-              <div className="comparison-tabs">
-                <button
-                  type="button"
-                  className={`comparison-tab-btn ${headerStyleMode === 'padding' ? 'active' : ''}`}
-                  onClick={() => setHeaderStyleMode('padding')}
-                >
-                  🌿 방안 A (시원한 여백형)
-                </button>
-                <button
-                  type="button"
-                  className={`comparison-tab-btn ${headerStyleMode === 'title' ? 'active' : ''}`}
-                  onClick={() => setHeaderStyleMode('title')}
-                >
-                  🏷️ 방안 B (타이틀 추가형)
-                </button>
-              </div>
-            </div>
-
-            {/* 방안 B 선택 시 표시되는 간결한 상단 타이틀 바 */}
-            {headerStyleMode === 'title' && (
-              <div className="detail-modal-eyebrow-row">
-                <span className="eyebrow-title">🐂 개체 상세 프로필</span>
-                <span className="eyebrow-desc">식별 및 생애 주기 관리</span>
-              </div>
-            )}
-
-            {/* 1행: 이표번호 & 상태 배너 (좌측 한 줄 일체화) | 정보 수정 & 닫기 버튼 (우측) */}
-            <div className="detail-header-top-row">
-              <div className="detail-header-tag" style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'nowrap', flexShrink: 0 }}>
-                <span className="entity-ear-tag">{entity.tagNumber}</span>
-
-                {/* 상태 배너 (이표 크기와 동등화 & 이모지 제거하여 순수 텍스트로 배치) */}
-                <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }} ref={statusMenuRef}>
-                  <button
-                    type="button"
-                    className={`badge ${statusObj.colorClass} status-banner-btn`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setIsStatusMenuOpen(prev => !prev);
-                    }}
-                    title="클릭하여 개체 상태 즉시 변경"
-                  >
-                    <span>{statusObj.label}</span>
-                    <span style={{ fontSize: '0.75rem', opacity: 0.8, marginLeft: '0.15rem' }}>▾</span>
-                  </button>
-
-                  {/* 상태 선택 팝오버 메뉴 */}
-                  {isStatusMenuOpen && (
-                    <div className="status-picker-dropdown">
-                      <div className="status-picker-header">상태 변경 선택</div>
-                      <div className="status-picker-list">
-                        {getAvailableStatuses(entity.breed, entity.gender).map(st => {
-                          const isCurrent = st.id === entity.status;
-                          return (
-                            <button
-                              key={st.id}
-                              type="button"
-                              className={`status-picker-item ${isCurrent ? 'active' : ''}`}
-                              onClick={() => handleStatusSelect(st.id)}
-                            >
-                              <span style={{ fontSize: '1.05rem', lineHeight: 1 }}>{st.icon}</span>
-                              <span style={{ fontWeight: isCurrent ? 800 : 600, flex: 1, textAlign: 'left' }}>
-                                {st.label}
-                              </span>
-                              {isCurrent && (
-                                <span style={{ fontSize: '0.75rem', color: 'var(--color-primary)', fontWeight: 800 }}>선택됨</span>
-                              )}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* 우측 상단 액션 버튼 그룹: 출력 및 정보 수정 버튼 (불필요한 X버튼 제거, 수정 버튼이 우측 끝으로 안착) */}
-              <div className="entity-detail-header-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                <button 
-                  className="btn btn-outline btn-sm detail-print-btn"
-                  onClick={() => onOpenPrintSheet(entity)}
-                  title="이 개체의 전체 관리 이력 A4 인쇄"
-                >
-                  <Printer size={15} />
-                  <span>출력</span>
-                </button>
-                <button 
-                  className="btn btn-outline btn-sm detail-edit-btn"
-                  onClick={() => onOpenEntityModal(entity)}
-                  title="개체 기본 정보 수정"
-                >
-                  <Edit3 size={15} />
-                  <span>정보 수정</span>
-                </button>
-              </div>
-            </div>
-
-            {/* 2행: 애칭(이름) & 사육단계 - 성별 • 월령(일수) (가로 100% 전체 폭 시원하게 활용) */}
-            <div className="detail-header-name-row" style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap', width: '100%' }}>
-              <h2 className="detail-header-name" style={{ margin: 0 }}>{entity.name}</h2>
-              <span className="detail-header-subtext">
-                {formatDisplayBreed(entity.breed)} • {age.text}
-              </span>
-            </div>
-          </div>
         )}
 
         {/* 모달 본문 */}
         <div className="modal-body">
           {viewMode === 'summary' ? (
-            /* [기본 뷰]: 4대 스펙 박스 + 특이사항 + 생애내역 전체보기 버튼 + 최근 10건 요약 리스트 */
+            /* [기본 뷰]: 개체 프로필 섹션 + 4대 스펙 박스 + 특이사항 + 최근 10건 요약 리스트 */
             <>
+              {/* 개체 핵심 프로필 섹션 (이표번호, 상태, 정보 수정 버튼, 이름 및 월령) */}
+              <div className="detail-entity-profile-card">
+                {/* 1행: 이표번호 & 상태 배너 (좌측) | 출력 및 정보 수정 버튼 (우측) */}
+                <div className="detail-header-top-row">
+                  <div className="detail-header-tag" style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'nowrap', flexShrink: 0 }}>
+                    <span className="entity-ear-tag">{entity.tagNumber}</span>
+
+                    {/* 상태 배너 (이표 크기와 동등화 & 이모지 제거하여 순수 텍스트로 배치) */}
+                    <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }} ref={statusMenuRef}>
+                      <button
+                        type="button"
+                        className={`badge ${statusObj.colorClass} status-banner-btn`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsStatusMenuOpen(prev => !prev);
+                        }}
+                        title="클릭하여 개체 상태 즉시 변경"
+                      >
+                        <span>{statusObj.label}</span>
+                        <span style={{ fontSize: '0.75rem', opacity: 0.8, marginLeft: '0.15rem' }}>▾</span>
+                      </button>
+
+                      {/* 상태 선택 팝오버 메뉴 */}
+                      {isStatusMenuOpen && (
+                        <div className="status-picker-dropdown">
+                          <div className="status-picker-header">상태 변경 선택</div>
+                          <div className="status-picker-list">
+                            {getAvailableStatuses(entity.breed, entity.gender).map(st => {
+                              const isCurrent = st.id === entity.status;
+                              return (
+                                <button
+                                  key={st.id}
+                                  type="button"
+                                  className={`status-picker-item ${isCurrent ? 'active' : ''}`}
+                                  onClick={() => handleStatusSelect(st.id)}
+                                >
+                                  <span style={{ fontSize: '1.05rem', lineHeight: 1 }}>{st.icon}</span>
+                                  <span style={{ fontWeight: isCurrent ? 800 : 600, flex: 1, textAlign: 'left' }}>
+                                    {st.label}
+                                  </span>
+                                  {isCurrent && (
+                                    <span style={{ fontSize: '0.75rem', color: 'var(--color-primary)', fontWeight: 800 }}>선택됨</span>
+                                  )}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* 우측 상단 액션 버튼 그룹: 출력 및 정보 수정 버튼 */}
+                  <div className="entity-detail-header-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <button 
+                      className="btn btn-outline btn-sm detail-print-btn"
+                      onClick={() => onOpenPrintSheet(entity)}
+                      title="이 개체의 전체 관리 이력 A4 인쇄"
+                    >
+                      <Printer size={15} />
+                      <span>출력</span>
+                    </button>
+                    <button 
+                      className="btn btn-outline btn-sm detail-edit-btn"
+                      onClick={() => onOpenEntityModal(entity)}
+                      title="개체 기본 정보 수정"
+                    >
+                      <Edit3 size={15} />
+                      <span>정보 수정</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* 2행: 애칭(이름) & 사육단계 - 성별 • 월령(일수) */}
+                <div className="detail-header-name-row" style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap', width: '100%', marginTop: '0.35rem' }}>
+                  <h2 className="detail-header-name" style={{ margin: 0 }}>{entity.name}</h2>
+                  <span className="detail-header-subtext">
+                    {formatDisplayBreed(entity.breed)} • {age.text}
+                  </span>
+                </div>
+              </div>
+
               {/* 1. 4대 중요 정보 2x2 균등 카드 그리드 */}
               <div className="modal-specs-grid">
                 <div className="modal-spec-card">
