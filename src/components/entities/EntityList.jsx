@@ -454,7 +454,6 @@ export default function EntityList({
           tabIndex={0}
         >
           <Plus size={18} strokeWidth={2.5} />
-          <span>지표 추가</span>
         </div>
       </div>
 
