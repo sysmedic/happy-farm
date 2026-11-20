@@ -28,15 +28,14 @@ import {
   isHistoricalStatus
 } from '../../lib/types.js';
 
-const DASHBOARD_CARDS_STORAGE_KEY = 'happy_farm_active_dashboard_cards_v4';
+const DASHBOARD_CARDS_STORAGE_KEY = 'happy_farm_active_dashboard_cards_v5';
 const HIDE_CHIP_TEXT_STORAGE_KEY = 'happy_farm_hide_chip_text';
 
 // 기본적인 배치는 중요 관리 대상 우선 (치료 💊 -> 발정 🔥 -> 임신 💖 -> 수정 🧬 -> 건강 💚)
-const DEFAULT_DASHBOARD_CARDS = ['total', 'treatment', 'in_heat', 'pregnant', 'inseminated', 'healthy'];
+const DEFAULT_DASHBOARD_CARDS = ['treatment', 'in_heat', 'pregnant', 'inseminated', 'healthy'];
 
-// 중요 관리 대상 우선 순서 정의
+// 중요 관리 대상 상태 목록 (총 사육 두수는 상단 세그먼트 탭 [사육 중 (80)]에서 전담)
 const ALL_DASHBOARD_CARDS = [
-  { id: 'total', label: '전체', icon: '🐂', color: '#10b981', bg: 'rgba(16, 185, 129, 0.15)', isFixed: true, desc: '현재 축사에서 사육 중인 전체 한우' },
   { id: 'treatment', label: '치료/투약중', icon: '💊', color: '#ef4444', bg: 'rgba(239, 68, 68, 0.15)', desc: '치료 투약 및 집중 관리 개체 (최우선 관리)' },
   { id: 'in_heat', label: '발정 관찰', icon: '🔥', color: '#f97316', bg: 'rgba(249, 115, 22, 0.15)', desc: '발정 징후 관찰 및 적기 인공수정 대상' },
   { id: 'pregnant', label: '임신/수태', icon: '💖', color: '#8b5cf6', bg: 'rgba(139, 92, 246, 0.15)', desc: '임신 감정 완료 및 출산 대기 개체' },
@@ -70,8 +69,8 @@ export default function EntityList({
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          if (!parsed.includes('total')) parsed.unshift('total');
-          return parsed;
+          const cleaned = parsed.filter(id => id !== 'total');
+          if (cleaned.length > 0) return cleaned;
         }
       }
     } catch (e) {
@@ -365,7 +364,7 @@ export default function EntityList({
   const moveCardUp = (cardId) => {
     setActiveCardIds(prev => {
       const idx = prev.indexOf(cardId);
-      if (idx <= 1) return prev; // 사육 두수(0) 다음인 1번 인덱스는 더 위로 못 감
+      if (idx <= 0) return prev;
       const next = [...prev];
       const temp = next[idx - 1];
       next[idx - 1] = next[idx];
@@ -381,7 +380,7 @@ export default function EntityList({
   const moveCardDown = (cardId) => {
     setActiveCardIds(prev => {
       const idx = prev.indexOf(cardId);
-      if (idx < 1 || idx >= prev.length - 1) return prev;
+      if (idx < 0 || idx >= prev.length - 1) return prev;
       const next = [...prev];
       const temp = next[idx + 1];
       next[idx + 1] = next[idx];
@@ -406,6 +405,37 @@ export default function EntityList({
 
   return (
     <div>
+      {/* 0. 사육 중 vs 출하/폐사 세그먼트 스위치 탭 (총 사육 두수 및 이력 카운트 직관적 표기) */}
+      <div className="view-segment-tabs">
+        <button
+          type="button"
+          className={`view-segment-btn ${!isHistoryMode ? 'active' : ''}`}
+          onClick={() => {
+            setSelectedStatus('active');
+            setSelectedBreed('all');
+            setSelectedBarn('all');
+          }}
+          title="현재 사육 중인 전체 개체 보기 (필터 초기화)"
+        >
+          <span>🐂</span>
+          <span>사육 중 ({stats.total})</span>
+        </button>
+
+        <button
+          type="button"
+          className={`view-segment-btn ${isHistoryMode ? 'active history-active' : ''}`}
+          onClick={() => {
+            setSelectedStatus('history');
+            setSelectedBreed('all');
+            setSelectedBarn('all');
+          }}
+          title="출하 및 폐사 이력 개체 보기"
+        >
+          <span>🏷️</span>
+          <span>출하·폐사 ({stats.historyCount})</span>
+        </button>
+      </div>
+
       {/* 1. 상단 맞춤형 통계 현황판 (원클릭 필터링 + 지표 추가) */}
       <div className="stats-grid">
         {activeCardIds.map(cardId => {
@@ -615,7 +645,7 @@ export default function EntityList({
                           display: 'flex', 
                           alignItems: 'center', 
                           gap: '0.75rem', 
-                          cursor: item.isFixed ? 'default' : 'pointer',
+                          cursor: 'pointer',
                           flex: 1,
                           minWidth: 0
                         }}
@@ -623,19 +653,13 @@ export default function EntityList({
                         <input
                           type="checkbox"
                           checked={isChecked}
-                          disabled={item.isFixed}
                           onChange={() => handleToggleCard(item.id)}
-                          style={{ width: '18px', height: '18px', accentColor: 'var(--color-primary)', cursor: item.isFixed ? 'default' : 'pointer' }}
+                          style={{ width: '18px', height: '18px', accentColor: 'var(--color-primary)', cursor: 'pointer' }}
                         />
                         <div style={{ minWidth: 0, overflow: 'hidden' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontWeight: 700, fontSize: '0.92rem' }}>
                             <span>{item.icon}</span>
                             <span>{item.label}</span>
-                            {item.isFixed && (
-                              <span style={{ fontSize: '0.72rem', color: 'var(--color-primary)', background: 'rgba(16, 185, 129, 0.15)', padding: '1px 5px', borderRadius: '4px' }}>
-                                필수
-                              </span>
-                            )}
                           </div>
                           <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                             {item.desc}
@@ -645,11 +669,11 @@ export default function EntityList({
 
                       {/* 우측: 순서 이동 버튼 그룹 + 두수 카운트 */}
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
-                        {isChecked && !item.isFixed && (
+                        {isChecked && (
                           <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
                             <button
                               type="button"
-                              disabled={activeIdx <= 1}
+                              disabled={activeIdx <= 0}
                               onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
@@ -660,9 +684,9 @@ export default function EntityList({
                                 borderRadius: '4px',
                                 border: '1px solid var(--border-color)',
                                 background: 'var(--bg-card)',
-                                color: activeIdx <= 1 ? 'var(--text-subtle)' : 'var(--text-main)',
-                                opacity: activeIdx <= 1 ? 0.3 : 1,
-                                cursor: activeIdx <= 1 ? 'not-allowed' : 'pointer',
+                                color: activeIdx <= 0 ? 'var(--text-subtle)' : 'var(--text-main)',
+                                opacity: activeIdx <= 0 ? 0.3 : 1,
+                                cursor: activeIdx <= 0 ? 'not-allowed' : 'pointer',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center'
