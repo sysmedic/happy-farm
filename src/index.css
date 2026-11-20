@@ -2421,7 +2421,7 @@ form.modal-content {
     -webkit-overflow-scrolling: touch;
     gap: 0.45rem !important;
     margin-bottom: 0.75rem !important;
-    padding: 0.35rem 0.25rem 0.45rem 0.25rem !important;
+    padding: 0.5rem 0.25rem 0.5rem 0.25rem !important;
     scrollbar-width: none;
   }
 

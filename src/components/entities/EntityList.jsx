@@ -29,6 +29,7 @@ import {
 } from '../../lib/types.js';
 
 const DASHBOARD_CARDS_STORAGE_KEY = 'happy_farm_active_dashboard_cards_v4';
+const HIDE_CHIP_TEXT_STORAGE_KEY = 'happy_farm_hide_chip_text';
 
 // 기본적인 배치는 중요 관리 대상 우선 (치료 💊 -> 발정 🔥 -> 임신 💖 -> 수정 🧬 -> 건강 💚)
 const DEFAULT_DASHBOARD_CARDS = ['total', 'treatment', 'in_heat', 'pregnant', 'inseminated', 'healthy'];
@@ -78,6 +79,25 @@ export default function EntityList({
     }
     return DEFAULT_DASHBOARD_CARDS;
   });
+
+  // 칩 텍스트 숨기기 설정 (아이콘 + 숫자만 콤팩트 표시)
+  const [hideChipText, setHideChipText] = useState(() => {
+    try {
+      return localStorage.getItem(HIDE_CHIP_TEXT_STORAGE_KEY) === 'true';
+    } catch (e) {
+      return false;
+    }
+  });
+
+  const handleToggleHideChipText = () => {
+    setHideChipText(prev => {
+      const next = !prev;
+      try {
+        localStorage.setItem(HIDE_CHIP_TEXT_STORAGE_KEY, String(next));
+      } catch (e) {}
+      return next;
+    });
+  };
 
   const [isCustomizeOpen, setIsCustomizeOpen] = useState(false);
 
@@ -400,11 +420,12 @@ export default function EntityList({
               className={`stat-card stat-card-interactive ${active ? 'active-custom' : ''}`}
               style={active ? {
                 borderColor: cardDef.color,
+                borderWidth: '2px',
                 background: cardDef.bg,
-                boxShadow: `0 0 0 1.5px ${cardDef.color}`
+                boxShadow: `inset 0 0 0 1px ${cardDef.color}`
               } : {}}
               onClick={() => handleCardClick(cardDef.id)}
-              title={`클릭 시 ${cardDef.label} 개체 필터링 (다시 누르면 해제)`}
+              title={hideChipText ? `${cardDef.label}: ${val} (클릭 시 필터링)` : `클릭 시 ${cardDef.label} 개체 필터링 (다시 누르면 해제)`}
               role="button"
               tabIndex={0}
             >
@@ -415,7 +436,7 @@ export default function EntityList({
                 {cardDef.icon}
               </div>
               <div className="stat-info">
-                <span className="stat-label">{cardDef.label}</span>
+                {!hideChipText && <span className="stat-label">{cardDef.label}</span>}
                 <span className="stat-value" style={{ color: cardDef.color }}>
                   {val}
                 </span>
@@ -533,6 +554,38 @@ export default function EntityList({
             </div>
 
             <div className="modal-body" style={{ maxHeight: '60vh', overflowY: 'auto' }}>
+              {/* 칩 글자 숨기기 토글 스위치 옵션 */}
+              <label 
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '0.75rem 0.9rem',
+                  marginBottom: '1rem',
+                  borderRadius: 'var(--radius-md)',
+                  background: hideChipText ? 'var(--color-primary-light)' : 'var(--bg-card-subtle)',
+                  border: `1.5px solid ${hideChipText ? 'var(--color-primary)' : 'var(--border-color)'}`,
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.45rem', color: 'var(--text-main)' }}>
+                    <span>👁️‍🗨️</span>
+                    <span>칩 글자 숨기기 (초슬림 모드)</span>
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '3px' }}>
+                    라벨 글자를 숨기고 [아이콘 + 숫자]만 심플하게 표시합니다.
+                  </div>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={hideChipText}
+                  onChange={handleToggleHideChipText}
+                  style={{ width: '20px', height: '20px', accentColor: 'var(--color-primary)', cursor: 'pointer' }}
+                />
+              </label>
+
               <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
                 상단 대시보드에 표시할 지표를 선택하고, <strong>[▲] [▼] 버튼</strong>으로 노출 순서를 자유롭게 변경하세요.
               </p>
