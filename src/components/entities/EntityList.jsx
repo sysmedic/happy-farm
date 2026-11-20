@@ -691,8 +691,8 @@ export default function EntityList({
                       alignItems: 'center', 
                       gap: '0.45rem', 
                       overflow: 'hidden', 
-                      textOverflow: 'ellipsis', 
-                      whiteSpace: 'nowrap' 
+                      whiteSpace: 'nowrap',
+                      minWidth: 0
                     }}>
                       <span style={{ 
                         fontWeight: 600, 
@@ -702,13 +702,18 @@ export default function EntityList({
                       }}>
                         {latestLog.date}
                       </span>
-                      <span style={{ 
-                        fontWeight: 600, 
-                        color: 'var(--text-main)', 
-                        overflow: 'hidden', 
-                        textOverflow: 'ellipsis', 
-                        whiteSpace: 'nowrap' 
-                      }}>
+                      <span 
+                        style={{ 
+                          fontWeight: 600, 
+                          color: 'var(--text-main)', 
+                          overflow: 'hidden', 
+                          textOverflow: 'ellipsis', 
+                          whiteSpace: 'nowrap',
+                          flex: 1,
+                          minWidth: 0
+                        }}
+                        title={latestLog.title}
+                      >
                         {latestLog.title}
                       </span>
                     </div>
