@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, AlertCircle, Save, Pencil, RotateCcw } from 'lucide-react';
+import { X, AlertCircle, Save, Pencil, RotateCcw, Trash2 } from 'lucide-react';
 import { 
   ENTITY_STATUSES, 
   GENDER_OPTIONS, 
@@ -481,30 +481,41 @@ export default function EntityFormModal({
             </div>
           </div>
 
-          {/* 모달 푸터 */}
-          <div className="modal-footer" style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.6rem' }}>
-            <button type="button" className="btn btn-secondary" onClick={onClose}>
-              취소
-            </button>
-            {isEditing && onDelete && (
-              <button
-                type="button"
-                className="btn btn-outline"
-                onClick={() => onDelete(entityToEdit.id, entityToEdit.name)}
-                style={{
-                  border: '1px solid var(--color-danger)',
-                  color: 'var(--color-danger)',
-                  fontWeight: 600,
-                  background: 'var(--bg-card)'
-                }}
-              >
-                삭제
+          {/* 모달 푸터: 위험한 삭제는 좌측 끝으로 완전히 격리, 취소와 저장은 우측에 배치 */}
+          <div className="modal-footer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.6rem' }}>
+            <div>
+              {isEditing && onDelete && (
+                <button
+                  type="button"
+                  className="btn btn-outline"
+                  onClick={() => onDelete(entityToEdit.id, entityToEdit.name)}
+                  style={{
+                    border: '1.5px solid rgba(239, 68, 68, 0.4)',
+                    color: 'var(--color-danger)',
+                    fontWeight: 600,
+                    background: 'rgba(239, 68, 68, 0.05)',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.35rem',
+                    padding: '0.5rem 0.85rem'
+                  }}
+                  title="이 개체 정보를 영구 삭제"
+                >
+                  <Trash2 size={15} />
+                  <span>삭제</span>
+                </button>
+              )}
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+              <button type="button" className="btn btn-secondary" onClick={onClose}>
+                취소
               </button>
-            )}
-            <button type="submit" className="btn btn-primary">
-              <Save size={16} />
-              <span>{isEditing ? '변경사항 저장' : '개체 등록 완료'}</span>
-            </button>
+              <button type="submit" className="btn btn-primary">
+                <Save size={16} />
+                <span>{isEditing ? '변경사항 저장' : '개체 등록 완료'}</span>
+              </button>
+            </div>
           </div>
         </form>
       </div>
