@@ -47,6 +47,12 @@ const ALL_DASHBOARD_CARDS = [
   { id: 'deceased', label: '폐사/도태', icon: '🪦', color: '#475569', bg: 'rgba(71, 85, 105, 0.15)', desc: '질병 또는 사고로 폐사된 종료 개체' },
 ];
 
+// 출하·폐사 이력 전용 칩 정의 (방안 2용)
+const HISTORY_DASHBOARD_CARDS = [
+  { id: 'shipped', label: '출하 완료', icon: '🏷️', color: '#64748b', bg: 'rgba(100, 116, 139, 0.15)' },
+  { id: 'deceased', label: '폐사/도태', icon: '🪦', color: '#ef4444', bg: 'rgba(239, 68, 68, 0.15)' }
+];
+
 export default function EntityList({
   entities,
   careLogs,
@@ -98,19 +104,19 @@ export default function EntityList({
     });
   };
 
-  // 세그먼트 탭 스타일 테마 비교 ('style1': 애플/토스 | 'style2': 파스텔 | 'style3': 차콜)
-  const [segmentTheme, setSegmentTheme] = useState(() => {
+  // 출하·폐사 시 칩 바 동작 비교 ('plan1': 딤드 비활성화 | 'plan2': 전용 칩 전환)
+  const [historyChipPlan, setHistoryChipPlan] = useState(() => {
     try {
-      return localStorage.getItem('happy_farm_segment_theme') || 'style1';
+      return localStorage.getItem('happy_farm_history_chip_plan') || 'plan2';
     } catch (e) {
-      return 'style1';
+      return 'plan2';
     }
   });
 
-  const handleSelectTheme = (themeId) => {
-    setSegmentTheme(themeId);
+  const handleSelectPlan = (plan) => {
+    setHistoryChipPlan(plan);
     try {
-      localStorage.setItem('happy_farm_segment_theme', themeId);
+      localStorage.setItem('happy_farm_history_chip_plan', plan);
     } catch (e) {}
   };
 
@@ -421,41 +427,51 @@ export default function EntityList({
 
   return (
     <div>
-      {/* 스타일 비교용 미니 스위처 */}
+      {/* 출하·폐사 모드 동작 비교용 미니 스위처 */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.45rem', padding: '0 2px' }}>
         <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)' }}>
-          🎨 탭 컬러 비교:
+          🔍 출하·폐사 시 칩 동작:
         </span>
         <div style={{ display: 'flex', gap: '4px' }}>
-          {[
-            { id: 'style1', label: '1. 애플/토스' },
-            { id: 'style2', label: '2. 파스텔' },
-            { id: 'style3', label: '3. 차콜' }
-          ].map(s => (
-            <button
-              key={s.id}
-              type="button"
-              onClick={() => handleSelectTheme(s.id)}
-              style={{
-                fontSize: '0.72rem',
-                fontWeight: segmentTheme === s.id ? 800 : 500,
-                padding: '2px 8px',
-                borderRadius: '9999px',
-                border: segmentTheme === s.id ? '1px solid var(--color-primary)' : '1px solid var(--border-color)',
-                background: segmentTheme === s.id ? 'var(--color-primary-light)' : 'var(--bg-card)',
-                color: segmentTheme === s.id ? 'var(--color-primary)' : 'var(--text-muted)',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              {s.label}
-            </button>
-          ))}
+          <button
+            type="button"
+            onClick={() => handleSelectPlan('plan1')}
+            style={{
+              fontSize: '0.72rem',
+              fontWeight: historyChipPlan === 'plan1' ? 800 : 500,
+              padding: '2px 8px',
+              borderRadius: '9999px',
+              border: historyChipPlan === 'plan1' ? '1.5px solid var(--color-primary)' : '1px solid var(--border-color)',
+              background: historyChipPlan === 'plan1' ? 'var(--color-primary-light)' : 'var(--bg-card)',
+              color: historyChipPlan === 'plan1' ? 'var(--color-primary)' : 'var(--text-muted)',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            방안 1: 딤드(잠금)
+          </button>
+          <button
+            type="button"
+            onClick={() => handleSelectPlan('plan2')}
+            style={{
+              fontSize: '0.72rem',
+              fontWeight: historyChipPlan === 'plan2' ? 800 : 500,
+              padding: '2px 8px',
+              borderRadius: '9999px',
+              border: historyChipPlan === 'plan2' ? '1.5px solid var(--color-primary)' : '1px solid var(--border-color)',
+              background: historyChipPlan === 'plan2' ? 'var(--color-primary-light)' : 'var(--bg-card)',
+              color: historyChipPlan === 'plan2' ? 'var(--color-primary)' : 'var(--text-muted)',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            방안 2: 전용 칩 전환(추천)
+          </button>
         </div>
       </div>
 
       {/* 0. 사육 중 vs 출하/폐사 세그먼트 스위치 탭 (총 사육 두수 및 이력 카운트 직관적 표기) */}
-      <div className={`view-segment-tabs theme-${segmentTheme}`}>
+      <div className="view-segment-tabs">
         <button
           type="button"
           className={`view-segment-btn ${!isHistoryMode ? 'active' : ''}`}
@@ -486,55 +502,128 @@ export default function EntityList({
       </div>
 
       {/* 1. 상단 맞춤형 통계 현황판 (원클릭 필터링 + 지표 추가) */}
-      <div className="stats-grid">
-        {activeCardIds.map(cardId => {
-          const cardDef = ALL_DASHBOARD_CARDS.find(c => c.id === cardId);
-          if (!cardDef) return null;
-          const active = isCardActive(cardDef.id);
-          const val = getCardValue(cardDef.id);
-
-          return (
-            <div 
-              key={cardDef.id}
-              className={`stat-card stat-card-interactive ${active ? 'active-custom' : ''}`}
-              style={active ? {
-                borderColor: cardDef.color,
-                borderWidth: '2px',
-                background: cardDef.bg,
-                boxShadow: `inset 0 0 0 1px ${cardDef.color}`
-              } : {}}
-              onClick={() => handleCardClick(cardDef.id)}
-              title={hideChipText ? `${cardDef.label}: ${val} (클릭 시 필터링)` : `클릭 시 ${cardDef.label} 개체 필터링 (다시 누르면 해제)`}
-              role="button"
-              tabIndex={0}
-            >
-              <div 
-                className="stat-icon-wrapper" 
-                style={{ background: cardDef.bg, color: cardDef.color }}
-              >
-                {cardDef.icon}
-              </div>
-              <div className="stat-info">
-                {!hideChipText && <span className="stat-label">{cardDef.label}</span>}
-                <span className="stat-value" style={{ color: cardDef.color }}>
-                  {val}
-                </span>
-              </div>
-            </div>
-          );
-        })}
-
-        {/* 대시보드 지표 추가 점선 버튼 */}
-        <div 
-          className="stat-card stat-card-add"
-          onClick={() => setIsCustomizeOpen(true)}
-          title="대시보드 지표 추가 및 설정"
-          role="button"
-          tabIndex={0}
-        >
-          <Plus size={18} strokeWidth={2.5} />
+      {isHistoryMode && historyChipPlan === 'plan1' ? (
+        // [방안 1] 딤드(Dimmed) 잠금 처리
+        <div>
+          <div 
+            className="stats-grid" 
+            style={{ 
+              opacity: 0.35, 
+              pointerEvents: 'none', 
+              filter: 'grayscale(0.6)', 
+              cursor: 'not-allowed',
+              userSelect: 'none'
+            }}
+          >
+            {activeCardIds.map(cardId => {
+              const cardDef = ALL_DASHBOARD_CARDS.find(c => c.id === cardId);
+              if (!cardDef) return null;
+              const val = getCardValue(cardDef.id);
+              return (
+                <div key={cardDef.id} className="stat-card">
+                  <div className="stat-icon-wrapper" style={{ background: cardDef.bg, color: cardDef.color }}>
+                    {cardDef.icon}
+                  </div>
+                  <div className="stat-info">
+                    {!hideChipText && <span className="stat-label">{cardDef.label}</span>}
+                    <span className="stat-value" style={{ color: cardDef.color }}>{val}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '-0.35rem', marginBottom: '0.65rem', textAlign: 'center' }}>
+            🔒 출하·폐사 이력 조회 중에는 현재 사육 상태 필터가 잠금(비활성화)됩니다.
+          </div>
         </div>
-      </div>
+      ) : isHistoryMode && historyChipPlan === 'plan2' ? (
+        // [방안 2] 출하/폐사 전용 스마트 칩으로 전환
+        <div className="stats-grid">
+          {HISTORY_DASHBOARD_CARDS.map(cardDef => {
+            const active = isCardActive(cardDef.id);
+            const val = getCardValue(cardDef.id);
+
+            return (
+              <div 
+                key={cardDef.id}
+                className={`stat-card stat-card-interactive ${active ? 'active-custom' : ''}`}
+                style={active ? {
+                  borderColor: cardDef.color,
+                  borderWidth: '1.5px',
+                  background: cardDef.bg
+                } : {}}
+                onClick={() => handleCardClick(cardDef.id)}
+                title={hideChipText ? `${cardDef.label}: ${val} (클릭 시 필터링)` : `클릭 시 ${cardDef.label} 개체 필터링 (다시 누르면 해제)`}
+                role="button"
+                tabIndex={0}
+              >
+                <div 
+                  className="stat-icon-wrapper" 
+                  style={{ background: cardDef.bg, color: cardDef.color }}
+                >
+                  {cardDef.icon}
+                </div>
+                <div className="stat-info">
+                  {!hideChipText && <span className="stat-label">{cardDef.label}</span>}
+                  <span className="stat-value" style={{ color: cardDef.color }}>
+                    {val}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        // [일반 모드: 사육 중]
+        <div className="stats-grid">
+          {activeCardIds.map(cardId => {
+            const cardDef = ALL_DASHBOARD_CARDS.find(c => c.id === cardId);
+            if (!cardDef) return null;
+            const active = isCardActive(cardDef.id);
+            const val = getCardValue(cardDef.id);
+
+            return (
+              <div 
+                key={cardDef.id}
+                className={`stat-card stat-card-interactive ${active ? 'active-custom' : ''}`}
+                style={active ? {
+                  borderColor: cardDef.color,
+                  borderWidth: '1.5px',
+                  background: cardDef.bg
+                } : {}}
+                onClick={() => handleCardClick(cardDef.id)}
+                title={hideChipText ? `${cardDef.label}: ${val} (클릭 시 필터링)` : `클릭 시 ${cardDef.label} 개체 필터링 (다시 누르면 해제)`}
+                role="button"
+                tabIndex={0}
+              >
+                <div 
+                  className="stat-icon-wrapper" 
+                  style={{ background: cardDef.bg, color: cardDef.color }}
+                >
+                  {cardDef.icon}
+                </div>
+                <div className="stat-info">
+                  {!hideChipText && <span className="stat-label">{cardDef.label}</span>}
+                  <span className="stat-value" style={{ color: cardDef.color }}>
+                    {val}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+
+          {/* 대시보드 지표 추가 점선 버튼 */}
+          <div 
+            className="stat-card stat-card-add"
+            onClick={() => setIsCustomizeOpen(true)}
+            title="대시보드 지표 추가 및 설정"
+            role="button"
+            tabIndex={0}
+          >
+            <Plus size={18} strokeWidth={2.5} />
+          </div>
+        </div>
+      )}
 
       {/* 2. 검색 및 필터 바 */}
       <div className="filter-bar">
