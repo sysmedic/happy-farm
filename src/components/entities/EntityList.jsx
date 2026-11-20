@@ -16,7 +16,8 @@ import {
   Check,
   ArrowUpDown,
   ChevronUp,
-  ChevronDown
+  ChevronDown,
+  ChevronRight
 } from 'lucide-react';
 import { 
   ENTITY_STATUSES, 
@@ -937,53 +938,32 @@ export default function EntityList({
                   </div>
                 </div>
 
-                {/* 최근 관리 이력 미니 프리뷰 */}
-                <div style={{ 
-                  fontSize: '0.82rem', 
-                  marginBottom: '0.75rem',
-                  background: 'var(--bg-hover)',
-                  padding: '0.5rem 0.75rem',
-                  borderRadius: 'var(--radius-sm)',
-                  width: '100%',
-                  minWidth: 0,
-                  boxSizing: 'border-box',
-                  overflow: 'hidden'
-                }}>
+                {/* 최근 관리 이력 미니 프리뷰 (클릭 시 상세 관리내역으로 점프) */}
+                <div 
+                  className="recent-log-preview-box"
+                  onClick={() => onOpenEntityDetail(entity.tagNumber)}
+                  title="클릭 시 이 개체의 상세 관리내역(타임라인)으로 이동"
+                  role="button"
+                  tabIndex={0}
+                >
                   {latestLog ? (
-                    <div style={{ 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      gap: '0.45rem', 
-                      width: '100%',
-                      minWidth: 0,
-                      overflow: 'hidden'
-                    }}>
-                      <span style={{ 
-                        fontWeight: 600, 
-                        color: 'var(--text-main)', 
-                        opacity: 0.7, 
-                        flexShrink: 0 
-                      }}>
+                    <div className="recent-log-preview-content">
+                      <span className="recent-log-date">
                         {latestLog.date}
                       </span>
                       <div 
                         className="recent-log-title"
-                        style={{ 
-                          fontWeight: 600, 
-                          color: 'var(--text-main)', 
-                          overflow: 'hidden', 
-                          textOverflow: 'ellipsis', 
-                          whiteSpace: 'nowrap',
-                          flex: 1,
-                          minWidth: 0
-                        }}
                         title={latestLog.title}
                       >
                         {latestLog.title}
                       </div>
+                      <ChevronRight size={14} className="recent-log-jump-icon" />
                     </div>
                   ) : (
-                    <span style={{ fontStyle: 'italic', opacity: 0.7, color: 'var(--text-muted)' }}>등록된 관리 기록이 없습니다.</span>
+                    <div className="recent-log-empty-content">
+                      <span>등록된 관리 기록이 없습니다</span>
+                      <ChevronRight size={14} className="recent-log-jump-icon" />
+                    </div>
                   )}
                 </div>
 

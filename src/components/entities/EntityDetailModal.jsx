@@ -164,22 +164,33 @@ export default function EntityDetailModal({
         {/* 모달 상단 헤더: viewMode에 따른 분기 */}
         {viewMode === 'fullHistory' ? (
           <div className="modal-header entity-detail-header fullhistory-header">
-            {/* 1열: 개체번호 + 별명 (좌측) | 전체보기 버튼 (우측 끝 양끝 정렬) */}
-            <div className="fullhistory-header-identity-row">
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', minWidth: 0, flex: 1, overflow: 'hidden' }}>
-                <span className="entity-ear-tag fullhistory-tag" style={{ flexShrink: 0 }}>{entity.tagNumber}</span>
-                <h2 className="fullhistory-entity-name" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{entity.name}</h2>
+              {/* 1열: 개체번호 + 별명 (좌측) | 전체보기 버튼 및 닫기 버튼 (우측 끝 양끝 정렬) */}
+              <div className="fullhistory-header-identity-row">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', minWidth: 0, flex: 1, overflow: 'hidden' }}>
+                  <span className="entity-ear-tag fullhistory-tag" style={{ flexShrink: 0 }}>{entity.tagNumber}</span>
+                  <h2 className="fullhistory-entity-name" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{entity.name}</h2>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                  <button
+                    type="button"
+                    className={`fullhistory-total-tag ${selectedCategory === 'all' ? 'active' : ''}`}
+                    onClick={() => setSelectedCategory('all')}
+                    title="클릭하여 전체 관리 기록 보기"
+                  >
+                    <span>전체 기록</span>
+                    <span className="tab-count">{allEntityLogs.length}</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="modal-close-btn"
+                    onClick={onClose}
+                    title="개체 목록으로 돌아가기"
+                    aria-label="돌아가기"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
               </div>
-              <button
-                type="button"
-                className={`fullhistory-total-tag ${selectedCategory === 'all' ? 'active' : ''}`}
-                onClick={() => setSelectedCategory('all')}
-                title="클릭하여 전체 관리 기록 보기"
-              >
-                <span>전체 기록</span>
-                <span className="tab-count">{allEntityLogs.length}</span>
-              </button>
-            </div>
 
             {/* 2열: 세부 관리 분류 (공간 부족 시 3열로 자동 줄바꿈 확장) */}
             <div className="fullhistory-filter-bar">
@@ -252,8 +263,8 @@ export default function EntityDetailModal({
                 </div>
               </div>
 
-              {/* 우측 상단 액션 버튼 그룹: 출력 및 정보 수정 버튼 */}
-              <div className="entity-detail-header-actions">
+              {/* 우측 상단 액션 버튼 그룹: 출력, 정보 수정 및 닫기/돌아가기 버튼 */}
+              <div className="entity-detail-header-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                 <button 
                   className="btn btn-outline btn-sm detail-print-btn"
                   onClick={() => onOpenPrintSheet(entity)}
@@ -269,6 +280,16 @@ export default function EntityDetailModal({
                 >
                   <Edit3 size={15} />
                   <span>정보 수정</span>
+                </button>
+                <button 
+                  type="button" 
+                  className="modal-close-btn"
+                  onClick={onClose}
+                  title="개체 목록으로 돌아가기"
+                  aria-label="닫기"
+                  style={{ marginLeft: '0.2rem' }}
+                >
+                  <X size={20} />
                 </button>
               </div>
             </div>
@@ -852,13 +873,14 @@ export default function EntityDetailModal({
         {/* 모달 푸터 */}
         <div className="modal-footer">
           {viewMode === 'fullHistory' ? (
-            <button className="btn btn-secondary" onClick={() => setViewMode('summary')}>
+            <button className="btn btn-secondary" onClick={() => setViewMode('summary')} title="요약 정보로 돌아가기">
               <ChevronLeft size={16} />
               <span>돌아가기</span>
             </button>
           ) : (
-            <button className="btn btn-secondary" onClick={onClose}>
-              닫기
+            <button className="btn btn-secondary" onClick={onClose} title="개체 목록 화면으로 돌아가기">
+              <ChevronLeft size={16} />
+              <span>돌아가기</span>
             </button>
           )}
           {(entity.status === 'shipped' || entity.status === 'deceased') ? (

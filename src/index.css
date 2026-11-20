@@ -1568,6 +1568,65 @@ a:hover {
   flex: 1;
 }
 
+/* 개체 카드 내 최근 관리내역 클릭 점프 프리뷰 박스 */
+.recent-log-preview-box {
+  font-size: 0.82rem;
+  margin-bottom: 0.75rem;
+  background: var(--bg-hover);
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-sm);
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+}
+
+.recent-log-preview-box:hover {
+  background: var(--bg-card-subtle);
+  border-color: var(--color-primary);
+  box-shadow: 0 1px 4px rgba(16, 185, 129, 0.15);
+  transform: translateY(-1px);
+}
+
+.recent-log-preview-box:active {
+  transform: scale(0.99);
+}
+
+.recent-log-preview-content {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.recent-log-jump-icon {
+  color: var(--color-primary);
+  opacity: 0.5;
+  flex-shrink: 0;
+  transition: transform 0.18s ease, opacity 0.18s ease;
+}
+
+.recent-log-preview-box:hover .recent-log-jump-icon {
+  opacity: 1;
+  transform: translateX(2px);
+}
+
+.recent-log-empty-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  color: var(--text-muted);
+  font-style: italic;
+  opacity: 0.75;
+}
+
 /* 생애전체내역 유동형 상단 탑바 (1열: 개체번호+별명+전체내역 | 2열: 관리 분류 탭, 넘침 시 3열 자동 확장) */
 .fullhistory-header {
   display: flex !important;
