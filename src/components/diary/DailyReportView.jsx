@@ -849,26 +849,35 @@ export default function DailyReportView({
                       return (
                         <tr key={log.id}>
                           <td style={{ fontWeight: 600 }}>{log.time || '-'}</td>
-                          {/* ⚡ 클릭 시 해당 개체의 전체 관리 내역으로 이동하는 개체번호 뱃지 + 개체이름 1칸 통합 */}
+                          {/* ⚡ 박스 없는 단정한 블랙 텍스트: 이표번호(클릭 이동) + 개체명 */}
                           <td>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
                               <span 
-                                className="badge badge-tag"
                                 onClick={() => onOpenEntityDetail(log.tagNumber)}
                                 title="클릭 시 이 개체의 관리 내역으로 이동"
-                                style={{ cursor: 'pointer', fontSize: '0.75rem', padding: '0.15rem 0.45rem' }}
+                                style={{ 
+                                  cursor: 'pointer', 
+                                  fontFamily: 'var(--font-mono)', 
+                                  fontWeight: 700, 
+                                  color: '#0f172a',
+                                  fontSize: '0.85rem',
+                                  textDecoration: 'underline',
+                                  textUnderlineOffset: '2px',
+                                  textDecorationColor: '#cbd5e1'
+                                }}
                               >
                                 {log.tagNumber}
                               </span>
-                              <span style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.85rem' }}>
-                                {log.entityName}
-                              </span>
+                              {log.entityName && (
+                                <span style={{ fontWeight: 600, color: '#334155', fontSize: '0.825rem' }}>
+                                  ({log.entityName})
+                                </span>
+                              )}
                             </div>
                           </td>
-                          <td>
-                            <span className={`badge ${catObj.badgeClass}`} style={{ fontSize: '0.7rem' }}>
-                              {catObj.label}
-                            </span>
+                          {/* 박스 없는 단정한 블랙 텍스트 분류 */}
+                          <td style={{ textAlign: 'center', fontWeight: 600, color: '#0f172a', fontSize: '0.825rem' }}>
+                            {catObj.label}
                           </td>
                           <td>
                             <div style={{ fontWeight: 700, color: '#0f172a', marginBottom: '2px' }}>{log.title}</div>
