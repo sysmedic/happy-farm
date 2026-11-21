@@ -166,15 +166,45 @@ export function saveCustomCareCategories(cats) {
   }
 }
 
+// 영문 레거시 카테고리 ID -> 표준 카테고리 ID 정규화 매핑
+const LEGACY_CATEGORY_MAP = {
+  medication: 'treatment',
+  insemination: 'breeding',
+  estrus: 'breeding',
+  vaccination: 'vaccine',
+  checkup: 'routine',
+  sanitation: 'routine',
+  birth: 'calving',
+  nutrition: 'feed'
+};
+
+// 미등록 영문 카테고리에 대한 한글 라벨 폴백
+const FALLBACK_CATEGORY_LABELS = {
+  medication: '진료·치료',
+  insemination: '인공수정',
+  estrus: '발정관찰',
+  vaccination: '백신접종',
+  checkup: '방역점검',
+  breeding: '인공수정',
+  treatment: '진료·치료',
+  vaccine: '백신접종',
+  calving: '분만',
+  feed: '사료·영양',
+  weight: '체중측정',
+  routine: '방역점검'
+};
+
 export function getCategoryById(catId, customCategories = []) {
   const all = [...DEFAULT_CARE_CATEGORIES, ...customCategories];
-  // 영문 레거시/저장소 ID 정규화 (medication -> treatment 등)
-  const normalizedId = catId === 'medication' ? 'treatment' : catId;
+  // 영문 레거시/저장소 ID 정규화 (medication -> treatment, insemination -> breeding 등)
+  const normalizedId = LEGACY_CATEGORY_MAP[catId] || catId;
   const found = all.find(c => c.id === normalizedId || c.id === catId);
   if (found) return found;
+
+  const fallbackLabel = FALLBACK_CATEGORY_LABELS[catId] || catId || '기타 관리';
   return {
     id: catId,
-    label: catId === 'medication' ? '진료·치료' : (catId || '기타 관리'),
+    label: fallbackLabel,
     icon: '📋',
     badgeClass: 'badge-cat-custom'
   };

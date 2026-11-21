@@ -581,15 +581,27 @@ export default function EntityDetailModal({
                   <div className="recent-logs-list">
                     {recent10Logs.map((log) => {
                       const catObj = getCategoryById(log.category, careCategories);
+                      // 스마트 컴팩트 날짜 (2026-09-05 -> 26.09.05로 여백을 확보하여 제목 잘림 완화)
+                      const displayDate = log.date ? log.date.slice(2).replace(/-/g, '.') : '';
                       return (
                         <div 
                           key={log.id} 
                           className="recent-log-item"
                           onClick={() => setViewMode('fullHistory')}
-                          title="클릭 시 생애 관리 내역 전체보기로 이동"
+                          title={`클릭 시 생애 관리 내역 전체보기로 이동 (${log.date})`}
                         >
-                          <div className="recent-log-date">{log.date}</div>
-                          <span className={`badge ${catObj.badgeClass}`} style={{ fontSize: '0.74rem', padding: '0.18rem 0.5rem', flexShrink: 0, fontWeight: 700 }}>
+                          <div className="recent-log-date" title={log.date}>{displayDate}</div>
+                          <span 
+                            className={`badge ${catObj.badgeClass}`} 
+                            style={{ 
+                              fontSize: '0.74rem', 
+                              padding: '0.15rem 0.52rem', 
+                              borderRadius: '9999px',
+                              flexShrink: 0, 
+                              fontWeight: 700,
+                              lineHeight: 1.2
+                            }}
+                          >
                             {catObj.label}
                           </span>
                           <div className="recent-log-title" title={log.title}>{log.title}</div>
@@ -738,7 +750,7 @@ export default function EntityDetailModal({
                           width: '100%'
                         }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem', minWidth: 0, flex: 1 }}>
-                            <span className={`badge ${catObj.badgeClass}`} style={{ flexShrink: 0 }}>
+                            <span className={`badge ${catObj.badgeClass}`} style={{ flexShrink: 0, borderRadius: '9999px', padding: '0.2rem 0.6rem', fontSize: '0.78rem', fontWeight: 700 }}>
                               {catObj.icon} {catObj.label}
                             </span>
                             <span style={{
