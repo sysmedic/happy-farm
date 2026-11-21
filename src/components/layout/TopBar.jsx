@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 
 // 정감 있는 제각(除角) 한우 벡터 라인 아이콘 (뿔 없이 순한 이마 & 부드러운 귀, 듬직한 비경)
-function CowIcon({ size = 23, strokeWidth = 2, className = '' }) {
+function CowIcon({ size = 25, strokeWidth = 2, className = '' }) {
   return (
     <svg
       width={size}
@@ -81,7 +81,7 @@ export default function TopBar({
           title="개체관리 (목록 및 상세 정보)"
           aria-label="개체관리"
         >
-          <CowIcon size={23} strokeWidth={activeTab === 'entities' ? 2.4 : 1.9} className="nav-tab-icon" />
+          <CowIcon size={25} strokeWidth={2} className="nav-tab-icon" />
           <span className="nav-tab-text">개체관리</span>
         </button>
 
@@ -91,7 +91,7 @@ export default function TopBar({
           title="다이어리 (일정 및 타임라인)"
           aria-label="다이어리"
         >
-          <Calendar size={22} strokeWidth={activeTab === 'diary' ? 2.4 : 1.9} className="nav-tab-icon" />
+          <Calendar size={22} strokeWidth={2} className="nav-tab-icon" />
           <span className="nav-tab-text">다이어리</span>
         </button>
 
@@ -102,7 +102,7 @@ export default function TopBar({
           title="일일보고 (영농일지 및 모바일 보고서)"
           aria-label="일일보고"
         >
-          <FileText size={22} strokeWidth={activeTab === 'report' ? 2.4 : 1.9} className="nav-tab-icon" />
+          <FileText size={22} strokeWidth={2} className="nav-tab-icon" />
           <span className="nav-tab-text">일일보고</span>
         </button>
 
@@ -112,7 +112,7 @@ export default function TopBar({
           title="드라이브 (구글 드라이브 백업/복원)"
           aria-label="드라이브"
         >
-          <Cloud size={22} strokeWidth={activeTab === 'cloud' ? 2.4 : 1.9} className="nav-tab-icon" />
+          <Cloud size={22} strokeWidth={2} className="nav-tab-icon" />
           <span className="nav-tab-text">드라이브</span>
         </button>
       </nav>
