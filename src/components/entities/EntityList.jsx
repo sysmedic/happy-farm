@@ -901,7 +901,7 @@ export default function EntityList({
                 </div>
 
                 {/* 2층: 소 이름(호칭) + 사육단계 · 축사 위치 */}
-                <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '0.75rem', fontSize: '0.88rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '0.45rem', marginBottom: '0.75rem', fontSize: '0.88rem' }}>
                   <span 
                     onClick={() => onOpenEntityDetail(entity.tagNumber)}
                     title="클릭 시 이 개체의 상세 프로필로 이동"
@@ -916,10 +916,9 @@ export default function EntityList({
                   <span style={{ fontWeight: 600, color: 'var(--text-muted)' }}>
                     ({formatDisplayBreed(entity.breed)})
                   </span>
-                  <span style={{ color: 'var(--border-color)', fontWeight: 300 }}>•</span>
-                  <span style={{ fontWeight: 600, color: 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', gap: '0.2rem' }}>
-                    <span style={{ fontSize: '0.82rem' }}>🏠</span>
-                    <span>{entity.barn || '축사 미지정'}</span>
+                  <span style={{ color: 'var(--border-color)', fontWeight: 300, margin: '0 0.1rem' }}>•</span>
+                  <span style={{ fontWeight: 600, color: 'var(--text-muted)' }}>
+                    {entity.barn || '축사 미지정'}
                   </span>
                 </div>
 
