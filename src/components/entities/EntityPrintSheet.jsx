@@ -107,7 +107,7 @@ export default function EntityPrintSheet({
           <tbody>
             <tr>
               <th style={{ width: '15%' }}>개체번호 (이표)</th>
-              <td style={{ width: '35%', fontWeight: 800, fontSize: '1.05rem', color: '#059669' }}>
+              <td className="tag-number-font" style={{ width: '35%', fontWeight: 800, fontSize: '1.05rem', color: '#059669' }}>
                 {entity.tagNumber}
               </td>
               <th style={{ width: '15%' }}>개체명 (애칭)</th>
@@ -135,9 +135,9 @@ export default function EntityPrintSheet({
             </tr>
             <tr>
               <th>모체 식별번호</th>
-              <td>{entity.motherTag || '미상'}</td>
+              <td className="tag-number-font" style={{ fontWeight: entity.motherTag ? 700 : 400 }}>{entity.motherTag || '미상'}</td>
               <th>부체 (KPN/종모우)</th>
-              <td>{entity.fatherTag || '미상'}</td>
+              <td className="tag-number-font" style={{ fontWeight: entity.fatherTag ? 700 : 400 }}>{entity.fatherTag || '미상'}</td>
             </tr>
             {entity.memo && (
               <tr>

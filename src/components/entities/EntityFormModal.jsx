@@ -256,7 +256,7 @@ export default function EntityFormModal({
                 <input
                   type="text"
                   inputMode="numeric"
-                  className="form-input"
+                  className="form-input tag-input"
                   placeholder="예: 002-1234-5678-9 (숫자 12자리만 입력)"
                   value={formData.tagNumber}
                   onChange={(e) => setFormData({ ...formData, tagNumber: formatTagNumber(e.target.value) })}
@@ -408,7 +408,7 @@ export default function EntityFormModal({
                 <input
                   type="text"
                   inputMode="numeric"
-                  className="form-input"
+                  className="form-input tag-input"
                   placeholder="예: 002-1100-3411-2 (숫자 12자리 입력)"
                   value={formData.motherTag}
                   onChange={(e) => setFormData({ ...formData, motherTag: formatTagNumber(e.target.value) })}
@@ -421,7 +421,7 @@ export default function EntityFormModal({
                 <label className="form-label">부체 식별 / 씨수소 (KPN)</label>
                 <input
                   type="text"
-                  className="form-input"
+                  className="form-input tag-input"
                   placeholder="예: KPN-1422"
                   value={formData.fatherTag}
                   onChange={(e) => setFormData({ ...formData, fatherTag: e.target.value })}

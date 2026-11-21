@@ -30,6 +30,7 @@ export default function EntityDetailModal({
   schedules = [],
   initialViewMode = 'summary',
   onClose,
+  onOpenEntityDetail,
   onOpenCareLogModal,
   onOpenEntityModal,
   onOpenPrintSheet,
@@ -347,15 +348,26 @@ export default function EntityDetailModal({
 
                 <div className="modal-spec-card">
                   <span className="modal-spec-label">모체 번호</span>
-                  <span className="modal-spec-value" title={entity.motherTag || '정보 없음'}>
-                    {entity.motherTag || '정보 없음'}
-                  </span>
+                  {entity.motherTag ? (
+                    <span 
+                      className="modal-spec-value tag-number-font spec-link-mother" 
+                      title="클릭 시 모체(어미소) 정보로 이동"
+                      onClick={() => onOpenEntityDetail && onOpenEntityDetail(entity.motherTag)}
+                      style={{ cursor: onOpenEntityDetail ? 'pointer' : 'default' }}
+                    >
+                      {entity.motherTag}
+                    </span>
+                  ) : (
+                    <span className="modal-spec-value" style={{ color: 'var(--text-muted)' }}>
+                      -
+                    </span>
+                  )}
                 </div>
 
                 <div className="modal-spec-card">
                   <span className="modal-spec-label">부체 (KPN)</span>
-                  <span className="modal-spec-value" title={entity.fatherTag || '정보 없음'}>
-                    {entity.fatherTag || '정보 없음'}
+                  <span className="modal-spec-value tag-number-font" title={entity.fatherTag || '미상'}>
+                    {entity.fatherTag || <span style={{ color: 'var(--text-muted)' }}>-</span>}
                   </span>
                 </div>
               </div>

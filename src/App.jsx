@@ -564,6 +564,7 @@ export default function App() {
             setSelectedEntityForDetail(null);
             setEntityDetailInitialView('summary');
           }}
+          onOpenEntityDetail={handleOpenEntityDetail}
           onOpenCareLogModal={(entity) => {
             setCareLogPreselectedEntity(entity);
             setCareLogInitialValues(null);
