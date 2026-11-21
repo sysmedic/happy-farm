@@ -204,6 +204,17 @@ a:hover {
   user-select: none;
 }
 
+.topbar-view-title {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--text-main);
+  letter-spacing: -0.025em;
+  white-space: nowrap;
+  line-height: 1.2;
+  user-select: none;
+}
+
 .brand-logo-icon {
   width: 40px;
   height: 40px;
@@ -2630,7 +2641,7 @@ form.modal-content {
     z-index: 100;
   }
 
-  /* 브랜드 섹션: 모바일에서는 로고 아이콘만 노출 */
+  /* 브랜드 섹션: 로고 아이콘 + 현재 화면 타이틀 노출 */
   .brand-title,
   .brand-subtitle,
   .brand-section>div:not(.brand-logo-icon) {
@@ -2638,9 +2649,19 @@ form.modal-content {
   }
 
   .brand-section {
-    gap: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
     flex-shrink: 0;
-    cursor: pointer;
+  }
+
+  .topbar-view-title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--text-main);
+    letter-spacing: -0.025em;
+    white-space: nowrap;
+    margin: 0;
   }
 
   .brand-logo-icon {

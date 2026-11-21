@@ -7,6 +7,48 @@ import {
   Plus
 } from 'lucide-react';
 
+// 정갈한 한우(소) 벡터 라인 아이콘 (Lucide 라인 스타일과 100% 호환)
+function CowIcon({ size = 17, className = '' }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      {/* 양쪽 뿔 */}
+      <path d="M6 7C4.5 4 2.5 4.5 2 7c2 1 3.5 1.5 5 1" />
+      <path d="M18 7c1.5-3 3.5-2.5 4 0-2 1-3.5 1.5-5 1" />
+      {/* 얼굴 윤곽 */}
+      <path d="M6 8v5c0 3.3 2.7 6 6 6s6-2.7 6-6V8" />
+      {/* 양쪽 귀 */}
+      <path d="M6 10H3.5a1.5 1.5 0 0 1-1.5-1.5c0-.8.7-1.5 1.5-1.5H6" />
+      <path d="M18 10h2.5a1.5 1.5 0 0 0 1.5-1.5c0-.8-.7-1.5-1.5-1.5H18" />
+      {/* 주둥이 */}
+      <rect x="8" y="13.5" width="8" height="4.5" rx="2" />
+      {/* 콧구멍 */}
+      <circle cx="10.5" cy="15.8" r="0.6" fill="currentColor" stroke="none" />
+      <circle cx="13.5" cy="15.8" r="0.6" fill="currentColor" stroke="none" />
+      {/* 눈 */}
+      <circle cx="9.5" cy="10.5" r="0.8" fill="currentColor" stroke="none" />
+      <circle cx="14.5" cy="10.5" r="0.8" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+// 탭별 현재 화면 이름 매핑
+const TAB_TITLES = {
+  entities: '개체 관리',
+  diary: '다이어리',
+  report: '일일 보고서',
+  cloud: '드라이브'
+};
+
 export default function TopBar({ 
   activeTab, 
   onSelectTab, 
@@ -14,9 +56,11 @@ export default function TopBar({
   onToggleTheme,
   onOpenCareLogModal
 }) {
+  const currentTitle = TAB_TITLES[activeTab] || '개체 관리';
+
   return (
     <header className="topbar">
-      {/* Brand Logo (농장 아이콘 터치 시 나이트/라이트 모드 전환) */}
+      {/* Brand Logo & Current View Title (농장 아이콘 터치 시 나이트/라이트 모드 전환) */}
       <div className="brand-section">
         <button
           type="button"
@@ -27,6 +71,7 @@ export default function TopBar({
         >
           <Sprout size={22} />
         </button>
+        <h1 className="topbar-view-title">{currentTitle}</h1>
       </div>
 
       {/* Main Navigation Tabs (모바일에서는 아이콘만 노출, 데스크톱에서는 텍스트 함께 노출) */}
@@ -37,7 +82,7 @@ export default function TopBar({
           title="개체관리 (목록 및 상세 정보)"
           aria-label="개체관리"
         >
-          <span className="nav-tab-icon" style={{ fontSize: '1.1rem', lineHeight: 1 }}>🐂</span>
+          <CowIcon size={17} className="nav-tab-icon" />
           <span className="nav-tab-text">개체관리</span>
         </button>
 
