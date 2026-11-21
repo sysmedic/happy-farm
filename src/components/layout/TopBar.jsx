@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 
 // 정감 있는 제각(除角) 한우 벡터 라인 아이콘 (상하 높이 꽉 찬 밸런스 핏)
-function CowIcon({ size = 25, strokeWidth = 1.5, className = '' }) {
+function CowIcon({ size = 27, strokeWidth = 1.5, className = '' }) {
   return (
     <svg
       width={size}
@@ -81,7 +81,7 @@ export default function TopBar({
           title="개체관리 (목록 및 상세 정보)"
           aria-label="개체관리"
         >
-          <CowIcon size={25} strokeWidth={1.5} className="nav-tab-icon" />
+          <CowIcon size={27} strokeWidth={1.5} className="nav-tab-icon" />
           <span className="nav-tab-text">개체관리</span>
         </button>
 
