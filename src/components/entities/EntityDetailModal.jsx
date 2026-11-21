@@ -185,28 +185,34 @@ export default function EntityDetailModal({
           </button>
         </div>
 
-        {/* 생애 관리 내역 전면 뷰 전용 서브 필터 바 */}
+        {/* 생애 관리 내역 전면 뷰 전용 서브 헤더 바 (2단 개체정보 + 3단 통합 캡슐 필터 고정) */}
         {viewMode === 'fullHistory' && (
           <div className="fullhistory-header-bar">
-            {/* 1열: 개체번호 + 별명 (좌측) | 전체 기록 버튼 (우측) */}
+            {/* 2단: 개체 식별 프로필 바 (가로 100% 쾌적하게 활용) */}
             <div className="fullhistory-header-identity-row">
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', minWidth: 0, flex: 1, overflow: 'hidden' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem', minWidth: 0, flex: 1, flexWrap: 'wrap' }}>
                 <span className="entity-ear-tag fullhistory-tag" style={{ flexShrink: 0 }}>{entity.tagNumber}</span>
                 <h2 className="fullhistory-entity-name" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{entity.name}</h2>
+                <span style={{ fontSize: '0.84rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                  {formatDisplayBreed(entity.breed)} • {age.text}
+                </span>
               </div>
-              <button
-                type="button"
-                className={`fullhistory-total-tag ${selectedCategory === 'all' ? 'active' : ''}`}
-                onClick={() => setSelectedCategory('all')}
-                title="클릭하여 전체 관리 기록 보기"
-              >
-                <span>전체 기록</span>
-                <span className="tab-count">{allEntityLogs.length}</span>
-              </button>
             </div>
 
-            {/* 2열: 세부 관리 분류 탭 */}
+            {/* 3단: '전체' + 종목별 기록 집계 캡슐 통합 필터 바 (3단 완전 일체화) */}
             <div className="fullhistory-filter-bar">
+              {/* 1번 캡슐: 전체 기록 */}
+              <button
+                type="button"
+                className={`fullhistory-tab-btn ${selectedCategory === 'all' ? 'active' : ''}`}
+                onClick={() => setSelectedCategory('all')}
+                title="전체 관리 기록 보기"
+              >
+                <span>전체</span>
+                <span className="tab-count">{allEntityLogs.length}</span>
+              </button>
+
+              {/* 종목별 기록 캡슐들 */}
               {categoriesToDisplay.map(cat => {
                 const count = allEntityLogs.filter(l => l.category === cat.id).length;
                 if (count === 0 && selectedCategory !== cat.id) return null;
@@ -216,6 +222,7 @@ export default function EntityDetailModal({
                     type="button"
                     className={`fullhistory-tab-btn ${selectedCategory === cat.id ? 'active' : ''}`}
                     onClick={() => setSelectedCategory(cat.id)}
+                    title={`${cat.label} 관리 기록 보기`}
                   >
                     <span>{cat.label}</span>
                     <span className="tab-count">{count}</span>
