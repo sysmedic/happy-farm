@@ -86,9 +86,10 @@ function createReportImageBlob({
       let h = 12; // 상단 내부 여백
       h += 20; // 1행 (사각 모노 귀표 + 소 이름 + 타원 종목 뱃지)
       h += 20; // 2행 (작업 제목 굵은 글씨)
-      if (log.details) {
-        const lines = getWrappedLines(mCtx, log.details, contentWidth - 24);
-        h += lines.length * 16 + 2; // 3행 (상세 내용 각 줄당 16px)
+      const detailText = log.details || log.description || '';
+      if (detailText) {
+        const lines = getWrappedLines(mCtx, detailText, contentWidth - 24);
+        h += lines.length * 16 + 2; // 3행 (상세 처치 내용 각 줄당 16px)
       }
       h += 18; // 4행 (시간 • 담당자 • 비용 메타 행)
       if (log.nextScheduleDate) {
@@ -98,7 +99,7 @@ function createReportImageBlob({
         const sLines = getWrappedLines(mCtx, fullScheduleText, contentWidth - 24);
         h += 17 + (sLines.length - 1) * 15; // 5행 (다음 일정)
       }
-      h += 12; // 하단 내부 여백
+      h += 10; // 하단 내부 여백 밸런싱
       return h;
     });
 
@@ -114,7 +115,7 @@ function createReportImageBlob({
     }
 
     // 전체 세로 높이 동적 계산 (화면과 100% 동일한 비례)
-    let totalHeight = 68; // 1. 상단 그린 헤더
+    let totalHeight = 54; // 1. 상단 그린 헤더 (대안 2 슬림 헤더)
     totalHeight += 12; // 상단 여백
     totalHeight += 36; // 1단: 총작업 & 총비용 2열 반반 카드 (36px)
 
@@ -148,24 +149,25 @@ function createReportImageBlob({
     ctx.fillStyle = '#f8fafc';
     ctx.fillRect(0, 0, viewWidth, totalHeight);
 
-    // 2. 상단 헤더 (산뜻한 그린)
+    // 2. 상단 헤더 (산뜻한 그린 - 대안 2: 좌우 양끝 대칭형 1줄 헤더)
     ctx.fillStyle = '#059669';
-    ctx.fillRect(0, 0, viewWidth, 68);
+    ctx.fillRect(0, 0, viewWidth, 54);
 
-    // 헤더 중앙 타이틀
-    ctx.textAlign = 'center';
+    // 좌측: 영농보고서 타이틀
+    ctx.textAlign = 'left';
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 17px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-    ctx.fillText('🌱 행복농장 일일 영농보고서', viewWidth / 2, 33);
+    ctx.font = 'bold 15.5px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.fillText('🌱 행복농장 일일 영농보고서', padding + 2, 33);
 
-    // 헤더 우측 일자
+    // 우측: 날짜 (2026. 03. 10. 세련된 점 포맷)
+    const formattedDate = reportDate ? reportDate.replace(/-/g, '. ') + '.' : '';
     ctx.textAlign = 'right';
-    ctx.font = '12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.font = '600 12.5px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
     ctx.fillStyle = '#d1fae5';
-    ctx.fillText(reportDate, viewWidth - padding, 54);
+    ctx.fillText(formattedDate, viewWidth - padding - 2, 33);
     ctx.textAlign = 'left';
 
-    let y = 80;
+    let y = 66;
 
     // 3. 1단: 총 작업 & 총 비용 2열 반반 카드
     const halfGap = 6;
@@ -334,10 +336,11 @@ function createReportImageBlob({
         ctx.fillText(log.title, padding + 12, cardY + 12);
 
         // 3행: 상세 처치 내용 (있을 때만)
-        if (log.details) {
+        const detailText = log.details || log.description || '';
+        if (detailText) {
           ctx.font = '12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
           ctx.fillStyle = '#475569';
-          const detailLines = getWrappedLines(ctx, log.details, contentWidth - 24);
+          const detailLines = getWrappedLines(ctx, detailText, contentWidth - 24);
           detailLines.forEach(line => {
             cardY += 16;
             ctx.fillText(line, padding + 12, cardY + 12);
@@ -534,6 +537,10 @@ export default function DailyReportView({
         if (l.operator) meta.push(`담당: ${l.operator}`);
         if (l.cost > 0) meta.push(`비용: ${Number(l.cost).toLocaleString()}원`);
         summaryText += `${idx + 1}. [${l.tagNumber}] ${eName ? eName + ' - ' : ''}${l.title} (${meta.join(', ')})\n`;
+        const itemDetail = l.details || l.description;
+        if (itemDetail) {
+          summaryText += `   내용: ${itemDetail}\n`;
+        }
       });
       if (farmNotes.trim()) {
         summaryText += `\n특이사항:\n${farmNotes}`;
@@ -835,9 +842,9 @@ export default function DailyReportView({
                     </div>
 
                     {/* 3행: 상세 처치 내용 (있을 때만) */}
-                    {log.details && (
+                    {(log.details || log.description) && (
                       <div style={{ fontSize: '0.825rem', color: 'var(--text-subtle)', lineHeight: 1.45, marginTop: '0.2rem' }}>
-                        {log.details}
+                        {log.details || log.description}
                       </div>
                     )}
 
