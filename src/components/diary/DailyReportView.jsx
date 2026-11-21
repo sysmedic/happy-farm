@@ -38,8 +38,17 @@ function saveDailyNotes(notesMap) {
   }
 }
 
-// 고화질 스마트폰 비율(모바일 카드형) JPG 이미지 보고서 캔버스 생성기
-function createReportImageBlob({ reportDate, dailyLogs, totalCost, categoryStats, farmNotes }) {
+// 고화질 스마트폰 비율(모바일 카드형) JPG 이미지 보고서 캔버스 생성기 (화면 양식과 100% 동일 규격)
+function createReportImageBlob({ 
+  reportDate, 
+  dailyLogs, 
+  totalCost, 
+  categoryStats, 
+  activeCategories = [], 
+  farmNotes,
+  entities = [],
+  careCategories = []
+}) {
   return new Promise((resolve) => {
     // 모바일 스마트폰 화면 기준 가로폭 (370px) & 선명한 레티나 2배수 렌더링 (740px 해상도)
     const viewWidth = 370;
@@ -72,28 +81,31 @@ function createReportImageBlob({ reportDate, dailyLogs, totalCost, categoryStats
     const mCtx = measureCanvas.getContext('2d');
     mCtx.font = '12.5px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
 
-    // 각 카드별 높이 사전 계산 (상단 12px : 하단 12px 정밀 대칭)
+    // 1안 레이아웃에 따른 각 카드별 높이 사전 계산
     const cardHeights = dailyLogs.map(log => {
       let h = 12; // 상단 내부 여백
-      h += 18; // 1행 (시간, 이표, 이름)
-      if (log.operator) h += 17; // 2행 (담당)
-      h += 19; // 3행 (제목)
+      h += 20; // 1행 (사각 모노 귀표 + 소 이름 + 타원 종목 뱃지)
+      h += 20; // 2행 (작업 제목 굵은 글씨)
       if (log.details) {
         const lines = getWrappedLines(mCtx, log.details, contentWidth - 24);
-        h += lines.length * 16; // 4행 (상세 내용 각 줄당 16px)
+        h += lines.length * 16 + 2; // 3행 (상세 내용 각 줄당 16px)
       }
+      h += 18; // 4행 (시간 • 담당자 • 비용 메타 행)
       if (log.nextScheduleDate) {
         const scheduleTitle = log.nextScheduleTitle ? ` (${log.nextScheduleTitle})` : '';
         const fullScheduleText = `다음 일정: ${log.nextScheduleDate}${scheduleTitle}`;
         mCtx.font = 'bold 11.5px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
         const sLines = getWrappedLines(mCtx, fullScheduleText, contentWidth - 24);
-        h += 17 + (sLines.length - 1) * 15; // 5행 (첫줄 17px + 추가줄당 15px)
+        h += 17 + (sLines.length - 1) * 15; // 5행 (다음 일정)
       }
-      h += 12; // 하단 내부 여백 (상단과 동일 대칭)
+      h += 12; // 하단 내부 여백
       return h;
     });
 
-    // 특이사항 높이 계산 (과다 여백 제거, 상하 12px 정밀 밀착)
+    // 캡슐 행 수 계산 (3개 단위로 자동 줄바꿈)
+    const capsuleRows = Math.ceil((activeCategories.length || 0) / 3);
+
+    // 특이사항 높이 계산
     let farmNotesLines = [];
     let farmNotesHeight = 0;
     if (farmNotes && farmNotes.trim()) {
@@ -101,24 +113,29 @@ function createReportImageBlob({ reportDate, dailyLogs, totalCost, categoryStats
       farmNotesHeight = 24 + (farmNotesLines.length * 17);
     }
 
-    // 전체 세로 높이 동적 계산 (모바일 세로 비율)
-    let totalHeight = 68; // 1. 상단 헤더
-    totalHeight += 84; // 2. 3열 1단 슬림 타일 카드 2행 (34 + 6 + 34 + 10)
-    totalHeight += 12; // 3. 자연스러운 여백 (세부내역 제목 완전 삭제)
+    // 전체 세로 높이 동적 계산 (화면과 100% 동일한 비례)
+    let totalHeight = 68; // 1. 상단 그린 헤더
+    totalHeight += 12; // 상단 여백
+    totalHeight += 36; // 1단: 총작업 & 총비용 2열 반반 카드 (36px)
+
+    if (capsuleRows > 0) {
+      totalHeight += 8 + (capsuleRows * 32) + ((capsuleRows - 1) * 6); // 2단: 3열 알약 캡슐 그리드
+    }
+    totalHeight += 14; // 카드 리스트 시작 전 여백
 
     if (dailyLogs.length === 0) {
       totalHeight += 70;
     } else {
       cardHeights.forEach(ch => {
-        totalHeight += ch + 10; // 카드 높이 + 카드 간격
+        totalHeight += ch + 10; // 카드 높이 + 간격
       });
     }
 
     if (farmNotesHeight > 0) {
-      totalHeight += farmNotesHeight + 14;
+      totalHeight += farmNotesHeight + 20;
     }
 
-    totalHeight += 45; // 푸터 여백
+    totalHeight += 40; // 하단 푸터 여백
 
     // 실제 캔버스 생성 (2배수 스케일)
     const canvas = document.createElement('canvas');
@@ -127,7 +144,7 @@ function createReportImageBlob({ reportDate, dailyLogs, totalCost, categoryStats
     const ctx = canvas.getContext('2d');
     ctx.scale(scale, scale);
 
-    // 1. 전체 배경 (모바일 앱 배경색 느낌의 부드러운 그레이)
+    // 1. 전체 배경 (부드러운 그레이)
     ctx.fillStyle = '#f8fafc';
     ctx.fillRect(0, 0, viewWidth, totalHeight);
 
@@ -135,82 +152,106 @@ function createReportImageBlob({ reportDate, dailyLogs, totalCost, categoryStats
     ctx.fillStyle = '#059669';
     ctx.fillRect(0, 0, viewWidth, 68);
 
-    // [헤더 중앙 배치] 앱 새싹 아이콘(🌱) + 타이틀 가로 정중앙
+    // 헤더 중앙 타이틀
     ctx.textAlign = 'center';
     ctx.fillStyle = '#ffffff';
     ctx.font = 'bold 17px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
     ctx.fillText('🌱 행복농장 일일 영농보고서', viewWidth / 2, 33);
 
-    // [헤더 우측 하단] '일자:' 및 '작성자' 삭제 ➡️ 날짜 숫자만 우측 배치
+    // 헤더 우측 일자
     ctx.textAlign = 'right';
     ctx.font = '12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
     ctx.fillStyle = '#d1fae5';
     ctx.fillText(reportDate, viewWidth - padding, 54);
-    ctx.textAlign = 'left'; // 기본 정렬 복귀
+    ctx.textAlign = 'left';
 
-    let y = 78;
+    let y = 80;
 
-    // 3. 3열 1단 슬림 타일 카드 그리드 (화면과 100% 동일 규격)
-    const colGap = 5;
-    const colW = Math.floor((contentWidth - (colGap * 2)) / 3);
-    const rowH = 34;
+    // 3. 1단: 총 작업 & 총 비용 2열 반반 카드
+    const halfGap = 6;
+    const halfW = Math.floor((contentWidth - halfGap) / 2);
+    const stat1X = padding;
+    const stat2X = padding + halfW + halfGap;
+    const statH = 36;
 
-    // 타일 박스 그리기 헬퍼
-    const drawTileBox = (x, boxY, w, h, bg, border, label, labelColor, val, valColor, isSpan2 = false) => {
-      ctx.fillStyle = bg;
-      ctx.strokeStyle = border;
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      if (ctx.roundRect) ctx.roundRect(x, boxY, w, h, 6);
-      else ctx.rect(x, boxY, w, h);
-      ctx.fill();
-      ctx.stroke();
+    // 좌측: 총 작업 카드
+    ctx.fillStyle = '#ffffff';
+    ctx.strokeStyle = '#e2e8f0';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(stat1X, y, halfW, statH, 6);
+    else ctx.rect(stat1X, y, halfW, statH);
+    ctx.fill();
+    ctx.stroke();
 
-      if (isSpan2) {
-        // 총 비용 (양쪽 정렬)
-        ctx.textAlign = 'left';
-        ctx.font = '600 11.5px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-        ctx.fillStyle = labelColor;
-        ctx.fillText(label, x + 10, boxY + 21);
+    ctx.font = '600 11.5px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.fillStyle = '#64748b';
+    ctx.fillText('총 작업', stat1X + 10, y + 22);
 
-        ctx.textAlign = 'right';
-        ctx.font = 'bold 13px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-        ctx.fillStyle = valColor;
-        ctx.fillText(val, x + w - 10, boxY + 21);
-        ctx.textAlign = 'left';
-      } else {
-        // 중앙 정렬 1단 (라벨 + 건수)
+    ctx.textAlign = 'right';
+    ctx.font = 'bold 13.5px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.fillStyle = '#059669';
+    ctx.fillText(`${dailyLogs.length}건`, stat1X + halfW - 10, y + 22);
+    ctx.textAlign = 'left';
+
+    // 우측: 총 비용 카드
+    ctx.fillStyle = '#ffffff';
+    ctx.strokeStyle = '#e2e8f0';
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(stat2X, y, halfW, statH, 6);
+    else ctx.rect(stat2X, y, halfW, statH);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.font = '600 11.5px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.fillStyle = '#64748b';
+    ctx.fillText('총 비용', stat2X + 10, y + 22);
+
+    ctx.textAlign = 'right';
+    ctx.font = 'bold 13.5px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.fillStyle = '#0f172a';
+    ctx.fillText(`${totalCost.toLocaleString()}원`, stat2X + halfW - 10, y + 22);
+    ctx.textAlign = 'left';
+
+    y += statH;
+
+    // 4. 2단: 당일 실제로 발생한 종목 3열 알약 캡슐 그리드 (3개 초과 시 자동 줄바꿈)
+    if (activeCategories.length > 0) {
+      y += 8;
+      const colGap = 5;
+      const colW = Math.floor((contentWidth - (colGap * 2)) / 3);
+      const rowH = 32;
+
+      activeCategories.forEach((cat, idx) => {
+        const col = idx % 3;
+        const row = Math.floor(idx / 3);
+        const cX = padding + col * (colW + colGap);
+        const cY = y + row * (rowH + 6);
+        const count = categoryStats[cat.id] || 0;
+
+        // 알약 캡슐 배경
+        ctx.fillStyle = '#ffffff';
+        ctx.strokeStyle = '#e2e8f0';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(cX, cY, colW, rowH, 16);
+        else ctx.rect(cX, cY, colW, rowH);
+        ctx.fill();
+        ctx.stroke();
+
+        // 캡슐 텍스트
         ctx.textAlign = 'center';
-        ctx.font = '600 11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-        ctx.fillStyle = labelColor;
-        ctx.fillText(label, x + (w / 2) - 15, boxY + 21);
-
-        ctx.font = 'bold 12.5px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-        ctx.fillStyle = valColor;
-        ctx.fillText(val, x + (w / 2) + 16, boxY + 21);
+        ctx.font = 'bold 11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+        ctx.fillStyle = '#0f172a';
+        const labelStr = `${cat.icon ? cat.icon + ' ' : ''}${cat.label} ${count}`;
+        ctx.fillText(labelStr, cX + colW / 2, cY + 20);
         ctx.textAlign = 'left';
-      }
-    };
+      });
 
-    // 1행: [총작업] [백신] [진료·치료]
-    const row1Y = y;
-    const col0X = padding;
-    const col1X = padding + colW + colGap;
-    const col2X = padding + (colW + colGap) * 2;
+      y += (capsuleRows * rowH) + ((capsuleRows - 1) * 6);
+    }
 
-    drawTileBox(col0X, row1Y, colW, rowH, '#ffffff', '#e2e8f0', '총작업', '#64748b', `${dailyLogs.length}건`, '#0f172a');
-    drawTileBox(col1X, row1Y, colW, rowH, 'rgba(5, 150, 105, 0.08)', 'rgba(5, 150, 105, 0.25)', '백신', '#059669', `${categoryStats.vaccine || 0}건`, '#059669');
-    drawTileBox(col2X, row1Y, colW, rowH, 'rgba(220, 38, 38, 0.08)', 'rgba(220, 38, 38, 0.25)', '진료·치료', '#dc2626', `${categoryStats.treatment || 0}건`, '#dc2626');
-
-    // 2행: [수정] [총 비용 (2칸)]
-    const row2Y = y + rowH + 6;
-    const span2W = contentWidth - colW - colGap;
-
-    drawTileBox(col0X, row2Y, colW, rowH, 'rgba(2, 132, 199, 0.08)', 'rgba(2, 132, 199, 0.25)', '수정', '#0284c7', `${categoryStats.breeding || 0}건`, '#0284c7');
-    drawTileBox(col1X, row2Y, span2W, rowH, '#ffffff', '#e2e8f0', '총 비용', '#64748b', `${totalCost.toLocaleString()}원`, '#0f172a', true);
-
-    // 4. 개체 카드 시작 위치 ('세부 관리 내역' 제목 삭제 및 시원한 자연 여백)
-    y = row2Y + rowH + 14;
+    y += 14;
 
     // 5. 개체별 관리 카드
     if (dailyLogs.length === 0) {
@@ -229,78 +270,91 @@ function createReportImageBlob({ reportDate, dailyLogs, totalCost, categoryStats
     } else {
       dailyLogs.forEach((log, idx) => {
         const cardH = cardHeights[idx];
+        const catObj = getCategoryById(log.category, careCategories);
+        const entityObj = entities?.find(e => e.id === log.entityId || e.tagNumber === log.tagNumber);
+        const entityName = log.entityName || entityObj?.name || '';
 
-        // 카드 배경 (흰색 + 둥근 테두리)
+        // 카드 외곽
         ctx.fillStyle = '#ffffff';
         ctx.strokeStyle = '#e2e8f0';
         ctx.lineWidth = 1;
         ctx.beginPath();
-        if (ctx.roundRect) {
-          ctx.roundRect(padding, y, contentWidth, cardH, 8);
-        } else {
-          ctx.rect(padding, y, contentWidth, cardH);
-        }
+        if (ctx.roundRect) ctx.roundRect(padding, y, contentWidth, cardH, 8);
+        else ctx.rect(padding, y, contentWidth, cardH);
         ctx.fill();
         ctx.stroke();
 
         let cardY = y + 12;
+        let rX = padding + 12;
 
-        // 1행: [시간] [개체번호 뱃지] [개체이름]
-        let row1X = padding + 12;
-        if (log.time) {
-          ctx.fillStyle = '#64748b';
-          ctx.font = 'bold 12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-          ctx.fillText(log.time, row1X, cardY + 11);
-          row1X += ctx.measureText(log.time).width + 8;
-        }
-
-        // 개체번호 뱃지 박스 (단정한 모노톤 사각 귀표 규격)
-        ctx.font = 'bold 11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+        // 1행: [사각 모노 귀표] + 소 이름 + [타원 종목 뱃지]
+        // 1) 사각 귀표 박스 (모노톤)
+        ctx.font = 'bold 11px monospace, -apple-system, sans-serif';
         const tagText = log.tagNumber || '';
-        const tagW = ctx.measureText(tagText).width + 10;
+        const tagW = ctx.measureText(tagText).width + 8;
         ctx.fillStyle = '#f1f5f9';
         ctx.strokeStyle = '#cbd5e1';
         ctx.beginPath();
-        if (ctx.roundRect) ctx.roundRect(row1X, cardY - 1, tagW, 17, 4);
-        else ctx.rect(row1X, cardY - 1, tagW, 17);
+        if (ctx.roundRect) ctx.roundRect(rX, cardY - 1, tagW, 18, 4);
+        else ctx.rect(rX, cardY - 1, tagW, 18);
         ctx.fill();
         ctx.stroke();
 
         ctx.fillStyle = '#0f172a';
-        ctx.fillText(tagText, row1X + 5, cardY + 11);
-        row1X += tagW + 7;
+        ctx.fillText(tagText, rX + 4, cardY + 12);
+        rX += tagW + 7;
 
-        // 개체 이름
-        ctx.fillStyle = '#0f172a';
-        ctx.font = 'bold 13px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-        ctx.fillText(log.entityName || '', row1X, cardY + 11);
-
-        // 2행: 담당
-        if (log.operator) {
-          cardY += 17;
-          ctx.fillStyle = '#64748b';
-          ctx.font = '11.5px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-          ctx.fillText(`담당: ${log.operator}`, padding + 12, cardY + 11);
+        // 2) 소 이름
+        if (entityName) {
+          ctx.font = 'bold 12.5px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+          ctx.fillStyle = '#0f172a';
+          ctx.fillText(entityName, rX, cardY + 12);
+          rX += ctx.measureText(entityName).width + 7;
         }
 
-        // 3행: 작업 제목
-        cardY += 19;
-        ctx.fillStyle = '#0f172a';
-        ctx.font = 'bold 13.5px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-        ctx.fillText(log.title, padding + 12, cardY + 11);
+        // 3) 타원 종목 뱃지
+        ctx.font = 'bold 11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+        const catText = `${catObj.icon ? catObj.icon + ' ' : ''}${catObj.label}`;
+        const catW = ctx.measureText(catText).width + 10;
+        ctx.fillStyle = 'rgba(16, 185, 129, 0.08)';
+        ctx.strokeStyle = 'rgba(16, 185, 129, 0.25)';
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(rX, cardY - 1, catW, 18, 9);
+        else ctx.rect(rX, cardY - 1, catW, 18);
+        ctx.fill();
+        ctx.stroke();
 
-        // 4행: 상세 처치 내용 (줄바꿈 지원)
+        ctx.fillStyle = '#059669';
+        ctx.fillText(catText, rX + 5, cardY + 12);
+
+        // 2행: 핵심 작업 제목 (굵은 글씨)
+        cardY += 21;
+        ctx.font = 'bold 13.5px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+        ctx.fillStyle = '#0f172a';
+        ctx.fillText(log.title, padding + 12, cardY + 12);
+
+        // 3행: 상세 처치 내용 (있을 때만)
         if (log.details) {
-          ctx.fillStyle = '#475569';
           ctx.font = '12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+          ctx.fillStyle = '#475569';
           const detailLines = getWrappedLines(ctx, log.details, contentWidth - 24);
           detailLines.forEach(line => {
             cardY += 16;
-            ctx.fillText(line, padding + 12, cardY + 11);
+            ctx.fillText(line, padding + 12, cardY + 12);
           });
         }
 
-        // 5행: 다음 일정 (긴 텍스트 자동 줄바꿈 및 박스 넘침 방지)
+        // 4행: 시간 • 담당자 • 비용 메타 행
+        cardY += 18;
+        ctx.font = '11.5px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+        let metaParts = [];
+        if (log.time) metaParts.push(log.time);
+        if (log.operator) metaParts.push(`담당: ${log.operator}`);
+        if (log.cost > 0) metaParts.push(`비용: ${Number(log.cost).toLocaleString()}원`);
+        ctx.fillStyle = '#64748b';
+        ctx.fillText(metaParts.join('  •  '), padding + 12, cardY + 11);
+
+        // 5행: 다음 일정
         if (log.nextScheduleDate) {
           cardY += 17;
           ctx.fillStyle = '#d97706';
@@ -318,12 +372,12 @@ function createReportImageBlob({ reportDate, dailyLogs, totalCost, categoryStats
       });
     }
 
-    // 6. 일일 영농 특이사항 (내용 있을 때만 표시, 콤팩트 슬림 밀착)
+    // 6. 일일 영농 특이사항 (내용 있을 때만 표시)
     if (farmNotesHeight > 0) {
       y += 4;
       ctx.fillStyle = '#0f172a';
-      ctx.font = 'bold 14px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-      ctx.fillText('📝 일일 영농 특이사항', padding, y);
+      ctx.font = 'bold 13.5px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      ctx.fillText('📄 일일 영농 특이사항', padding, y);
       y += 10;
 
       ctx.fillStyle = '#ffffff';
@@ -344,16 +398,15 @@ function createReportImageBlob({ reportDate, dailyLogs, totalCost, categoryStats
         ctx.fillText(line, padding + 12, noteY + 11);
         noteY += 17;
       });
-
-      y += farmNotesHeight + 14;
+      y += farmNotesHeight;
     }
 
-    // 7. 하단 안내 푸터 (가로 정중앙 배치)
+    // 7. 하단 푸터 워터마크
     ctx.textAlign = 'center';
     ctx.fillStyle = '#94a3b8';
     ctx.font = '11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-    ctx.fillText('행복 농장 • 고객등록카드 기반 개체식별 관리시스템', viewWidth / 2, y + 16);
-    ctx.textAlign = 'left'; // 기본 정렬 복귀
+    ctx.fillText('행복 농장 • 고객등록카드 기반 개체식별 관리시스템', viewWidth / 2, totalHeight - 16);
+    ctx.textAlign = 'left';
 
     canvas.toBlob((blob) => {
       resolve(blob);
@@ -438,7 +491,10 @@ export default function DailyReportView({
         dailyLogs,
         totalCost,
         categoryStats,
-        farmNotes
+        activeCategories,
+        farmNotes,
+        entities,
+        careCategories
       });
 
       const fileName = `행복농장_일일보고서_${reportDate}.jpg`;
@@ -468,12 +524,19 @@ export default function DailyReportView({
         URL.revokeObjectURL(url);
       }
 
-      let summaryText = `[행복 농장 일일 관리 보고서]\n일자: ${reportDate}\n총 관리 작업: ${dailyLogs.length}건\n총 비용: ${totalCost.toLocaleString()}원\n\n[작업 내역]\n`;
+      let summaryText = `[행복 농장 일일 관리 보고서]\n일자: ${reportDate}\n총 관리 작업: ${dailyLogs.length}건 | 총 비용: ${totalCost.toLocaleString()}원\n\n[작업 내역]\n`;
       dailyLogs.forEach((l, idx) => {
-        summaryText += `${idx + 1}. [${l.tagNumber}] ${l.entityName} - ${l.title} (${l.time || '시간미지정'})\n`;
+        const catObj = getCategoryById(l.category, careCategories);
+        const ent = entities?.find(e => e.id === l.entityId || e.tagNumber === l.tagNumber);
+        const eName = l.entityName || ent?.name || '';
+        let meta = [catObj.label];
+        if (l.time) meta.push(l.time);
+        if (l.operator) meta.push(`담당: ${l.operator}`);
+        if (l.cost > 0) meta.push(`비용: ${Number(l.cost).toLocaleString()}원`);
+        summaryText += `${idx + 1}. [${l.tagNumber}] ${eName ? eName + ' - ' : ''}${l.title} (${meta.join(', ')})\n`;
       });
       if (farmNotes.trim()) {
-        summaryText += `\n특이사항: ${farmNotes}`;
+        summaryText += `\n특이사항:\n${farmNotes}`;
       }
 
       if (navigator.clipboard) {
