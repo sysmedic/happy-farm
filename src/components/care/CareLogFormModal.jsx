@@ -48,7 +48,7 @@ export default function CareLogFormModal({
   const [selectedEntityId, setSelectedEntityId] = useState(logToEdit?.entityId || initialValues?.entityId || preselectedEntity?.id || '');
   const [date, setDate] = useState(logToEdit?.date || initialValues?.date || getTodayDateString());
   const [time, setTime] = useState(logToEdit?.time || getCurrentTimeString());
-  const [category, setCategory] = useState(normalizeCategoryId(logToEdit?.category || initialValues?.category) || 'vaccine');
+  const [category, setCategory] = useState(normalizeCategoryId(logToEdit?.category || initialValues?.category) || '');
   const [title, setTitle] = useState(logToEdit?.title || initialValues?.title || '');
   const [details, setDetails] = useState(logToEdit?.details || '');
   const [operator, setOperator] = useState(() => getInitialOperator(logToEdit, careLogs));
@@ -215,6 +215,11 @@ export default function CareLogFormModal({
 
     if (!selectedEntityId) {
       setErrorMsg('대상 개체를 선택해주세요.');
+      return;
+    }
+
+    if (!category) {
+      setErrorMsg('관리 분류를 선택해주세요.');
       return;
     }
 

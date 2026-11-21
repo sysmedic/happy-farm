@@ -418,6 +418,7 @@ export default function App() {
         onToggleTheme={handleToggleTheme}
         onOpenCareLogModal={(preselected = null) => {
           setCareLogPreselectedEntity(preselected);
+          setCareLogInitialValues(null);
           setIsCareLogModalOpen(true);
         }}
       />
@@ -479,6 +480,7 @@ export default function App() {
                 }}
                 onOpenCareLogModal={(entity) => {
                   setCareLogPreselectedEntity(entity);
+                  setCareLogInitialValues(null);
                   setIsCareLogModalOpen(true);
                 }}
                 onOpenPrintSheet={(entity) => {
@@ -526,6 +528,7 @@ export default function App() {
                 onOpenEntityDetail={handleOpenEntityDetail}
                 onOpenCareLogModal={(entity = null) => {
                   setCareLogPreselectedEntity(entity);
+                  setCareLogInitialValues(null);
                   setIsCareLogModalOpen(true);
                 }}
                 onEditCareLog={handleOpenEditCareLog}
@@ -563,6 +566,7 @@ export default function App() {
           }}
           onOpenCareLogModal={(entity) => {
             setCareLogPreselectedEntity(entity);
+            setCareLogInitialValues(null);
             setIsCareLogModalOpen(true);
           }}
           onOpenEntityModal={(entity) => {
