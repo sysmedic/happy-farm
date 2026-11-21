@@ -256,7 +256,7 @@ export default function DailyDiaryView({
                 일정/작업 기록 있음
               </span>
               <button
-                className="btn btn-primary btn-sm"
+                className="btn btn-outline btn-sm"
                 onClick={() => onOpenScheduleModal(selectedDate)}
                 style={{ fontSize: '0.75rem', padding: '0.2rem 0.55rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
                 title="선택한 일자에 새 영농 일정 등록"
@@ -273,7 +273,7 @@ export default function DailyDiaryView({
           {/* 상단 날짜 헤더 */}
           <div className="diary-section-header">
             <div>
-              <span style={{ fontSize: '0.825rem', color: 'var(--color-primary)', fontWeight: 700 }}>
+              <span style={{ fontSize: '0.825rem', color: 'var(--text-subtle)', fontWeight: 700 }}>
                 일일 영농 일지
               </span>
               <h2 style={{ fontSize: '1.35rem', fontWeight: 800, margin: '0.15rem 0 0 0' }}>
@@ -324,7 +324,7 @@ export default function DailyDiaryView({
                   <span>등록된 일정 ({dailySchedules.length}건)</span>
                 </h4>
                 <button
-                  className="btn btn-primary btn-sm"
+                  className="btn btn-outline btn-sm"
                   onClick={() => onOpenScheduleModal(selectedDate)}
                   style={{ fontSize: '0.75rem', padding: '0.2rem 0.55rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
                 >
