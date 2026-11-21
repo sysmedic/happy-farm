@@ -886,10 +886,10 @@ export default function EntityList({
                       fontSize: '1.25rem', 
                       fontWeight: 900, 
                       fontFamily: 'var(--font-family)',
-                      fontVariantNumeric: 'slashed-zero tabular-nums',
-                      fontFeatureSettings: '"zero" 1, "tnum" 1',
+                      fontVariantNumeric: 'tabular-nums',
+                      fontFeatureSettings: '"tnum" 1',
                       color: 'var(--text-main)', 
-                      letterSpacing: '0.02em',
+                      letterSpacing: '0.01em',
                       cursor: 'pointer' 
                     }}
                     onClick={() => onOpenEntityDetail(entity.tagNumber)}
@@ -958,7 +958,7 @@ export default function EntityList({
                           className="spec-link-mother"
                           onClick={() => onOpenEntityDetail(entity.motherTag)}
                           title="클릭 시 모체(어미소) 정보로 이동"
-                          style={{ fontFamily: 'var(--font-mono)' }}
+                          style={{ fontFamily: 'var(--font-family)', fontVariantNumeric: 'tabular-nums' }}
                         >
                           {entity.motherTag}
                         </span>
@@ -968,7 +968,7 @@ export default function EntityList({
                   {/* 부체(씨수소) */}
                   <div style={{ display: 'flex', flexDirection: 'column' }}>
                     <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: '2px' }}>부체(씨수소)</span>
-                    <span style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-main)', fontFamily: 'var(--font-mono)' }}>
+                    <span style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-main)', fontFamily: 'var(--font-family)', fontVariantNumeric: 'tabular-nums' }}>
                       {entity.fatherTag || <span style={{ color: 'var(--text-muted)' }}>-</span>}
                     </span>
                   </div>
