@@ -47,6 +47,9 @@ export default function DailyDiaryView({
   // 다이어리 서브 탭: 'schedules'(일정) 또는 'logs'(관리 내역)
   const [activeDiaryTab, setActiveDiaryTab] = useState('schedules');
 
+  // 🎨 캘린더 디자인 비교 모드 (개발서버 실시간 프리뷰): 'modern'(제안1: 모던 원형) | 'twotone'(제안2: 스마트 투톤) | 'pastel'(제안3: 소프트 파스텔)
+  const [calendarTheme, setCalendarTheme] = useState('modern');
+
   // 완료된 일정 중 상세 내용을 확인하기 위해 사용자가 탭하여 임시로 펼친 일정 ID 목록
   const [expandedCompletedIds, setExpandedCompletedIds] = useState(new Set());
 
@@ -103,6 +106,21 @@ export default function DailyDiaryView({
     (schedules || []).forEach(s => {
       if (s.date) set.add(s.date);
     });
+    return set;
+  }, [careLogs, schedules]);
+
+  // 스마트 투톤(제안2)을 위한 관리기록 전용 일자
+  const datesWithCareLogs = useMemo(() => {
+    const set = new Set();
+    careLogs.forEach(l => { if (l.date) set.add(l.date); });
+    return set;
+  }, [careLogs]);
+
+  // 스마트 투톤(제안2)을 위한 일정(할 일) 전용 일자
+  const datesWithSchedules = useMemo(() => {
+    const set = new Set();
+    careLogs.forEach(l => { if (l.nextScheduleDate) set.add(l.nextScheduleDate); });
+    (schedules || []).forEach(s => { if (s.date) set.add(s.date); });
     return set;
   }, [careLogs, schedules]);
 
@@ -175,6 +193,75 @@ export default function DailyDiaryView({
         {/* 왼쪽: 캘린더 다이어리 위젯 */}
         <div style={{ width: '100%' }}>
           <div className="calendar-card">
+            {/* 🎨 캘린더 디자인 비교 실시간 스위처 (개발서버 테스트용) */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '0.25rem',
+              marginBottom: '1rem',
+              background: 'var(--bg-card-subtle)',
+              padding: '0.25rem',
+              borderRadius: '9999px',
+              border: '1px solid var(--border-color)',
+              boxSizing: 'border-box'
+            }}>
+              <button
+                type="button"
+                onClick={() => setCalendarTheme('modern')}
+                style={{
+                  flex: 1,
+                  padding: '0.35rem 0.3rem',
+                  borderRadius: '9999px',
+                  border: 'none',
+                  background: calendarTheme === 'modern' ? 'var(--color-primary)' : 'transparent',
+                  color: calendarTheme === 'modern' ? '#ffffff' : 'var(--text-muted)',
+                  cursor: 'pointer',
+                  fontWeight: 700,
+                  fontSize: '0.74rem',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                1. 모던 원형
+              </button>
+              <button
+                type="button"
+                onClick={() => setCalendarTheme('twotone')}
+                style={{
+                  flex: 1,
+                  padding: '0.35rem 0.3rem',
+                  borderRadius: '9999px',
+                  border: 'none',
+                  background: calendarTheme === 'twotone' ? '#1e293b' : 'transparent',
+                  color: calendarTheme === 'twotone' ? '#ffffff' : 'var(--text-muted)',
+                  cursor: 'pointer',
+                  fontWeight: 700,
+                  fontSize: '0.74rem',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                2. 스마트 투톤
+              </button>
+              <button
+                type="button"
+                onClick={() => setCalendarTheme('pastel')}
+                style={{
+                  flex: 1,
+                  padding: '0.35rem 0.3rem',
+                  borderRadius: '9999px',
+                  border: 'none',
+                  background: calendarTheme === 'pastel' ? '#d1fae5' : 'transparent',
+                  color: calendarTheme === 'pastel' ? '#065f46' : 'var(--text-muted)',
+                  cursor: 'pointer',
+                  fontWeight: 700,
+                  fontSize: '0.74rem',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                3. 소프트 파스텔
+              </button>
+            </div>
+
             <div className="calendar-header">
               <h3 style={{ fontSize: '1.25rem', fontWeight: 800, letterSpacing: '-0.02em', margin: 0 }}>
                 {currentYearMonth.year}년 {currentYearMonth.month + 1}월
@@ -225,15 +312,156 @@ export default function DailyDiaryView({
               {calendarDays.map((item, index) => {
                 const isSelected = item.dateStr === selectedDate;
                 const isToday = item.dateStr === todayStr;
+                const hasSchedule = datesWithSchedules.has(item.dateStr);
+                const hasCareLog = datesWithCareLogs.has(item.dateStr);
                 const hasActivity = datesWithActivity.has(item.dateStr);
 
+                // 1. 제안 1 (모던 원형)
+                if (calendarTheme === 'modern') {
+                  return (
+                    <button
+                      key={index}
+                      type="button"
+                      disabled={!item.isCurrentMonth}
+                      onClick={() => setSelectedDate(item.dateStr)}
+                      style={{
+                        background: 'transparent',
+                        border: 'none',
+                        minHeight: '40px',
+                        padding: 0,
+                        position: 'relative',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: item.isCurrentMonth ? 'pointer' : 'default',
+                        opacity: item.isCurrentMonth ? 1 : 0.25
+                      }}
+                    >
+                      <span style={{
+                        width: '32px',
+                        height: '32px',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '0.92rem',
+                        fontWeight: (isSelected || isToday) ? 800 : 600,
+                        background: isSelected ? 'var(--color-primary)' : 'transparent',
+                        color: isSelected ? '#ffffff' : 'var(--text-main)',
+                        border: (!isSelected && isToday) ? '1.5px solid var(--color-primary)' : 'none',
+                        boxShadow: isSelected ? '0 2px 6px rgba(16, 185, 129, 0.35)' : 'none',
+                        transition: 'all 0.15s ease'
+                      }}>
+                        {item.dayNumber}
+                      </span>
+                      {hasActivity && (
+                        <span style={{
+                          width: '4px',
+                          height: '4px',
+                          borderRadius: '50%',
+                          background: isSelected ? 'var(--color-primary)' : 'var(--color-primary)',
+                          position: 'absolute',
+                          bottom: '1px'
+                        }} />
+                      )}
+                    </button>
+                  );
+                }
+
+                // 2. 제안 2 (스마트 투톤)
+                if (calendarTheme === 'twotone') {
+                  return (
+                    <button
+                      key={index}
+                      type="button"
+                      disabled={!item.isCurrentMonth}
+                      onClick={() => setSelectedDate(item.dateStr)}
+                      style={{
+                        background: 'transparent',
+                        border: 'none',
+                        minHeight: '40px',
+                        padding: 0,
+                        position: 'relative',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: item.isCurrentMonth ? 'pointer' : 'default',
+                        opacity: item.isCurrentMonth ? 1 : 0.25
+                      }}
+                    >
+                      <span style={{
+                        width: '32px',
+                        height: '32px',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '0.92rem',
+                        fontWeight: (isSelected || isToday) ? 800 : 600,
+                        background: isSelected ? '#1e293b' : 'transparent',
+                        color: isSelected ? '#ffffff' : 'var(--text-main)',
+                        border: (!isSelected && isToday) ? '1.5px solid #1e293b' : 'none',
+                        transition: 'all 0.15s ease'
+                      }}>
+                        {item.dayNumber}
+                      </span>
+                      {/* 점: 할일(주황) + 기록(초록) 분리 */}
+                      {hasSchedule && hasCareLog ? (
+                        <div style={{ display: 'flex', gap: '2px', position: 'absolute', bottom: '1px' }}>
+                          <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#f59e0b' }} />
+                          <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'var(--color-primary)' }} />
+                        </div>
+                      ) : hasSchedule ? (
+                        <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#f59e0b', position: 'absolute', bottom: '1px' }} />
+                      ) : hasCareLog ? (
+                        <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'var(--color-primary)', position: 'absolute', bottom: '1px' }} />
+                      ) : null}
+                    </button>
+                  );
+                }
+
+                // 3. 제안 3 (소프트 파스텔 박스)
                 return (
                   <button
                     key={index}
-                    className={`calendar-cell ${!item.isCurrentMonth ? 'other-month' : ''} ${isSelected ? 'selected' : ''} ${isToday ? 'is-today' : ''} ${hasActivity ? 'has-logs' : ''}`}
+                    type="button"
+                    disabled={!item.isCurrentMonth}
                     onClick={() => setSelectedDate(item.dateStr)}
+                    style={{
+                      aspectRatio: '1',
+                      width: '100%',
+                      minHeight: '40px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      borderRadius: 'var(--radius-md)',
+                      fontSize: '0.95rem',
+                      fontWeight: (isSelected || isToday) ? 800 : 600,
+                      cursor: item.isCurrentMonth ? 'pointer' : 'default',
+                      position: 'relative',
+                      transition: 'all 0.15s ease',
+                      opacity: item.isCurrentMonth ? 1 : 0.25,
+                      background: !item.isCurrentMonth ? 'transparent' : isSelected ? 'rgba(16, 185, 129, 0.15)' : 'var(--bg-card-subtle)',
+                      border: !item.isCurrentMonth ? 'none' : isSelected ? '2px solid var(--color-primary)' : isToday ? '2px solid var(--color-primary)' : '1px solid var(--border-color)',
+                      color: isSelected ? '#065f46' : 'var(--text-main)',
+                      boxSizing: 'border-box',
+                      padding: 0
+                    }}
                   >
                     <span>{item.dayNumber}</span>
+                    {hasActivity && (
+                      <span style={{
+                        width: '5px',
+                        height: '5px',
+                        borderRadius: '50%',
+                        background: 'var(--color-primary)',
+                        position: 'absolute',
+                        bottom: '4px'
+                      }} />
+                    )}
                   </button>
                 );
               })}
@@ -251,10 +479,23 @@ export default function DailyDiaryView({
               fontSize: '0.75rem',
               color: 'var(--text-muted)'
             }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--color-primary)', display: 'inline-block' }} />
-                일정/작업 기록 있음
-              </span>
+              {calendarTheme === 'twotone' ? (
+                <span style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                    <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#f59e0b' }} />
+                    할 일
+                  </span>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                    <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--color-primary)' }} />
+                    관리기록
+                  </span>
+                </span>
+              ) : (
+                <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--color-primary)', display: 'inline-block' }} />
+                  일정/작업 기록 있음
+                </span>
+              )}
               <button
                 className="btn btn-outline btn-sm"
                 onClick={() => onOpenScheduleModal(selectedDate)}
