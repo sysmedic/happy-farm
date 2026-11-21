@@ -7,7 +7,8 @@ import {
   formatDisplayBreed, 
   formatTagNumber,
   loadCustomCareCategories,
-  saveCustomCareCategories
+  saveCustomCareCategories,
+  normalizeCategoryId
 } from './types.js';
 
 // v5로 스토리지 키 버전업하여 필드 테스트용 10두 매뉴얼 레퍼런스 데이터 즉시 반영
@@ -215,7 +216,7 @@ export const INITIAL_SAMPLE_CARE_LOGS = [
     "tagNumber": "002-1202-1002-2",
     "date": "2026-01-14",
     "time": "10:20",
-    "category": "insemination",
+    "category": "breeding",
     "title": "1차 인공수정 시술 (KPN-1410 우량 정액)",
     "description": "자연 발정 확인 후 수정 적기 10시간 경과 시점 인공수정 실시. 정액 스트로 보관 상태 양호.",
     "operator": "이인공 수정사",
@@ -245,7 +246,7 @@ export const INITIAL_SAMPLE_CARE_LOGS = [
     "tagNumber": "002-1201-1001-1",
     "date": "2026-02-03",
     "time": "08:15",
-    "category": "estrus",
+    "category": "breeding",
     "title": "승가 허용 및 끈적한 점액 분비 (자연 발정)",
     "description": "동방우의 승가를 차분히 허용하는 명확한 발정 행동 확인. 당일 오후 인공수정 예약.",
     "operator": "농장주",
@@ -258,7 +259,7 @@ export const INITIAL_SAMPLE_CARE_LOGS = [
     "tagNumber": "002-1201-1001-1",
     "date": "2026-02-03",
     "time": "15:30",
-    "category": "insemination",
+    "category": "breeding",
     "title": "인공수정 시술 (KPN-1410 보증씨수소)",
     "description": "자궁경관 통과 원활, 자궁각 깊숙이 정액 주입 완료. 자궁 수축 양호.",
     "operator": "이인공 수정사",
@@ -327,7 +328,7 @@ export const INITIAL_SAMPLE_CARE_LOGS = [
     "tagNumber": "002-1202-1002-2",
     "date": "2026-03-25",
     "time": "14:30",
-    "category": "insemination",
+    "category": "breeding",
     "title": "초음파 임신 감정 (임신 확인 / 수태 판정)",
     "description": "인공수정 후 70일차 직장 초음파 진단 결과 배아 심박동 확인 및 정상 임신 확정.",
     "operator": "김축산 수의사",
@@ -370,7 +371,7 @@ export const INITIAL_SAMPLE_CARE_LOGS = [
     "tagNumber": "002-1201-1001-1",
     "date": "2026-05-02",
     "time": "10:30",
-    "category": "insemination",
+    "category": "breeding",
     "title": "초음파 임신 감정 (임신 확정 / 수태 성공)",
     "description": "인공수정 후 88일차 초음파 감정 결과 정상 수태 확인. 분만 예정일: 2026-11-28 산출.",
     "operator": "김축산 수의사",
@@ -439,7 +440,7 @@ export const INITIAL_SAMPLE_CARE_LOGS = [
     "tagNumber": "002-1206-1006-6",
     "date": "2026-06-15",
     "time": "08:30",
-    "category": "birth",
+    "category": "calving",
     "title": "수송아지 출생 등록 (생시체중 31kg)",
     "description": "우량 수송아지 자연 분만 출생. 초유 2L 섭취 및 탯줄 소독 완료.",
     "operator": "농장주",
@@ -543,7 +544,7 @@ export const INITIAL_SAMPLE_CARE_LOGS = [
     "tagNumber": "002-1202-1002-2",
     "date": "2026-10-20",
     "time": "04:30",
-    "category": "birth",
+    "category": "calving",
     "title": "우량 암송아지(샘플5) 자연 순산 성공",
     "description": "새벽 4시 양수 파수 후 30분 만에 조산 없이 자연 분만. 후산 2시간 내 완전 배출.",
     "operator": "농장주",
@@ -556,7 +557,7 @@ export const INITIAL_SAMPLE_CARE_LOGS = [
     "tagNumber": "002-1205-1005-5",
     "date": "2026-10-20",
     "time": "05:30",
-    "category": "birth",
+    "category": "calving",
     "title": "신생 송아지 생시체중 계근 (28kg) 및 초유 급여",
     "description": "체온 38.6도 양호. 분만 1시간 내 면역글로불린 농축 초유 1.5L 자발 포유 성공.",
     "operator": "농장주",
@@ -595,7 +596,7 @@ export const INITIAL_SAMPLE_CARE_LOGS = [
     "tagNumber": "002-1203-1003-3",
     "date": "2026-11-15",
     "time": "11:20",
-    "category": "insemination",
+    "category": "breeding",
     "title": "1차 인공수정 시술 (KPN-1422 우량 정액)",
     "description": "자연 발정 확인 후 오전 적기 시술. 자궁내막 주입 양호.",
     "operator": "이인공 수정사",
@@ -655,7 +656,7 @@ export const INITIAL_SAMPLE_CARE_LOGS = [
     "tagNumber": "002-1204-1004-4",
     "date": "2026-11-21",
     "time": "07:30",
-    "category": "estrus",
+    "category": "breeding",
     "title": "승가 행동 및 외음부 충혈 관찰 (자연 발정)",
     "description": "오침 승가 허용, 맑은 점액 배출 확인. 금일 오후 14시 인공수정 예약.",
     "operator": "농장주",
@@ -679,7 +680,7 @@ export const INITIAL_SAMPLE_SCHEDULES = [
     "date": "2026-11-21",
     "time": "14:00",
     "title": "[샘플4] KPN 보증정액 인공수정 시술",
-    "category": "insemination",
+    "category": "breeding",
     "completed": false,
     "memo": "이인공 수정사 방문 예정. KPN-1425 정액 준비."
   },
@@ -690,7 +691,7 @@ export const INITIAL_SAMPLE_SCHEDULES = [
     "date": "2026-11-24",
     "time": "07:00",
     "title": "[샘플8] 농협 안심한우 공판장 출하 상차",
-    "category": "shipment",
+    "category": "routine",
     "completed": false,
     "memo": "전일 저녁부터 절식 실시. 수송 차량 7시 도착 예정."
   },
@@ -701,7 +702,7 @@ export const INITIAL_SAMPLE_SCHEDULES = [
     "date": "2026-11-28",
     "time": "09:00",
     "title": "[샘플1] 예정 분만일 (분만실 집중 관찰)",
-    "category": "birth",
+    "category": "calving",
     "completed": false,
     "memo": "CCTV 분만실 감시 가동 및 마른 깔짚 충분히 보충."
   },
@@ -712,7 +713,7 @@ export const INITIAL_SAMPLE_SCHEDULES = [
     "date": "2026-12-06",
     "time": "09:00",
     "title": "[샘플3] 21일차 재발정 여부 면밀 관찰",
-    "category": "estrus",
+    "category": "breeding",
     "completed": false,
     "memo": "승가 행동 및 점액 분비 여부 확인 후 미발정 시 1월 초음파 감정 예약."
   },
@@ -765,24 +766,52 @@ export function loadCareLogs() {
     if (raw) {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        return parsed.map(log => ({
-          ...log,
-          tagNumber: formatTagNumber(log.tagNumber)
-        }));
+        let hasModified = false;
+        const normalized = parsed.map(log => {
+          const normCat = normalizeCategoryId(log.category);
+          const normTag = formatTagNumber(log.tagNumber);
+          if (log.category !== normCat || log.tagNumber !== normTag) {
+            hasModified = true;
+          }
+          return {
+            ...log,
+            category: normCat,
+            tagNumber: normTag
+          };
+        });
+        // 레거시 카테고리(insemination, birth 등)가 존재했던 경우 스토리지 즉시 자동 치유 및 갱신 저장
+        if (hasModified) {
+          saveCareLogs(normalized);
+        }
+        return normalized;
       }
     }
     // 새 버전 초기 데이터 자동 저장
-    saveCareLogs(INITIAL_SAMPLE_CARE_LOGS);
-    return INITIAL_SAMPLE_CARE_LOGS;
+    const normalizedSeed = INITIAL_SAMPLE_CARE_LOGS.map(log => ({
+      ...log,
+      category: normalizeCategoryId(log.category),
+      tagNumber: formatTagNumber(log.tagNumber)
+    }));
+    saveCareLogs(normalizedSeed);
+    return normalizedSeed;
   } catch (err) {
     console.error('Failed to load care logs:', err);
-    return INITIAL_SAMPLE_CARE_LOGS;
+    return INITIAL_SAMPLE_CARE_LOGS.map(log => ({
+      ...log,
+      category: normalizeCategoryId(log.category),
+      tagNumber: formatTagNumber(log.tagNumber)
+    }));
   }
 }
 
 export function saveCareLogs(logs) {
   try {
-    localStorage.setItem(STORAGE_LOGS_KEY, JSON.stringify(logs));
+    const normalized = (logs || []).map(log => ({
+      ...log,
+      category: normalizeCategoryId(log.category),
+      tagNumber: formatTagNumber(log.tagNumber)
+    }));
+    localStorage.setItem(STORAGE_LOGS_KEY, JSON.stringify(normalized));
   } catch (err) {
     console.error('Failed to save care logs:', err);
   }

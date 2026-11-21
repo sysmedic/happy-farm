@@ -9,7 +9,8 @@ import {
 import { 
   CARE_CATEGORIES, 
   getTodayDateString, 
-  getCurrentTimeString 
+  getCurrentTimeString,
+  normalizeCategoryId
 } from '../../lib/types.js';
 
 const LAST_OPERATOR_STORAGE_KEY = 'happy_farm_last_operator';
@@ -47,7 +48,7 @@ export default function CareLogFormModal({
   const [selectedEntityId, setSelectedEntityId] = useState(logToEdit?.entityId || initialValues?.entityId || preselectedEntity?.id || '');
   const [date, setDate] = useState(logToEdit?.date || initialValues?.date || getTodayDateString());
   const [time, setTime] = useState(logToEdit?.time || getCurrentTimeString());
-  const [category, setCategory] = useState(logToEdit?.category || initialValues?.category || 'vaccine');
+  const [category, setCategory] = useState(normalizeCategoryId(logToEdit?.category || initialValues?.category) || 'vaccine');
   const [title, setTitle] = useState(logToEdit?.title || initialValues?.title || '');
   const [details, setDetails] = useState(logToEdit?.details || '');
   const [operator, setOperator] = useState(() => getInitialOperator(logToEdit, careLogs));
@@ -95,7 +96,7 @@ export default function CareLogFormModal({
       setSelectedEntityId(logToEdit.entityId);
       setDate(logToEdit.date);
       setTime(logToEdit.time || getCurrentTimeString());
-      setCategory(logToEdit.category);
+      setCategory(normalizeCategoryId(logToEdit.category));
       setTitle(logToEdit.title);
       setDetails(logToEdit.details || '');
       setOperator(logToEdit.operator || getInitialOperator(null, careLogs));
@@ -107,7 +108,7 @@ export default function CareLogFormModal({
     } else {
       setOperator(getInitialOperator(null, careLogs));
       if (initialValues) {
-        if (initialValues.category) setCategory(initialValues.category);
+        if (initialValues.category) setCategory(normalizeCategoryId(initialValues.category));
         if (initialValues.title) setTitle(initialValues.title);
         if (initialValues.date) setDate(initialValues.date);
         if (initialValues.time) setTime(initialValues.time);
@@ -172,7 +173,7 @@ export default function CareLogFormModal({
   // 커스텀 분류 삭제 처리 (경고 및 연계 검증)
   const handleDeleteCategoryClick = (cat) => {
     const isCurrentlySelected = category === cat.id;
-    const linkedCount = careLogs ? careLogs.filter(l => l.category === cat.id).length : 0;
+    const linkedCount = careLogs ? careLogs.filter(l => normalizeCategoryId(l.category) === cat.id).length : 0;
 
     let confirmMsg = `'${cat.label}' 분류를 삭제하시겠습니까?`;
 

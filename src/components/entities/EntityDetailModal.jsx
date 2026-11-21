@@ -19,7 +19,8 @@ import {
   formatDisplayBreed,
   getAvailableStatuses,
   getCategoryById,
-  getTodayDateString
+  getTodayDateString,
+  normalizeCategoryId
 } from '../../lib/types.js';
 
 export default function EntityDetailModal({
@@ -93,10 +94,10 @@ export default function EntityDetailModal({
     return allEntityLogs.slice(0, 10);
   }, [allEntityLogs]);
 
-  // 카테고리 필터링된 전체 내역 (전면 생애관리내역 뷰용)
+  // 카테고리 필터링된 전체 내역 (전면 생애관리내역 뷰용: 레거시 영문 카테고리도 완벽하게 표준 ID로 정규화하여 매칭)
   const filteredLogs = useMemo(() => {
     if (selectedCategory === 'all') return allEntityLogs;
-    return allEntityLogs.filter(l => l.category === selectedCategory);
+    return allEntityLogs.filter(l => normalizeCategoryId(l.category) === selectedCategory);
   }, [allEntityLogs, selectedCategory]);
 
   const today = useMemo(() => getTodayDateString(), []);
@@ -212,10 +213,10 @@ export default function EntityDetailModal({
               </button>
             </div>
 
-            {/* 3단: 세부 종목 캡슐 3열 균등 바둑판 배치 */}
+            {/* 3단: 세부 종목 캡슐 3열 균등 바둑판 배치 (레거시 영문 카테고리도 표준 ID로 완벽 집계) */}
             <div className="fullhistory-filter-bar">
               {categoriesToDisplay.map(cat => {
-                const count = allEntityLogs.filter(l => l.category === cat.id).length;
+                const count = allEntityLogs.filter(l => normalizeCategoryId(l.category) === cat.id).length;
                 if (count === 0 && selectedCategory !== cat.id) return null;
                 return (
                   <button

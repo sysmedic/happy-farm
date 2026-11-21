@@ -12,7 +12,8 @@ import {
 import { 
   CARE_CATEGORIES, 
   getTodayDateString,
-  getCategoryById
+  getCategoryById,
+  normalizeCategoryId
 } from '../../lib/types.js';
 import { shareFarmReport } from '../../lib/googleDriveService.js';
 
@@ -361,13 +362,14 @@ export default function DailyReportView({
       .sort((a, b) => (a.time || '').localeCompare(b.time || ''));
   }, [careLogs, reportDate]);
 
-  // 카테고리별 집계
+  // 카테고리별 집계 (레거시 영문 카테고리도 표준 ID로 안전 정규화 집계)
   const categoryStats = useMemo(() => {
     const counts = {};
     categoriesToUse.forEach(c => { counts[c.id] = 0; });
     dailyLogs.forEach(l => {
-      if (counts[l.category] !== undefined) {
-        counts[l.category]++;
+      const normCat = normalizeCategoryId(l.category);
+      if (counts[normCat] !== undefined) {
+        counts[normCat]++;
       }
     });
     return counts;
