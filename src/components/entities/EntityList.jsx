@@ -960,7 +960,7 @@ export default function EntityList({
                           className="spec-link-mother"
                           onClick={() => onOpenEntityDetail(entity.motherTag)}
                           title="클릭 시 모체(어미소) 정보로 이동"
-                          style={{ fontFamily: 'var(--font-family)', fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.02em' }}
+                          style={{ fontFamily: 'var(--font-family)', fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.02em', fontWeight: 700 }}
                         >
                           {entity.motherTag}
                         </span>

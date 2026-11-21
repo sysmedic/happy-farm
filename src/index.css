@@ -1116,7 +1116,7 @@ a:hover {
 /* 스펙 박스 내 모체 링크 스타일 (초록색 형광 밑줄 제거, 정갈한 대시 밑줄) */
 .spec-link-mother {
   color: var(--text-main);
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.15s ease;
   border-bottom: 1px dashed var(--text-muted);
