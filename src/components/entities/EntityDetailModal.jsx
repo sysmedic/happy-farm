@@ -233,12 +233,25 @@ export default function EntityDetailModal({
             <>
               {/* 개체 핵심 프로필 섹션 (이표번호, 상태, 정보 수정 버튼, 이름 및 월령) */}
               <div className="detail-entity-profile-card">
-                {/* 1행: 이표번호 & 상태 배너 (좌측) | 출력 및 정보 수정 버튼 (우측) */}
+                {/* 1행: 이표번호 (좌측) <───────────────> 상태 배너 & 출력 액션 (우측) 대칭 배치 */}
                 <div className="detail-header-top-row">
-                  <div className="detail-header-tag" style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'nowrap', flexShrink: 0 }}>
+                  {/* 좌측: 개체 고유 이표번호 */}
+                  <div className="detail-header-tag" style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
                     <span className="entity-ear-tag">{entity.tagNumber}</span>
+                  </div>
 
-                    {/* 상태 배너 (이표 크기와 동등화 & 이모지 제거하여 순수 텍스트로 배치) */}
+                  {/* 우측 끝: 출력 버튼(데스크톱) & 상태 변경 뱃지 드롭다운 */}
+                  <div className="entity-detail-header-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexShrink: 0 }}>
+                    <button 
+                      className="btn btn-outline btn-sm detail-print-btn"
+                      onClick={() => onOpenPrintSheet(entity)}
+                      title="이 개체의 전체 관리 이력 A4 인쇄"
+                    >
+                      <Printer size={15} />
+                      <span>출력</span>
+                    </button>
+
+                    {/* 상태 배너 (우측 끝 정렬) */}
                     <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }} ref={statusMenuRef}>
                       <button
                         type="button"
@@ -253,7 +266,7 @@ export default function EntityDetailModal({
                         <span style={{ fontSize: '0.75rem', opacity: 0.8, marginLeft: '0.15rem' }}>▾</span>
                       </button>
 
-                      {/* 상태 선택 팝오버 메뉴 */}
+                      {/* 상태 선택 팝오버 메뉴 (우측 기준 안쪽으로 오픈) */}
                       {isStatusMenuOpen && (
                         <div className="status-picker-dropdown">
                           <div className="status-picker-header">상태 변경 선택</div>
@@ -281,18 +294,6 @@ export default function EntityDetailModal({
                         </div>
                       )}
                     </div>
-                  </div>
-
-                  {/* 우측 상단 액션 버튼: 인쇄 출력 버튼 (데스크톱 전용) */}
-                  <div className="entity-detail-header-actions" style={{ display: 'flex', alignItems: 'center' }}>
-                    <button 
-                      className="btn btn-outline btn-sm detail-print-btn"
-                      onClick={() => onOpenPrintSheet(entity)}
-                      title="이 개체의 전체 관리 이력 A4 인쇄"
-                    >
-                      <Printer size={15} />
-                      <span>출력</span>
-                    </button>
                   </div>
                 </div>
 

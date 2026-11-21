@@ -1503,11 +1503,12 @@ a:hover {
   transform: scale(0.97);
 }
 
-/* 상태 선택 팝오버 드롭다운 */
+/* 상태 선택 팝오버 드롭다운 (우측 정렬로 화면 안쪽으로 오픈) */
 .status-picker-dropdown {
   position: absolute;
   top: calc(100% + 6px);
-  left: 0;
+  right: 0;
+  left: auto;
   z-index: 120;
   min-width: 195px;
   background: var(--bg-card);
