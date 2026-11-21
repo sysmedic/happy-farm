@@ -7,8 +7,8 @@ import {
   Plus
 } from 'lucide-react';
 
-// 정갈한 한우(소) 벡터 라인 아이콘 (Lucide 라인 스타일과 100% 호환)
-function CowIcon({ size = 17, className = '' }) {
+// 듬직한 한우(소) 옆모습 벡터 라인 아이콘 (Lucide 라인 스타일과 100% 호환)
+function CowIcon({ size = 19, className = '' }) {
   return (
     <svg
       width={size}
@@ -21,22 +21,16 @@ function CowIcon({ size = 17, className = '' }) {
       strokeLinejoin="round"
       className={className}
     >
-      {/* 양쪽 뿔 */}
-      <path d="M6 7C4.5 4 2.5 4.5 2 7c2 1 3.5 1.5 5 1" />
-      <path d="M18 7c1.5-3 3.5-2.5 4 0-2 1-3.5 1.5-5 1" />
-      {/* 얼굴 윤곽 */}
-      <path d="M6 8v5c0 3.3 2.7 6 6 6s6-2.7 6-6V8" />
-      {/* 양쪽 귀 */}
-      <path d="M6 10H3.5a1.5 1.5 0 0 1-1.5-1.5c0-.8.7-1.5 1.5-1.5H6" />
-      <path d="M18 10h2.5a1.5 1.5 0 0 0 1.5-1.5c0-.8-.7-1.5-1.5-1.5H18" />
-      {/* 주둥이 */}
-      <rect x="8" y="13.5" width="8" height="4.5" rx="2" />
-      {/* 콧구멍 */}
-      <circle cx="10.5" cy="15.8" r="0.6" fill="currentColor" stroke="none" />
-      <circle cx="13.5" cy="15.8" r="0.6" fill="currentColor" stroke="none" />
+      {/* 솟은 뿔 */}
+      <path d="M5.5 7.5C4 4.5 2.5 5 2 6.5" />
+      {/* 귀 */}
+      <path d="M7.5 8L9 6.5" />
+      {/* 머리 - 등(한우 어깨혹) - 엉덩이 - 뒷다리 - 배 - 앞다리 */}
+      <path d="M2.5 10.5c0-1.5 1.5-2.2 3-1.8 1.5-1.5 3.5-1 6-.5 2.5.5 4.2 0 5.5 1.5 1.2 1.2 1 3 1 5.3v4h-2.2v-3.5h-5V19H8.5v-4.8c-1.5 0-3-.5-4-1.5L2.5 10.5z" />
+      {/* 꼬리 */}
+      <path d="M18.5 12c.8 1.8.8 3.5 0 5" />
       {/* 눈 */}
-      <circle cx="9.5" cy="10.5" r="0.8" fill="currentColor" stroke="none" />
-      <circle cx="14.5" cy="10.5" r="0.8" fill="currentColor" stroke="none" />
+      <circle cx="5" cy="10" r="0.75" fill="currentColor" stroke="none" />
     </svg>
   );
 }
@@ -82,7 +76,7 @@ export default function TopBar({
           title="개체관리 (목록 및 상세 정보)"
           aria-label="개체관리"
         >
-          <CowIcon size={17} className="nav-tab-icon" />
+          <CowIcon size={19} className="nav-tab-icon" />
           <span className="nav-tab-text">개체관리</span>
         </button>
 
