@@ -878,14 +878,14 @@ export default function EntityList({
                 className="entity-card"
                 style={isHistory ? { opacity: 0.92, borderColor: 'rgba(100, 116, 139, 0.3)' } : {}}
               >
-                {/* 1층: 가장 중요한 "소 이름/별명" & "현재 사육 상태 배지" */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', marginBottom: '0.4rem' }}>
+                {/* 1층: 최우선 식별자 "개체식별번호" & "현재 사육 상태 배지" */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', marginBottom: '0.35rem' }}>
                   <h3 
-                    className="entity-name"
                     style={{ 
                       margin: 0, 
                       fontSize: '1.25rem', 
                       fontWeight: 900, 
+                      fontFamily: 'var(--font-mono)',
                       color: 'var(--text-main)', 
                       letterSpacing: '-0.02em',
                       cursor: 'pointer' 
@@ -893,38 +893,32 @@ export default function EntityList({
                     onClick={() => onOpenEntityDetail(entity.tagNumber)}
                     title="클릭 시 이 개체의 상세 프로필로 이동"
                   >
-                    {entity.name}
+                    {entity.tagNumber}
                   </h3>
                   <span className={`badge ${statusObj.colorClass}`} style={{ flexShrink: 0, fontSize: '0.85rem', padding: '0.25rem 0.65rem', borderRadius: 'var(--radius-sm)' }}>
                     {statusObj.icon} {statusObj.label}
                   </span>
                 </div>
 
-                {/* 2층: 이표번호 (단정한 모노스페이스) · 사육단계 · 축사 위치 */}
-                <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '0.35rem', marginBottom: '0.75rem', fontSize: '0.86rem' }}>
+                {/* 2층: 소 이름(호칭) + 사육단계 · 축사 위치 */}
+                <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '0.75rem', fontSize: '0.88rem' }}>
                   <span 
                     onClick={() => onOpenEntityDetail(entity.tagNumber)}
-                    title="클릭 시 이 개체의 관리 내역으로 이동"
+                    title="클릭 시 이 개체의 상세 프로필로 이동"
                     style={{ 
-                      fontFamily: 'var(--font-mono)', 
-                      fontWeight: 700, 
-                      color: 'var(--color-primary)', 
-                      cursor: 'pointer',
-                      letterSpacing: '-0.01em',
-                      background: 'rgba(16, 185, 129, 0.08)',
-                      padding: '0.1rem 0.4rem',
-                      borderRadius: 'var(--radius-sm)'
+                      fontWeight: 800, 
+                      color: 'var(--text-main)', 
+                      cursor: 'pointer'
                     }}
                   >
-                    {entity.tagNumber}
+                    {entity.name}
                   </span>
-                  <span style={{ color: 'var(--border-color)', fontWeight: 300 }}>•</span>
                   <span style={{ fontWeight: 600, color: 'var(--text-muted)' }}>
-                    {formatDisplayBreed(entity.breed)}
+                    ({formatDisplayBreed(entity.breed)})
                   </span>
                   <span style={{ color: 'var(--border-color)', fontWeight: 300 }}>•</span>
                   <span style={{ fontWeight: 600, color: 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', gap: '0.2rem' }}>
-                    <span style={{ fontSize: '0.8rem' }}>🏠</span>
+                    <span style={{ fontSize: '0.82rem' }}>🏠</span>
                     <span>{entity.barn || '축사 미지정'}</span>
                   </span>
                 </div>
@@ -979,48 +973,30 @@ export default function EntityList({
                   </div>
                 </div>
 
-                {/* 4층: 최근 관리 이력 미니 프리뷰 (처치 카테고리 태그 + 날짜 + 내용) */}
+                {/* 4층: 최근 관리 이력 미니 프리뷰 (원복: 날짜 + 제목 1줄 바) */}
                 <div 
                   className="recent-log-preview-box"
                   onClick={() => onOpenEntityDetail(entity.tagNumber, 'fullHistory')}
                   title="클릭 시 이 개체의 전체 관리내역으로 바로 이동"
                   role="button"
                   tabIndex={0}
-                  style={{
-                    background: 'var(--bg-card-subtle)',
-                    border: '1px solid var(--border-color)',
-                    borderRadius: 'var(--radius-sm)',
-                    padding: '0.45rem 0.65rem',
-                    marginBottom: '0.85rem',
-                    cursor: 'pointer'
-                  }}
                 >
-                  {latestLog && latestLogCat ? (
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', width: '100%' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', minWidth: 0, flex: 1 }}>
-                        <span style={{
-                          fontSize: '0.72rem',
-                          fontWeight: 700,
-                          padding: '0.12rem 0.4rem',
-                          borderRadius: 'var(--radius-sm)',
-                          background: 'rgba(16, 185, 129, 0.12)',
-                          color: 'var(--color-primary)',
-                          flexShrink: 0
-                        }}>
-                          {latestLogCat.icon} {latestLogCat.label}
-                        </span>
-                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', flexShrink: 0, fontFamily: 'var(--font-mono)' }}>
-                          {latestLog.date}
-                        </span>
-                        <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          {latestLog.title}
-                        </span>
+                  {latestLog ? (
+                    <div className="recent-log-preview-content">
+                      <span className="recent-log-date">
+                        {latestLog.date}
+                      </span>
+                      <div 
+                        className="recent-log-title"
+                        title={latestLog.title}
+                      >
+                        {latestLog.title}
                       </div>
                       <ChevronRight size={14} className="recent-log-jump-icon" />
                     </div>
                   ) : (
-                    <div className="recent-log-empty-content" style={{ fontSize: '0.78rem' }}>
-                      <span>최근 등록된 관리 기록이 없습니다</span>
+                    <div className="recent-log-empty-content">
+                      <span>등록된 관리 기록이 없습니다</span>
                       <ChevronRight size={14} className="recent-log-jump-icon" />
                     </div>
                   )}
