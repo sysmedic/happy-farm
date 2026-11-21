@@ -658,18 +658,16 @@ export default function DailyReportView({
       {/* 📱 1. 모바일 전용 독립 폼 (스마트폰 화면에서만 단독 표시) */}
       <div className="report-mobile-view" style={{ paddingBottom: '4rem' }}>
         
-        {/* 1. 슬림 1줄 상단 헤더: 뒤로가기 & 오늘 & 날짜선택 & 공유 & 인쇄 (5개 요소 완벽 등간격 정돈) */}
-        <div className="card" style={{ padding: '0.55rem 0.65rem', marginBottom: '0.75rem' }}>
+        {/* 1. 슬림 1줄 상단 헤더: [‹ 뒤로가기(좌측 고정)] --- [📅 오늘 + 날짜선택(중앙 밀착)] --- [↗ 공유 + 🖨 인쇄(우측 고정)] */}
+        <div className="card" style={{ padding: '0.5rem 0.65rem', marginBottom: '0.75rem' }}>
           <div style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            gap: '0.4rem',
-            width: '100%',
-            maxWidth: '360px',
-            margin: '0 auto'
+            gap: '0.35rem',
+            width: '100%'
           }}>
-            {/* 1) 뒤로가기 버튼 (32x32) */}
+            {/* 좌측 고정: 뒤로가기 버튼 (32x32) */}
             {onNavigateToDiary && (
               <button
                 type="button"
@@ -695,108 +693,117 @@ export default function DailyReportView({
               </button>
             )}
 
-            {/* 2) 오늘 복귀 버튼 (32x32 사각 규격 통일) */}
-            <button
-              type="button"
-              className="btn btn-outline btn-sm"
-              onClick={() => {
-                setReportDate(todayStr);
-                const now = new Date();
-                setPopupYearMonth({ year: now.getFullYear(), month: now.getMonth() });
-              }}
-              title={reportDate === todayStr ? "오늘 날짜를 보고 있습니다" : "터치 시 오늘 날짜로 즉시 복귀"}
-              aria-label="오늘 날짜로 이동"
-              style={{
-                width: '32px',
-                height: '32px',
-                padding: 0,
-                flexShrink: 0,
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                background: reportDate !== todayStr ? 'rgba(16, 185, 129, 0.12)' : 'var(--bg-card)',
-                border: reportDate !== todayStr ? '1px solid rgba(16, 185, 129, 0.5)' : '1px solid var(--border-color)',
-                borderRadius: 'var(--radius-md)',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease'
-              }}
-            >
-              <Calendar size={16} color="var(--color-primary)" />
-            </button>
+            {/* 중앙 그룹: 오늘 복귀 버튼 + 날짜 선택 버튼 (가깝게 밀착 gap: 0.25rem) */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', flexShrink: 0 }}>
+              {/* 오늘 이동 버튼 */}
+              <button
+                type="button"
+                className="btn btn-outline btn-sm"
+                onClick={() => {
+                  setReportDate(todayStr);
+                  const now = new Date();
+                  setPopupYearMonth({ year: now.getFullYear(), month: now.getMonth() });
+                }}
+                title={reportDate === todayStr ? "오늘 날짜를 보고 있습니다" : "터치 시 오늘 날짜로 즉시 복귀"}
+                aria-label="오늘 날짜로 이동"
+                style={{
+                  width: '32px',
+                  height: '32px',
+                  padding: 0,
+                  flexShrink: 0,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: reportDate !== todayStr ? 'rgba(16, 185, 129, 0.12)' : 'var(--bg-card)',
+                  border: reportDate !== todayStr ? '1px solid rgba(16, 185, 129, 0.5)' : '1px solid var(--border-color)',
+                  borderRadius: 'var(--radius-md)',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                <Calendar size={16} color="var(--color-primary)" />
+              </button>
 
-            {/* 3) 날짜 선택 버튼 (벙벙함 제거, 콤팩트 핏) */}
-            <button
-              type="button"
-              onClick={() => setIsCalendarOpen(true)}
-              title="터치하여 달력에서 날짜 선택 (기록 점 표시)"
-              style={{
-                height: '32px',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.35rem',
-                background: 'var(--bg-card)',
-                border: '1.5px solid var(--color-primary)',
-                borderRadius: 'var(--radius-md)',
-                padding: '0 0.65rem',
-                fontSize: '0.88rem',
-                fontWeight: 800,
-                color: 'var(--text-main)',
-                cursor: 'pointer',
-                flexShrink: 0
-              }}
-            >
-              <span>{reportDate}</span>
-              <span style={{ fontSize: '0.62rem', color: 'var(--color-primary)' }}>▼</span>
-            </button>
+              {/* 날짜 선택 버튼 (콤팩트 핏) */}
+              <button
+                type="button"
+                onClick={() => setIsCalendarOpen(true)}
+                title="터치하여 달력에서 날짜 선택 (기록 점 표시)"
+                style={{
+                  height: '32px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.35rem',
+                  background: 'var(--bg-card)',
+                  border: '1.5px solid var(--color-primary)',
+                  borderRadius: 'var(--radius-md)',
+                  padding: '0 0.55rem',
+                  fontSize: '0.88rem',
+                  fontWeight: 800,
+                  color: 'var(--text-main)',
+                  cursor: 'pointer',
+                  flexShrink: 0
+                }}
+              >
+                <span>{reportDate}</span>
+                <span style={{ fontSize: '0.62rem', color: 'var(--color-primary)' }}>▼</span>
+              </button>
+            </div>
 
-            {/* 4) 공유 버튼 (32x32) */}
-            <button 
-              type="button" 
-              className="btn btn-outline btn-sm" 
-              onClick={handleShare}
-              title="스마트폰 고해상도 이미지 공유 및 텍스트 복사"
-              aria-label="보고서 공유"
-              style={{ 
-                width: '32px',
-                height: '32px',
-                padding: 0,
-                flexShrink: 0,
-                border: '1px solid var(--border-color)',
-                color: 'var(--text-main)',
-                background: 'var(--bg-card)',
-                display: 'inline-flex', 
-                alignItems: 'center', 
-                justifyContent: 'center',
-                borderRadius: 'var(--radius-md)'
-              }}
-            >
-              <Share2 size={15} />
-            </button>
-
-            {/* 5) 인쇄 버튼 (32x32) */}
-            <button 
-              type="button" 
-              className="btn btn-outline btn-sm" 
-              onClick={handlePrint}
-              title="A4 규격 인쇄"
-              aria-label="보고서 인쇄"
-              style={{ 
-                width: '32px',
-                height: '32px',
-                padding: 0,
-                flexShrink: 0,
-                border: '1px solid var(--border-color)',
-                color: 'var(--text-main)',
-                background: 'var(--bg-card)',
-                display: 'inline-flex', 
-                alignItems: 'center', 
-                justifyContent: 'center',
-                borderRadius: 'var(--radius-md)'
-              }}
-            >
-              <Printer size={15} />
-            </button>
+            {/* 우측 고정: 텍스트 포함 공유 & 인쇄 버튼 (반응형 텍스트 자동 숨김) */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', flexShrink: 0 }}>
+              <button 
+                type="button" 
+                className="btn btn-outline btn-sm" 
+                onClick={handleShare}
+                title="스마트폰 고해상도 이미지 공유 및 텍스트 복사"
+                aria-label="보고서 공유"
+                style={{ 
+                  height: '32px',
+                  padding: '0 0.55rem',
+                  border: '1px solid var(--border-color)',
+                  color: 'var(--text-main)',
+                  background: 'var(--bg-card)',
+                  display: 'inline-flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  gap: '0.28rem',
+                  fontSize: '0.8rem',
+                  fontWeight: 700,
+                  borderRadius: 'var(--radius-md)',
+                  flexShrink: 0
+                }}
+              >
+                <Share2 size={14} />
+                <span className="report-header-btn-text">공유</span>
+              </button>
+              <button 
+                type="button" 
+                className="btn btn-outline btn-sm" 
+                onClick={handlePrint}
+                title="A4 규격 인쇄"
+                aria-label="보고서 인쇄"
+                style={{ 
+                  height: '32px',
+                  padding: '0 0.55rem',
+                  border: '1px solid var(--border-color)',
+                  color: 'var(--text-main)',
+                  background: 'var(--bg-card)',
+                  display: 'inline-flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  gap: '0.28rem',
+                  fontSize: '0.8rem',
+                  fontWeight: 700,
+                  borderRadius: 'var(--radius-md)',
+                  flexShrink: 0
+                }}
+              >
+                <Printer size={14} />
+                <span className="report-header-btn-text">인쇄</span>
+              </button>
+            </div>
           </div>
         </div>
 

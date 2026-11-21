@@ -2512,6 +2512,16 @@ form.modal-content {
   display: none;
 }
 
+.report-header-btn-text {
+  display: inline;
+}
+
+@media (max-width: 355px) {
+  .report-header-btn-text {
+    display: none !important;
+  }
+}
+
 .report-desktop-view {
   display: block;
 }
