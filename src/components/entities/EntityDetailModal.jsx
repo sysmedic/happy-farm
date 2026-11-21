@@ -261,9 +261,11 @@ export default function EntityDetailModal({
                           setIsStatusMenuOpen(prev => !prev);
                         }}
                         title="클릭하여 개체 상태 즉시 변경"
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}
                       >
+                        {statusObj.icon && <span style={{ fontSize: '1.05rem', lineHeight: 1 }}>{statusObj.icon}</span>}
                         <span>{statusObj.label}</span>
-                        <span style={{ fontSize: '0.75rem', opacity: 0.8, marginLeft: '0.15rem' }}>▾</span>
+                        <span style={{ fontSize: '0.75rem', opacity: 0.8, marginLeft: '0.1rem' }}>▾</span>
                       </button>
 
                       {/* 상태 선택 팝오버 메뉴 (우측 기준 안쪽으로 오픈) */}
