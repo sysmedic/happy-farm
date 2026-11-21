@@ -610,6 +610,7 @@ export default function App() {
             setCareLogInitialValues(null);
           }}
           onSave={handleSaveCareLog}
+          onDelete={handleDeleteCareLog}
         />
       )}
 

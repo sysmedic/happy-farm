@@ -655,96 +655,92 @@ export default function EntityDetailModal({
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
-                  {/* 상단 스마트 배너: 아직 도래하지 않은 미래 예정 일정 (최대 3개 나열) */}
+                  {/* 상단 스마트 배너: 가장 가까운 차기 예정 일정 1개 단독 노출 (중복 배너 스크롤 낭비 차단) */}
                   {upcomingSchedules.length > 0 && (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '0.35rem' }}>
-                      {upcomingSchedules.slice(0, 3).map(item => (
-                        <div 
-                          key={item.id}
-                          style={{ 
-                            padding: '0.55rem 0.85rem',
-                            background: 'rgba(245, 158, 11, 0.08)',
-                            border: '1px solid rgba(245, 158, 11, 0.3)',
-                            borderRadius: 'var(--radius-md)',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: '0.2rem',
-                            boxShadow: 'var(--shadow-sm)'
+                    <div 
+                      style={{ 
+                        padding: '0.52rem 0.75rem',
+                        background: 'rgba(245, 158, 11, 0.08)',
+                        border: '1px solid rgba(245, 158, 11, 0.3)',
+                        borderRadius: 'var(--radius-md)',
+                        marginBottom: '0.45rem',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.15rem',
+                        boxShadow: 'var(--shadow-sm)'
+                      }}
+                    >
+                      {/* 1단: 다음 일정: 날짜 - 시간 & D-day + 원클릭 수정 버튼 */}
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: '0.5rem',
+                        width: '100%'
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', minWidth: 0, flex: 1 }}>
+                          <span style={{
+                            fontSize: '0.78rem',
+                            color: 'var(--color-accent)',
+                            fontWeight: 700,
+                            letterSpacing: '-0.01em',
+                            whiteSpace: 'nowrap'
+                          }}>
+                            다음 일정: {upcomingSchedules[0].date}{upcomingSchedules[0].time ? ` - ${upcomingSchedules[0].time}` : ''}
+                          </span>
+                          <span style={{
+                            fontSize: '0.72rem',
+                            background: 'var(--color-accent)',
+                            color: '#ffffff',
+                            padding: '0.1rem 0.4rem',
+                            borderRadius: '4px',
+                            fontWeight: 800,
+                            whiteSpace: 'nowrap'
+                          }}>
+                            {getDdayBadge(upcomingSchedules[0].date)}
+                          </span>
+                        </div>
+
+                        <button
+                          type="button"
+                          className="btn btn-outline btn-sm btn-icon-only"
+                          onClick={() => {
+                            if (upcomingSchedules[0].type === 'careLog' && onEditCareLog) {
+                              onEditCareLog(upcomingSchedules[0].sourceLog, { focusNextSchedule: true });
+                            } else if (upcomingSchedules[0].type === 'schedule' && onEditSchedule) {
+                              onEditSchedule(upcomingSchedules[0].sourceSchedule);
+                            }
+                          }}
+                          title="이 예정 일정 수정"
+                          style={{
+                            width: '24px',
+                            height: '24px',
+                            padding: 0,
+                            flexShrink: 0,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            border: '1px solid rgba(245, 158, 11, 0.4)',
+                            color: 'var(--color-accent)',
+                            background: 'var(--bg-card)',
+                            borderRadius: 'var(--radius-sm)'
                           }}
                         >
-                          {/* 1단: 다음 일정: 날짜 - 시간 & D-day + 원클릭 수정 버튼 */}
-                          <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            gap: '0.5rem',
-                            width: '100%'
-                          }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', minWidth: 0, flex: 1 }}>
-                              <span style={{
-                                fontSize: '0.78rem',
-                                color: 'var(--color-accent)',
-                                fontWeight: 700,
-                                letterSpacing: '-0.01em',
-                                whiteSpace: 'nowrap'
-                              }}>
-                                다음 일정: {item.date}{item.time ? ` - ${item.time}` : ''}
-                              </span>
-                              <span style={{
-                                fontSize: '0.72rem',
-                                background: 'var(--color-accent)',
-                                color: '#ffffff',
-                                padding: '0.1rem 0.4rem',
-                                borderRadius: '4px',
-                                fontWeight: 800,
-                                whiteSpace: 'nowrap'
-                              }}>
-                                {getDdayBadge(item.date)}
-                              </span>
-                            </div>
+                          <Edit3 size={12} />
+                        </button>
+                      </div>
 
-                            <button
-                              type="button"
-                              className="btn btn-outline btn-sm btn-icon-only"
-                              onClick={() => {
-                                if (item.type === 'careLog' && onEditCareLog) {
-                                  onEditCareLog(item.sourceLog, { focusNextSchedule: true });
-                                } else if (item.type === 'schedule' && onEditSchedule) {
-                                  onEditSchedule(item.sourceSchedule);
-                                }
-                              }}
-                              title="이 예정 일정 수정"
-                              style={{
-                                width: '24px',
-                                height: '24px',
-                                padding: 0,
-                                flexShrink: 0,
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                border: '1px solid rgba(245, 158, 11, 0.4)',
-                                color: 'var(--color-accent)',
-                                background: 'var(--bg-card)',
-                                borderRadius: 'var(--radius-sm)'
-                              }}
-                            >
-                              <Edit3 size={12} />
-                            </button>
-                          </div>
-
-                          {/* 2단: 작업 내용 (70% 소프트 그레이) */}
-                          <div style={{
-                            fontSize: '0.88rem',
-                            fontWeight: 600,
-                            color: 'var(--text-main)',
-                            opacity: 0.7,
-                            lineHeight: 1.35,
-                            wordBreak: 'break-word'
-                          }}>
-                            {item.title}
-                          </div>
-                        </div>
-                      ))}
+                      {/* 2단: 작업 내용 */}
+                      <div style={{
+                        fontSize: '0.86rem',
+                        fontWeight: 600,
+                        color: 'var(--text-main)',
+                        opacity: 0.8,
+                        lineHeight: 1.35,
+                        wordBreak: 'break-word'
+                      }}>
+                        {upcomingSchedules[0].title}
+                      </div>
                     </div>
                   )}
 
@@ -758,27 +754,27 @@ export default function EntityDetailModal({
                           background: 'var(--bg-card)',
                           border: '1px solid var(--border-color)',
                           borderRadius: 'var(--radius-md)',
-                          padding: '0.65rem 0.85rem',
+                          padding: '0.52rem 0.75rem',
                           boxShadow: 'var(--shadow-sm)',
                           transition: 'all 0.15s ease'
                         }}
                       >
-                        {/* 1행: [관리분류 뱃지] + [70% 소프트 블랙 날짜] (좌측) & [✏️ 수정] [🗑️ 삭제] 액션 버튼 (우측 끝) */}
+                        {/* 1행: [관리분류 뱃지] + [날짜] (좌측) & [✏️ 수정] 액션 버튼 (우측 끝, 삭제는 수정창 내 격리) */}
                         <div style={{
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'space-between',
                           gap: '0.5rem',
-                          marginBottom: '0.45rem',
+                          marginBottom: '0.3rem',
                           width: '100%'
                         }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem', minWidth: 0, flex: 1 }}>
-                            <span className={`badge ${catObj.badgeClass}`} style={{ flexShrink: 0, borderRadius: '9999px', padding: '0.2rem 0.6rem', fontSize: '0.78rem', fontWeight: 700 }}>
+                            <span className={`badge ${catObj.badgeClass}`} style={{ flexShrink: 0, borderRadius: '9999px', padding: '0.18rem 0.55rem', fontSize: '0.78rem', fontWeight: 700 }}>
                               {catObj.icon} {catObj.label}
                             </span>
                             <span style={{
                               fontWeight: 700,
-                              fontSize: '0.90rem',
+                              fontSize: '0.88rem',
                               color: 'var(--text-main)',
                               opacity: 0.7,
                               whiteSpace: 'nowrap',
@@ -788,51 +784,28 @@ export default function EntityDetailModal({
                             </span>
                           </div>
 
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexShrink: 0 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
                             {onEditCareLog && (
                               <button
                                 type="button"
                                 className="btn btn-outline btn-sm btn-icon-only"
                                 onClick={() => onEditCareLog(log)}
-                                title="관리 기록 수정"
+                                title="관리 기록 수정 및 삭제"
                                 style={{
-                                  width: '26px',
-                                  height: '26px',
+                                  width: '24px',
+                                  height: '24px',
                                   padding: 0,
                                   flexShrink: 0,
                                   display: 'inline-flex',
                                   alignItems: 'center',
                                   justifyContent: 'center',
-                                  border: '1px solid var(--text-muted)',
+                                  border: '1px solid rgba(0, 0, 0, 0.15)',
                                   color: 'var(--text-main)',
                                   background: 'var(--bg-card)',
                                   borderRadius: 'var(--radius-sm)'
                                 }}
                               >
-                                <Edit3 size={13} />
-                              </button>
-                            )}
-                            {onDeleteCareLog && (
-                              <button
-                                type="button"
-                                className="btn btn-outline btn-sm btn-icon-only"
-                                onClick={() => onDeleteCareLog(log.id)}
-                                title="관리 기록 삭제"
-                                style={{
-                                  width: '26px',
-                                  height: '26px',
-                                  padding: 0,
-                                  flexShrink: 0,
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  border: '1px solid rgba(239, 68, 68, 0.4)',
-                                  color: 'var(--color-danger)',
-                                  background: 'var(--bg-card)',
-                                  borderRadius: 'var(--radius-sm)'
-                                }}
-                              >
-                                <Trash2 size={13} color="var(--color-danger)" />
+                                <Edit3 size={12} />
                               </button>
                             )}
                           </div>
@@ -842,10 +815,10 @@ export default function EntityDetailModal({
                         <div 
                           style={{ 
                             fontWeight: 700, 
-                            fontSize: '0.96rem', 
+                            fontSize: '0.93rem', 
                             color: 'var(--text-main)',
                             lineHeight: 1.35,
-                            marginBottom: log.details ? '0.35rem' : '0.1rem',
+                            marginBottom: log.details ? '0.25rem' : '0.05rem',
                             width: '100%',
                             wordBreak: 'break-word'
                           }}

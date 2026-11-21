@@ -3,7 +3,8 @@ import {
   X, 
   Save, 
   AlertCircle,
-  Plus
+  Plus,
+  Trash2
 } from 'lucide-react';
 import { 
   CARE_CATEGORIES, 
@@ -38,7 +39,8 @@ export default function CareLogFormModal({
   onAddCustomCategory,
   onDeleteCustomCategory,
   onClose,
-  onSave
+  onSave,
+  onDelete
 }) {
   const isEditing = Boolean(logToEdit);
   const categoriesToDisplay = careCategories || CARE_CATEGORIES;
@@ -731,33 +733,65 @@ export default function CareLogFormModal({
             </div>
           </div>
 
-          {/* 모달 푸터 */}
-          <div className="modal-footer">
-            <button 
-              type="button" 
-              className="btn btn-secondary" 
-              onClick={onClose}
-              style={{
-                border: '1px solid var(--text-muted)',
-                color: 'var(--text-main)',
-                fontWeight: 600
-              }}
-            >
-              취소
-            </button>
-            <button 
-              type="submit" 
-              className={`btn ${isEditing ? 'btn-outline' : 'btn-primary'}`}
-              style={isEditing ? {
-                border: '1px solid var(--text-muted)',
-                color: 'var(--text-main)',
-                fontWeight: 700,
-                background: 'var(--bg-card)'
-              } : {}}
-            >
-              <Save size={16} />
-              <span>{isEditing ? '수정 사항 저장' : '관리 기록 저장'}</span>
-            </button>
+          {/* 모달 푸터: 좌측 삭제 격리 및 우측 저장/취소 안전 배치 */}
+          <div className="modal-footer" style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: isEditing && onDelete ? 'space-between' : 'flex-end',
+            width: '100%',
+            gap: '0.6rem'
+          }}>
+            {isEditing && onDelete && (
+              <button 
+                type="button" 
+                className="btn btn-outline"
+                onClick={() => {
+                  if (window.confirm('정말 이 관리 기록을 삭제하시겠습니까?')) {
+                    onDelete(logToEdit.id);
+                    onClose();
+                  }
+                }}
+                style={{
+                  border: '1px solid rgba(239, 68, 68, 0.4)',
+                  color: 'var(--color-danger)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.35rem',
+                  fontWeight: 700
+                }}
+              >
+                <Trash2 size={16} color="var(--color-danger)" />
+                <span>기록 삭제</span>
+              </button>
+            )}
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <button 
+                type="button" 
+                className="btn btn-secondary" 
+                onClick={onClose}
+                style={{
+                  border: '1px solid var(--text-muted)',
+                  color: 'var(--text-main)',
+                  fontWeight: 600
+                }}
+              >
+                취소
+              </button>
+              <button 
+                type="submit" 
+                className={`btn ${isEditing ? 'btn-outline' : 'btn-primary'}`}
+                style={isEditing ? {
+                  border: '1px solid var(--text-muted)',
+                  color: 'var(--text-main)',
+                  fontWeight: 700,
+                  background: 'var(--bg-card)'
+                } : {}}
+              >
+                <Save size={16} />
+                <span>{isEditing ? '수정 사항 저장' : '관리 기록 저장'}</span>
+              </button>
+            </div>
           </div>
         </form>
       </div>
