@@ -879,17 +879,19 @@ export default function EntityList({
                 style={isHistory ? { opacity: 0.92, borderColor: 'rgba(100, 116, 139, 0.3)' } : {}}
               >
                 {/* 1층: 최우선 식별자 "개체식별번호" & "현재 사육 상태 배지" */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', marginBottom: '0.35rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.45rem', marginBottom: '0.35rem' }}>
                   <h3 
                     style={{ 
                       margin: 0, 
-                      fontSize: '1.25rem', 
+                      fontSize: '1.12rem', 
                       fontWeight: 900, 
                       fontFamily: 'var(--font-family)',
                       fontVariantNumeric: 'tabular-nums',
                       fontFeatureSettings: '"tnum" 1',
                       color: 'var(--text-main)', 
-                      letterSpacing: '0.01em',
+                      letterSpacing: '-0.025em',
+                      whiteSpace: 'nowrap',
+                      minWidth: 0,
                       cursor: 'pointer' 
                     }}
                     onClick={() => onOpenEntityDetail(entity.tagNumber)}
@@ -897,7 +899,7 @@ export default function EntityList({
                   >
                     {entity.tagNumber}
                   </h3>
-                  <span className={`badge ${statusObj.colorClass}`} style={{ flexShrink: 0, fontSize: '0.85rem', padding: '0.25rem 0.65rem', borderRadius: 'var(--radius-sm)' }}>
+                  <span className={`badge ${statusObj.colorClass}`} style={{ flexShrink: 0, fontSize: '0.82rem', padding: '0.22rem 0.6rem', borderRadius: 'var(--radius-sm)' }}>
                     {statusObj.icon} {statusObj.label}
                   </span>
                 </div>
@@ -952,13 +954,13 @@ export default function EntityList({
                   {/* 모체 번호 */}
                   <div style={{ display: 'flex', flexDirection: 'column' }}>
                     <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: '2px' }}>모체 번호</span>
-                    <span style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-main)' }}>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-main)' }}>
                       {entity.motherTag ? (
                         <span 
                           className="spec-link-mother"
                           onClick={() => onOpenEntityDetail(entity.motherTag)}
                           title="클릭 시 모체(어미소) 정보로 이동"
-                          style={{ fontFamily: 'var(--font-family)', fontVariantNumeric: 'tabular-nums' }}
+                          style={{ fontFamily: 'var(--font-family)', fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.02em' }}
                         >
                           {entity.motherTag}
                         </span>
@@ -968,7 +970,7 @@ export default function EntityList({
                   {/* 부체(씨수소) */}
                   <div style={{ display: 'flex', flexDirection: 'column' }}>
                     <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: '2px' }}>부체(씨수소)</span>
-                    <span style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-main)', fontFamily: 'var(--font-family)', fontVariantNumeric: 'tabular-nums' }}>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-main)', fontFamily: 'var(--font-family)', fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.02em' }}>
                       {entity.fatherTag || <span style={{ color: 'var(--text-muted)' }}>-</span>}
                     </span>
                   </div>
