@@ -189,7 +189,7 @@ export function calculateAge(birthDate) {
   const now = new Date();
   const diffTime = Math.abs(now - birth);
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  
+
   let months = (now.getFullYear() - birth.getFullYear()) * 12;
   months -= birth.getMonth();
   months += now.getMonth();
@@ -226,7 +226,7 @@ export function getCurrentTimeString() {
 export function getKoreanChoseong(str) {
   if (!str) return '';
   const normalized = str.normalize('NFC');
-  const CHOSEONG = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+  const CHOSEONG = ['ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ', 'ㅅ', 'ㅆ', 'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ'];
   let result = '';
   for (let i = 0; i < normalized.length; i++) {
     const code = normalized.charCodeAt(i) - 44032;
