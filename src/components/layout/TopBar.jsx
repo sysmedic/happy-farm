@@ -7,8 +7,8 @@ import {
   Plus
 } from 'lucide-react';
 
-// 듬직한 한우(소) 옆모습 벡터 라인 아이콘 (Lucide 라인 스타일과 100% 호환)
-function CowIcon({ size = 19, className = '' }) {
+// 정갈한 한우(소) 정면 라인 아이콘 (선 뭉침 제거 & 시원한 뿔/귀 강조, Lucide 스타일 호환)
+function CowIcon({ size = 20, className = '' }) {
   return (
     <svg
       width={size}
@@ -21,16 +21,19 @@ function CowIcon({ size = 19, className = '' }) {
       strokeLinejoin="round"
       className={className}
     >
-      {/* 솟은 뿔 */}
-      <path d="M5.5 7.5C4 4.5 2.5 5 2 6.5" />
-      {/* 귀 */}
-      <path d="M7.5 8L9 6.5" />
-      {/* 머리 - 등(한우 어깨혹) - 엉덩이 - 뒷다리 - 배 - 앞다리 */}
-      <path d="M2.5 10.5c0-1.5 1.5-2.2 3-1.8 1.5-1.5 3.5-1 6-.5 2.5.5 4.2 0 5.5 1.5 1.2 1.2 1 3 1 5.3v4h-2.2v-3.5h-5V19H8.5v-4.8c-1.5 0-3-.5-4-1.5L2.5 10.5z" />
-      {/* 꼬리 */}
-      <path d="M18.5 12c.8 1.8.8 3.5 0 5" />
-      {/* 눈 */}
-      <circle cx="5" cy="10" r="0.75" fill="currentColor" stroke="none" />
+      {/* 위로 힘차게 솟은 양쪽 뿔 */}
+      <path d="M7 6C5 2 2 3 2 5.5c2 1 3.5 1.5 5 1.5" />
+      <path d="M17 6c2-4 5-3 5-.5-2 1-3.5 1.5-5 1.5" />
+      {/* 단정한 얼굴 턱선 */}
+      <path d="M6 8.5v4.5c0 3.3 2.7 6 6 6s6-2.7 6-6V8.5" />
+      {/* 양쪽 귀 */}
+      <path d="M6 10H3a1.5 1.5 0 0 0 0 3h3" />
+      <path d="M18 10h3a1.5 1.5 0 0 1 0 3h-3" />
+      {/* 또렷한 두 눈 */}
+      <circle cx="9.5" cy="12" r="1" fill="currentColor" stroke="none" />
+      <circle cx="14.5" cy="12" r="1" fill="currentColor" stroke="none" />
+      {/* 하단 미니멀 코 라인 */}
+      <path d="M10 16c1 .7 3 .7 4 0" />
     </svg>
   );
 }
@@ -76,7 +79,7 @@ export default function TopBar({
           title="개체관리 (목록 및 상세 정보)"
           aria-label="개체관리"
         >
-          <CowIcon size={19} className="nav-tab-icon" />
+          <CowIcon size={20} className="nav-tab-icon" />
           <span className="nav-tab-text">개체관리</span>
         </button>
 
