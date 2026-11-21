@@ -435,8 +435,7 @@ export default function DailyReportView({
   const [reportDate, setReportDate] = useState(targetDate || getTodayDateString());
   const todayStr = useMemo(() => getTodayDateString(), []);
 
-  // 🔍 1안(달력 팝업) vs 2안(주간 스트립) 비교 모드 스위처
-  const [compareMode, setCompareMode] = useState('modal'); // 'modal' | 'strip'
+  // 1안 팝업 달력 열림 상태
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
   // 미니 달력 팝업용 연월 상태
@@ -504,55 +503,6 @@ export default function DailyReportView({
 
     return days;
   }, [popupYearMonth]);
-
-  // 2안용 주간 7일 날짜 목록
-  const weekDays = useMemo(() => {
-    if (!reportDate) return [];
-    const parts = reportDate.split('-').map(Number);
-    const curr = new Date(parts[0], parts[1] - 1, parts[2]);
-    const dayOfWeek = curr.getDay(); // 0 is Sunday
-    const sunday = new Date(curr);
-    sunday.setDate(curr.getDate() - dayOfWeek);
-
-    const days = [];
-    const dayLabels = ['일', '월', '화', '수', '목', '금', '토'];
-    for (let i = 0; i < 7; i++) {
-      const d = new Date(sunday);
-      d.setDate(sunday.getDate() + i);
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, '0');
-      const dateNum = String(d.getDate()).padStart(2, '0');
-      const dateStr = `${y}-${m}-${dateNum}`;
-      days.push({
-        dateStr,
-        dayNumber: d.getDate(),
-        dayLabel: dayLabels[i],
-        isSunday: i === 0,
-        isSaturday: i === 6
-      });
-    }
-    return days;
-  }, [reportDate]);
-
-  const handlePrevWeek = () => {
-    const parts = reportDate.split('-').map(Number);
-    const d = new Date(parts[0], parts[1] - 1, parts[2]);
-    d.setDate(d.getDate() - 7);
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    setReportDate(`${y}-${m}-${day}`);
-  };
-
-  const handleNextWeek = () => {
-    const parts = reportDate.split('-').map(Number);
-    const d = new Date(parts[0], parts[1] - 1, parts[2]);
-    d.setDate(d.getDate() + 7);
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    setReportDate(`${y}-${m}-${day}`);
-  };
   
   // 날짜별 일일 특이사항 영구 로드
   const [farmNotes, setFarmNotes] = useState(() => {
@@ -708,68 +658,24 @@ export default function DailyReportView({
       {/* 📱 1. 모바일 전용 독립 폼 (스마트폰 화면에서만 단독 표시) */}
       <div className="report-mobile-view" style={{ paddingBottom: '4rem' }}>
         
-        {/* 🔬 [개발서버 비교 스위처] 1안(달력 팝업) vs 2안(주간 스트립) */}
-        <div style={{
-          background: 'rgba(16, 185, 129, 0.08)',
-          border: '1.5px dashed var(--color-primary)',
-          borderRadius: 'var(--radius-md)',
-          padding: '0.45rem 0.65rem',
-          marginBottom: '0.65rem',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '0.4rem',
-          flexWrap: 'wrap'
-        }}>
-          <span style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--color-primary)' }}>
-            🔍 점 표시 캘린더 비교:
-          </span>
-          <div style={{ display: 'inline-flex', background: 'var(--bg-card)', borderRadius: 'var(--radius-sm)', padding: '2px', border: '1px solid var(--border-color)' }}>
-            <button
-              type="button"
-              onClick={() => setCompareMode('modal')}
-              style={{
-                padding: '0.22rem 0.55rem',
-                fontSize: '0.75rem',
-                fontWeight: compareMode === 'modal' ? 800 : 500,
-                background: compareMode === 'modal' ? 'var(--color-primary)' : 'transparent',
-                color: compareMode === 'modal' ? '#fff' : 'var(--text-muted)',
-                border: 'none',
-                borderRadius: 'var(--radius-sm)',
-                cursor: 'pointer'
-              }}
-            >
-              1안. 달력 팝업
-            </button>
-            <button
-              type="button"
-              onClick={() => setCompareMode('strip')}
-              style={{
-                padding: '0.22rem 0.55rem',
-                fontSize: '0.75rem',
-                fontWeight: compareMode === 'strip' ? 800 : 500,
-                background: compareMode === 'strip' ? 'var(--color-primary)' : 'transparent',
-                color: compareMode === 'strip' ? '#fff' : 'var(--text-muted)',
-                border: 'none',
-                borderRadius: 'var(--radius-sm)',
-                cursor: 'pointer'
-              }}
-            >
-              2안. 주간 스트립
-            </button>
-          </div>
-        </div>
-
-        {/* 1. 슬림 1줄 상단 헤더: 뒤로가기(관리내역) & 날짜 선택 & 심플 아이콘 버튼(공유/인쇄) */}
-        <div className="card" style={{ padding: '0.55rem 0.75rem', marginBottom: '0.75rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.45rem' }}>
-            {/* 좌측: 다이어리 관리내역 복귀 뒤로가기 버튼 */}
+        {/* 1. 슬림 1줄 상단 헤더: 뒤로가기 & 오늘 & 날짜선택 & 공유 & 인쇄 (5개 요소 완벽 등간격 정돈) */}
+        <div className="card" style={{ padding: '0.55rem 0.65rem', marginBottom: '0.75rem' }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '0.4rem',
+            width: '100%',
+            maxWidth: '360px',
+            margin: '0 auto'
+          }}>
+            {/* 1) 뒤로가기 버튼 (32x32) */}
             {onNavigateToDiary && (
               <button
                 type="button"
                 className="btn btn-outline btn-sm"
                 onClick={() => onNavigateToDiary(reportDate)}
-                title="관리 내역으로 돌아가기"
+                title="다이어리 관리 내역으로 돌아가기"
                 aria-label="관리 내역으로 돌아가기"
                 style={{
                   width: '32px',
@@ -781,197 +687,118 @@ export default function DailyReportView({
                   justifyContent: 'center',
                   border: '1px solid var(--border-color)',
                   background: 'var(--bg-card)',
-                  color: 'var(--text-main)'
+                  color: 'var(--text-main)',
+                  borderRadius: 'var(--radius-md)'
                 }}
               >
                 <ChevronLeft size={18} />
               </button>
             )}
 
-            {/* 중앙: 오늘 복귀 캘린더 아이콘 + 날짜 버튼/인풋 */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', minWidth: 0, flex: 1 }}>
-              <button
-                type="button"
-                onClick={() => {
-                  setReportDate(todayStr);
-                  const now = new Date();
-                  setPopupYearMonth({ year: now.getFullYear(), month: now.getMonth() });
-                }}
-                title={reportDate === todayStr ? "오늘 날짜를 보고 있습니다" : "터치 시 오늘 날짜로 즉시 복귀"}
-                aria-label="오늘 날짜로 이동"
-                style={{
-                  background: reportDate !== todayStr ? 'rgba(16, 185, 129, 0.12)' : 'transparent',
-                  border: reportDate !== todayStr ? '1px solid rgba(16, 185, 129, 0.4)' : 'none',
-                  borderRadius: 'var(--radius-sm)',
-                  padding: '0.2rem',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  flexShrink: 0,
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                <Calendar size={18} color="var(--color-primary)" />
-              </button>
+            {/* 2) 오늘 복귀 버튼 (32x32 사각 규격 통일) */}
+            <button
+              type="button"
+              className="btn btn-outline btn-sm"
+              onClick={() => {
+                setReportDate(todayStr);
+                const now = new Date();
+                setPopupYearMonth({ year: now.getFullYear(), month: now.getMonth() });
+              }}
+              title={reportDate === todayStr ? "오늘 날짜를 보고 있습니다" : "터치 시 오늘 날짜로 즉시 복귀"}
+              aria-label="오늘 날짜로 이동"
+              style={{
+                width: '32px',
+                height: '32px',
+                padding: 0,
+                flexShrink: 0,
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: reportDate !== todayStr ? 'rgba(16, 185, 129, 0.12)' : 'var(--bg-card)',
+                border: reportDate !== todayStr ? '1px solid rgba(16, 185, 129, 0.5)' : '1px solid var(--border-color)',
+                borderRadius: 'var(--radius-md)',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <Calendar size={16} color="var(--color-primary)" />
+            </button>
 
-              {/* 1안 선택 시: 누르면 초록 점이 찍힌 팝업 달력이 열리는 커스텀 날짜 버튼 */}
-              {compareMode === 'modal' ? (
-                <button
-                  type="button"
-                  onClick={() => setIsCalendarOpen(true)}
-                  title="터치하여 달력에서 날짜 선택 (기록 점 표시)"
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: '0.35rem',
-                    background: 'var(--bg-card)',
-                    border: '1.5px solid var(--color-primary)',
-                    borderRadius: 'var(--radius-md)',
-                    padding: '0.3rem 0.55rem',
-                    fontSize: '0.9rem',
-                    fontWeight: 800,
-                    color: 'var(--text-main)',
-                    cursor: 'pointer',
-                    width: '100%',
-                    maxWidth: '155px'
-                  }}
-                >
-                  <span>{reportDate}</span>
-                  <span style={{ fontSize: '0.65rem', color: 'var(--color-primary)' }}>▼</span>
-                </button>
-              ) : (
-                /* 2안 선택 시: 기본 날짜 인풋 */
-                <input
-                  type="date"
-                  className="form-input"
-                  style={{ width: '100%', maxWidth: '145px', padding: '0.25rem 0.4rem', fontSize: '0.9rem', fontWeight: 700, minWidth: 0 }}
-                  value={reportDate}
-                  onChange={(e) => setReportDate(e.target.value)}
-                />
-              )}
-            </div>
+            {/* 3) 날짜 선택 버튼 (벙벙함 제거, 콤팩트 핏) */}
+            <button
+              type="button"
+              onClick={() => setIsCalendarOpen(true)}
+              title="터치하여 달력에서 날짜 선택 (기록 점 표시)"
+              style={{
+                height: '32px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.35rem',
+                background: 'var(--bg-card)',
+                border: '1.5px solid var(--color-primary)',
+                borderRadius: 'var(--radius-md)',
+                padding: '0 0.65rem',
+                fontSize: '0.88rem',
+                fontWeight: 800,
+                color: 'var(--text-main)',
+                cursor: 'pointer',
+                flexShrink: 0
+              }}
+            >
+              <span>{reportDate}</span>
+              <span style={{ fontSize: '0.62rem', color: 'var(--color-primary)' }}>▼</span>
+            </button>
 
-            {/* 우측: 텍스트 제거된 심플 아이콘 버튼 (공유 / 인쇄) */}
-            <div style={{ display: 'flex', gap: '0.35rem', flexShrink: 0 }}>
-              <button 
-                type="button" 
-                className="btn btn-outline btn-sm" 
-                onClick={handleShare}
-                title="스마트폰 고해상도 이미지 공유 및 텍스트 복사"
-                aria-label="보고서 공유"
-                style={{ 
-                  width: '32px',
-                  height: '32px',
-                  padding: 0,
-                  border: '1px solid var(--border-color)',
-                  color: 'var(--text-main)',
-                  background: 'var(--bg-card)',
-                  display: 'inline-flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center'
-                }}
-              >
-                <Share2 size={15} />
-              </button>
-              <button 
-                type="button" 
-                className="btn btn-outline btn-sm" 
-                onClick={handlePrint}
-                title="A4 규격 인쇄"
-                aria-label="보고서 인쇄"
-                style={{ 
-                  width: '32px',
-                  height: '32px',
-                  padding: 0,
-                  border: '1px solid var(--border-color)',
-                  color: 'var(--text-main)',
-                  background: 'var(--bg-card)',
-                  display: 'inline-flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center'
-                }}
-              >
-                <Printer size={15} />
-              </button>
-            </div>
+            {/* 4) 공유 버튼 (32x32) */}
+            <button 
+              type="button" 
+              className="btn btn-outline btn-sm" 
+              onClick={handleShare}
+              title="스마트폰 고해상도 이미지 공유 및 텍스트 복사"
+              aria-label="보고서 공유"
+              style={{ 
+                width: '32px',
+                height: '32px',
+                padding: 0,
+                flexShrink: 0,
+                border: '1px solid var(--border-color)',
+                color: 'var(--text-main)',
+                background: 'var(--bg-card)',
+                display: 'inline-flex', 
+                alignItems: 'center', 
+                justifyContent: 'center',
+                borderRadius: 'var(--radius-md)'
+              }}
+            >
+              <Share2 size={15} />
+            </button>
+
+            {/* 5) 인쇄 버튼 (32x32) */}
+            <button 
+              type="button" 
+              className="btn btn-outline btn-sm" 
+              onClick={handlePrint}
+              title="A4 규격 인쇄"
+              aria-label="보고서 인쇄"
+              style={{ 
+                width: '32px',
+                height: '32px',
+                padding: 0,
+                flexShrink: 0,
+                border: '1px solid var(--border-color)',
+                color: 'var(--text-main)',
+                background: 'var(--bg-card)',
+                display: 'inline-flex', 
+                alignItems: 'center', 
+                justifyContent: 'center',
+                borderRadius: 'var(--radius-md)'
+              }}
+            >
+              <Printer size={15} />
+            </button>
           </div>
         </div>
-
-        {/* 📅 2안: 주간 스트립 바 (7일 날짜 넘김 & 요일별 기록 점 표시) */}
-        {compareMode === 'strip' && (
-          <div className="card" style={{ padding: '0.5rem 0.6rem', marginBottom: '0.75rem', background: 'var(--bg-card)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.3rem' }}>
-              <button
-                type="button"
-                className="btn btn-outline btn-sm btn-icon-only"
-                onClick={handlePrevWeek}
-                title="이전 주"
-                style={{ width: '28px', height: '28px', padding: 0, flexShrink: 0 }}
-              >
-                <ChevronLeft size={16} />
-              </button>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '0.2rem', flex: 1 }}>
-                {weekDays.map((d) => {
-                  const isSelected = d.dateStr === reportDate;
-                  const isToday = d.dateStr === todayStr;
-                  const hasActivity = datesWithActivity.has(d.dateStr);
-
-                  return (
-                    <button
-                      key={d.dateStr}
-                      type="button"
-                      onClick={() => setReportDate(d.dateStr)}
-                      style={{
-                        padding: '0.35rem 0.1rem',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        borderRadius: 'var(--radius-sm)',
-                        background: isSelected ? 'rgba(16, 185, 129, 0.16)' : 'var(--bg-card-subtle)',
-                        border: isSelected ? '2px solid var(--color-primary)' : '1px solid var(--border-color)',
-                        color: isSelected ? '#065f46' : d.isSunday ? '#ef4444' : d.isSaturday ? '#3b82f6' : 'var(--text-main)',
-                        cursor: 'pointer',
-                        position: 'relative',
-                        minHeight: '44px'
-                      }}
-                    >
-                      <span style={{ fontSize: '0.62rem', fontWeight: 600, color: 'var(--text-muted)' }}>{d.dayLabel}</span>
-                      <span style={{ fontSize: '0.82rem', fontWeight: (isSelected || isToday) ? 800 : 600 }}>{d.dayNumber}</span>
-                      {isToday && (
-                        <span style={{ fontSize: '0.52rem', fontWeight: 800, color: 'var(--color-primary)', lineHeight: 1 }}>오늘</span>
-                      )}
-                      {hasActivity && (
-                        <span style={{
-                          width: '4.5px',
-                          height: '4.5px',
-                          borderRadius: '50%',
-                          background: 'var(--color-primary)',
-                          marginTop: '1px'
-                        }} />
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-              <button
-                type="button"
-                className="btn btn-outline btn-sm btn-icon-only"
-                onClick={handleNextWeek}
-                title="다음 주"
-                style={{ width: '28px', height: '28px', padding: 0, flexShrink: 0 }}
-              >
-                <ChevronRight size={16} />
-              </button>
-            </div>
-            <div style={{ marginTop: '0.35rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.35rem', fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-              <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: 'var(--color-primary)', display: 'inline-block' }} />
-              <span>초록 점: 해당 일자에 관리기록/일정 있음</span>
-            </div>
-          </div>
-        )}
 
         {/* 📅 1안: 미니 캘린더 모달 팝업 (초록 점 + 오늘 꼬리표 완벽 탑재) */}
         {isCalendarOpen && (
