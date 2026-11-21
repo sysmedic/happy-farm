@@ -133,7 +133,7 @@ function createReportImageBlob({
     }
 
     if (farmNotesHeight > 0) {
-      totalHeight += farmNotesHeight + 20;
+      totalHeight += farmNotesHeight + 30; // 카드와 특이사항 간 시원한 분리 여백 반영
     }
 
     totalHeight += 40; // 하단 푸터 여백
@@ -377,11 +377,11 @@ function createReportImageBlob({
 
     // 6. 일일 영농 특이사항 (내용 있을 때만 표시)
     if (farmNotesHeight > 0) {
-      y += 4;
+      y += 18; // 이전 카드와의 여백을 시원하게 확보 (총 28px 분리)
       ctx.fillStyle = '#0f172a';
       ctx.font = 'bold 13.5px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
       ctx.fillText('📄 일일 영농 특이사항', padding, y);
-      y += 10;
+      y += 12; // 타이틀과 박스 사이 간격 정돈
 
       ctx.fillStyle = '#ffffff';
       ctx.strokeStyle = '#e2e8f0';
