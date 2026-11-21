@@ -47,9 +47,6 @@ export default function DailyDiaryView({
   // 다이어리 서브 탭: 'schedules'(일정) 또는 'logs'(관리 내역)
   const [activeDiaryTab, setActiveDiaryTab] = useState('schedules');
 
-  // 🎨 소프트 파스텔 캘린더 '오늘' 구별 방식 비교 모드: 'label'(방법 1: 오늘 글자 꼬리표) | 'orange'(방법 2: 주황 테두리 색상분리) | 'both'(방법 3: 주황 미니 꼬리표)
-  const [todayMode, setTodayMode] = useState('label');
-
   // 완료된 일정 중 상세 내용을 확인하기 위해 사용자가 탭하여 임시로 펼친 일정 ID 목록
   const [expandedCompletedIds, setExpandedCompletedIds] = useState(new Set());
 
@@ -193,75 +190,6 @@ export default function DailyDiaryView({
         {/* 왼쪽: 캘린더 다이어리 위젯 */}
         <div style={{ width: '100%' }}>
           <div className="calendar-card">
-            {/* 🎨 [소프트 파스텔] '오늘' vs '선택일' 구별 비교 실시간 스위처 */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: '0.25rem',
-              marginBottom: '1rem',
-              background: 'var(--bg-card-subtle)',
-              padding: '0.25rem',
-              borderRadius: '9999px',
-              border: '1px solid var(--border-color)',
-              boxSizing: 'border-box'
-            }}>
-              <button
-                type="button"
-                onClick={() => setTodayMode('label')}
-                style={{
-                  flex: 1,
-                  padding: '0.35rem 0.2rem',
-                  borderRadius: '9999px',
-                  border: 'none',
-                  background: todayMode === 'label' ? 'var(--color-primary)' : 'transparent',
-                  color: todayMode === 'label' ? '#ffffff' : 'var(--text-muted)',
-                  cursor: 'pointer',
-                  fontWeight: 700,
-                  fontSize: '0.74rem',
-                  transition: 'all 0.15s ease'
-                }}
-              >
-                1. '오늘' 글자
-              </button>
-              <button
-                type="button"
-                onClick={() => setTodayMode('orange')}
-                style={{
-                  flex: 1,
-                  padding: '0.35rem 0.2rem',
-                  borderRadius: '9999px',
-                  border: 'none',
-                  background: todayMode === 'orange' ? '#f59e0b' : 'transparent',
-                  color: todayMode === 'orange' ? '#ffffff' : 'var(--text-muted)',
-                  cursor: 'pointer',
-                  fontWeight: 700,
-                  fontSize: '0.74rem',
-                  transition: 'all 0.15s ease'
-                }}
-              >
-                2. 주황 테두리
-              </button>
-              <button
-                type="button"
-                onClick={() => setTodayMode('both')}
-                style={{
-                  flex: 1,
-                  padding: '0.35rem 0.2rem',
-                  borderRadius: '9999px',
-                  border: 'none',
-                  background: todayMode === 'both' ? '#d97706' : 'transparent',
-                  color: todayMode === 'both' ? '#ffffff' : 'var(--text-muted)',
-                  cursor: 'pointer',
-                  fontWeight: 700,
-                  fontSize: '0.74rem',
-                  transition: 'all 0.15s ease'
-                }}
-              >
-                3. 주황 꼬리표
-              </button>
-            </div>
-
             <div className="calendar-header">
               <h3 style={{ fontSize: '1.25rem', fontWeight: 800, letterSpacing: '-0.02em', margin: 0 }}>
                 {currentYearMonth.year}년 {currentYearMonth.month + 1}월
@@ -307,50 +235,29 @@ export default function DailyDiaryView({
               ))}
             </div>
 
-            {/* 날짜 셀 그리드 (소프트 파스텔 베이스 + 오늘 구별 3가지 모드) */}
+            {/* 날짜 셀 그리드 (소프트 파스텔 + '오늘' 직관 꼬리표 라벨) */}
             <div className="calendar-grid">
               {calendarDays.map((item, index) => {
                 const isSelected = item.dateStr === selectedDate;
                 const isToday = item.dateStr === todayStr;
                 const hasActivity = datesWithActivity.has(item.dateStr);
 
-                // 테두리 및 배경 계산
-                let cellBg = !item.isCurrentMonth 
+                // 소프트 파스텔 배경 및 테두리
+                const cellBg = !item.isCurrentMonth 
                   ? 'transparent' 
                   : isSelected 
                     ? 'rgba(16, 185, 129, 0.16)' 
                     : 'var(--bg-card-subtle)';
 
-                let cellBorder = '1px solid var(--border-color)';
-                let textColor = isSelected ? '#065f46' : 'var(--text-main)';
+                const cellBorder = !item.isCurrentMonth
+                  ? 'none'
+                  : isSelected
+                    ? '2px solid var(--color-primary)'
+                    : isToday
+                      ? '1.5px solid var(--border-color)'
+                      : '1px solid var(--border-color)';
 
-                if (!item.isCurrentMonth) {
-                  cellBorder = 'none';
-                } else if (todayMode === 'orange') {
-                  // 방법 2: 주황 테두리 색상 분리
-                  if (isToday && isSelected) {
-                    cellBorder = '2.5px solid #f59e0b';
-                  } else if (isToday) {
-                    cellBorder = '2px solid #f59e0b';
-                    textColor = '#b45309';
-                  } else if (isSelected) {
-                    cellBorder = '2px solid var(--color-primary)';
-                  }
-                } else if (todayMode === 'both') {
-                  // 방법 3: 주황 꼬리표 + 부드러운 테두리
-                  if (isSelected) {
-                    cellBorder = '2px solid var(--color-primary)';
-                  } else if (isToday) {
-                    cellBorder = '1.5px solid #f59e0b';
-                  }
-                } else {
-                  // 방법 1: 오늘 글자 꼬리표
-                  if (isSelected) {
-                    cellBorder = '2px solid var(--color-primary)';
-                  } else if (isToday) {
-                    cellBorder = '1.5px solid var(--border-color)';
-                  }
-                }
+                const textColor = isSelected ? '#065f46' : 'var(--text-main)';
 
                 return (
                   <button
@@ -380,28 +287,12 @@ export default function DailyDiaryView({
                       padding: 0
                     }}
                   >
-                    {/* 방법 1: 작은 '오늘' 글자 */}
-                    {todayMode === 'label' && isToday && (
+                    {/* 방법 1: 앙증맞은 '오늘' 꼬리표 라벨 (0.1초 만에 오늘 구별) */}
+                    {isToday && (
                       <span style={{
                         fontSize: '0.62rem',
                         fontWeight: 800,
                         color: isSelected ? '#047857' : 'var(--color-primary)',
-                        lineHeight: 1,
-                        marginBottom: '1px'
-                      }}>
-                        오늘
-                      </span>
-                    )}
-
-                    {/* 방법 3: 주황 미니 꼬리표 */}
-                    {todayMode === 'both' && isToday && (
-                      <span style={{
-                        fontSize: '0.6rem',
-                        fontWeight: 800,
-                        color: '#d97706',
-                        background: 'rgba(245, 158, 11, 0.18)',
-                        padding: '1px 3px',
-                        borderRadius: '3px',
                         lineHeight: 1,
                         marginBottom: '1px'
                       }}>
@@ -439,23 +330,10 @@ export default function DailyDiaryView({
               fontSize: '0.75rem',
               color: 'var(--text-muted)'
             }}>
-              {todayMode === 'orange' ? (
-                <span style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
-                    <span style={{ width: '8px', height: '8px', borderRadius: '2px', border: '1.5px solid #f59e0b', display: 'inline-block' }} />
-                    오늘
-                  </span>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
-                    <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--color-primary)' }} />
-                    기록/일정 있음
-                  </span>
-                </span>
-              ) : (
-                <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--color-primary)', display: 'inline-block' }} />
-                  일정/작업 기록 있음
-                </span>
-              )}
+              <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--color-primary)', display: 'inline-block' }} />
+                일정/작업 기록 있음
+              </span>
               <button
                 className="btn btn-outline btn-sm"
                 onClick={() => onOpenScheduleModal(selectedDate)}
