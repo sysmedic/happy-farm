@@ -7,8 +7,8 @@ import {
   Plus
 } from 'lucide-react';
 
-// 정갈한 한우(소) 정면 라인 아이콘 (선 뭉침 제거 & 시원한 뿔/귀 강조, Lucide 스타일 호환)
-function CowIcon({ size = 20, className = '' }) {
+// 정감 있는 제각(除角) 한우 벡터 라인 아이콘 (뿔 없이 순한 이마 & 부드러운 귀, 듬직한 비경)
+function CowIcon({ size = 23, strokeWidth = 2, className = '' }) {
   return (
     <svg
       width={size}
@@ -16,24 +16,26 @@ function CowIcon({ size = 20, className = '' }) {
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth="2"
+      strokeWidth={strokeWidth}
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
     >
-      {/* 위로 힘차게 솟은 양쪽 뿔 */}
-      <path d="M7 6C5 2 2 3 2 5.5c2 1 3.5 1.5 5 1.5" />
-      <path d="M17 6c2-4 5-3 5-.5-2 1-3.5 1.5-5 1.5" />
-      {/* 단정한 얼굴 턱선 */}
-      <path d="M6 8.5v4.5c0 3.3 2.7 6 6 6s6-2.7 6-6V8.5" />
-      {/* 양쪽 귀 */}
-      <path d="M6 10H3a1.5 1.5 0 0 0 0 3h3" />
-      <path d="M18 10h3a1.5 1.5 0 0 1 0 3h-3" />
-      {/* 또렷한 두 눈 */}
-      <circle cx="9.5" cy="12" r="1" fill="currentColor" stroke="none" />
-      <circle cx="14.5" cy="12" r="1" fill="currentColor" stroke="none" />
-      {/* 하단 미니멀 코 라인 */}
-      <path d="M10 16c1 .7 3 .7 4 0" />
+      {/* 순한 둥근 이마 라인 (제각으로 뿔 없음) */}
+      <path d="M7 8c1.5-1.5 3.2-2 5-2s3.5.5 5 2" />
+      {/* 부드러운 양쪽 귀 */}
+      <path d="M7 8.5c-2.5-.5-4.5.5-5 2.5 1.5 1 3.5.5 5-1" />
+      <path d="M17 8.5c2.5-.5 4.5.5 5 2.5-1.5 1-3.5.5-5-1" />
+      {/* 듬직한 턱선 */}
+      <path d="M6.5 10v4c0 3 2.5 5.5 5.5 5.5s5.5-2.5 5.5-5.5v-4" />
+      {/* 듬직하고 넓은 한우 비경(코) */}
+      <path d="M8 14.2c0-.8 1.8-1.4 4-1.4s4 .6 4 1.4v1.6c0 1.2-1.8 1.8-4 1.8s-4-.6-4-1.8v-1.6z" />
+      {/* 또렷하고 순한 두 눈 */}
+      <circle cx="9" cy="11.5" r="1" fill="currentColor" stroke="none" />
+      <circle cx="15" cy="11.5" r="1" fill="currentColor" stroke="none" />
+      {/* 콧구멍 2개 */}
+      <circle cx="10.5" cy="15.8" r="0.65" fill="currentColor" stroke="none" />
+      <circle cx="13.5" cy="15.8" r="0.65" fill="currentColor" stroke="none" />
     </svg>
   );
 }
@@ -79,7 +81,7 @@ export default function TopBar({
           title="개체관리 (목록 및 상세 정보)"
           aria-label="개체관리"
         >
-          <CowIcon size={20} className="nav-tab-icon" />
+          <CowIcon size={23} strokeWidth={activeTab === 'entities' ? 2.4 : 1.9} className="nav-tab-icon" />
           <span className="nav-tab-text">개체관리</span>
         </button>
 
@@ -89,7 +91,7 @@ export default function TopBar({
           title="다이어리 (일정 및 타임라인)"
           aria-label="다이어리"
         >
-          <Calendar size={17} className="nav-tab-icon" />
+          <Calendar size={22} strokeWidth={activeTab === 'diary' ? 2.4 : 1.9} className="nav-tab-icon" />
           <span className="nav-tab-text">다이어리</span>
         </button>
 
@@ -100,7 +102,7 @@ export default function TopBar({
           title="일일보고 (영농일지 및 모바일 보고서)"
           aria-label="일일보고"
         >
-          <FileText size={17} className="nav-tab-icon" />
+          <FileText size={22} strokeWidth={activeTab === 'report' ? 2.4 : 1.9} className="nav-tab-icon" />
           <span className="nav-tab-text">일일보고</span>
         </button>
 
@@ -110,7 +112,7 @@ export default function TopBar({
           title="드라이브 (구글 드라이브 백업/복원)"
           aria-label="드라이브"
         >
-          <Cloud size={17} className="nav-tab-icon" />
+          <Cloud size={22} strokeWidth={activeTab === 'cloud' ? 2.4 : 1.9} className="nav-tab-icon" />
           <span className="nav-tab-text">드라이브</span>
         </button>
       </nav>
