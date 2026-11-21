@@ -109,10 +109,13 @@ export default function CareLogFormModal({
       setOperator(getInitialOperator(null, careLogs));
       if (initialValues) {
         if (initialValues.category) setCategory(normalizeCategoryId(initialValues.category));
+        else setCategory('');
         if (initialValues.title) setTitle(initialValues.title);
         if (initialValues.date) setDate(initialValues.date);
         if (initialValues.time) setTime(initialValues.time);
         if (initialValues.entityId) setSelectedEntityId(initialValues.entityId);
+      } else {
+        setCategory('');
       }
       if (preselectedEntity) {
         setSelectedEntityId(preselectedEntity.id);

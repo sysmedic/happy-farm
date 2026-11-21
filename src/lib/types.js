@@ -180,7 +180,7 @@ export const LEGACY_CATEGORY_MAP = {
 
 // 카테고리 ID 정규화 함수 (어디서든 일관되게 레거시 ID를 표준 ID로 승격)
 export function normalizeCategoryId(catId) {
-  if (!catId) return 'routine';
+  if (!catId) return '';
   return LEGACY_CATEGORY_MAP[catId] || catId;
 }
 
