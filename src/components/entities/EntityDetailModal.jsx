@@ -371,8 +371,8 @@ export default function EntityDetailModal({
                       alignItems: 'center', 
                       justifyContent: 'space-between'
                     }}>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                        <span>📝 특이사항 / 사양 관리 메모</span>
+                      <span style={{ display: 'flex', alignItems: 'center' }}>
+                        <span>특이사항 / 사양 관리 메모</span>
                       </span>
                       <button
                         type="button"
@@ -417,10 +417,9 @@ export default function EntityDetailModal({
                       fontWeight: 700, 
                       marginBottom: '0.45rem',
                       display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.35rem'
+                      alignItems: 'center'
                     }}>
-                      <span>📝 특이사항 / 사양 관리 메모 직접 수정</span>
+                      <span>특이사항 / 사양 관리 메모 직접 수정</span>
                     </div>
                     <textarea
                       className="form-textarea"
