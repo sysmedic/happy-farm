@@ -1931,12 +1931,10 @@ a:hover {
   color: #ffffff !important;
 }
 
-/* 2열: 관리 분류 탭바 (공간 부족 시 3열로 자동 줄바꿈 확장) */
+/* 3단: 관리 분류 탭바 (3열 균등 그리드 배치) */
 .fullhistory-filter-bar {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  /* 넘치면 3열로 자동 확장 */
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 0.45rem;
   width: 100%;
 }
@@ -1944,15 +1942,17 @@ a:hover {
 .fullhistory-tab-btn {
   height: 32px;
   box-sizing: border-box;
-  padding: 0 0.75rem;
+  padding: 0 0.45rem;
   border-radius: var(--radius-full);
   font-size: 0.82rem;
   font-weight: 600;
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 0.35rem;
+  justify-content: center;
+  gap: 0.25rem;
   white-space: nowrap;
-  flex-shrink: 0;
+  min-width: 0;
+  width: 100%;
   background: var(--bg-hover);
   color: var(--text-muted);
   border: 1px solid var(--border-color);
@@ -2932,13 +2932,15 @@ form.modal-content {
   }
 
   .fullhistory-filter-bar {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
     gap: 0.35rem !important;
   }
 
   .fullhistory-tab-btn {
     height: 30px !important;
-    font-size: 0.78rem !important;
-    padding: 0 0.65rem !important;
+    font-size: 0.76rem !important;
+    padding: 0 0.35rem !important;
   }
 
   .detail-header-top-row {

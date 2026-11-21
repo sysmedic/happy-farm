@@ -185,34 +185,35 @@ export default function EntityDetailModal({
           </button>
         </div>
 
-        {/* 생애 관리 내역 전면 뷰 전용 서브 헤더 바 (2단 개체정보 + 3단 통합 캡슐 필터 고정) */}
+        {/* 생애 관리 내역 전면 뷰 전용 서브 헤더 바 (2단 개체정보/전체캡슐 + 3단 3열 균등 종목캡슐) */}
         {viewMode === 'fullHistory' && (
           <div className="fullhistory-header-bar">
-            {/* 2단: 개체 식별 프로필 바 (가로 100% 쾌적하게 활용) */}
-            <div className="fullhistory-header-identity-row">
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem', minWidth: 0, flex: 1, flexWrap: 'wrap' }}>
+            {/* 2단: 개체 식별 프로필 (좌측) <──────────────> 전체 기록 캡슐 (우측 3열 끝선 칼정렬) */}
+            <div className="fullhistory-header-identity-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', width: '100%' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', minWidth: 0, flex: 1, overflow: 'hidden' }}>
                 <span className="entity-ear-tag fullhistory-tag" style={{ flexShrink: 0 }}>{entity.tagNumber}</span>
                 <h2 className="fullhistory-entity-name" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{entity.name}</h2>
-                <span style={{ fontSize: '0.84rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-                  {formatDisplayBreed(entity.breed)} • {age.text}
-                </span>
               </div>
-            </div>
 
-            {/* 3단: '전체' + 종목별 기록 집계 캡슐 통합 필터 바 (3단 완전 일체화) */}
-            <div className="fullhistory-filter-bar">
-              {/* 1번 캡슐: 전체 기록 */}
+              {/* 우측 3열 끝선에 수직 칼정렬되는 전체 기록 캡슐 */}
               <button
                 type="button"
                 className={`fullhistory-tab-btn ${selectedCategory === 'all' ? 'active' : ''}`}
                 onClick={() => setSelectedCategory('all')}
                 title="전체 관리 기록 보기"
+                style={{
+                  width: 'auto',
+                  flexShrink: 0,
+                  padding: '0 0.85rem'
+                }}
               >
                 <span>전체</span>
                 <span className="tab-count">{allEntityLogs.length}</span>
               </button>
+            </div>
 
-              {/* 종목별 기록 캡슐들 */}
+            {/* 3단: 세부 종목 캡슐 3열 균등 바둑판 배치 */}
+            <div className="fullhistory-filter-bar">
               {categoriesToDisplay.map(cat => {
                 const count = allEntityLogs.filter(l => l.category === cat.id).length;
                 if (count === 0 && selectedCategory !== cat.id) return null;
@@ -224,7 +225,7 @@ export default function EntityDetailModal({
                     onClick={() => setSelectedCategory(cat.id)}
                     title={`${cat.label} 관리 기록 보기`}
                   >
-                    <span>{cat.label}</span>
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{cat.label}</span>
                     <span className="tab-count">{count}</span>
                   </button>
                 );
