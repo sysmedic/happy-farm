@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   ChevronLeft,
   ChevronRight,
@@ -28,6 +28,8 @@ export default function DailyDiaryView({
   careLogs,
   careCategories,
   schedules = [],
+  initialDate,
+  initialTab = 'schedules',
   onOpenEntityDetail,
   onOpenCareLogModal,
   onOpenScheduleModal,
@@ -38,14 +40,31 @@ export default function DailyDiaryView({
   onEditCareLog,
   onNavigateToReport
 }) {
-  const [selectedDate, setSelectedDate] = useState(getTodayDateString());
+  const [selectedDate, setSelectedDate] = useState(initialDate || getTodayDateString());
   const [currentYearMonth, setCurrentYearMonth] = useState(() => {
-    const today = new Date();
-    return { year: today.getFullYear(), month: today.getMonth() };
+    const base = initialDate ? new Date(initialDate) : new Date();
+    return { year: base.getFullYear(), month: base.getMonth() };
   });
 
   // 다이어리 서브 탭: 'schedules'(일정) 또는 'logs'(관리 내역)
-  const [activeDiaryTab, setActiveDiaryTab] = useState('schedules');
+  const [activeDiaryTab, setActiveDiaryTab] = useState(initialTab || 'schedules');
+
+  // 외부(보고서 등)에서 날짜나 탭이 변경되어 진입했을 때 실시간 동기화
+  useEffect(() => {
+    if (initialDate) {
+      setSelectedDate(initialDate);
+      const parts = initialDate.split('-');
+      if (parts.length === 3) {
+        setCurrentYearMonth({ year: parseInt(parts[0], 10), month: parseInt(parts[1], 10) - 1 });
+      }
+    }
+  }, [initialDate]);
+
+  useEffect(() => {
+    if (initialTab) {
+      setActiveDiaryTab(initialTab);
+    }
+  }, [initialTab]);
 
   // 완료된 일정 중 상세 내용을 확인하기 위해 사용자가 탭하여 임시로 펼친 일정 ID 목록
   const [expandedCompletedIds, setExpandedCompletedIds] = useState(new Set());

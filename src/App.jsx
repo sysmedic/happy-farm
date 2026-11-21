@@ -65,6 +65,8 @@ export default function App() {
   const [printSheetEntity, setPrintSheetEntity] = useState(null);
   const [returnToDetailEntity, setReturnToDetailEntity] = useState(null);
   const [targetReportDate, setTargetReportDate] = useState(getTodayDateString());
+  const [targetDiaryDate, setTargetDiaryDate] = useState(null);
+  const [initialDiaryTab, setInitialDiaryTab] = useState('schedules');
 
   // 토스트 피드백 (2초 자동 소멸 및 타이머 안정화)
   const [toastMessage, setToastMessage] = useState(null);
@@ -493,6 +495,8 @@ export default function App() {
                 careLogs={careLogs}
                 careCategories={allCareCategories}
                 schedules={schedules}
+                initialDate={targetDiaryDate}
+                initialTab={initialDiaryTab}
                 onOpenEntityDetail={handleOpenEntityDetail}
                 onOpenCareLogModal={(entity = null, date = null, initialValues = null) => {
                   setCareLogPreselectedEntity(entity);
@@ -524,6 +528,11 @@ export default function App() {
                   setIsCareLogModalOpen(true);
                 }}
                 onEditCareLog={handleOpenEditCareLog}
+                onNavigateToDiary={(date) => {
+                  if (date) setTargetDiaryDate(date);
+                  setInitialDiaryTab('logs');
+                  setActiveTab('diary');
+                }}
                 onNavigateToCloud={() => setActiveTab('cloud')}
               />
             )}

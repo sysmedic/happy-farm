@@ -8,7 +8,8 @@ import {
   FileText, 
   Sparkles,
   ArrowRight,
-  Edit3
+  Edit3,
+  ChevronLeft
 } from 'lucide-react';
 import { 
   CARE_CATEGORIES, 
@@ -425,6 +426,7 @@ export default function DailyReportView({
   onOpenEntityDetail,
   onOpenCareLogModal,
   onEditCareLog,
+  onNavigateToDiary,
   onNavigateToCloud
 }) {
   const [reportDate, setReportDate] = useState(targetDate || getTodayDateString());
@@ -582,10 +584,36 @@ export default function DailyReportView({
 
       {/* 📱 1. 모바일 전용 독립 폼 (스마트폰 화면에서만 단독 표시) */}
       <div className="report-mobile-view" style={{ paddingBottom: '4rem' }}>
-        {/* 1. 슬림 1줄 상단 헤더: 날짜 선택 & 공유/인쇄 버튼 */}
-        <div className="card" style={{ padding: '0.65rem 0.85rem', marginBottom: '0.75rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', minWidth: 0, flex: 1 }}>
+        {/* 1. 슬림 1줄 상단 헤더: 뒤로가기(관리내역) & 날짜 선택 & 심플 아이콘 버튼(공유/인쇄) */}
+        <div className="card" style={{ padding: '0.55rem 0.75rem', marginBottom: '0.75rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.45rem' }}>
+            {/* 좌측: 다이어리 관리내역 복귀 뒤로가기 버튼 */}
+            {onNavigateToDiary && (
+              <button
+                type="button"
+                className="btn btn-outline btn-sm"
+                onClick={() => onNavigateToDiary(reportDate)}
+                title="관리 내역으로 돌아가기"
+                aria-label="관리 내역으로 돌아가기"
+                style={{
+                  width: '32px',
+                  height: '32px',
+                  padding: 0,
+                  flexShrink: 0,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border: '1px solid var(--border-color)',
+                  background: 'var(--bg-card)',
+                  color: 'var(--text-main)'
+                }}
+              >
+                <ChevronLeft size={18} />
+              </button>
+            )}
+
+            {/* 중앙: 오늘 복귀 캘린더 아이콘 + 날짜 인풋 */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', minWidth: 0, flex: 1 }}>
               <button
                 type="button"
                 onClick={() => setReportDate(getTodayDateString())}
@@ -609,52 +637,53 @@ export default function DailyReportView({
               <input
                 type="date"
                 className="form-input"
-                style={{ width: 'auto', padding: '0.25rem 0.5rem', fontSize: '0.95rem', fontWeight: 700, minWidth: 0 }}
+                style={{ width: '100%', maxWidth: '145px', padding: '0.25rem 0.4rem', fontSize: '0.9rem', fontWeight: 700, minWidth: 0 }}
                 value={reportDate}
                 onChange={(e) => setReportDate(e.target.value)}
               />
             </div>
 
+            {/* 우측: 텍스트 제거된 심플 아이콘 버튼 (공유 / 인쇄) */}
             <div style={{ display: 'flex', gap: '0.35rem', flexShrink: 0 }}>
               <button 
                 type="button" 
                 className="btn btn-outline btn-sm" 
                 onClick={handleShare}
                 title="스마트폰 고해상도 이미지 공유 및 텍스트 복사"
+                aria-label="보고서 공유"
                 style={{ 
+                  width: '32px',
+                  height: '32px',
+                  padding: 0,
                   border: '1px solid var(--border-color)',
                   color: 'var(--text-main)',
-                  fontWeight: 600,
                   background: 'var(--bg-card)',
-                  padding: '0.32rem 0.65rem', 
-                  fontSize: '0.82rem', 
                   display: 'inline-flex', 
                   alignItems: 'center', 
-                  gap: '0.28rem' 
+                  justifyContent: 'center'
                 }}
               >
-                <Share2 size={13} />
-                <span>공유</span>
+                <Share2 size={15} />
               </button>
               <button 
                 type="button" 
                 className="btn btn-outline btn-sm" 
                 onClick={handlePrint}
                 title="A4 규격 인쇄"
+                aria-label="보고서 인쇄"
                 style={{ 
+                  width: '32px',
+                  height: '32px',
+                  padding: 0,
                   border: '1px solid var(--border-color)',
                   color: 'var(--text-main)',
-                  fontWeight: 600,
                   background: 'var(--bg-card)',
-                  padding: '0.32rem 0.65rem', 
-                  fontSize: '0.82rem', 
                   display: 'inline-flex', 
                   alignItems: 'center', 
-                  gap: '0.28rem' 
+                  justifyContent: 'center'
                 }}
               >
-                <Printer size={13} />
-                <span>인쇄</span>
+                <Printer size={15} />
               </button>
             </div>
           </div>
@@ -929,7 +958,25 @@ export default function DailyReportView({
             padding: '0.75rem 1.15rem'
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            {onNavigateToDiary && (
+              <button
+                type="button"
+                className="btn btn-outline btn-sm"
+                onClick={() => onNavigateToDiary(reportDate)}
+                title="다이어리 관리 내역으로 돌아가기"
+                style={{ 
+                  display: 'inline-flex', 
+                  alignItems: 'center', 
+                  gap: '0.3rem', 
+                  fontWeight: 600,
+                  padding: '0.35rem 0.65rem'
+                }}
+              >
+                <ChevronLeft size={16} />
+                <span>관리 내역</span>
+              </button>
+            )}
             <label style={{ fontSize: '0.875rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-main)', whiteSpace: 'nowrap' }}>
               <button
                 type="button"
