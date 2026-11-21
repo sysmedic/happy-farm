@@ -7,8 +7,8 @@ import {
   Plus
 } from 'lucide-react';
 
-// 정감 있는 제각(除角) 한우 벡터 라인 아이콘 (뿔 없이 순한 이마 & 부드러운 귀, 듬직한 비경)
-function CowIcon({ size = 27, strokeWidth = 1.5, className = '' }) {
+// 정감 있는 제각(除角) 한우 벡터 라인 아이콘 (상하 높이 꽉 찬 밸런스 핏)
+function CowIcon({ size = 25, strokeWidth = 1.5, className = '' }) {
   return (
     <svg
       width={size}
@@ -21,21 +21,21 @@ function CowIcon({ size = 27, strokeWidth = 1.5, className = '' }) {
       strokeLinejoin="round"
       className={className}
     >
-      {/* 순한 둥근 이마 라인 (제각으로 뿔 없음) */}
-      <path d="M7 8c1.5-1.5 3.2-2 5-2s3.5.5 5 2" />
+      {/* 순한 둥근 이마 라인 (상단 Y:3까지 시원하게 확장) */}
+      <path d="M6.5 5.5c1.8-2 3.6-2.5 5.5-2.5s3.7.5 5.5 2.5" />
       {/* 부드러운 양쪽 귀 */}
-      <path d="M7 8.5c-2.5-.5-4.5.5-5 2.5 1.5 1 3.5.5 5-1" />
-      <path d="M17 8.5c2.5-.5 4.5.5 5 2.5-1.5 1-3.5.5-5-1" />
-      {/* 듬직한 턱선 */}
-      <path d="M6.5 10v4c0 3 2.5 5.5 5.5 5.5s5.5-2.5 5.5-5.5v-4" />
-      {/* 듬직하고 넓은 한우 비경(코) */}
-      <path d="M8 14.2c0-.8 1.8-1.4 4-1.4s4 .6 4 1.4v1.6c0 1.2-1.8 1.8-4 1.8s-4-.6-4-1.8v-1.6z" />
+      <path d="M6.5 6c-2.8-.5-4.5.5-5 2.8 1.8 1.2 3.8.7 5-1" />
+      <path d="M17.5 6c2.8-.5 4.5.5 5 2.8-1.8 1.2-3.8.7-5-1" />
+      {/* 얼굴 윤곽 */}
+      <path d="M6 7.5v8c0 3.8 2.8 6.5 6 6.5s6-2.7 6-6.5v-8" />
+      {/* 듬직하고 넓은 한우 비경(코/주둥이, 하단 Y:22까지 꽉 참) */}
+      <path d="M7.5 14.5c0-1.2 2-1.8 4.5-1.8s4.5.6 4.5 1.8v2.5c0 1.5-2 2.2-4.5 2.2s-4.5-.7-4.5-2.2v-2.5z" />
       {/* 또렷하고 순한 두 눈 */}
-      <circle cx="9" cy="11.5" r="1" fill="currentColor" stroke="none" />
-      <circle cx="15" cy="11.5" r="1" fill="currentColor" stroke="none" />
+      <circle cx="9" cy="10" r="1.1" fill="currentColor" stroke="none" />
+      <circle cx="15" cy="10" r="1.1" fill="currentColor" stroke="none" />
       {/* 콧구멍 2개 */}
-      <circle cx="10.5" cy="15.8" r="0.65" fill="currentColor" stroke="none" />
-      <circle cx="13.5" cy="15.8" r="0.65" fill="currentColor" stroke="none" />
+      <circle cx="10.2" cy="16.5" r="0.75" fill="currentColor" stroke="none" />
+      <circle cx="13.8" cy="16.5" r="0.75" fill="currentColor" stroke="none" />
     </svg>
   );
 }
@@ -81,7 +81,7 @@ export default function TopBar({
           title="개체관리 (목록 및 상세 정보)"
           aria-label="개체관리"
         >
-          <CowIcon size={27} strokeWidth={1.5} className="nav-tab-icon" />
+          <CowIcon size={25} strokeWidth={1.5} className="nav-tab-icon" />
           <span className="nav-tab-text">개체관리</span>
         </button>
 
