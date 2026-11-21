@@ -26,7 +26,8 @@ import {
   calculateAge, 
   getKoreanChoseong,
   formatDisplayBreed,
-  isHistoricalStatus
+  isHistoricalStatus,
+  getCategoryById
 } from '../../lib/types.js';
 
 const DASHBOARD_CARDS_STORAGE_KEY = 'happy_farm_active_dashboard_cards_v5';
@@ -57,6 +58,7 @@ const HISTORY_DASHBOARD_CARDS = [
 export default function EntityList({
   entities,
   careLogs,
+  careCategories,
   onOpenEntityDetail,
   onOpenEntityModal,
   onOpenCareLogModal,
@@ -868,6 +870,7 @@ export default function EntityList({
             const isShipped = entity.status === 'shipped';
             const isDeceased = entity.status === 'deceased';
             const isHistory = isHistoricalStatus(entity.status);
+            const latestLogCat = latestLog ? getCategoryById(latestLog.category, careCategories) : null;
 
             return (
               <div 
@@ -875,102 +878,156 @@ export default function EntityList({
                 className="entity-card"
                 style={isHistory ? { opacity: 0.92, borderColor: 'rgba(100, 116, 139, 0.3)' } : {}}
               >
-                {/* 상단: 개체번호(클릭 시 상세 이동) & 상태 */}
-                <div className="entity-card-top">
-                  <div className="entity-tag-wrapper">
-                    <span 
-                      className="entity-ear-tag"
-                      onClick={() => onOpenEntityDetail(entity.tagNumber)}
-                      title="클릭 시 이 개체의 관리 내역으로 이동"
-                    >
-                      {entity.tagNumber}
-                    </span>
-                  </div>
-                  <span className={`badge ${statusObj.colorClass}`}>
+                {/* 1층: 가장 중요한 "소 이름/별명" & "현재 사육 상태 배지" */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', marginBottom: '0.4rem' }}>
+                  <h3 
+                    className="entity-name"
+                    style={{ 
+                      margin: 0, 
+                      fontSize: '1.25rem', 
+                      fontWeight: 900, 
+                      color: 'var(--text-main)', 
+                      letterSpacing: '-0.02em',
+                      cursor: 'pointer' 
+                    }}
+                    onClick={() => onOpenEntityDetail(entity.tagNumber)}
+                    title="클릭 시 이 개체의 상세 프로필로 이동"
+                  >
+                    {entity.name}
+                  </h3>
+                  <span className={`badge ${statusObj.colorClass}`} style={{ flexShrink: 0, fontSize: '0.85rem', padding: '0.25rem 0.65rem', borderRadius: 'var(--radius-sm)' }}>
                     {statusObj.icon} {statusObj.label}
                   </span>
                 </div>
 
-                {/* 개체명, 사육단계, 축사 위치 1열 통합 배치 (동일한 폰트 크기 & 컬러 구분) */}
-                <div className="entity-card-identity-row">
-                  <h3 
-                    className="entity-name"
-                    style={{ margin: 0, cursor: 'pointer' }}
+                {/* 2층: 이표번호 (단정한 모노스페이스) · 사육단계 · 축사 위치 */}
+                <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '0.35rem', marginBottom: '0.75rem', fontSize: '0.86rem' }}>
+                  <span 
                     onClick={() => onOpenEntityDetail(entity.tagNumber)}
+                    title="클릭 시 이 개체의 관리 내역으로 이동"
+                    style={{ 
+                      fontFamily: 'var(--font-mono)', 
+                      fontWeight: 700, 
+                      color: 'var(--color-primary)', 
+                      cursor: 'pointer',
+                      letterSpacing: '-0.01em',
+                      background: 'rgba(16, 185, 129, 0.08)',
+                      padding: '0.1rem 0.4rem',
+                      borderRadius: 'var(--radius-sm)'
+                    }}
                   >
-                    {entity.name}
-                  </h3>
-                  <span className="entity-card-breed">
+                    {entity.tagNumber}
+                  </span>
+                  <span style={{ color: 'var(--border-color)', fontWeight: 300 }}>•</span>
+                  <span style={{ fontWeight: 600, color: 'var(--text-muted)' }}>
                     {formatDisplayBreed(entity.breed)}
                   </span>
-                  <span className="entity-card-dot">•</span>
-                  <span className="entity-card-barn">
-                    {entity.barn || '축사 미지정'}
+                  <span style={{ color: 'var(--border-color)', fontWeight: 300 }}>•</span>
+                  <span style={{ fontWeight: 600, color: 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', gap: '0.2rem' }}>
+                    <span style={{ fontSize: '0.8rem' }}>🏠</span>
+                    <span>{entity.barn || '축사 미지정'}</span>
                   </span>
                 </div>
 
-                {/* 상세 사양 정보 그리드 */}
-                <div className="entity-specs-grid">
-                  <div className="spec-item">
-                    <span className="spec-item-label">월령(생년월일)</span>
-                    <span className="spec-item-value">{age.text}</span>
+                {/* 3층: 상세 사양 정보 그리드 (소프트 파스텔 2x2 카드) */}
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: '0.55rem',
+                  background: 'var(--bg-card-subtle)',
+                  padding: '0.75rem 0.85rem',
+                  borderRadius: 'var(--radius-md)',
+                  marginBottom: '0.75rem',
+                  border: '1px solid var(--border-color)'
+                }}>
+                  {/* 월령 */}
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: '2px' }}>월령(생년월일)</span>
+                    <span style={{ fontSize: '0.92rem', fontWeight: 800, color: 'var(--text-main)' }}>{age.text}</span>
                   </div>
-                  <div className="spec-item">
-                    <span className="spec-item-label">{isShipped ? '출하 체중' : isDeceased ? '최종 체중' : '현재 체중'}</span>
-                    <span className="spec-item-value">{entity.weight ? `${entity.weight} kg` : '미측정'}</span>
+                  {/* 체중 */}
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: '2px' }}>
+                      {isShipped ? '출하 체중' : isDeceased ? '최종 체중' : '현재 체중'}
+                    </span>
+                    <span style={{ fontSize: '0.92rem', fontWeight: 800, color: 'var(--text-main)' }}>
+                      {entity.weight ? `${entity.weight} kg` : '미측정'}
+                    </span>
                   </div>
-                  <div className="spec-item">
-                    <span className="spec-item-label">모체 번호</span>
-                    <span className="spec-item-value">
+                  {/* 모체 번호 */}
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: '2px' }}>모체 번호</span>
+                    <span style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-main)' }}>
                       {entity.motherTag ? (
                         <span 
                           className="spec-link-mother"
                           onClick={() => onOpenEntityDetail(entity.motherTag)}
                           title="클릭 시 모체(어미소) 정보로 이동"
+                          style={{ fontFamily: 'var(--font-mono)' }}
                         >
                           {entity.motherTag}
                         </span>
-                      ) : '-'}
+                      ) : <span style={{ color: 'var(--text-muted)' }}>-</span>}
                     </span>
                   </div>
-                  <div className="spec-item">
-                    <span className="spec-item-label">부체(씨수소)</span>
-                    <span className="spec-item-value">{entity.fatherTag || '-'}</span>
+                  {/* 부체(씨수소) */}
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: '2px' }}>부체(씨수소)</span>
+                    <span style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-main)', fontFamily: 'var(--font-mono)' }}>
+                      {entity.fatherTag || <span style={{ color: 'var(--text-muted)' }}>-</span>}
+                    </span>
                   </div>
                 </div>
 
-                {/* 최근 관리 이력 미니 프리뷰 (클릭 시 전체 관리내역으로 다이렉트 점프) */}
+                {/* 4층: 최근 관리 이력 미니 프리뷰 (처치 카테고리 태그 + 날짜 + 내용) */}
                 <div 
                   className="recent-log-preview-box"
                   onClick={() => onOpenEntityDetail(entity.tagNumber, 'fullHistory')}
                   title="클릭 시 이 개체의 전체 관리내역으로 바로 이동"
                   role="button"
                   tabIndex={0}
+                  style={{
+                    background: 'var(--bg-card-subtle)',
+                    border: '1px solid var(--border-color)',
+                    borderRadius: 'var(--radius-sm)',
+                    padding: '0.45rem 0.65rem',
+                    marginBottom: '0.85rem',
+                    cursor: 'pointer'
+                  }}
                 >
-                  {latestLog ? (
-                    <div className="recent-log-preview-content">
-                      <span className="recent-log-date">
-                        {latestLog.date}
-                      </span>
-                      <div 
-                        className="recent-log-title"
-                        title={latestLog.title}
-                      >
-                        {latestLog.title}
+                  {latestLog && latestLogCat ? (
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', width: '100%' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', minWidth: 0, flex: 1 }}>
+                        <span style={{
+                          fontSize: '0.72rem',
+                          fontWeight: 700,
+                          padding: '0.12rem 0.4rem',
+                          borderRadius: 'var(--radius-sm)',
+                          background: 'rgba(16, 185, 129, 0.12)',
+                          color: 'var(--color-primary)',
+                          flexShrink: 0
+                        }}>
+                          {latestLogCat.icon} {latestLogCat.label}
+                        </span>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', flexShrink: 0, fontFamily: 'var(--font-mono)' }}>
+                          {latestLog.date}
+                        </span>
+                        <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {latestLog.title}
+                        </span>
                       </div>
                       <ChevronRight size={14} className="recent-log-jump-icon" />
                     </div>
                   ) : (
-                    <div className="recent-log-empty-content">
-                      <span>등록된 관리 기록이 없습니다</span>
+                    <div className="recent-log-empty-content" style={{ fontSize: '0.78rem' }}>
+                      <span>최근 등록된 관리 기록이 없습니다</span>
                       <ChevronRight size={14} className="recent-log-jump-icon" />
                     </div>
                   )}
                 </div>
 
-                {/* 액션 버튼 그룹 */}
-                {/* 액션 버튼 그룹: 상세 이력(좌) & 관리 추가(우) 배치 */}
-                <div className="entity-card-actions">
+                {/* 5층: 액션 버튼 그룹: 상세 이력(좌) & 관리 추가(우) 배치 */}
+                <div className="entity-card-actions" style={{ display: 'flex', gap: '0.5rem' }}>
                   <button 
                     className="btn btn-outline btn-sm"
                     onClick={() => onOpenEntityDetail(entity.tagNumber)}
@@ -980,7 +1037,7 @@ export default function EntityList({
                       height: '36px', 
                       fontWeight: 600, 
                       gap: '0.4rem',
-                      border: '1px solid var(--text-muted)',
+                      border: '1px solid var(--border-color)',
                       color: 'var(--text-main)',
                       background: 'var(--bg-card)'
                     }}
