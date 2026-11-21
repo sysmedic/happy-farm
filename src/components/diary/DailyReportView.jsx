@@ -9,7 +9,9 @@ import {
   Sparkles,
   ArrowRight,
   Edit3,
-  ChevronLeft
+  ChevronLeft,
+  ChevronRight,
+  X
 } from 'lucide-react';
 import { 
   CARE_CATEGORIES, 
@@ -421,7 +423,8 @@ function createReportImageBlob({
 export default function DailyReportView({
   targetDate,
   entities,
-  careLogs,
+  careLogs = [],
+  schedules = [],
   careCategories,
   onOpenEntityDetail,
   onOpenCareLogModal,
@@ -430,6 +433,126 @@ export default function DailyReportView({
   onNavigateToCloud
 }) {
   const [reportDate, setReportDate] = useState(targetDate || getTodayDateString());
+  const todayStr = useMemo(() => getTodayDateString(), []);
+
+  // 🔍 1안(달력 팝업) vs 2안(주간 스트립) 비교 모드 스위처
+  const [compareMode, setCompareMode] = useState('modal'); // 'modal' | 'strip'
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+
+  // 미니 달력 팝업용 연월 상태
+  const [popupYearMonth, setPopupYearMonth] = useState(() => {
+    const base = targetDate ? new Date(targetDate) : new Date();
+    return { year: base.getFullYear(), month: base.getMonth() };
+  });
+
+  // reportDate가 변경될 때 팝업 달력 연월 동기화
+  useEffect(() => {
+    if (reportDate) {
+      const parts = reportDate.split('-').map(Number);
+      if (parts.length === 3) {
+        setPopupYearMonth({ year: parts[0], month: parts[1] - 1 });
+      }
+    }
+  }, [reportDate]);
+
+  // 활동(작업 기록 또는 일정)이 있는 일자 Set
+  const datesWithActivity = useMemo(() => {
+    const set = new Set();
+    (careLogs || []).forEach(l => {
+      if (l.date) set.add(l.date);
+      if (l.nextScheduleDate) set.add(l.nextScheduleDate);
+    });
+    (schedules || []).forEach(s => {
+      if (s.date) set.add(s.date);
+    });
+    return set;
+  }, [careLogs, schedules]);
+
+  // 1안용 달력 날짜 매트릭스 생성
+  const popupCalendarDays = useMemo(() => {
+    const { year, month } = popupYearMonth;
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const daysInPrevMonth = new Date(year, month, 0).getDate();
+
+    const days = [];
+
+    // 이전 달 일자
+    for (let i = firstDay - 1; i >= 0; i--) {
+      const d = daysInPrevMonth - i;
+      const prevMonth = month === 0 ? 11 : month - 1;
+      const prevYear = month === 0 ? year - 1 : year;
+      const dateStr = `${prevYear}-${String(prevMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+      days.push({ dayNumber: d, dateStr, isCurrentMonth: false });
+    }
+
+    // 이번 달 일자
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+      days.push({ dayNumber: d, dateStr, isCurrentMonth: true });
+    }
+
+    // 다음 달 일자
+    const totalSlots = days.length <= 35 ? 35 : 42;
+    const remaining = totalSlots - days.length;
+    for (let d = 1; d <= remaining; d++) {
+      const nextMonth = month === 11 ? 0 : month + 1;
+      const nextYear = month === 11 ? year + 1 : year;
+      const dateStr = `${nextYear}-${String(nextMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+      days.push({ dayNumber: d, dateStr, isCurrentMonth: false });
+    }
+
+    return days;
+  }, [popupYearMonth]);
+
+  // 2안용 주간 7일 날짜 목록
+  const weekDays = useMemo(() => {
+    if (!reportDate) return [];
+    const parts = reportDate.split('-').map(Number);
+    const curr = new Date(parts[0], parts[1] - 1, parts[2]);
+    const dayOfWeek = curr.getDay(); // 0 is Sunday
+    const sunday = new Date(curr);
+    sunday.setDate(curr.getDate() - dayOfWeek);
+
+    const days = [];
+    const dayLabels = ['일', '월', '화', '수', '목', '금', '토'];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(sunday);
+      d.setDate(sunday.getDate() + i);
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const dateNum = String(d.getDate()).padStart(2, '0');
+      const dateStr = `${y}-${m}-${dateNum}`;
+      days.push({
+        dateStr,
+        dayNumber: d.getDate(),
+        dayLabel: dayLabels[i],
+        isSunday: i === 0,
+        isSaturday: i === 6
+      });
+    }
+    return days;
+  }, [reportDate]);
+
+  const handlePrevWeek = () => {
+    const parts = reportDate.split('-').map(Number);
+    const d = new Date(parts[0], parts[1] - 1, parts[2]);
+    d.setDate(d.getDate() - 7);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    setReportDate(`${y}-${m}-${day}`);
+  };
+
+  const handleNextWeek = () => {
+    const parts = reportDate.split('-').map(Number);
+    const d = new Date(parts[0], parts[1] - 1, parts[2]);
+    d.setDate(d.getDate() + 7);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    setReportDate(`${y}-${m}-${day}`);
+  };
   
   // 날짜별 일일 특이사항 영구 로드
   const [farmNotes, setFarmNotes] = useState(() => {
@@ -584,6 +707,59 @@ export default function DailyReportView({
 
       {/* 📱 1. 모바일 전용 독립 폼 (스마트폰 화면에서만 단독 표시) */}
       <div className="report-mobile-view" style={{ paddingBottom: '4rem' }}>
+        
+        {/* 🔬 [개발서버 비교 스위처] 1안(달력 팝업) vs 2안(주간 스트립) */}
+        <div style={{
+          background: 'rgba(16, 185, 129, 0.08)',
+          border: '1.5px dashed var(--color-primary)',
+          borderRadius: 'var(--radius-md)',
+          padding: '0.45rem 0.65rem',
+          marginBottom: '0.65rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '0.4rem',
+          flexWrap: 'wrap'
+        }}>
+          <span style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--color-primary)' }}>
+            🔍 점 표시 캘린더 비교:
+          </span>
+          <div style={{ display: 'inline-flex', background: 'var(--bg-card)', borderRadius: 'var(--radius-sm)', padding: '2px', border: '1px solid var(--border-color)' }}>
+            <button
+              type="button"
+              onClick={() => setCompareMode('modal')}
+              style={{
+                padding: '0.22rem 0.55rem',
+                fontSize: '0.75rem',
+                fontWeight: compareMode === 'modal' ? 800 : 500,
+                background: compareMode === 'modal' ? 'var(--color-primary)' : 'transparent',
+                color: compareMode === 'modal' ? '#fff' : 'var(--text-muted)',
+                border: 'none',
+                borderRadius: 'var(--radius-sm)',
+                cursor: 'pointer'
+              }}
+            >
+              1안. 달력 팝업
+            </button>
+            <button
+              type="button"
+              onClick={() => setCompareMode('strip')}
+              style={{
+                padding: '0.22rem 0.55rem',
+                fontSize: '0.75rem',
+                fontWeight: compareMode === 'strip' ? 800 : 500,
+                background: compareMode === 'strip' ? 'var(--color-primary)' : 'transparent',
+                color: compareMode === 'strip' ? '#fff' : 'var(--text-muted)',
+                border: 'none',
+                borderRadius: 'var(--radius-sm)',
+                cursor: 'pointer'
+              }}
+            >
+              2안. 주간 스트립
+            </button>
+          </div>
+        </div>
+
         {/* 1. 슬림 1줄 상단 헤더: 뒤로가기(관리내역) & 날짜 선택 & 심플 아이콘 버튼(공유/인쇄) */}
         <div className="card" style={{ padding: '0.55rem 0.75rem', marginBottom: '0.75rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.45rem' }}>
@@ -612,16 +788,20 @@ export default function DailyReportView({
               </button>
             )}
 
-            {/* 중앙: 오늘 복귀 캘린더 아이콘 + 날짜 인풋 */}
+            {/* 중앙: 오늘 복귀 캘린더 아이콘 + 날짜 버튼/인풋 */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', minWidth: 0, flex: 1 }}>
               <button
                 type="button"
-                onClick={() => setReportDate(getTodayDateString())}
-                title={reportDate === getTodayDateString() ? "오늘 날짜를 보고 있습니다" : "터치 시 오늘 날짜로 즉시 복귀"}
+                onClick={() => {
+                  setReportDate(todayStr);
+                  const now = new Date();
+                  setPopupYearMonth({ year: now.getFullYear(), month: now.getMonth() });
+                }}
+                title={reportDate === todayStr ? "오늘 날짜를 보고 있습니다" : "터치 시 오늘 날짜로 즉시 복귀"}
                 aria-label="오늘 날짜로 이동"
                 style={{
-                  background: reportDate !== getTodayDateString() ? 'rgba(16, 185, 129, 0.12)' : 'transparent',
-                  border: reportDate !== getTodayDateString() ? '1px solid rgba(16, 185, 129, 0.4)' : 'none',
+                  background: reportDate !== todayStr ? 'rgba(16, 185, 129, 0.12)' : 'transparent',
+                  border: reportDate !== todayStr ? '1px solid rgba(16, 185, 129, 0.4)' : 'none',
                   borderRadius: 'var(--radius-sm)',
                   padding: '0.2rem',
                   display: 'inline-flex',
@@ -634,13 +814,43 @@ export default function DailyReportView({
               >
                 <Calendar size={18} color="var(--color-primary)" />
               </button>
-              <input
-                type="date"
-                className="form-input"
-                style={{ width: '100%', maxWidth: '145px', padding: '0.25rem 0.4rem', fontSize: '0.9rem', fontWeight: 700, minWidth: 0 }}
-                value={reportDate}
-                onChange={(e) => setReportDate(e.target.value)}
-              />
+
+              {/* 1안 선택 시: 누르면 초록 점이 찍힌 팝업 달력이 열리는 커스텀 날짜 버튼 */}
+              {compareMode === 'modal' ? (
+                <button
+                  type="button"
+                  onClick={() => setIsCalendarOpen(true)}
+                  title="터치하여 달력에서 날짜 선택 (기록 점 표시)"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '0.35rem',
+                    background: 'var(--bg-card)',
+                    border: '1.5px solid var(--color-primary)',
+                    borderRadius: 'var(--radius-md)',
+                    padding: '0.3rem 0.55rem',
+                    fontSize: '0.9rem',
+                    fontWeight: 800,
+                    color: 'var(--text-main)',
+                    cursor: 'pointer',
+                    width: '100%',
+                    maxWidth: '155px'
+                  }}
+                >
+                  <span>{reportDate}</span>
+                  <span style={{ fontSize: '0.65rem', color: 'var(--color-primary)' }}>▼</span>
+                </button>
+              ) : (
+                /* 2안 선택 시: 기본 날짜 인풋 */
+                <input
+                  type="date"
+                  className="form-input"
+                  style={{ width: '100%', maxWidth: '145px', padding: '0.25rem 0.4rem', fontSize: '0.9rem', fontWeight: 700, minWidth: 0 }}
+                  value={reportDate}
+                  onChange={(e) => setReportDate(e.target.value)}
+                />
+              )}
             </div>
 
             {/* 우측: 텍스트 제거된 심플 아이콘 버튼 (공유 / 인쇄) */}
@@ -688,6 +898,304 @@ export default function DailyReportView({
             </div>
           </div>
         </div>
+
+        {/* 📅 2안: 주간 스트립 바 (7일 날짜 넘김 & 요일별 기록 점 표시) */}
+        {compareMode === 'strip' && (
+          <div className="card" style={{ padding: '0.5rem 0.6rem', marginBottom: '0.75rem', background: 'var(--bg-card)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.3rem' }}>
+              <button
+                type="button"
+                className="btn btn-outline btn-sm btn-icon-only"
+                onClick={handlePrevWeek}
+                title="이전 주"
+                style={{ width: '28px', height: '28px', padding: 0, flexShrink: 0 }}
+              >
+                <ChevronLeft size={16} />
+              </button>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '0.2rem', flex: 1 }}>
+                {weekDays.map((d) => {
+                  const isSelected = d.dateStr === reportDate;
+                  const isToday = d.dateStr === todayStr;
+                  const hasActivity = datesWithActivity.has(d.dateStr);
+
+                  return (
+                    <button
+                      key={d.dateStr}
+                      type="button"
+                      onClick={() => setReportDate(d.dateStr)}
+                      style={{
+                        padding: '0.35rem 0.1rem',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderRadius: 'var(--radius-sm)',
+                        background: isSelected ? 'rgba(16, 185, 129, 0.16)' : 'var(--bg-card-subtle)',
+                        border: isSelected ? '2px solid var(--color-primary)' : '1px solid var(--border-color)',
+                        color: isSelected ? '#065f46' : d.isSunday ? '#ef4444' : d.isSaturday ? '#3b82f6' : 'var(--text-main)',
+                        cursor: 'pointer',
+                        position: 'relative',
+                        minHeight: '44px'
+                      }}
+                    >
+                      <span style={{ fontSize: '0.62rem', fontWeight: 600, color: 'var(--text-muted)' }}>{d.dayLabel}</span>
+                      <span style={{ fontSize: '0.82rem', fontWeight: (isSelected || isToday) ? 800 : 600 }}>{d.dayNumber}</span>
+                      {isToday && (
+                        <span style={{ fontSize: '0.52rem', fontWeight: 800, color: 'var(--color-primary)', lineHeight: 1 }}>오늘</span>
+                      )}
+                      {hasActivity && (
+                        <span style={{
+                          width: '4.5px',
+                          height: '4.5px',
+                          borderRadius: '50%',
+                          background: 'var(--color-primary)',
+                          marginTop: '1px'
+                        }} />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+              <button
+                type="button"
+                className="btn btn-outline btn-sm btn-icon-only"
+                onClick={handleNextWeek}
+                title="다음 주"
+                style={{ width: '28px', height: '28px', padding: 0, flexShrink: 0 }}
+              >
+                <ChevronRight size={16} />
+              </button>
+            </div>
+            <div style={{ marginTop: '0.35rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.35rem', fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+              <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: 'var(--color-primary)', display: 'inline-block' }} />
+              <span>초록 점: 해당 일자에 관리기록/일정 있음</span>
+            </div>
+          </div>
+        )}
+
+        {/* 📅 1안: 미니 캘린더 모달 팝업 (초록 점 + 오늘 꼬리표 완벽 탑재) */}
+        {isCalendarOpen && (
+          <div
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(0, 0, 0, 0.45)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 1000,
+              padding: '1rem',
+              backdropFilter: 'blur(2px)'
+            }}
+            onClick={() => setIsCalendarOpen(false)}
+          >
+            <div
+              className="card"
+              style={{
+                width: '100%',
+                maxWidth: '350px',
+                padding: '1.1rem',
+                boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.25)',
+                background: 'var(--bg-card)',
+                borderRadius: 'var(--radius-lg)'
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* 1층: 모달 타이틀 & 우측 상단 독립 닫기(X) 버튼 (간섭 방지 분리) */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                paddingBottom: '0.65rem',
+                marginBottom: '0.75rem',
+                borderBottom: '1px solid var(--border-color)'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                  <Calendar size={18} color="var(--color-primary)" />
+                  <span style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-main)' }}>
+                    보고서 날짜 선택
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  className="btn btn-outline btn-sm btn-icon-only"
+                  onClick={() => setIsCalendarOpen(false)}
+                  title="닫기"
+                  aria-label="달력 닫기"
+                  style={{
+                    width: '32px',
+                    height: '32px',
+                    padding: 0,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    border: '1px solid var(--border-color)',
+                    background: 'var(--bg-card)',
+                    color: 'var(--text-muted)'
+                  }}
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              {/* 2층: 달력 연월 & [ ‹ ] [ 오늘 ] [ › ] 날짜 이동 컨트롤러 */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginBottom: '0.75rem'
+              }}>
+                <h4 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-main)', letterSpacing: '-0.02em' }}>
+                  {popupYearMonth.year}년 {popupYearMonth.month + 1}월
+                </h4>
+                <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
+                  <button
+                    type="button"
+                    className="btn btn-outline btn-sm btn-icon-only"
+                    onClick={() => {
+                      setPopupYearMonth(prev => {
+                        const prevM = prev.month === 0 ? 11 : prev.month - 1;
+                        const prevY = prev.month === 0 ? prev.year - 1 : prev.year;
+                        return { year: prevY, month: prevM };
+                      });
+                    }}
+                    title="이전 달"
+                    style={{ width: '32px', height: '32px', padding: 0 }}
+                  >
+                    <ChevronLeft size={18} />
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-outline btn-sm"
+                    onClick={() => {
+                      const now = new Date();
+                      setPopupYearMonth({ year: now.getFullYear(), month: now.getMonth() });
+                      setReportDate(todayStr);
+                      setIsCalendarOpen(false);
+                    }}
+                    title="오늘 날짜로 이동"
+                    style={{ padding: '0.28rem 0.65rem', fontSize: '0.82rem', fontWeight: 700 }}
+                  >
+                    오늘
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-outline btn-sm btn-icon-only"
+                    onClick={() => {
+                      setPopupYearMonth(prev => {
+                        const nextM = prev.month === 11 ? 0 : prev.month + 1;
+                        const nextY = prev.month === 11 ? prev.year + 1 : prev.year;
+                        return { year: nextY, month: nextM };
+                      });
+                    }}
+                    title="다음 달"
+                    style={{ width: '32px', height: '32px', padding: 0 }}
+                  >
+                    <ChevronRight size={18} />
+                  </button>
+                </div>
+              </div>
+
+              {/* 요일 라벨 */}
+              <div className="calendar-grid" style={{ marginBottom: '4px' }}>
+                {['일', '월', '화', '수', '목', '금', '토'].map((name, idx) => (
+                  <div key={name} className="calendar-day-label" style={{ color: idx === 0 ? '#ef4444' : idx === 6 ? '#3b82f6' : 'var(--text-muted)', fontSize: '0.75rem' }}>
+                    {name}
+                  </div>
+                ))}
+              </div>
+
+              {/* 날짜 그리드 (소프트 파스텔 + '오늘' 직관 꼬리표 + 초록 점) */}
+              <div className="calendar-grid">
+                {popupCalendarDays.map((item, index) => {
+                  const isSelected = item.dateStr === reportDate;
+                  const isToday = item.dateStr === todayStr;
+                  const hasActivity = datesWithActivity.has(item.dateStr);
+
+                  const cellBg = !item.isCurrentMonth
+                    ? 'transparent'
+                    : isSelected
+                      ? 'rgba(16, 185, 129, 0.16)'
+                      : 'var(--bg-card-subtle)';
+
+                  const cellBorder = !item.isCurrentMonth
+                    ? 'none'
+                    : isSelected
+                      ? '2px solid var(--color-primary)'
+                      : isToday
+                        ? '1.5px solid var(--border-color)'
+                        : '1px solid var(--border-color)';
+
+                  const textColor = isSelected ? '#065f46' : 'var(--text-main)';
+
+                  return (
+                    <button
+                      key={index}
+                      type="button"
+                      disabled={!item.isCurrentMonth}
+                      onClick={() => {
+                        setReportDate(item.dateStr);
+                        setIsCalendarOpen(false);
+                      }}
+                      style={{
+                        aspectRatio: '1',
+                        width: '100%',
+                        minHeight: '36px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderRadius: 'var(--radius-md)',
+                        fontSize: '0.85rem',
+                        fontWeight: (isSelected || isToday) ? 800 : 600,
+                        cursor: item.isCurrentMonth ? 'pointer' : 'default',
+                        position: 'relative',
+                        opacity: item.isCurrentMonth ? 1 : 0.25,
+                        background: cellBg,
+                        border: cellBorder,
+                        color: textColor,
+                        boxSizing: 'border-box',
+                        padding: 0
+                      }}
+                    >
+                      {isToday && (
+                        <span style={{
+                          fontSize: '0.55rem',
+                          fontWeight: 800,
+                          color: isSelected ? '#047857' : 'var(--color-primary)',
+                          lineHeight: 1,
+                          marginBottom: '1px'
+                        }}>
+                          오늘
+                        </span>
+                      )}
+                      <span>{item.dayNumber}</span>
+                      {hasActivity && (
+                        <span style={{
+                          width: '4px',
+                          height: '4px',
+                          borderRadius: '50%',
+                          background: 'var(--color-primary)',
+                          position: 'absolute',
+                          bottom: '2px'
+                        }} />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* 안내 꼬리표 */}
+              <div style={{ marginTop: '0.65rem', paddingTop: '0.5rem', borderTop: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--color-primary)', display: 'inline-block' }} />
+                <span>점(●) 표시 날짜: 일정/작업 기록 있음</span>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* 2. 상단 2단 구조 통계 요약 (1단: 총작업&총비용 반반 카드 / 2단: 당일 발생 종목 3열 균등 캡슐) */}
         <div style={{ marginBottom: '0.85rem' }}>
@@ -978,27 +1486,23 @@ export default function DailyReportView({
               </button>
             )}
             <label style={{ fontSize: '0.875rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-main)', whiteSpace: 'nowrap' }}>
-              <button
-                type="button"
-                onClick={() => setReportDate(getTodayDateString())}
-                title={reportDate === getTodayDateString() ? "오늘 날짜를 보고 있습니다" : "클릭 시 오늘 날짜로 즉시 복귀"}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  padding: 0,
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center'
-                }}
-              >
-                <Calendar size={16} color="var(--color-primary)" />
-              </button>
               <span>보고서 기준 일자:</span>
             </label>
+            <button
+              type="button"
+              className="btn btn-outline btn-sm"
+              onClick={() => setIsCalendarOpen(true)}
+              title="달력 열기 (기록/일정 점 표시)"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontWeight: 700, padding: '0.35rem 0.65rem' }}
+            >
+              <Calendar size={15} color="var(--color-primary)" />
+              <span>{reportDate}</span>
+              <span style={{ fontSize: '0.65rem', color: 'var(--color-primary)' }}>▼</span>
+            </button>
             <input
               type="date"
               className="form-input"
-              style={{ width: 'auto', padding: '0.35rem 0.65rem', fontWeight: 700 }}
+              style={{ width: 'auto', padding: '0.35rem 0.65rem', fontWeight: 700, display: 'none' }}
               value={reportDate}
               onChange={(e) => setReportDate(e.target.value)}
             />

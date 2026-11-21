@@ -521,6 +521,7 @@ export default function App() {
                 targetDate={targetReportDate}
                 entities={entities}
                 careLogs={careLogs}
+                schedules={schedules}
                 careCategories={allCareCategories}
                 onOpenEntityDetail={handleOpenEntityDetail}
                 onOpenCareLogModal={(entity = null) => {
