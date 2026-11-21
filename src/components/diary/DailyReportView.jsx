@@ -254,19 +254,19 @@ function createReportImageBlob({ reportDate, dailyLogs, totalCost, categoryStats
           row1X += ctx.measureText(log.time).width + 8;
         }
 
-        // 개체번호 뱃지 박스
+        // 개체번호 뱃지 박스 (단정한 모노톤 사각 귀표 규격)
         ctx.font = 'bold 11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
         const tagText = log.tagNumber || '';
         const tagW = ctx.measureText(tagText).width + 10;
-        ctx.fillStyle = '#e0f2fe';
-        ctx.strokeStyle = '#bae6fd';
+        ctx.fillStyle = '#f1f5f9';
+        ctx.strokeStyle = '#cbd5e1';
         ctx.beginPath();
         if (ctx.roundRect) ctx.roundRect(row1X, cardY - 1, tagW, 17, 4);
         else ctx.rect(row1X, cardY - 1, tagW, 17);
         ctx.fill();
         ctx.stroke();
 
-        ctx.fillStyle = '#0369a1';
+        ctx.fillStyle = '#0f172a';
         ctx.fillText(tagText, row1X + 5, cardY + 11);
         row1X += tagW + 7;
 
@@ -706,7 +706,13 @@ export default function DailyReportView({
                           className="badge badge-tag"
                           onClick={() => onOpenEntityDetail(log.tagNumber)}
                           title="클릭 시 이 개체의 관리 내역으로 이동"
-                          style={{ cursor: 'pointer', fontSize: '0.75rem', padding: '0.15rem 0.45rem', flexShrink: 0 }}
+                          style={{ 
+                            cursor: 'pointer', 
+                            fontSize: '0.78rem', 
+                            padding: '0.18rem 0.5rem', 
+                            borderRadius: 'var(--radius-sm)',
+                            flexShrink: 0 
+                          }}
                         >
                           {log.tagNumber}
                         </span>
