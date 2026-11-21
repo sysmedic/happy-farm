@@ -523,6 +523,7 @@ export default function App() {
                   setCareLogPreselectedEntity(entity);
                   setIsCareLogModalOpen(true);
                 }}
+                onEditCareLog={handleOpenEditCareLog}
                 onNavigateToCloud={() => setActiveTab('cloud')}
               />
             )}

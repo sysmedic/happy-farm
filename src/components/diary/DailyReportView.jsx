@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   Printer, 
   Share2, 
@@ -7,7 +7,8 @@ import {
   CheckCircle2, 
   FileText, 
   Sparkles,
-  ArrowRight
+  ArrowRight,
+  Edit3
 } from 'lucide-react';
 import { 
   CARE_CATEGORIES, 
@@ -16,6 +17,26 @@ import {
   normalizeCategoryId
 } from '../../lib/types.js';
 import { shareFarmReport } from '../../lib/googleDriveService.js';
+
+// 일일 영농 특이사항 로컬스토리지 영구 보존 키 및 도우미 함수
+const STORAGE_DAILY_NOTES_KEY = 'happy_farm_daily_notes_v1';
+
+function loadDailyNotes() {
+  try {
+    const raw = localStorage.getItem(STORAGE_DAILY_NOTES_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch (e) {
+    return {};
+  }
+}
+
+function saveDailyNotes(notesMap) {
+  try {
+    localStorage.setItem(STORAGE_DAILY_NOTES_KEY, JSON.stringify(notesMap));
+  } catch (e) {
+    console.error('Failed to save daily notes:', e);
+  }
+}
 
 // 고화질 스마트폰 비율(모바일 카드형) JPG 이미지 보고서 캔버스 생성기
 function createReportImageBlob({ reportDate, dailyLogs, totalCost, categoryStats, farmNotes }) {
@@ -347,10 +368,30 @@ export default function DailyReportView({
   careCategories,
   onOpenEntityDetail,
   onOpenCareLogModal,
+  onEditCareLog,
   onNavigateToCloud
 }) {
   const [reportDate, setReportDate] = useState(targetDate || getTodayDateString());
-  const [farmNotes, setFarmNotes] = useState('');
+  
+  // 날짜별 일일 특이사항 영구 로드
+  const [farmNotes, setFarmNotes] = useState(() => {
+    const allNotes = loadDailyNotes();
+    return allNotes[targetDate || getTodayDateString()] || '';
+  });
+
+  // 날짜가 바뀔 때 해당 날짜의 영농 특이사항 동기화
+  useEffect(() => {
+    const allNotes = loadDailyNotes();
+    setFarmNotes(allNotes[reportDate] || '');
+  }, [reportDate]);
+
+  // 특이사항 변경 시 실시간 로컬스토리지 영구 보존
+  const handleFarmNotesChange = (val) => {
+    setFarmNotes(val);
+    const allNotes = loadDailyNotes();
+    allNotes[reportDate] = val;
+    saveDailyNotes(allNotes);
+  };
 
   const [shareFeedback, setShareFeedback] = useState('');
   const categoriesToUse = careCategories || CARE_CATEGORIES;
@@ -374,6 +415,11 @@ export default function DailyReportView({
     });
     return counts;
   }, [dailyLogs, categoriesToUse]);
+
+  // 당일 실제로 1건 이상 발생한 작업 종목 목록 (0건 낭비 방지 및 동적 추출)
+  const activeCategories = useMemo(() => {
+    return categoriesToUse.filter(cat => (categoryStats[cat.id] || 0) > 0);
+  }, [categoriesToUse, categoryStats]);
 
   // 총 비용
   const totalCost = useMemo(() => {
@@ -483,20 +529,40 @@ export default function DailyReportView({
             <div style={{ display: 'flex', gap: '0.35rem', flexShrink: 0 }}>
               <button 
                 type="button" 
-                className="btn btn-secondary btn-sm" 
+                className="btn btn-outline btn-sm" 
                 onClick={handleShare}
                 title="스마트폰 고해상도 이미지 공유 및 텍스트 복사"
-                style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
+                style={{ 
+                  border: '1px solid var(--border-color)',
+                  color: 'var(--text-main)',
+                  fontWeight: 600,
+                  background: 'var(--bg-card)',
+                  padding: '0.32rem 0.65rem', 
+                  fontSize: '0.82rem', 
+                  display: 'inline-flex', 
+                  alignItems: 'center', 
+                  gap: '0.28rem' 
+                }}
               >
                 <Share2 size={13} />
                 <span>공유</span>
               </button>
               <button 
                 type="button" 
-                className="btn btn-primary btn-sm" 
+                className="btn btn-outline btn-sm" 
                 onClick={handlePrint}
                 title="A4 규격 인쇄"
-                style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
+                style={{ 
+                  border: '1px solid var(--border-color)',
+                  color: 'var(--text-main)',
+                  fontWeight: 600,
+                  background: 'var(--bg-card)',
+                  padding: '0.32rem 0.65rem', 
+                  fontSize: '0.82rem', 
+                  display: 'inline-flex', 
+                  alignItems: 'center', 
+                  gap: '0.28rem' 
+                }}
               >
                 <Printer size={13} />
                 <span>인쇄</span>
@@ -505,170 +571,217 @@ export default function DailyReportView({
           </div>
         </div>
 
-        {/* 2. 슬림 1단 모바일 타일 카드 그리드 (3열 균일 높이/너비 대칭 규격) */}
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(3, 1fr)', 
-          gap: '0.4rem', 
-          marginBottom: '0.85rem' 
-        }}>
-          {/* 1. 총 작업 */}
-          <div className="card" style={{ 
-            height: '34px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '0.3rem',
-            padding: '0 0.35rem', 
-            borderRadius: 'var(--radius-sm)',
-            border: '1px solid var(--border-color)',
-            background: 'var(--bg-card)',
-            boxSizing: 'border-box'
+        {/* 2. 상단 2단 구조 통계 요약 (1단: 총작업&총비용 반반 카드 / 2단: 당일 발생 종목 3열 균등 캡슐) */}
+        <div style={{ marginBottom: '0.85rem' }}>
+          {/* 1단: 총 작업 & 총 비용 2열 반반 카드 */}
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(2, 1fr)', 
+            gap: '0.45rem', 
+            marginBottom: activeCategories.length > 0 ? '0.45rem' : '0' 
           }}>
-            <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)', fontWeight: 600 }}>총작업</span>
-            <span style={{ fontSize: '0.86rem', fontWeight: 800, color: 'var(--text-main)' }}>{dailyLogs.length}건</span>
+            <div className="card" style={{ 
+              height: '36px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '0 0.85rem', 
+              borderRadius: 'var(--radius-sm)',
+              border: '1px solid var(--border-color)',
+              background: 'var(--bg-card)',
+              boxSizing: 'border-box'
+            }}>
+              <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>총 작업</span>
+              <span style={{ fontSize: '0.92rem', fontWeight: 800, color: 'var(--color-primary)' }}>{dailyLogs.length}건</span>
+            </div>
+
+            <div className="card" style={{ 
+              height: '36px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '0 0.85rem', 
+              borderRadius: 'var(--radius-sm)',
+              border: '1px solid var(--border-color)',
+              background: 'var(--bg-card)',
+              boxSizing: 'border-box'
+            }}>
+              <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>총 비용</span>
+              <span style={{ fontSize: '0.92rem', fontWeight: 800, color: 'var(--text-main)' }}>{totalCost.toLocaleString()}원</span>
+            </div>
           </div>
 
-          {/* 2. 백신 */}
-          <div className="card" style={{ 
-            height: '34px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '0.3rem',
-            padding: '0 0.35rem', 
-            borderRadius: 'var(--radius-sm)',
-            border: '1px solid rgba(5, 150, 105, 0.25)',
-            background: 'rgba(5, 150, 105, 0.06)',
-            boxSizing: 'border-box'
-          }}>
-            <span style={{ fontSize: '0.74rem', color: '#059669', fontWeight: 600 }}>백신</span>
-            <span style={{ fontSize: '0.86rem', fontWeight: 800, color: '#059669' }}>{categoryStats.vaccine || 0}건</span>
-          </div>
-
-          {/* 3. 진료·치료 */}
-          <div className="card" style={{ 
-            height: '34px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '0.25rem',
-            padding: '0 0.25rem', 
-            borderRadius: 'var(--radius-sm)',
-            border: '1px solid rgba(220, 38, 38, 0.25)',
-            background: 'rgba(220, 38, 38, 0.06)',
-            boxSizing: 'border-box'
-          }}>
-            <span style={{ fontSize: '0.72rem', color: '#dc2626', fontWeight: 600 }}>진료·치료</span>
-            <span style={{ fontSize: '0.86rem', fontWeight: 800, color: '#dc2626' }}>{categoryStats.treatment || 0}건</span>
-          </div>
-
-          {/* 4. 수정 */}
-          <div className="card" style={{ 
-            height: '34px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '0.3rem',
-            padding: '0 0.35rem', 
-            borderRadius: 'var(--radius-sm)',
-            border: '1px solid rgba(2, 132, 199, 0.25)',
-            background: 'rgba(2, 132, 199, 0.06)',
-            boxSizing: 'border-box'
-          }}>
-            <span style={{ fontSize: '0.74rem', color: '#0284c7', fontWeight: 600 }}>수정</span>
-            <span style={{ fontSize: '0.86rem', fontWeight: 800, color: '#0284c7' }}>{categoryStats.breeding || 0}건</span>
-          </div>
-
-          {/* 5. 총 비용 (2칸 차지) */}
-          <div className="card" style={{ 
-            gridColumn: 'span 2',
-            height: '34px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '0 0.75rem', 
-            borderRadius: 'var(--radius-sm)',
-            border: '1px solid var(--border-color)',
-            background: 'var(--bg-card)',
-            boxSizing: 'border-box'
-          }}>
-            <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)', fontWeight: 600 }}>총 비용</span>
-            <span style={{ fontSize: '0.88rem', fontWeight: 800, color: 'var(--text-main)' }}>{totalCost.toLocaleString()}원</span>
-          </div>
+          {/* 2단: 당일 실제로 발생한 종목 3열 균등 알약 캡슐 바둑판 (0건 종목 낭비 방지) */}
+          {activeCategories.length > 0 && (
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(3, 1fr)', 
+              gap: '0.4rem' 
+            }}>
+              {activeCategories.map(cat => {
+                const count = categoryStats[cat.id] || 0;
+                return (
+                  <div
+                    key={cat.id}
+                    className="card"
+                    style={{
+                      height: '34px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.35rem',
+                      padding: '0 0.35rem',
+                      borderRadius: '9999px',
+                      border: '1px solid var(--border-color)',
+                      background: 'var(--bg-card-subtle)',
+                      boxSizing: 'border-box'
+                    }}
+                  >
+                    {cat.icon && <span style={{ fontSize: '0.85rem', lineHeight: 1 }}>{cat.icon}</span>}
+                    <span style={{ fontSize: '0.76rem', color: 'var(--text-main)', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {cat.label}
+                    </span>
+                    <span style={{ 
+                      fontSize: '0.75rem', 
+                      fontWeight: 800, 
+                      color: 'var(--color-primary)',
+                      background: 'rgba(16, 185, 129, 0.12)',
+                      padding: '0.05rem 0.35rem',
+                      borderRadius: '9999px',
+                      flexShrink: 0
+                    }}>
+                      {count}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
-        {/* 2안: 선 없이 자연스러운 여백으로 분리 */}
+        {/* 3. 일일 영농 작업 내역 카드 리스트 */}
         <div style={{ marginBottom: '1.25rem', marginTop: '0.15rem' }}>
           {dailyLogs.length === 0 ? (
             <div className="card" style={{ 
               textAlign: 'center', 
-              padding: '2rem 1rem', 
+              padding: '2.5rem 1rem', 
               color: 'var(--text-muted)',
-              fontSize: '0.85rem'
+              fontSize: '0.88rem'
             }}>
               {reportDate}에 등록된 영농 관리 내역이 없습니다.
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
-              {dailyLogs.map(log => (
-                <div key={`m-card-${log.id}`} className="card" style={{ padding: '0.75rem 0.85rem' }}>
-                  {/* 1행: [시간] [개체번호] [이름] */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap', minWidth: 0 }}>
-                    {log.time && (
-                      <span style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                        {log.time}
-                      </span>
+              {dailyLogs.map(log => {
+                const catObj = getCategoryById(log.category, careCategories);
+                return (
+                  <div key={`m-card-${log.id}`} className="card" style={{ padding: '0.75rem 0.85rem' }}>
+                    {/* 1행: [시간] [분류 뱃지] [이표번호] [이름] <──────────> [✏️ 수정 버튼] */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.45rem', width: '100%' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap', minWidth: 0, flex: 1 }}>
+                        {log.time && (
+                          <span style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                            {log.time}
+                          </span>
+                        )}
+                        <span 
+                          className={`badge ${catObj.badgeClass}`}
+                          style={{
+                            fontSize: '0.72rem',
+                            padding: '0.12rem 0.45rem',
+                            borderRadius: '9999px',
+                            fontWeight: 700,
+                            lineHeight: 1.2,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.2rem'
+                          }}
+                        >
+                          {catObj.icon && <span style={{ fontSize: '0.75rem' }}>{catObj.icon}</span>}
+                          <span>{catObj.label}</span>
+                        </span>
+                        <span 
+                          className="badge badge-tag"
+                          onClick={() => onOpenEntityDetail(log.tagNumber)}
+                          title="클릭 시 이 개체의 관리 내역으로 이동"
+                          style={{ cursor: 'pointer', fontSize: '0.75rem', padding: '0.15rem 0.45rem' }}
+                        >
+                          {log.tagNumber}
+                        </span>
+                        {log.entityName && (
+                          <span style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--text-main)' }}>
+                            {log.entityName}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* 우측 끝: 24x24 미니 수정 버튼 */}
+                      {onEditCareLog && (
+                        <button
+                          type="button"
+                          className="btn btn-outline btn-sm btn-icon-only"
+                          onClick={() => onEditCareLog(log)}
+                          title="이 작업 기록 수정"
+                          style={{
+                            width: '24px',
+                            height: '24px',
+                            padding: 0,
+                            flexShrink: 0,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            border: '1px solid var(--border-color)',
+                            color: 'var(--text-muted)',
+                            background: 'var(--bg-card)',
+                            borderRadius: 'var(--radius-sm)'
+                          }}
+                        >
+                          <Edit3 size={12} />
+                        </button>
+                      )}
+                    </div>
+
+                    {/* 2행: 담당자 및 비용 */}
+                    {(log.operator || log.cost > 0) && (
+                      <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 500, marginTop: '0.25rem', display: 'flex', gap: '0.6rem' }}>
+                        {log.operator && <span>담당: {log.operator}</span>}
+                        {log.cost > 0 && <span>비용: {Number(log.cost).toLocaleString()}원</span>}
+                      </div>
                     )}
-                    <span 
-                      className="badge badge-tag"
-                      onClick={() => onOpenEntityDetail(log.tagNumber)}
-                      title="클릭 시 이 개체의 관리 내역으로 이동"
-                      style={{ cursor: 'pointer', fontSize: '0.75rem', padding: '0.15rem 0.45rem' }}
-                    >
-                      {log.tagNumber}
-                    </span>
-                    <span style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--text-main)' }}>
-                      {log.entityName}
-                    </span>
+
+                    {/* 3행: 작업 제목 */}
+                    <div style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-main)', marginTop: '0.35rem' }}>
+                      {log.title}
+                    </div>
+
+                    {/* 4행: 상세 처치 내용 */}
+                    {log.details && (
+                      <div style={{ fontSize: '0.825rem', color: 'var(--text-subtle)', lineHeight: 1.45, marginTop: '0.2rem' }}>
+                        {log.details}
+                      </div>
+                    )}
+
+                    {/* 5행: 다음 일정 */}
+                    {log.nextScheduleDate && (
+                      <div style={{ fontSize: '0.78rem', color: '#d97706', marginTop: '0.35rem', fontWeight: 700, wordBreak: 'break-all', lineHeight: 1.4 }}>
+                        다음 일정: {log.nextScheduleDate} {log.nextScheduleTime ? `(${log.nextScheduleTime}) ` : ''}({log.nextScheduleTitle || '예정'})
+                      </div>
+                    )}
                   </div>
-
-                  {/* 2행: 담당 */}
-                  {log.operator && (
-                    <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 500, marginTop: '0.2rem' }}>
-                      담당: {log.operator}
-                    </div>
-                  )}
-
-                  {/* 3행: 작업 제목 */}
-                  <div style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-main)', marginTop: '0.35rem' }}>
-                    {log.title}
-                  </div>
-
-                  {/* 3행: 상세 처치 내용 */}
-                  {log.details && (
-                    <div style={{ fontSize: '0.825rem', color: 'var(--text-subtle)', lineHeight: 1.45, marginTop: '0.2rem' }}>
-                      {log.details}
-                    </div>
-                  )}
-
-                  {/* 4행: 다음 일정 */}
-                  {log.nextScheduleDate && (
-                    <div style={{ fontSize: '0.78rem', color: '#d97706', marginTop: '0.35rem', fontWeight: 700, wordBreak: 'break-all', lineHeight: 1.4 }}>
-                      다음 일정: {log.nextScheduleDate} {log.nextScheduleTime ? `(${log.nextScheduleTime}) ` : ''}({log.nextScheduleTitle || '예정'})
-                    </div>
-                  )}
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
 
-        {/* 4. 모바일 영농 특이사항 */}
+        {/* 4. 모바일 영농 특이사항 (실시간 스토리지 저장 연동) */}
         <div className="card" style={{ padding: '0.85rem 1rem' }}>
-          <h4 style={{ fontSize: '0.92rem', fontWeight: 800, margin: '0 0 0.45rem 0', color: 'var(--text-main)' }}>
-            📝 일일 영농 특이사항
-          </h4>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', marginBottom: '0.45rem' }}>
+            <FileText size={16} style={{ color: 'var(--color-primary)' }} />
+            <h4 style={{ fontSize: '0.92rem', fontWeight: 800, margin: 0, color: 'var(--text-main)' }}>
+              일일 영농 특이사항
+            </h4>
+          </div>
           <textarea
             className="form-textarea"
             style={{ 
@@ -682,7 +795,7 @@ export default function DailyReportView({
               minHeight: '75px' 
             }}
             value={farmNotes}
-            onChange={(e) => setFarmNotes(e.target.value)}
+            onChange={(e) => handleFarmNotesChange(e.target.value)}
             placeholder="당일 기상, 사료 섭취 상태, 이상 증상 개체 등 일일 총평을 입력하세요."
           />
         </div>
@@ -894,7 +1007,7 @@ export default function DailyReportView({
                 className="form-textarea"
                 style={{ background: 'transparent', border: 'none', padding: 0, minHeight: '60px' }}
                 value={farmNotes}
-                onChange={(e) => setFarmNotes(e.target.value)}
+                onChange={(e) => handleFarmNotesChange(e.target.value)}
                 placeholder="당일 기상, 사료 섭취 상태, 이상 증상 개체 등 일일 총평을 입력하세요."
               />
             </div>
