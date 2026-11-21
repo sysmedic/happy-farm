@@ -884,7 +884,7 @@ export default function EntityList({
                     style={{ 
                       margin: 0, 
                       fontSize: '1.12rem', 
-                      fontWeight: 900, 
+                      fontWeight: 800, 
                       fontFamily: 'var(--font-family)',
                       fontVariantNumeric: 'tabular-nums',
                       fontFeatureSettings: '"tnum" 1',
