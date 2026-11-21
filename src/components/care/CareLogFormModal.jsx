@@ -271,13 +271,14 @@ export default function CareLogFormModal({
         onClick={(e) => e.stopPropagation()} 
         onSubmit={handleSubmit}
       >
-        {/* 모달 헤더 */}
+        {/* 모달 헤더 (신규 개체 등록 모달 표준 규격 일체화) */}
         <div className="modal-header">
           <div className="modal-header-title">
-            <span style={{ fontSize: '1.4rem' }}>📋</span>
-            <span>{isEditing ? '관리 내역 수정' : '관리 내역 추가'}</span>
+            <span style={{ fontWeight: 800, fontSize: '1.25rem' }}>
+              {isEditing ? '관리 내역 수정' : '관리 내역 추가'}
+            </span>
           </div>
-          <button type="button" className="modal-close-btn" onClick={onClose}>
+          <button type="button" className="modal-close-btn" onClick={onClose} aria-label="닫기">
             <X size={20} />
           </button>
         </div>
@@ -368,64 +369,99 @@ export default function CareLogFormModal({
               </div>
             )}
 
-            {/* 관리 분류 선택기 (버튼 칩 그리드 + 직접 추가) */}
+            {/* 관리 분류 선택기 (3열 가로폭 균등 통일 알약 칩) */}
             <div className="form-group" style={{ marginBottom: '1.25rem' }}>
-              <label className="form-label">관리 분류 선택</label>
+              <label className="form-label" style={{ marginBottom: '0.45rem', fontWeight: 700 }}>관리 분류 선택</label>
 
-              <div className="category-picker-grid">
-                {categoriesToDisplay.map(cat => (
-                  <button
-                    key={cat.id}
-                    type="button"
-                    className={`category-picker-btn ${category === cat.id ? 'selected' : ''}`}
-                    onClick={() => handleCategorySelect(cat.id)}
-                    style={{ position: 'relative' }}
-                  >
-                    {cat.isCustom && (
-                      <span
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteCategoryClick(cat);
-                        }}
-                        title="이 커스텀 분류 삭제"
-                        style={{
-                          position: 'absolute',
-                          top: '4px',
-                          right: '4px',
-                          width: '18px',
-                          height: '18px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          borderRadius: '50%',
-                          background: 'rgba(0, 0, 0, 0.08)',
-                          color: 'var(--text-muted)'
-                        }}
-                      >
-                        <X size={11} />
-                      </span>
-                    )}
-                    {cat.icon && <span style={{ fontSize: '1.3rem' }}>{cat.icon}</span>}
-                    <span>{cat.label}</span>
-                  </button>
-                ))}
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(3, 1fr)',
+                gap: '0.45rem',
+                marginTop: '0.25rem'
+              }}>
+                {categoriesToDisplay.map(cat => {
+                  const isSelected = category === cat.id;
+                  return (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      onClick={() => handleCategorySelect(cat.id)}
+                      style={{
+                        position: 'relative',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.3rem',
+                        padding: '0.45rem 0.35rem',
+                        borderRadius: '9999px',
+                        border: isSelected ? '1.5px solid #10b981' : '1px solid var(--border-color)',
+                        background: isSelected ? 'rgba(16, 185, 129, 0.12)' : 'var(--bg-card)',
+                        color: isSelected ? '#059669' : 'var(--text-main)',
+                        fontWeight: isSelected ? 700 : 600,
+                        fontSize: '0.82rem',
+                        cursor: 'pointer',
+                        boxShadow: isSelected ? '0 1px 4px rgba(16, 185, 129, 0.2)' : 'none',
+                        transition: 'all 0.15s ease',
+                        whiteSpace: 'nowrap',
+                        minWidth: 0,
+                        width: '100%'
+                      }}
+                    >
+                      {cat.isCustom && (
+                        <span
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteCategoryClick(cat);
+                          }}
+                          title="이 커스텀 분류 삭제"
+                          style={{
+                            position: 'absolute',
+                            top: '2px',
+                            right: '4px',
+                            width: '14px',
+                            height: '14px',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            borderRadius: '50%',
+                            background: 'rgba(0, 0, 0, 0.08)',
+                            color: 'var(--text-muted)'
+                          }}
+                        >
+                          <X size={9} />
+                        </span>
+                      )}
+                      {cat.icon && <span style={{ fontSize: '1.05rem', lineHeight: 1, flexShrink: 0 }}>{cat.icon}</span>}
+                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{cat.label}</span>
+                    </button>
+                  );
+                })}
 
-                {/* 그리드 끝의 직접 추가 버튼 */}
+                {/* 새 분류 추가 버튼 (3열 균등 알약 칩 형태) */}
                 <button
                   type="button"
-                  className={`category-picker-btn ${isAddingCategory ? 'selected' : ''}`}
                   onClick={() => setIsAddingCategory(prev => !prev)}
-                  style={{ 
-                    borderStyle: 'dashed', 
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.25rem',
+                    padding: '0.45rem 0.35rem',
+                    borderRadius: '9999px',
+                    border: isAddingCategory ? '1.5px solid var(--color-primary)' : '1px dashed var(--border-color)',
                     background: isAddingCategory ? 'var(--color-primary-light)' : 'transparent',
-                    borderColor: isAddingCategory ? 'var(--color-primary)' : 'var(--border-color)'
+                    color: 'var(--color-primary)',
+                    fontWeight: 700,
+                    fontSize: '0.82rem',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease',
+                    whiteSpace: 'nowrap',
+                    width: '100%'
                   }}
                   title="새 관리 분류 직접 만들기"
                 >
-                  <span style={{ fontSize: '1.25rem', color: 'var(--color-primary)' }}>
-                    <Plus size={20} />
-                  </span>
-                  <span style={{ color: 'var(--color-primary)', fontWeight: 700 }}>+ 분류 추가</span>
+                  <Plus size={15} />
+                  <span>분류 추가</span>
                 </button>
               </div>
 
