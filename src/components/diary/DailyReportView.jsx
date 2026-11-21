@@ -674,14 +674,26 @@ export default function DailyReportView({
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
               {dailyLogs.map(log => {
                 const catObj = getCategoryById(log.category, careCategories);
+                // 개체 이름(애칭) 매핑: log.entityName이 없을 때 entities에서 자동 조회
+                const entityObj = entities?.find(e => e.id === log.entityId || e.tagNumber === log.tagNumber);
+                const entityName = log.entityName || entityObj?.name || '';
+
                 return (
                   <div key={`m-card-${log.id}`} className="card" style={{ padding: '0.75rem 0.85rem' }}>
-                    {/* 1행: [시간] [분류 뱃지] [이표번호] [이름] <──────────> [✏️ 수정 버튼] */}
+                    {/* 1행: [이표번호] [소 이름] [분류 뱃지] <──────────> [✏️ 수정 버튼] */}
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.45rem', width: '100%' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap', minWidth: 0, flex: 1 }}>
-                        {log.time && (
-                          <span style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                            {log.time}
+                        <span 
+                          className="badge badge-tag"
+                          onClick={() => onOpenEntityDetail(log.tagNumber)}
+                          title="클릭 시 이 개체의 관리 내역으로 이동"
+                          style={{ cursor: 'pointer', fontSize: '0.75rem', padding: '0.15rem 0.45rem', flexShrink: 0 }}
+                        >
+                          {log.tagNumber}
+                        </span>
+                        {entityName && (
+                          <span style={{ fontWeight: 800, fontSize: '0.88rem', color: 'var(--text-main)', flexShrink: 0 }}>
+                            {entityName}
                           </span>
                         )}
                         <span 
@@ -694,25 +706,13 @@ export default function DailyReportView({
                             lineHeight: 1.2,
                             display: 'inline-flex',
                             alignItems: 'center',
-                            gap: '0.2rem'
+                            gap: '0.2rem',
+                            flexShrink: 0
                           }}
                         >
                           {catObj.icon && <span style={{ fontSize: '0.75rem' }}>{catObj.icon}</span>}
                           <span>{catObj.label}</span>
                         </span>
-                        <span 
-                          className="badge badge-tag"
-                          onClick={() => onOpenEntityDetail(log.tagNumber)}
-                          title="클릭 시 이 개체의 관리 내역으로 이동"
-                          style={{ cursor: 'pointer', fontSize: '0.75rem', padding: '0.15rem 0.45rem' }}
-                        >
-                          {log.tagNumber}
-                        </span>
-                        {log.entityName && (
-                          <span style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--text-main)' }}>
-                            {log.entityName}
-                          </span>
-                        )}
                       </div>
 
                       {/* 우측 끝: 24x24 미니 수정 버튼 */}
@@ -741,25 +741,43 @@ export default function DailyReportView({
                       )}
                     </div>
 
-                    {/* 2행: 담당자 및 비용 */}
-                    {(log.operator || log.cost > 0) && (
-                      <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 500, marginTop: '0.25rem', display: 'flex', gap: '0.6rem' }}>
-                        {log.operator && <span>담당: {log.operator}</span>}
-                        {log.cost > 0 && <span>비용: {Number(log.cost).toLocaleString()}원</span>}
-                      </div>
-                    )}
-
-                    {/* 3행: 작업 제목 */}
-                    <div style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-main)', marginTop: '0.35rem' }}>
+                    {/* 2행: 핵심 작업 제목 (굵은 글씨) */}
+                    <div style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-main)', marginTop: '0.35rem', lineHeight: 1.35 }}>
                       {log.title}
                     </div>
 
-                    {/* 4행: 상세 처치 내용 */}
+                    {/* 3행: 상세 처치 내용 (있을 때만) */}
                     {log.details && (
                       <div style={{ fontSize: '0.825rem', color: 'var(--text-subtle)', lineHeight: 1.45, marginTop: '0.2rem' }}>
                         {log.details}
                       </div>
                     )}
+
+                    {/* 4행: 시간 • 담당자 • 비용 메타 정보 묶음 (3행 이동으로 1행 수정버튼 안정 확보) */}
+                    <div style={{ 
+                      fontSize: '0.78rem', 
+                      color: 'var(--text-muted)', 
+                      fontWeight: 500, 
+                      marginTop: '0.35rem', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '0.45rem',
+                      flexWrap: 'wrap'
+                    }}>
+                      {log.time && (
+                        <span style={{ fontWeight: 700, color: 'var(--text-main)' }}>
+                          🕒 {log.time}
+                        </span>
+                      )}
+                      {log.time && log.operator && <span style={{ opacity: 0.4 }}>•</span>}
+                      {log.operator && <span>담당: {log.operator}</span>}
+                      {log.cost > 0 && (
+                        <>
+                          <span style={{ opacity: 0.4 }}>•</span>
+                          <span>비용: {Number(log.cost).toLocaleString()}원</span>
+                        </>
+                      )}
+                    </div>
 
                     {/* 5행: 다음 일정 */}
                     {log.nextScheduleDate && (
