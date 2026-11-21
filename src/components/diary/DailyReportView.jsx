@@ -516,7 +516,26 @@ export default function DailyReportView({
         <div className="card" style={{ padding: '0.65rem 0.85rem', marginBottom: '0.75rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', minWidth: 0, flex: 1 }}>
-              <Calendar size={18} color="var(--color-primary)" style={{ flexShrink: 0 }} />
+              <button
+                type="button"
+                onClick={() => setReportDate(getTodayDateString())}
+                title={reportDate === getTodayDateString() ? "오늘 날짜를 보고 있습니다" : "터치 시 오늘 날짜로 즉시 복귀"}
+                aria-label="오늘 날짜로 이동"
+                style={{
+                  background: reportDate !== getTodayDateString() ? 'rgba(16, 185, 129, 0.12)' : 'transparent',
+                  border: reportDate !== getTodayDateString() ? '1px solid rgba(16, 185, 129, 0.4)' : 'none',
+                  borderRadius: 'var(--radius-sm)',
+                  padding: '0.2rem',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  flexShrink: 0,
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                <Calendar size={18} color="var(--color-primary)" />
+              </button>
               <input
                 type="date"
                 className="form-input"
@@ -766,7 +785,7 @@ export default function DailyReportView({
                     }}>
                       {log.time && (
                         <span style={{ fontWeight: 700, color: 'var(--text-main)' }}>
-                          🕒 {log.time}
+                          {log.time}
                         </span>
                       )}
                       {log.time && log.operator && <span style={{ opacity: 0.4 }}>•</span>}
@@ -836,7 +855,21 @@ export default function DailyReportView({
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
             <label style={{ fontSize: '0.875rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-main)', whiteSpace: 'nowrap' }}>
-              <Calendar size={16} color="var(--color-primary)" />
+              <button
+                type="button"
+                onClick={() => setReportDate(getTodayDateString())}
+                title={reportDate === getTodayDateString() ? "오늘 날짜를 보고 있습니다" : "클릭 시 오늘 날짜로 즉시 복귀"}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  padding: 0,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center'
+                }}
+              >
+                <Calendar size={16} color="var(--color-primary)" />
+              </button>
               <span>보고서 기준 일자:</span>
             </label>
             <input
