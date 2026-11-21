@@ -273,8 +273,8 @@ export default function DailyDiaryView({
           {/* 상단 날짜 헤더 */}
           <div className="diary-section-header">
             <div>
-              <span style={{ fontSize: '0.825rem', color: 'var(--color-primary)', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
-                🌱 일일 영농 일지
+              <span style={{ fontSize: '0.825rem', color: 'var(--color-primary)', fontWeight: 700 }}>
+                일일 영농 일지
               </span>
               <h2 style={{ fontSize: '1.35rem', fontWeight: 800, margin: '0.15rem 0 0 0' }}>
                 {getFormattedDateTitle(selectedDate)}
