@@ -885,9 +885,11 @@ export default function EntityList({
                       margin: 0, 
                       fontSize: '1.25rem', 
                       fontWeight: 900, 
-                      fontFamily: 'var(--font-mono)',
+                      fontFamily: 'var(--font-family)',
+                      fontVariantNumeric: 'slashed-zero tabular-nums',
+                      fontFeatureSettings: '"zero" 1, "tnum" 1',
                       color: 'var(--text-main)', 
-                      letterSpacing: '-0.02em',
+                      letterSpacing: '0.02em',
                       cursor: 'pointer' 
                     }}
                     onClick={() => onOpenEntityDetail(entity.tagNumber)}
