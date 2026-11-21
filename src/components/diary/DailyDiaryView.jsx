@@ -130,8 +130,9 @@ export default function DailyDiaryView({
       days.push({ dayNumber: d, dateStr, isCurrentMonth: true });
     }
 
-    // 다음 달 일자 채우기 (42칸 6주 맞춤)
-    const remaining = 42 - days.length;
+    // 다음 달 일자 채우기 (5주 35칸 또는 6주 42칸으로 동적 최적화)
+    const totalSlots = days.length <= 35 ? 35 : 42;
+    const remaining = totalSlots - days.length;
     for (let d = 1; d <= remaining; d++) {
       const nextMonth = month === 11 ? 0 : month + 1;
       const nextYear = month === 11 ? year + 1 : year;
@@ -255,9 +256,9 @@ export default function DailyDiaryView({
                 일정/작업 기록 있음
               </span>
               <button
-                className="btn btn-outline btn-sm"
+                className="btn btn-primary btn-sm"
                 onClick={() => onOpenScheduleModal(selectedDate)}
-                style={{ fontSize: '0.75rem', padding: '0.2rem 0.5rem' }}
+                style={{ fontSize: '0.75rem', padding: '0.2rem 0.55rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
                 title="선택한 일자에 새 영농 일정 등록"
               >
                 <Plus size={12} />
@@ -272,8 +273,8 @@ export default function DailyDiaryView({
           {/* 상단 날짜 헤더 */}
           <div className="diary-section-header">
             <div>
-              <span style={{ fontSize: '0.8rem', color: 'var(--color-primary)', fontWeight: 700, textTransform: 'uppercase' }}>
-                Daily Farm Diary
+              <span style={{ fontSize: '0.825rem', color: 'var(--color-primary)', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                🌱 일일 영농 일지
               </span>
               <h2 style={{ fontSize: '1.35rem', fontWeight: 800, margin: '0.15rem 0 0 0' }}>
                 {getFormattedDateTitle(selectedDate)}
@@ -323,9 +324,9 @@ export default function DailyDiaryView({
                   <span>등록된 일정 ({dailySchedules.length}건)</span>
                 </h4>
                 <button
-                  className="btn btn-outline btn-sm"
+                  className="btn btn-primary btn-sm"
                   onClick={() => onOpenScheduleModal(selectedDate)}
-                  style={{ fontSize: '0.75rem', padding: '0.2rem 0.5rem' }}
+                  style={{ fontSize: '0.75rem', padding: '0.2rem 0.55rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
                 >
                   <Plus size={12} />
                   <span>일정 추가</span>
@@ -360,8 +361,11 @@ export default function DailyDiaryView({
                   {dailySchedules.length > 0 && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
                       {dailySchedules.map(sched => {
+                        const targetEntity = (entities || []).find(e => e.id === sched.entityId || e.tagNumber === sched.tagNumber);
+                        const entityName = sched.entityName || targetEntity?.name || '';
                         const isDone = Boolean(sched.completed);
                         const isExpanded = expandedCompletedIds.has(sched.id);
+                        const cleanTitle = entityName ? (sched.title || '').replace(new RegExp(`^\\[${entityName}\\]\\s*`), '') : (sched.title || '');
 
                       // 1. 완료 상태이면서 접힌 모드: 1행 콤팩트 가로 배치 [체크박스 + 개체번호/농장공통 + 일정제목(말줄임)]
                       if (isDone && !isExpanded) {
@@ -422,17 +426,24 @@ export default function DailyDiaryView({
 
                               {/* 개체번호 뱃지 또는 농장 공통 뱃지 */}
                               {sched.tagNumber ? (
-                                <span 
-                                  className="badge badge-tag"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    onOpenEntityDetail(sched.tagNumber);
-                                  }}
-                                  title="클릭 시 이 개체의 관리 내역으로 이동"
-                                  style={{ cursor: 'pointer', fontSize: '0.75rem', padding: '0.15rem 0.45rem', flexShrink: 0 }}
-                                >
-                                  {sched.tagNumber}
-                                </span>
+                                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', flexShrink: 0 }}>
+                                  <span 
+                                    className="badge badge-tag"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      onOpenEntityDetail(sched.tagNumber);
+                                    }}
+                                    title="클릭 시 이 개체의 관리 내역으로 이동"
+                                    style={{ cursor: 'pointer', fontSize: '0.75rem', padding: '0.15rem 0.45rem' }}
+                                  >
+                                    {sched.tagNumber}
+                                  </span>
+                                  {entityName && (
+                                    <span style={{ fontSize: '0.825rem', fontWeight: 700, color: 'var(--text-main)' }}>
+                                      {entityName}
+                                    </span>
+                                  )}
+                                </div>
                               ) : (
                                 <span style={{
                                   fontSize: '0.75rem',
@@ -444,7 +455,7 @@ export default function DailyDiaryView({
                                   fontWeight: 600,
                                   flexShrink: 0
                                 }}>
-                                  {sched.entityName || '농장 공통'}
+                                  {entityName || '농장 공통'}
                                 </span>
                               )}
 
@@ -458,10 +469,9 @@ export default function DailyDiaryView({
                                 textOverflow: 'ellipsis',
                                 whiteSpace: 'nowrap',
                                 minWidth: 0,
-                                flex: 1,
-                                overflow: 'hidden'
+                                flex: 1
                               }}>
-                                {sched.title}
+                                {cleanTitle || sched.title}
                               </span>
                             </div>
 
@@ -540,18 +550,18 @@ export default function DailyDiaryView({
                                   fontWeight: 600,
                                   flexShrink: 0
                                 }}>
-                                  {sched.entityName || '농장 공통'}
+                                  {entityName || '농장 공통'}
                                 </span>
                               )}
 
                               {/* 별명 (개체명) */}
-                              {sched.tagNumber && sched.entityName && (
+                              {sched.tagNumber && entityName && (
                                 <span style={{ 
-                                  fontSize: '0.825rem', 
-                                  fontWeight: 600, 
+                                  fontSize: '0.85rem', 
+                                  fontWeight: 700, 
                                   color: 'var(--text-main)' 
                                 }}>
-                                  {sched.entityName}
+                                  {entityName}
                                 </span>
                               )}
                             </div>
@@ -578,11 +588,11 @@ export default function DailyDiaryView({
                                   onClick={() => {
                                     const targetEntity = (entities || []).find(e => e.id === sched.entityId || e.tagNumber === sched.tagNumber);
                                     onOpenCareLogModal(
-                                      targetEntity || { tagNumber: sched.tagNumber, name: sched.entityName, id: sched.entityId },
+                                      targetEntity || { tagNumber: sched.tagNumber, name: entityName, id: sched.entityId },
                                       selectedDate,
                                       {
                                         category: sched.category || 'routine',
-                                        title: sched.title || '',
+                                        title: cleanTitle || sched.title || '',
                                         date: selectedDate,
                                         time: sched.time || undefined,
                                         entityId: sched.entityId || (targetEntity ? targetEntity.id : '')
@@ -677,9 +687,9 @@ export default function DailyDiaryView({
                                   flex: 1,
                                   minWidth: 0
                                 }}
-                                title={sched.title}
+                                title={cleanTitle || sched.title}
                               >
-                                {sched.title}
+                                {cleanTitle || sched.title}
                               </div>
                             </div>
 
@@ -769,6 +779,7 @@ export default function DailyDiaryView({
 
                       {scheduledTasks.map(task => {
                         const targetEntity = (entities || []).find(e => e.id === task.entityId || e.tagNumber === task.tagNumber);
+                        const entityName = task.entityName || targetEntity?.name || '';
                         const reminderCardId = `reminder-${task.id}`;
                         const isDone = Boolean(task.nextScheduleCompleted);
                         const isExpanded = expandedCompletedIds.has(reminderCardId);
@@ -841,6 +852,12 @@ export default function DailyDiaryView({
                               >
                                 {task.tagNumber}
                               </span>
+
+                              {entityName && (
+                                <span style={{ fontSize: '0.825rem', fontWeight: 700, color: 'var(--text-main)', flexShrink: 0 }}>
+                                  {entityName}
+                                </span>
+                              )}
 
                               {/* 작업 이름: 원래 선명한 텍스트 컬러 유지 (var(--text-main)), 좁으면 말줄임, 가로줄 없음 */}
                               <span style={{ 
@@ -926,13 +943,15 @@ export default function DailyDiaryView({
                               </span>
 
                               {/* 별명 (소 이름) */}
-                              <span style={{ 
-                                fontSize: '0.825rem', 
-                                fontWeight: 600, 
-                                color: 'var(--text-main)' 
-                              }}>
-                                {task.entityName}
-                              </span>
+                              {entityName && (
+                                <span style={{ 
+                                  fontSize: '0.85rem', 
+                                  fontWeight: 700, 
+                                  color: 'var(--text-main)' 
+                                }}>
+                                  {entityName}
+                                </span>
+                              )}
                             </div>
 
                             {/* 우측 상단: [기록] 버튼 및 다시 접기 버튼 */}
@@ -953,7 +972,7 @@ export default function DailyDiaryView({
                                   type="button"
                                   className="btn btn-primary btn-sm"
                                   onClick={() => onOpenCareLogModal(
-                                    targetEntity || { tagNumber: task.tagNumber, name: task.entityName, id: task.entityId },
+                                    targetEntity || { tagNumber: task.tagNumber, name: entityName, id: task.entityId },
                                     selectedDate,
                                     {
                                       category: task.category || 'treatment',
@@ -1116,46 +1135,65 @@ export default function DailyDiaryView({
                   </button>
                 </div>
               ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
                   {dailyLogs.map(log => {
                     const catObj = getCategoryById(log.category, careCategories);
+                    const targetEntity = (entities || []).find(e => e.id === log.entityId || e.tagNumber === log.tagNumber);
+                    const entityName = log.entityName || targetEntity?.name || '';
+                    const detailText = log.details || log.description || '';
 
                     return (
                       <div
                         key={log.id}
-                        className="diary-item-card"
+                        className="card"
                         style={{
-                          background: 'var(--bg-card)',
-                          border: '1px solid var(--border-color)',
-                          borderRadius: 'var(--radius-md)',
-                          padding: '0.65rem 0.85rem',
-                          boxShadow: 'var(--shadow-sm)',
-                          transition: 'all 0.15s ease'
+                          padding: '0.75rem 0.85rem'
                         }}
                       >
-                        {/* 1행: [개체번호] [개체이름] [관리분류] (좌측) & [✏️ 수정버튼] (우측 끝 - 개체번호 상단 정렬) */}
+                        {/* 1행: [개체번호] [개체이름] [관리분류] <──────────> [✏️ 수정버튼] */}
                         <div style={{
                           display: 'flex',
-                          alignItems: 'flex-start',
+                          alignItems: 'center',
                           justifyContent: 'space-between',
-                          gap: '0.5rem',
-                          marginBottom: '0.45rem',
+                          gap: '0.45rem',
                           width: '100%'
                         }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', minWidth: 0, flex: 1 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap', minWidth: 0, flex: 1 }}>
                             <span
                               className="badge badge-tag"
                               onClick={() => onOpenEntityDetail(log.tagNumber)}
                               title="클릭 시 이 개체의 관리 내역으로 즉시 이동"
-                              style={{ cursor: 'pointer' }}
+                              style={{ 
+                                cursor: 'pointer',
+                                fontSize: '0.78rem',
+                                padding: '0.18rem 0.5rem',
+                                borderRadius: 'var(--radius-sm)',
+                                flexShrink: 0
+                              }}
                             >
                               {log.tagNumber}
                             </span>
-                            <span style={{ fontWeight: 700, fontSize: '0.92rem', color: 'var(--text-main)' }}>
-                              {log.entityName}
-                            </span>
-                            <span className={`badge ${catObj.badgeClass}`}>
-                              {catObj.icon} {catObj.label}
+                            {entityName && (
+                              <span style={{ fontWeight: 800, fontSize: '0.88rem', color: 'var(--text-main)', flexShrink: 0 }}>
+                                {entityName}
+                              </span>
+                            )}
+                            <span 
+                              className={`badge ${catObj.badgeClass}`}
+                              style={{
+                                fontSize: '0.72rem',
+                                padding: '0.12rem 0.45rem',
+                                borderRadius: '9999px',
+                                fontWeight: 700,
+                                lineHeight: 1.2,
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '0.2rem',
+                                flexShrink: 0
+                              }}
+                            >
+                              {catObj.icon && <span style={{ fontSize: '0.75rem' }}>{catObj.icon}</span>}
+                              <span>{catObj.label}</span>
                             </span>
                           </div>
 
@@ -1170,12 +1208,11 @@ export default function DailyDiaryView({
                                 height: '24px',
                                 padding: 0,
                                 flexShrink: 0,
-                                alignSelf: 'flex-start',
                                 display: 'inline-flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                border: '1px solid var(--text-muted)',
-                                color: 'var(--text-main)',
+                                border: '1px solid var(--border-color)',
+                                color: 'var(--text-muted)',
                                 background: 'var(--bg-card)',
                                 borderRadius: 'var(--radius-sm)'
                               }}
@@ -1185,66 +1222,43 @@ export default function DailyDiaryView({
                           )}
                         </div>
 
-                        {/* 2행: [시간] [관리 작업명 (말줄임)] */}
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.55rem',
-                          marginBottom: log.details ? '0.35rem' : '0.1rem',
-                          width: '100%'
-                        }}>
-                          {log.time && (
-                            <span style={{
-                              fontWeight: 700,
-                              fontSize: '0.95rem',
-                              color: 'var(--text-main)',
-                              opacity: 0.7,
-                              whiteSpace: 'nowrap',
-                              flexShrink: 0
-                            }}>
-                              {log.time.startsWith('0') ? log.time.slice(1) : log.time}
-                            </span>
-                          )}
-
-                          <div 
-                            style={{ 
-                              fontWeight: 700, 
-                              fontSize: '0.95rem', 
-                              color: 'var(--text-main)',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              whiteSpace: 'nowrap',
-                              flex: 1,
-                              minWidth: 0
-                            }}
-                            title={log.title}
-                          >
-                            {log.title}
-                          </div>
+                        {/* 2행: 핵심 작업 제목 (굵은 글씨) */}
+                        <div style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-main)', marginTop: '0.35rem', lineHeight: 1.35 }}>
+                          {log.title}
                         </div>
 
-                        {log.details && (
-                          <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.5, marginBottom: '0.5rem' }}>
-                            {log.details}
+                        {/* 3행: 상세 처치 내용 (있을 때만) */}
+                        {detailText && (
+                          <div style={{ fontSize: '0.825rem', color: 'var(--text-subtle)', lineHeight: 1.45, marginTop: '0.2rem' }}>
+                            {detailText}
                           </div>
                         )}
 
-                        {((log.operator && log.operator.trim()) || (log.cost && Number(log.cost) > 0)) ? (
-                          <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.75rem',
-                            flexWrap: 'wrap',
-                            fontSize: '0.775rem',
-                            color: 'var(--text-subtle)',
-                            paddingTop: '0.45rem',
-                            marginTop: '0.45rem',
-                            borderTop: '1px dashed var(--border-color)'
-                          }}>
-                            {log.operator && log.operator.trim() ? <span>작업자: {log.operator.trim()}</span> : null}
-                            {log.cost && Number(log.cost) > 0 ? <span>비용: {Number(log.cost).toLocaleString()}원</span> : null}
-                          </div>
-                        ) : null}
+                        {/* 4행: 시간 • 담당자 • 비용 메타 정보 묶음 (점선 없이 정갈한 1줄) */}
+                        <div style={{ 
+                          fontSize: '0.78rem', 
+                          color: 'var(--text-muted)', 
+                          fontWeight: 500, 
+                          marginTop: '0.35rem', 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          gap: '0.45rem',
+                          flexWrap: 'wrap'
+                        }}>
+                          {log.time && (
+                            <span style={{ fontWeight: 700, color: 'var(--text-main)' }}>
+                              {log.time}
+                            </span>
+                          )}
+                          {log.time && log.operator && <span style={{ opacity: 0.4 }}>•</span>}
+                          {log.operator && <span>담당: {log.operator}</span>}
+                          {log.cost > 0 && (
+                            <>
+                              <span style={{ opacity: 0.4 }}>•</span>
+                              <span>비용: {Number(log.cost).toLocaleString()}원</span>
+                            </>
+                          )}
+                        </div>
                       </div>
                     );
                   })}
