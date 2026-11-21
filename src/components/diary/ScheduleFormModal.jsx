@@ -5,7 +5,8 @@ import {
   Clock, 
   Sparkles, 
   Check, 
-  AlertCircle 
+  AlertCircle,
+  Trash2
 } from 'lucide-react';
 import { getTodayDateString } from '../../lib/types.js';
 
@@ -356,50 +357,64 @@ export default function ScheduleFormModal({
             </div>
           </div>
 
-          <div className="modal-footer" style={{ justifyContent: 'flex-end', gap: '0.6rem' }}>
-            <button 
-              type="button" 
-              className="btn btn-secondary" 
-              onClick={onClose}
-              style={{
-                border: '1px solid var(--text-muted)',
-                color: 'var(--text-main)',
-                fontWeight: 600
-              }}
-            >
-              취소
-            </button>
+          {/* 모달 푸터: 좌측 삭제 격리 및 우측 저장/취소 안전 배치 */}
+          <div className="modal-footer" style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: isEditing && onDelete ? 'space-between' : 'flex-end',
+            width: '100%',
+            gap: '0.6rem'
+          }}>
             {isEditing && onDelete && (
               <button 
                 type="button" 
                 className="btn btn-outline"
                 onClick={handleDelete}
                 style={{
-                  border: '1px solid var(--color-danger)',
+                  border: '1.5px solid rgba(239, 68, 68, 0.4)',
                   color: 'var(--color-danger)',
-                  fontWeight: 600,
-                  background: 'var(--bg-card)'
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.35rem',
+                  fontWeight: 700,
+                  background: 'rgba(239, 68, 68, 0.05)'
                 }}
               >
-                삭제
+                <Trash2 size={16} color="var(--color-danger)" />
+                <span>일정 삭제</span>
               </button>
             )}
-            <button 
-              type="submit" 
-              className={`btn ${isEditing ? 'btn-outline' : 'btn-primary'}`}
-              style={{
-                fontWeight: 700,
-                minWidth: '100px',
-                ...(isEditing ? {
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+              <button 
+                type="button" 
+                className="btn btn-secondary" 
+                onClick={onClose}
+                style={{
                   border: '1px solid var(--text-muted)',
                   color: 'var(--text-main)',
-                  background: 'var(--bg-card)'
-                } : {})
-              }}
-            >
-              <Check size={16} />
-              <span>{isEditing ? '수정 사항 저장' : '일정 등록'}</span>
-            </button>
+                  fontWeight: 600
+                }}
+              >
+                취소
+              </button>
+              <button 
+                type="submit" 
+                className={`btn ${isEditing ? 'btn-outline' : 'btn-primary'}`}
+                style={{
+                  fontWeight: 700,
+                  minWidth: '100px',
+                  ...(isEditing ? {
+                    border: '1px solid var(--text-muted)',
+                    color: 'var(--text-main)',
+                    background: 'var(--bg-card)'
+                  } : {})
+                }}
+              >
+                <Check size={16} />
+                <span>{isEditing ? '수정 사항 저장' : '일정 등록'}</span>
+              </button>
+            </div>
           </div>
         </form>
       </div>

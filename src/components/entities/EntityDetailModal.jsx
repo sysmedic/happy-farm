@@ -461,14 +461,22 @@ export default function EntityDetailModal({
                       </button>
                       <button
                         type="button"
-                        className="btn btn-primary btn-sm"
+                        className="btn btn-outline btn-sm"
                         onClick={() => {
                           if (onUpdateEntityMemo) {
                             onUpdateEntityMemo(entity.id, memoDraft);
                           }
                           setIsEditingMemo(false);
                         }}
-                        style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontWeight: 700 }}
+                        style={{ 
+                          border: '1px solid var(--text-muted)', 
+                          color: 'var(--text-main)', 
+                          fontWeight: 700, 
+                          background: 'var(--bg-card)', 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          gap: '0.3rem' 
+                        }}
                       >
                         <Save size={13} />
                         <span>메모 저장</span>

@@ -471,7 +471,16 @@ export default function EntityFormModal({
               <button type="button" className="btn btn-secondary" onClick={onClose}>
                 취소
               </button>
-              <button type="submit" className="btn btn-primary">
+              <button 
+                type="submit" 
+                className={`btn ${isEditing ? 'btn-outline' : 'btn-primary'}`}
+                style={isEditing ? {
+                  border: '1px solid var(--text-muted)',
+                  color: 'var(--text-main)',
+                  fontWeight: 700,
+                  background: 'var(--bg-card)'
+                } : {}}
+              >
                 <Save size={16} />
                 <span>{isEditing ? '변경사항 저장' : '개체 등록 완료'}</span>
               </button>
