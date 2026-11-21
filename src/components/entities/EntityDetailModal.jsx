@@ -374,10 +374,31 @@ export default function EntityDetailModal({
                       <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                         <span>📝 특이사항 / 사양 관리 메모</span>
                       </span>
-                      <span className="memo-edit-hint">
+                      <button
+                        type="button"
+                        className="btn btn-outline btn-sm btn-icon-only"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setMemoDraft(entity.memo || '');
+                          setIsEditingMemo(true);
+                        }}
+                        title="특이사항 메모 수정"
+                        style={{
+                          width: '24px',
+                          height: '24px',
+                          padding: 0,
+                          flexShrink: 0,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          border: '1px solid rgba(16, 185, 129, 0.4)',
+                          color: 'var(--color-primary)',
+                          background: 'var(--bg-card)',
+                          borderRadius: 'var(--radius-sm)'
+                        }}
+                      >
                         <Edit3 size={12} />
-                        <span>터치하여 수정</span>
-                      </span>
+                      </button>
                     </div>
                     <div style={{ 
                       color: entity.memo ? 'var(--text-main)' : 'var(--text-muted)', 
