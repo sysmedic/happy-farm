@@ -366,7 +366,7 @@ export default function EntityDetailModal({
                       fontSize: '0.8rem', 
                       color: 'var(--color-primary)', 
                       fontWeight: 700, 
-                      marginBottom: '0.35rem', 
+                      marginBottom: '0.2rem', 
                       display: 'flex', 
                       alignItems: 'center', 
                       justifyContent: 'space-between'

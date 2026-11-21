@@ -1618,8 +1618,8 @@ a:hover {
   background: var(--bg-card-subtle);
   border-left: 3.5px solid var(--color-primary);
   border-radius: var(--radius-sm);
-  padding: 0.85rem 1.1rem;
-  margin-bottom: 1.35rem;
+  padding: 0.55rem 0.85rem;
+  margin-bottom: 0.85rem;
   font-size: 0.9rem;
   font-weight: 500;
   color: var(--text-main);
@@ -3032,8 +3032,8 @@ form.modal-content {
   }
 
   .modal-spec-memo-card {
-    padding: 0.75rem 0.9rem;
-    margin-bottom: 1rem;
+    padding: 0.55rem 0.85rem;
+    margin-bottom: 0.85rem;
     font-size: 0.84rem;
   }
 
