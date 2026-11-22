@@ -204,12 +204,120 @@ export default function GoogleDriveView({
         </div>
       )}
 
-      {/* 1. 구글 드라이브 클라우드 동기화 카드 */}
+      {/* 1. [최상단 배치] 파일 백업 (JSON) & 엑셀/구글 시트 연동 */}
       <div className="card" style={{ marginBottom: '1.5rem' }}>
         <div className="card-header">
           <div className="card-title">
+            <Share2 size={20} color="var(--color-primary)" />
+            <span style={{ fontSize: '1.02rem', fontWeight: 800 }}>파일 백업 및 복원 (JSON / 엑셀)</span>
+          </div>
+        </div>
+
+        <div className="card-body">
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem', lineHeight: '1.55', marginBottom: '1.25rem' }}>
+            로그인 없이도 전체 농장 데이터를 즉시 파일로 내려받아 안전하게 보관하거나,
+            보관 중인 백업 파일을 불러와 다른 기기에서 그대로 복원할 수 있습니다.
+          </p>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem' }}>
+            {/* 전체 JSON 백업 다운로드 */}
+            <div style={{
+              background: 'var(--bg-card-subtle)',
+              border: '1px solid var(--border-color)',
+              borderRadius: 'var(--radius-md)',
+              padding: '1.25rem',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between'
+            }}>
+              <div>
+                <h4 style={{ fontWeight: 800, fontSize: '0.98rem', marginBottom: '0.45rem', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                  <Download size={18} color="var(--color-primary)" />
+                  <span>전체 백업 파일 다운로드</span>
+                </h4>
+                <p style={{ fontSize: '0.86rem', color: 'var(--text-muted)', lineHeight: '1.45', marginBottom: '1.15rem' }}>
+                  개체 정보와 모든 관리 기록을 JSON 파일로 내 기기에 즉시 저장합니다.
+                </p>
+              </div>
+              <button 
+                className="btn btn-primary" 
+                style={{ padding: '0.7rem 1rem', fontSize: '0.9rem', fontWeight: 700 }}
+                onClick={handleDownloadLocalJson}
+              >
+                JSON 백업 파일 내려받기
+              </button>
+            </div>
+
+            {/* 백업 파일 불러오기 / 복원 */}
+            <div style={{
+              background: 'var(--bg-card-subtle)',
+              border: '1px solid var(--border-color)',
+              borderRadius: 'var(--radius-md)',
+              padding: '1.25rem',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between'
+            }}>
+              <div>
+                <h4 style={{ fontWeight: 800, fontSize: '0.98rem', marginBottom: '0.45rem', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                  <Upload size={18} color="var(--color-secondary)" />
+                  <span>백업 파일 복원 (가져오기)</span>
+                </h4>
+                <p style={{ fontSize: '0.86rem', color: 'var(--text-muted)', lineHeight: '1.45', marginBottom: '1.15rem' }}>
+                  기기에 보관 중인 백업(.json) 파일을 선택하여 최신 상태로 복원합니다.
+                </p>
+              </div>
+              <label 
+                className="btn btn-secondary" 
+                style={{ textAlign: 'center', cursor: 'pointer', padding: '0.7rem 1rem', fontSize: '0.9rem', fontWeight: 700 }}
+              >
+                <input
+                  type="file"
+                  accept=".json"
+                  style={{ display: 'none' }}
+                  onChange={handleFileUpload}
+                />
+                백업 파일 선택 (.json)
+              </label>
+            </div>
+
+            {/* 엑셀 / 구글 스프레드시트 호환 CSV */}
+            <div style={{
+              background: 'var(--bg-card-subtle)',
+              border: '1px solid var(--border-color)',
+              borderRadius: 'var(--radius-md)',
+              padding: '1.25rem',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between'
+            }}>
+              <div>
+                <h4 style={{ fontWeight: 800, fontSize: '0.98rem', marginBottom: '0.45rem', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                  <FileSpreadsheet size={18} color="#10b981" />
+                  <span>엑셀/구글 시트용 CSV</span>
+                </h4>
+                <p style={{ fontSize: '0.86rem', color: 'var(--text-muted)', lineHeight: '1.45', marginBottom: '1.15rem' }}>
+                  개체 목록을 엑셀이나 구글 스프레드시트에서 열람 가능한 표 형식으로 추출합니다.
+                </p>
+              </div>
+              <button 
+                className="btn btn-outline" 
+                style={{ padding: '0.7rem 1rem', fontSize: '0.9rem', fontWeight: 700 }}
+                onClick={handleExportCsv}
+              >
+                CSV 파일로 내보내기
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 2. 구글 드라이브 클라우드 동기화 카드 */}
+      <div className="card">
+        <div className="card-header">
+          <div className="card-title">
             <Cloud size={20} color="var(--color-secondary)" />
-            <span>구글 드라이브 클라우드 백업 및 공유 (Google Drive)</span>
+            <span style={{ fontSize: '1.02rem', fontWeight: 800 }}>구글 드라이브 클라우드 동기화 (선택)</span>
           </div>
           <button 
             className="btn btn-outline btn-sm"
@@ -247,10 +355,10 @@ export default function GoogleDriveView({
                 <ShieldCheck size={22} />
               </div>
               <div>
-                <div style={{ fontWeight: 800, fontSize: '1rem' }}>
+                <div style={{ fontWeight: 800, fontSize: '1.05rem' }}>
                   {isSignedIn ? '구글 드라이브 연결 완료' : '구글 계정 미연동'}
                 </div>
-                <div style={{ fontSize: '0.825rem', color: 'var(--text-muted)' }}>
+                <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: '1.45', marginTop: '0.2rem' }}>
                   {isSignedIn 
                     ? '농장 데이터를 구글 드라이브에 안전하게 동기화하고 팀원과 공유할 수 있습니다.' 
                     : '구글 계정에 로그인하여 클라우드 백업 및 복원 기능을 활성화하세요.'}
@@ -389,103 +497,6 @@ export default function GoogleDriveView({
               )}
             </div>
           )}
-        </div>
-      </div>
-
-      {/* 2. 간편 로컬 파일 공유 & 엑셀/구글 시트 연동 */}
-      <div className="card">
-        <div className="card-header">
-          <div className="card-title">
-            <Share2 size={20} color="var(--color-primary)" />
-            <span>원클릭 자료 공유 및 파일 백업/복원</span>
-          </div>
-        </div>
-
-        <div className="card-body">
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', marginBottom: '1.25rem' }}>
-            API 설정 없이도 전체 농장 데이터베이스를 파일로 내려받아 <strong>구글 드라이브 폴더에 직접 업로드</strong>하거나,
-            카카오톡/이메일로 전송하고 다른 기기에서 즉시 불러올 수 있습니다.
-          </p>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem' }}>
-            {/* 전체 JSON 백업 다운로드 */}
-            <div style={{
-              background: 'var(--bg-card-subtle)',
-              border: '1px solid var(--border-color)',
-              borderRadius: 'var(--radius-md)',
-              padding: '1.25rem',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between'
-            }}>
-              <div>
-                <h4 style={{ fontWeight: 700, marginBottom: '0.35rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  <Download size={16} color="var(--color-primary)" />
-                  <span>전체 백업 파일 다운로드</span>
-                </h4>
-                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
-                  개체 마스터 데이터 및 모든 생애 관리 기록을 JSON 파일로 저장합니다.
-                </p>
-              </div>
-              <button className="btn btn-primary btn-sm" onClick={handleDownloadLocalJson}>
-                JSON 백업 파일 내려받기
-              </button>
-            </div>
-
-            {/* 백업 파일 불러오기 / 복원 */}
-            <div style={{
-              background: 'var(--bg-card-subtle)',
-              border: '1px solid var(--border-color)',
-              borderRadius: 'var(--radius-md)',
-              padding: '1.25rem',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between'
-            }}>
-              <div>
-                <h4 style={{ fontWeight: 700, marginBottom: '0.35rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  <Upload size={16} color="var(--color-secondary)" />
-                  <span>백업 파일 복원 (가져오기)</span>
-                </h4>
-                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
-                  구글 드라이브나 PC에 보관 중인 JSON 백업 파일을 선택하여 복원합니다.
-                </p>
-              </div>
-              <label className="btn btn-secondary btn-sm" style={{ textAlign: 'center', cursor: 'pointer' }}>
-                <input
-                  type="file"
-                  accept=".json"
-                  style={{ display: 'none' }}
-                  onChange={handleFileUpload}
-                />
-                백업 파일 선택 (.json)
-              </label>
-            </div>
-
-            {/* 엑셀 / 구글 스프레드시트 호환 CSV */}
-            <div style={{
-              background: 'var(--bg-card-subtle)',
-              border: '1px solid var(--border-color)',
-              borderRadius: 'var(--radius-md)',
-              padding: '1.25rem',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between'
-            }}>
-              <div>
-                <h4 style={{ fontWeight: 700, marginBottom: '0.35rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  <FileSpreadsheet size={16} color="#10b981" />
-                  <span>구글 시트/엑셀용 CSV</span>
-                </h4>
-                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
-                  개체 목록 및 관리 정보를 구글 스프레드시트나 엑셀에서 바로 열 수 있습니다.
-                </p>
-              </div>
-              <button className="btn btn-outline btn-sm" onClick={handleExportCsv}>
-                CSV 파일로 내보내기
-              </button>
-            </div>
-          </div>
         </div>
       </div>
     </div>

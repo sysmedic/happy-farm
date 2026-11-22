@@ -130,7 +130,7 @@ export default function FarmSettingsModal({
             onClick={() => setActiveTab('info')}
           >
             <Building2 size={16} />
-            <span>농장 기본 정보</span>
+            <span>농장 정보</span>
           </button>
           <button
             type="button"
@@ -138,7 +138,7 @@ export default function FarmSettingsModal({
             onClick={() => setActiveTab('startView')}
           >
             <Compass size={16} />
-            <span>시작 화면 & 탭 순서</span>
+            <span>시작 화면</span>
           </button>
           <button
             type="button"
@@ -146,7 +146,7 @@ export default function FarmSettingsModal({
             onClick={() => setActiveTab('backup')}
           >
             <Cloud size={16} />
-            <span>데이터 백업 (구글 드라이브)</span>
+            <span>백업</span>
           </button>
         </div>
 
@@ -155,14 +155,6 @@ export default function FarmSettingsModal({
           {/* 1. 농장 정보 탭 */}
           {activeTab === 'info' && (
             <form onSubmit={handleSaveInfo} className="settings-form-section">
-              <div className="settings-tip-banner">
-                <Sparkles size={18} className="tip-icon" />
-                <div className="tip-text">
-                  <strong>공식 영농 보고서 실시간 연동</strong>
-                  <p>여기에 등록된 농장명과 대표자 성명은 <strong>[일일 보고서]</strong> 상단 제목과 결재 서명란에 자동으로 찍혀 출력됩니다.</p>
-                </div>
-              </div>
-
               <div className="settings-field-group">
                 <label className="settings-label" htmlFor="farm-name-input">
                   <Building2 size={16} />
@@ -226,14 +218,6 @@ export default function FarmSettingsModal({
           {/* 2. 시작 화면 & 탑바 탭 정렬 탭 */}
           {activeTab === 'startView' && (
             <div className="settings-start-view-section">
-              <div className="settings-tip-banner">
-                <Compass size={18} className="tip-icon" />
-                <div className="tip-text">
-                  <strong>앱 실행 첫 화면 & 탑바 맨 앞자리 자동 정렬</strong>
-                  <p>선택하신 메뉴가 앱을 켤 때 가장 먼저 표시되며, <strong>상단 탑바의 맨 앞(1번) 자리</strong>로 자동 이동합니다.</p>
-                </div>
-              </div>
-
               <div className="start-tab-choice-grid">
                 {/* 1) 개체 관리 옵션 */}
                 <div 

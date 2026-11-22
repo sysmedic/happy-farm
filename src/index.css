@@ -3499,8 +3499,8 @@ form.modal-content {
   display: flex;
   background: var(--bg-card-subtle);
   border-bottom: 1px solid var(--border-color);
-  padding: 0.35rem 1rem 0;
-  gap: 0.5rem;
+  padding: 0.35rem 0.75rem 0;
+  gap: 0.25rem;
   overflow-x: auto;
   scrollbar-width: none;
 }
@@ -3510,11 +3510,13 @@ form.modal-content {
 }
 
 .settings-nav-tab-btn {
+  flex: 1;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.45rem;
-  padding: 0.65rem 0.95rem;
-  font-size: 0.86rem;
+  padding: 0.75rem 0.5rem;
+  font-size: 0.92rem;
   font-weight: 700;
   color: var(--text-muted);
   border: none;
@@ -3523,6 +3525,7 @@ form.modal-content {
   border-bottom: 2px solid transparent;
   transition: all 0.2s ease;
   white-space: nowrap;
+  text-align: center;
 }
 
 .settings-nav-tab-btn:hover {
