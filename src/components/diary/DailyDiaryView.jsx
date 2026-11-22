@@ -544,13 +544,13 @@ export default function DailyDiaryView({
                               overflow: 'hidden'
                             }}>
                               <CheckCircle2 size={16} color="var(--color-primary)" style={{ flexShrink: 0 }} />
-                              {/* 개체번호 (캡슐 제거, 굵고 시원한 텍스트로 가독성 극대화) */}
+                              {/* 개체번호 (클릭 시 원본 관리기록 및 다음 일정 열람) */}
                               <span 
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  onOpenEntityDetail(task.tagNumber);
+                                  if (onEditCareLog) onEditCareLog(task, { focusNextSchedule: true });
                                 }}
-                                title="클릭 시 이 개체의 관리 내역으로 이동"
+                                title="클릭 시 이 알람이 등록된 원본 관리기록 열람"
                                 style={{ 
                                   cursor: 'pointer', 
                                   fontSize: '0.92rem', 
@@ -566,15 +566,12 @@ export default function DailyDiaryView({
                                 {task.tagNumber}
                               </span>
 
+                              {/* 소 이름: 박스 없는 자연스러운 순수 텍스트 */}
                               {entityName && (
                                 <span style={{ 
-                                  fontSize: '0.82rem', 
-                                  fontWeight: 700, 
+                                  fontSize: '0.88rem', 
+                                  fontWeight: 600, 
                                   color: 'var(--text-subtle)',
-                                  background: 'rgba(0, 0, 0, 0.04)',
-                                  padding: '0.1rem 0.4rem',
-                                  borderRadius: 'var(--radius-sm)',
-                                  border: '1px solid rgba(0, 0, 0, 0.06)',
                                   flexShrink: 0 
                                 }}>
                                   {entityName}
@@ -640,10 +637,12 @@ export default function DailyDiaryView({
                           {/* 1행: [체크박스] [개체번호] [별명]   ...   [기록] 버튼 & 접기버튼 (우측 상단) */}
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', width: '100%' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap', minWidth: 0, flex: 1 }}>
-                              {/* 개체번호 (캡슐 제거, 굵고 시원한 텍스트로 가독성 극대화) */}
+                              {/* 개체번호 (클릭 시 원본 관리기록 및 다음 일정 열람) */}
                               <span 
-                                onClick={() => onOpenEntityDetail(task.tagNumber)}
-                                title="클릭 시 이 개체의 관리 내역으로 이동"
+                                onClick={() => {
+                                  if (onEditCareLog) onEditCareLog(task, { focusNextSchedule: true });
+                                }}
+                                title="클릭 시 이 알람이 등록된 원본 관리기록 열람"
                                 style={{ 
                                   cursor: 'pointer', 
                                   fontSize: '0.95rem', 
@@ -658,23 +657,19 @@ export default function DailyDiaryView({
                                 {task.tagNumber}
                               </span>
 
-                              {/* 별명 (소 이름) */}
+                              {/* 소 이름: 박스 없는 자연스러운 순수 텍스트 */}
                               {entityName && (
                                 <span style={{ 
-                                  fontSize: '0.82rem', 
-                                  fontWeight: 700, 
-                                  color: 'var(--text-subtle)',
-                                  background: 'rgba(0, 0, 0, 0.04)',
-                                  padding: '0.1rem 0.4rem',
-                                  borderRadius: 'var(--radius-sm)',
-                                  border: '1px solid rgba(0, 0, 0, 0.06)'
+                                  fontSize: '0.9rem', 
+                                  fontWeight: 600, 
+                                  color: 'var(--text-subtle)' 
                                 }}>
                                   {entityName}
                                 </span>
                               )}
                             </div>
 
-                            {/* 우측 상단: 미리완료 뱃지 / [일정으로] 버튼 / 다시 접기 버튼 */}
+                            {/* 우측 상단: 미리완료 뱃지 / [일정 등록] 버튼 / 다시 접기 버튼 */}
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexShrink: 0 }}>
                               {isEarlyCompleted && (
                                 <span style={{
@@ -733,7 +728,7 @@ export default function DailyDiaryView({
                                   }}
                                 >
                                   <Calendar size={12} />
-                                  <span>일정으로</span>
+                                  <span>일정 등록</span>
                                 </button>
                               )}
                             </div>
@@ -817,7 +812,7 @@ export default function DailyDiaryView({
                                 }}
                               >
                                 <Clock size={12} />
-                                <span>날짜변경</span>
+                                <span>날짜 변경</span>
                               </button>
                             )}
                           </div>
@@ -1055,13 +1050,10 @@ export default function DailyDiaryView({
                                   </span>
                                   {entityName && (
                                     <span style={{ 
-                                      fontSize: '0.82rem', 
-                                      fontWeight: 700, 
+                                      fontSize: '0.88rem', 
+                                      fontWeight: 600, 
                                       color: 'var(--text-subtle)',
-                                      background: 'rgba(0, 0, 0, 0.04)',
-                                      padding: '0.1rem 0.4rem',
-                                      borderRadius: 'var(--radius-sm)',
-                                      border: '1px solid rgba(0, 0, 0, 0.06)'
+                                      flexShrink: 0 
                                     }}>
                                       {entityName}
                                     </span>
@@ -1186,16 +1178,12 @@ export default function DailyDiaryView({
                                 </span>
                               )}
 
-                              {/* 별명 (개체명) */}
+                              {/* 별명 (개체명: 박스 없는 자연스러운 순수 텍스트) */}
                               {sched.tagNumber && entityName && (
                                 <span style={{ 
-                                  fontSize: '0.82rem', 
-                                  fontWeight: 700, 
-                                  color: 'var(--text-subtle)',
-                                  background: 'rgba(0, 0, 0, 0.04)',
-                                  padding: '0.1rem 0.4rem',
-                                  borderRadius: 'var(--radius-sm)',
-                                  border: '1px solid rgba(0, 0, 0, 0.06)'
+                                  fontSize: '0.9rem', 
+                                  fontWeight: 600, 
+                                  color: 'var(--text-subtle)' 
                                 }}>
                                   {entityName}
                                 </span>
