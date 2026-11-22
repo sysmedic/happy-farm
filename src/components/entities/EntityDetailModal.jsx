@@ -192,9 +192,31 @@ export default function EntityDetailModal({
           <div className="fullhistory-header-bar">
             {/* 2단: 개체 식별 프로필 (좌측) <──────────────> 전체 기록 캡슐 (우측 3열 끝선 칼정렬) */}
             <div className="fullhistory-header-identity-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', width: '100%' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', minWidth: 0, flex: 1, overflow: 'hidden' }}>
-                <span className="entity-ear-tag fullhistory-tag" style={{ flexShrink: 0 }}>{entity.tagNumber}</span>
-                <h2 className="fullhistory-entity-name" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{entity.name}</h2>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', minWidth: 0, flex: 1, overflow: 'hidden' }}>
+                <span style={{ 
+                  fontSize: '1.18rem', 
+                  fontWeight: 800, 
+                  color: 'var(--text-main)', 
+                  fontFamily: 'var(--font-family)',
+                  fontVariantNumeric: 'tabular-nums',
+                  fontFeatureSettings: '"tnum" 1',
+                  letterSpacing: '-0.025em',
+                  whiteSpace: 'nowrap',
+                  flexShrink: 0 
+                }}>
+                  {entity.tagNumber}
+                </span>
+                <h2 style={{ 
+                  margin: 0, 
+                  fontSize: '1.05rem', 
+                  fontWeight: 700, 
+                  color: 'var(--text-main)', 
+                  overflow: 'hidden', 
+                  textOverflow: 'ellipsis', 
+                  whiteSpace: 'nowrap' 
+                }}>
+                  {entity.name}
+                </h2>
               </div>
 
               {/* 우측 3열 끝선에 수직 칼정렬되는 전체 기록 캡슐 */}
@@ -243,12 +265,25 @@ export default function EntityDetailModal({
             <>
               {/* 개체 핵심 프로필 섹션 (이표번호, 상태, 정보 수정 버튼, 이름 및 월령) */}
               <div className="detail-entity-profile-card">
-                {/* 1행: 이표번호 (좌측) <───────────────> 상태 배너 & 출력 액션 (우측) 대칭 배치 */}
-                <div className="detail-header-top-row">
-                  {/* 좌측: 개체 고유 이표번호 */}
-                  <div className="detail-header-tag" style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
-                    <span className="entity-ear-tag">{entity.tagNumber}</span>
-                  </div>
+                {/* 1행: 이표번호 (좌측) <───────────────> 상태 배너 & 출력 액션 (우측) 대칭 배치 (개체 카드와 동일 규격) */}
+                <div className="detail-header-top-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
+                  {/* 좌측: 개체 고유 이표번호 (박스 없는 시원하고 굵은 텍스트) */}
+                  <h3 
+                    style={{ 
+                      margin: 0, 
+                      fontSize: '1.28rem', 
+                      fontWeight: 800, 
+                      fontFamily: 'var(--font-family)',
+                      fontVariantNumeric: 'tabular-nums',
+                      fontFeatureSettings: '"tnum" 1',
+                      color: 'var(--text-main)', 
+                      letterSpacing: '-0.025em',
+                      whiteSpace: 'nowrap',
+                      flexShrink: 0
+                    }}
+                  >
+                    {entity.tagNumber}
+                  </h3>
 
                   {/* 우측 끝: 출력 버튼(데스크톱) & 상태 변경 뱃지 드롭다운 */}
                   <div className="entity-detail-header-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexShrink: 0 }}>
@@ -309,11 +344,21 @@ export default function EntityDetailModal({
                   </div>
                 </div>
 
-                {/* 2행: 애칭(이름) & 사육단계 - 성별 • 월령(일수) */}
-                <div className="detail-header-name-row" style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap', width: '100%', marginTop: '0.35rem' }}>
-                  <h2 className="detail-header-name" style={{ margin: 0 }}>{entity.name}</h2>
-                  <span className="detail-header-subtext">
-                    {formatDisplayBreed(entity.breed)} • {age.text}
+                {/* 2행: 소 이름(호칭) + 사육단계 · 축사 위치 · 월령 (개체 카드 2층과 100% 동일 규격) */}
+                <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '0.45rem', marginTop: '0.35rem', fontSize: '0.92rem' }}>
+                  <span style={{ fontWeight: 700, fontSize: '1.05rem', color: 'var(--text-main)' }}>
+                    {entity.name}
+                  </span>
+                  <span style={{ fontWeight: 600, color: 'var(--text-muted)' }}>
+                    ({formatDisplayBreed(entity.breed)})
+                  </span>
+                  <span style={{ color: 'var(--border-color)', fontWeight: 300, margin: '0 0.1rem' }}>•</span>
+                  <span style={{ fontWeight: 600, color: 'var(--text-muted)' }}>
+                    {entity.barn || '축사 미지정'}
+                  </span>
+                  <span style={{ color: 'var(--border-color)', fontWeight: 300, margin: '0 0.1rem' }}>•</span>
+                  <span style={{ fontWeight: 600, color: 'var(--text-muted)' }}>
+                    {age.text}
                   </span>
                 </div>
               </div>
