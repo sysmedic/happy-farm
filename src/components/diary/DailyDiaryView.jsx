@@ -928,31 +928,7 @@ export default function DailyDiaryView({
                               flex: 1,
                               overflow: 'hidden'
                             }}>
-                              {/* 완료 체크 원형 토글 버튼 */}
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  onToggleReminderComplete?.(task.id);
-                                }}
-                                style={{
-                                  background: 'none',
-                                  border: 'none',
-                                  cursor: 'pointer',
-                                  padding: '4px',
-                                  margin: '-4px',
-                                  color: 'var(--color-primary)',
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  flexShrink: 0,
-                                  borderRadius: '50%'
-                                }}
-                                title="미완료로 변경 (원래 카드로 복원)"
-                              >
-                                <CheckCircle2 size={19} color="var(--color-primary)" />
-                              </button>
-
+                              <CheckCircle2 size={16} color="var(--color-primary)" style={{ flexShrink: 0 }} />
                               {/* 개체번호 뱃지 */}
                               <span 
                                 className="badge badge-tag"
@@ -1031,35 +1007,6 @@ export default function DailyDiaryView({
                           {/* 1행: [체크박스] [개체번호] [별명]   ...   [기록] 버튼 & 접기버튼 (우측 상단) */}
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', width: '100%' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap', minWidth: 0, flex: 1 }}>
-                              {/* 완료 체크박스 버튼 */}
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  onToggleReminderComplete?.(task.id);
-                                }}
-                                style={{
-                                  background: 'none',
-                                  border: 'none',
-                                  cursor: 'pointer',
-                                  padding: '4px',
-                                  margin: '-4px',
-                                  color: isDone ? 'var(--color-primary)' : 'var(--text-muted)',
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  flexShrink: 0,
-                                  borderRadius: '50%'
-                                }}
-                                title={isDone ? '미완료로 변경' : '완료로 표시'}
-                              >
-                                {isDone ? (
-                                  <CheckCircle2 size={19} color="var(--color-primary)" />
-                                ) : (
-                                  <Circle size={19} color="var(--text-muted)" />
-                                )}
-                              </button>
-
                               {/* 개체번호 뱃지 */}
                               <span 
                                 className="badge badge-tag"
