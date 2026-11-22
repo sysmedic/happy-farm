@@ -886,17 +886,9 @@ export default function EntityDetailModal({
                               color: 'var(--text-main)',
                               opacity: 0.85,
                               whiteSpace: 'nowrap',
-                              flexShrink: 0,
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '0.35rem'
+                              flexShrink: 0
                             }}>
-                              <span>{log.date}</span>
-                              {log.time && (
-                                <span style={{ fontWeight: 600, fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-                                  {log.time}
-                                </span>
-                              )}
+                              {log.date}{log.time ? ` ${log.time}` : ''}
                             </span>
                           </div>
 
