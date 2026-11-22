@@ -340,14 +340,20 @@ export default function DailyDiaryView({
                       padding: 0
                     }}
                   >
-                    {/* 방법 1: 앙증맞은 '오늘' 꼬리표 라벨 (0.1초 만에 오늘 구별) */}
+                    {/* 1안: '오늘' 텍스트를 상단에 플로팅시켜 숫자의 정중앙 높이(가로 라인) 완벽 일치 */}
                     {isToday && (
                       <span style={{
-                        fontSize: '0.62rem',
+                        position: 'absolute',
+                        top: '2.5px',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        fontSize: '0.58rem',
                         fontWeight: 800,
                         color: isSelected ? '#047857' : 'var(--color-primary)',
                         lineHeight: 1,
-                        marginBottom: '1px'
+                        letterSpacing: '-0.02em',
+                        pointerEvents: 'none',
+                        whiteSpace: 'nowrap'
                       }}>
                         오늘
                       </span>
