@@ -463,19 +463,22 @@ export default function DailyDiaryView({
                 <span 
                   className="diary-tab-count" 
                   style={{
-                    minWidth: '20px',
+                    width: '20px',
                     height: '20px',
+                    minWidth: '20px',
+                    maxWidth: '20px',
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    borderRadius: '9999px',
-                    padding: '0 4px',
+                    borderRadius: '50%',
+                    padding: 0,
                     fontSize: '0.75rem',
                     fontWeight: 800,
+                    lineHeight: 1,
                     boxSizing: 'border-box',
                     background: activeDiaryTab === 'reminders' ? '#f59e0b' : 'rgba(245, 158, 11, 0.15)',
                     color: activeDiaryTab === 'reminders' ? '#fff' : '#d97706',
-                    border: activeDiaryTab === 'reminders' ? 'none' : '1px solid rgba(245, 158, 11, 0.3)'
+                    border: activeDiaryTab === 'reminders' ? '1px solid transparent' : '1px solid rgba(245, 158, 11, 0.3)'
                   }}
                 >
                   {pendingRemindersCount}
@@ -483,7 +486,7 @@ export default function DailyDiaryView({
               </button>
             )}
 
-            {/* 2. 일정 탭 (A안: 완료 시 ✔, 미완료 시 남은 건수 원형 표기) */}
+            {/* 2. 일정 탭 (20px 정원형 및 동일 0.75rem 규격) */}
             <button
               type="button"
               className={`diary-dock-tab tab-schedules ${activeDiaryTab === 'schedules' ? 'active' : ''}`}
@@ -493,22 +496,25 @@ export default function DailyDiaryView({
               <span 
                 className="diary-tab-count"
                 style={{
-                  minWidth: '20px',
+                  width: '20px',
                   height: '20px',
+                  minWidth: '20px',
+                  maxWidth: '20px',
                   display: 'inline-flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  borderRadius: '9999px',
-                  padding: '0 4px',
-                  fontSize: isScheduleAllDone ? '0.7rem' : '0.75rem',
+                  borderRadius: '50%',
+                  padding: 0,
+                  fontSize: '0.75rem',
                   fontWeight: 800,
+                  lineHeight: 1,
                   boxSizing: 'border-box',
                   ...(isScheduleAllDone
                     ? activeDiaryTab === 'schedules'
-                      ? { background: '#10b981', color: '#fff', border: 'none' }
+                      ? { background: '#10b981', color: '#fff', border: '1px solid transparent' }
                       : { background: 'rgba(16, 185, 129, 0.15)', color: '#059669', border: '1px solid rgba(16, 185, 129, 0.3)' }
                     : activeDiaryTab === 'schedules'
-                    ? { background: 'var(--color-primary)', color: '#fff', border: 'none' }
+                    ? { background: 'var(--color-primary)', color: '#fff', border: '1px solid transparent' }
                     : { background: 'var(--bg-card)', color: 'var(--text-subtle)', border: '1px solid var(--border-color)' }
                   )
                 }}
@@ -517,7 +523,7 @@ export default function DailyDiaryView({
               </span>
             </button>
 
-            {/* 3. 관리 내역 탭 */}
+            {/* 3. 관리 내역 탭 (20px 정원형 및 동일 0.75rem 규격) */}
             <button
               type="button"
               className={`diary-dock-tab tab-logs ${activeDiaryTab === 'logs' ? 'active' : ''}`}
@@ -527,19 +533,22 @@ export default function DailyDiaryView({
               <span 
                 className="diary-tab-count"
                 style={{
-                  minWidth: '20px',
+                  width: '20px',
                   height: '20px',
+                  minWidth: '20px',
+                  maxWidth: '20px',
                   display: 'inline-flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  borderRadius: '9999px',
-                  padding: '0 4px',
+                  borderRadius: '50%',
+                  padding: 0,
                   fontSize: '0.75rem',
                   fontWeight: 800,
+                  lineHeight: 1,
                   boxSizing: 'border-box',
                   background: activeDiaryTab === 'logs' ? 'var(--color-primary)' : 'var(--bg-card)',
                   color: activeDiaryTab === 'logs' ? '#fff' : 'var(--text-subtle)',
-                  border: activeDiaryTab === 'logs' ? 'none' : '1px solid var(--border-color)'
+                  border: activeDiaryTab === 'logs' ? '1px solid transparent' : '1px solid var(--border-color)'
                 }}
               >
                 {dailyLogs.length}
