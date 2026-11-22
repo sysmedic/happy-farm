@@ -1437,26 +1437,52 @@ export default function DailyDiaryView({
                           gap: '0.45rem',
                           width: '100%'
                         }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap', minWidth: 0, flex: 1 }}>
-                            <span
-                              className="badge badge-tag"
-                              onClick={() => onOpenEntityDetail(log.tagNumber)}
-                              title="클릭 시 이 개체의 관리 내역으로 즉시 이동"
-                              style={{ 
-                                cursor: 'pointer',
-                                fontSize: '0.78rem',
-                                padding: '0.18rem 0.5rem',
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap', minWidth: 0, flex: 1 }}>
+                            {/* 개체번호 (일정 카드와 동일한 대시 밑줄 및 초록색 호버) 또는 농장 공통 뱃지 */}
+                            {log.tagNumber ? (
+                              <span
+                                className="spec-link-mother"
+                                onClick={() => onOpenEntityDetail(log.tagNumber)}
+                                title="클릭 시 이 개체의 관리 내역으로 이동"
+                                style={{ 
+                                  cursor: 'pointer',
+                                  fontSize: '0.95rem',
+                                  fontWeight: 800,
+                                  letterSpacing: '-0.01em',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  flexShrink: 0
+                                }}
+                              >
+                                {log.tagNumber}
+                              </span>
+                            ) : (
+                              <span style={{
+                                fontSize: '0.82rem',
+                                color: 'var(--text-main)',
+                                background: 'var(--bg-card-subtle)',
+                                padding: '0.15rem 0.45rem',
                                 borderRadius: 'var(--radius-sm)',
+                                border: '1px solid var(--border-color)',
+                                fontWeight: 700,
                                 flexShrink: 0
-                              }}
-                            >
-                              {log.tagNumber}
-                            </span>
-                            {entityName && (
-                              <span style={{ fontWeight: 800, fontSize: '0.88rem', color: 'var(--text-main)', flexShrink: 0 }}>
+                              }}>
+                                {entityName || '농장 공통'}
+                              </span>
+                            )}
+
+                            {/* 소 이름: 일정 카드와 동일한 선명하고 자연스러운 텍스트 */}
+                            {log.tagNumber && entityName && (
+                              <span style={{ 
+                                fontSize: '0.92rem', 
+                                fontWeight: 600, 
+                                color: 'var(--text-main)',
+                                flexShrink: 0 
+                              }}>
                                 {entityName}
                               </span>
                             )}
+
                             <span 
                               className={`badge ${catObj.badgeClass}`}
                               style={{
