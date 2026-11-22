@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   ChevronLeft,
   ChevronRight,
@@ -50,6 +50,17 @@ export default function DailyDiaryView({
 
   // 다이어리 서브 탭: 'schedules'(일정) 또는 'logs'(관리 내역)
   const [activeDiaryTab, setActiveDiaryTab] = useState(initialTab || 'schedules');
+  const dockTabsRef = useRef(null);
+
+  // 탭 클릭 시 서브탭 전환 및 화면 위치 최적 스크롤
+  const handleTabClick = (tabKey) => {
+    setActiveDiaryTab(tabKey);
+    setTimeout(() => {
+      if (dockTabsRef.current) {
+        dockTabsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 50);
+  };
 
   // 알람 인라인 날짜 변경 상태
   const [editingReminderDateId, setEditingReminderDateId] = useState(null);
@@ -399,16 +410,16 @@ export default function DailyDiaryView({
             </div>
           </div>
 
-          {/* 독(Dock) 세그먼트 탭 바: [알람] -> [일정] -> [관리 내역] */}
-          <div className="diary-dock-tabs">
+          {/* 독(Dock) 세그먼트 탭 바: [알람] -> [일정] -> [관리 내역] (이모지 제거 및 스크롤 타겟 지정) */}
+          <div className="diary-dock-tabs" ref={dockTabsRef} style={{ scrollMarginTop: '80px' }}>
             {/* 1. 알람 탭: 미처리 알람(pendingRemindersCount > 0)이 있을 때만 노출, 0건이면 자동 소멸 */}
             {pendingRemindersCount > 0 && (
               <button
                 type="button"
                 className={`diary-dock-tab tab-reminders ${activeDiaryTab === 'reminders' ? 'active' : ''}`}
-                onClick={() => setActiveDiaryTab('reminders')}
+                onClick={() => handleTabClick('reminders')}
               >
-                <span>🔔 알람</span>
+                <span>알람</span>
                 <span className="diary-tab-count" style={{ background: '#f59e0b', color: '#fff' }}>
                   {pendingRemindersCount}
                 </span>
@@ -419,9 +430,9 @@ export default function DailyDiaryView({
             <button
               type="button"
               className={`diary-dock-tab tab-schedules ${activeDiaryTab === 'schedules' ? 'active' : ''}`}
-              onClick={() => setActiveDiaryTab('schedules')}
+              onClick={() => handleTabClick('schedules')}
             >
-              <span>📌 일정</span>
+              <span>일정</span>
               <span className="diary-tab-count">
                 {pendingDailySchedulesCount}
               </span>
@@ -431,9 +442,9 @@ export default function DailyDiaryView({
             <button
               type="button"
               className={`diary-dock-tab tab-logs ${activeDiaryTab === 'logs' ? 'active' : ''}`}
-              onClick={() => setActiveDiaryTab('logs')}
+              onClick={() => handleTabClick('logs')}
             >
-              <span>📋 관리 내역</span>
+              <span>관리 내역</span>
               <span className="diary-tab-count">
                 {dailyLogs.length}
               </span>
