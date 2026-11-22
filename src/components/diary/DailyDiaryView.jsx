@@ -132,9 +132,11 @@ export default function DailyDiaryView({
     return dailySchedules.filter(s => !s.completed).length;
   }, [dailySchedules]);
   const totalDailySchedulesCount = dailySchedules.length;
-  const scheduleCountText = totalDailySchedulesCount > 0
-    ? `${pendingDailySchedulesCount}/${totalDailySchedulesCount}`
-    : '0';
+  // A안: 모두 완료 시 깔끔한 체크(✔), 미완료 시 남은 건수(숫자)
+  const isScheduleAllDone = totalDailySchedulesCount > 0 && pendingDailySchedulesCount === 0;
+  const scheduleBadgeContent = isScheduleAllDone
+    ? '✔'
+    : String(pendingDailySchedulesCount);
 
   // 전체 미완료 합계 (달력 뱃지 등 호환성)
   const pendingScheduleCount = pendingDailySchedulesCount + pendingRemindersCount;
@@ -420,7 +422,7 @@ export default function DailyDiaryView({
             </div>
           </div>
 
-          {/* 독(Dock) 세그먼트 탭 바: [알람] -> [일정] -> [관리 내역] (이모지 제거 및 스크롤 타겟 지정) */}
+          {/* 독(Dock) 세그먼트 탭 바: [알람] -> [일정] -> [관리 내역] (A안: 원형 단일 뱃지 규격화 및 활성/비활성 색상 위계 정돈) */}
           <div className="diary-dock-tabs" ref={dockTabsRef} style={{ scrollMarginTop: '80px' }}>
             {/* 1. 알람 탭: 미처리 알람(pendingRemindersCount > 0)이 있을 때만 노출, 0건이면 자동 소멸 */}
             {pendingRemindersCount > 0 && (
@@ -430,13 +432,30 @@ export default function DailyDiaryView({
                 onClick={() => handleTabClick('reminders')}
               >
                 <span>알람</span>
-                <span className="diary-tab-count" style={{ background: '#f59e0b', color: '#fff' }}>
+                <span 
+                  className="diary-tab-count" 
+                  style={{
+                    minWidth: '20px',
+                    height: '20px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRadius: '9999px',
+                    padding: '0 4px',
+                    fontSize: '0.75rem',
+                    fontWeight: 800,
+                    boxSizing: 'border-box',
+                    background: activeDiaryTab === 'reminders' ? '#f59e0b' : 'rgba(245, 158, 11, 0.15)',
+                    color: activeDiaryTab === 'reminders' ? '#fff' : '#d97706',
+                    border: activeDiaryTab === 'reminders' ? 'none' : '1px solid rgba(245, 158, 11, 0.3)'
+                  }}
+                >
                   {pendingRemindersCount}
                 </span>
               </button>
             )}
 
-            {/* 2. 일정 탭 (남은 건수 / 총 건수 표기) */}
+            {/* 2. 일정 탭 (A안: 완료 시 ✔, 미완료 시 남은 건수 원형 표기) */}
             <button
               type="button"
               className={`diary-dock-tab tab-schedules ${activeDiaryTab === 'schedules' ? 'active' : ''}`}
@@ -445,15 +464,28 @@ export default function DailyDiaryView({
               <span>일정</span>
               <span 
                 className="diary-tab-count"
-                style={
-                  totalDailySchedulesCount > 0 && pendingDailySchedulesCount === 0
-                    ? { background: '#10b981', color: '#fff' }
+                style={{
+                  minWidth: '20px',
+                  height: '20px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderRadius: '9999px',
+                  padding: '0 4px',
+                  fontSize: isScheduleAllDone ? '0.7rem' : '0.75rem',
+                  fontWeight: 800,
+                  boxSizing: 'border-box',
+                  ...(isScheduleAllDone
+                    ? activeDiaryTab === 'schedules'
+                      ? { background: '#10b981', color: '#fff', border: 'none' }
+                      : { background: 'rgba(16, 185, 129, 0.15)', color: '#059669', border: '1px solid rgba(16, 185, 129, 0.3)' }
                     : activeDiaryTab === 'schedules'
-                    ? { background: 'var(--color-primary)', color: '#fff' }
-                    : {}
-                }
+                    ? { background: 'var(--color-primary)', color: '#fff', border: 'none' }
+                    : { background: 'var(--bg-card)', color: 'var(--text-subtle)', border: '1px solid var(--border-color)' }
+                  )
+                }}
               >
-                {scheduleCountText}
+                {scheduleBadgeContent}
               </span>
             </button>
 
@@ -466,7 +498,21 @@ export default function DailyDiaryView({
               <span>관리 내역</span>
               <span 
                 className="diary-tab-count"
-                style={activeDiaryTab === 'logs' ? { background: 'var(--color-primary)', color: '#fff' } : {}}
+                style={{
+                  minWidth: '20px',
+                  height: '20px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderRadius: '9999px',
+                  padding: '0 4px',
+                  fontSize: '0.75rem',
+                  fontWeight: 800,
+                  boxSizing: 'border-box',
+                  background: activeDiaryTab === 'logs' ? 'var(--color-primary)' : 'var(--bg-card)',
+                  color: activeDiaryTab === 'logs' ? '#fff' : 'var(--text-subtle)',
+                  border: activeDiaryTab === 'logs' ? 'none' : '1px solid var(--border-color)'
+                }}
               >
                 {dailyLogs.length}
               </span>
@@ -1347,29 +1393,27 @@ export default function DailyDiaryView({
             </div>
           )}
 
-          {/* 탭 2: 관리 내역 화면 */}
+          {/* 탭 3: 관리 내역 화면 */}
           {activeDiaryTab === 'logs' && (
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem', gap: '0.5rem', flexWrap: 'wrap' }}>
-                <h4 style={{
-                  fontSize: '0.95rem',
-                  fontWeight: 700,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.4rem',
-                  margin: 0
-                }}>
-                  <CheckCircle2 size={16} color="var(--color-primary)" />
-                  <span>관리 내역 ({dailyLogs.length}건)</span>
-                </h4>
-
+              {/* 상단 액션 바: 중복 타이틀 제거 및 [일일 보고서] 버튼 우측 배치 (일정 탭과 완벽 일치) */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: '0.65rem' }}>
                 <button
-                  className="btn btn-secondary btn-sm"
+                  className="btn btn-outline btn-sm"
                   onClick={() => onNavigateToReport(selectedDate)}
                   title="이 날짜의 일일 종합 영농 보고서 보기"
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', padding: '0.25rem 0.65rem', fontSize: '0.8rem', fontWeight: 600 }}
+                  style={{
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    padding: '0.15rem 0.55rem',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.25rem',
+                    height: '24px',
+                    borderRadius: 'var(--radius-sm)'
+                  }}
                 >
-                  <FileText size={14} />
+                  <FileText size={12} />
                   <span>일일 보고서</span>
                 </button>
               </div>
