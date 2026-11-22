@@ -423,7 +423,8 @@ export const INITIAL_SAMPLE_CARE_LOGS = [
     "nextScheduleDate": "2026-11-28",
     "nextScheduleTime": "09:00",
     "nextScheduleTitle": "예정 분만일 및 분만실 집중 관리",
-    "nextScheduleCompleted": false,
+    "nextScheduleCompleted": true,
+    "nextSchedulePromotedScheduleId": "SCH-1003",
     "createdAt": "2026-05-02T10:30:00Z"
   },
   {
@@ -665,7 +666,8 @@ export const INITIAL_SAMPLE_CARE_LOGS = [
     "nextScheduleDate": "2026-11-24",
     "nextScheduleTime": "07:00",
     "nextScheduleTitle": "농협 공판장 출하 상차",
-    "nextScheduleCompleted": false,
+    "nextScheduleCompleted": true,
+    "nextSchedulePromotedScheduleId": "SCH-1002",
     "createdAt": "2026-11-15T15:30:00Z"
   },
   {
@@ -737,6 +739,7 @@ export const INITIAL_SAMPLE_SCHEDULES = [
     "title": "[샘플8] 농협 안심한우 공판장 출하 상차",
     "category": "routine",
     "completed": false,
+    "originReminderLogId": "LOG-1031",
     "memo": "전일 저녁부터 절식 실시. 수송 차량 7시 도착 예정."
   },
   {
@@ -748,6 +751,7 @@ export const INITIAL_SAMPLE_SCHEDULES = [
     "title": "[샘플1] 예정 분만일 (분만실 집중 관찰)",
     "category": "calving",
     "completed": false,
+    "originReminderLogId": "LOG-1013",
     "memo": "CCTV 분만실 감시 가동 및 마른 깔짚 충분히 보충."
   },
   {
@@ -823,7 +827,49 @@ export function loadCareLogs() {
             tagNumber: normTag
           };
         });
-        // 레거시 카테고리(insemination, birth 등)가 존재했던 경우 스토리지 즉시 자동 치유 및 갱신 저장
+        // 알람-일정 간 누락된 연결 고리 및 유령 알람 자동 치유 (Auto-healing)
+        try {
+          const schedRaw = localStorage.getItem(STORAGE_SCHEDULES_KEY);
+          const existingSchedules = schedRaw ? JSON.parse(schedRaw) : [];
+          if (Array.isArray(existingSchedules) && existingSchedules.length > 0) {
+            let schedModified = false;
+            normalized.forEach(log => {
+              if (log.nextScheduleDate) {
+                // 이미 등록된 일정 중 이 알람과 일치하는 일정 매칭 (ID 연결 또는 개체/날짜/작업명 일치)
+                const matchedSched = existingSchedules.find(s => 
+                  s.originReminderLogId === log.id ||
+                  s.id === log.nextSchedulePromotedScheduleId ||
+                  ((s.entityId === log.entityId || s.tagNumber === log.tagNumber) && 
+                   s.date === log.nextScheduleDate && 
+                   log.nextScheduleTitle && s.title && (s.title.includes(log.nextScheduleTitle) || log.nextScheduleTitle.includes(s.title)))
+                );
+                if (matchedSched) {
+                  if (!log.nextSchedulePromotedScheduleId) {
+                    log.nextSchedulePromotedScheduleId = matchedSched.id;
+                    hasModified = true;
+                  }
+                  if (!matchedSched.originReminderLogId) {
+                    matchedSched.originReminderLogId = log.id;
+                    schedModified = true;
+                  }
+                  // 일정이 이미 완료되었거나 공식 일정으로 등록된 경우 알람도 중복 방지 완료 처리
+                  if (!log.nextScheduleCompleted) {
+                    log.nextScheduleCompleted = true;
+                    log.nextScheduleCompletedDate = matchedSched.date;
+                    hasModified = true;
+                  }
+                }
+              }
+            });
+            if (schedModified) {
+              localStorage.setItem(STORAGE_SCHEDULES_KEY, JSON.stringify(existingSchedules));
+            }
+          }
+        } catch (e) {
+          // 자동 치유 파싱 예외 무시
+        }
+
+        // 레거시 카테고리(insemination, birth 등) 또는 알람 자동치유가 수행된 경우 스토리지 즉시 갱신 저장
         if (hasModified) {
           saveCareLogs(normalized);
         }

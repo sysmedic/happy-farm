@@ -116,15 +116,30 @@ export default function EntityDetailModal({
           return;
         }
 
-        // 이미 공식 일정으로 승격된 경우 schedules 쪽에서 처리하도록 건너뜀 (중복 방지)
+        // 이미 공식 일정으로 승격/등록되었거나 연결된 일정이 있는 경우 schedules 쪽에서 처리하도록 건너뜀 (중복 방지)
         if (log.nextSchedulePromotedScheduleId) {
           const hasLinkedSchedule = (schedules || []).some(s => s.id === log.nextSchedulePromotedScheduleId);
           if (hasLinkedSchedule) return;
         }
+        const hasPointedSchedule = (schedules || []).some(s => s.originReminderLogId === log.id);
+        if (hasPointedSchedule) return;
 
         // 이미 동일 날짜에 해당 개체의 완료 관리기록이 등록되어 있는 경우 차기 일정에서 제외
         const alreadyDoneInLogs = allEntityLogs.some(al => al.date === log.nextScheduleDate && al.id !== log.id);
         if (alreadyDoneInLogs) return;
+
+        // 해당 개체에 대해 동일/유사한 작업명(출하, 분만 등)의 최신 관리기록이 이미 완료된 경우 차기 일정에서 제외
+        const isAlreadyAccomplished = allEntityLogs.some(al => 
+          al.date >= log.date && 
+          al.id !== log.id && 
+          log.nextScheduleTitle && al.title && (
+            al.title.includes(log.nextScheduleTitle) || 
+            log.nextScheduleTitle.includes(al.title) ||
+            (log.nextScheduleTitle.includes('출하') && al.title.includes('출하')) ||
+            (log.nextScheduleTitle.includes('분만') && al.title.includes('분만'))
+          )
+        );
+        if (isAlreadyAccomplished) return;
 
         list.push({
           id: `CARE-${log.id}`,
@@ -142,6 +157,13 @@ export default function EntityDetailModal({
       schedules.forEach(sc => {
         const isMatch = sc.entityId === entity.id || sc.tagNumber === entity.tagNumber || sc.targetEntityId === entity.id;
         if (isMatch && sc.date && sc.date >= today && !sc.completed) {
+          // 이미 관리기록에 해당 일정이 기록 처리되어 있다면(당일 완료 로그 존재) 차기 일정에서 제외
+          const schedDoneInLogs = allEntityLogs.some(al => 
+            al.linkedScheduleId === sc.id || 
+            (al.date === sc.date && sc.title && al.title && (al.title.includes(sc.title) || sc.title.includes(al.title)))
+          );
+          if (schedDoneInLogs) return;
+
           list.push({
             id: `SCHED-${sc.id}`,
             type: 'schedule',

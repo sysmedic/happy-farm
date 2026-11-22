@@ -252,13 +252,28 @@ export default function App() {
     }
 
     // 1. 등록된 일정에서 [+ 기록]을 작성한 경우:
-    // 해당 일정을 즉시 완료(completed: true) 처리하고 날짜도 실제 처리일(savedLog.date)로 이동
-    let linkedOriginReminderLogId = null;
+    // ⚠️ 비동기 상태 갱신 타이밍 문제를 방지하기 위해 현재 schedules 상태에서 대상 일정을 즉시 조회
+    const targetSched = savedLog.linkedScheduleId 
+      ? (schedules || []).find(s => s.id === savedLog.linkedScheduleId) 
+      : null;
+    
+    // 연결된 원본 알람 ID 추출 (명시적 originReminderLogId 우선, 없으면 지능형 매칭 추적)
+    let linkedOriginReminderLogId = targetSched?.originReminderLogId || null;
+    if (!linkedOriginReminderLogId && targetSched) {
+      const matchReminder = (careLogs || []).find(l => 
+        (l.entityId === targetSched.entityId || l.tagNumber === targetSched.tagNumber) &&
+        !l.nextScheduleCompleted &&
+        (l.nextScheduleDate === targetSched.date || l.nextSchedulePromotedScheduleId === targetSched.id)
+      );
+      if (matchReminder) {
+        linkedOriginReminderLogId = matchReminder.id;
+      }
+    }
+
     if (savedLog.linkedScheduleId) {
       setSchedules(prev => {
         const next = prev.map(s => {
           if (s.id === savedLog.linkedScheduleId) {
-            linkedOriginReminderLogId = s.originReminderLogId;
             return {
               ...s,
               completed: true,
@@ -292,11 +307,23 @@ export default function App() {
       });
     }
 
-    // 3. 지능형 안전장치: 같은 개체에 대해 동일 날짜(savedLog.date)의 미완료 차기 예정 작업이 있다면 자동 완료 동기화
-    if (savedLog.entityId && savedLog.date) {
+    // 3. 지능형 안전장치: 같은 개체에 대해 미완료 차기 예정 작업이 있는 경우
+    // (a) 동일 날짜이거나 (b) 동일/유사한 작업명(출하, 백신, 체중 등)이 당일 수행된 경우 자동 완료 처리
+    if (savedLog.entityId || savedLog.tagNumber) {
       updatedLogs = updatedLogs.map(l => {
-        const isSameEntity = l.entityId === savedLog.entityId || l.tagNumber === savedLog.tagNumber;
-        if (isSameEntity && l.nextScheduleDate === savedLog.date && !l.nextScheduleCompleted) {
+        const isSameEntity = (savedLog.entityId && l.entityId === savedLog.entityId) || 
+                             (savedLog.tagNumber && l.tagNumber === savedLog.tagNumber);
+        if (!isSameEntity || l.nextScheduleCompleted) return l;
+
+        const isSameDate = l.nextScheduleDate === savedLog.date;
+        const isTitleMatch = l.nextScheduleTitle && savedLog.title && (
+          savedLog.title.includes(l.nextScheduleTitle) || 
+          l.nextScheduleTitle.includes(savedLog.title) ||
+          (l.nextScheduleTitle.includes('출하') && savedLog.title.includes('출하')) ||
+          (l.nextScheduleTitle.includes('분만') && savedLog.title.includes('분만'))
+        );
+
+        if (isSameDate || isTitleMatch) {
           return {
             ...l,
             nextScheduleCompleted: true,
@@ -427,13 +454,17 @@ export default function App() {
       return next;
     });
 
-    // 알람에서 공식 일정으로 승격/등록한 경우 원본 알람 완료 표기
-    if (scheduleData.originReminderLogId) {
+    // 알람에서 공식 일정으로 승격/등록했거나, 기존 일정이 수정된 경우 원본 알람과 양방향 동기화
+    const targetReminderId = scheduleData.originReminderLogId || 
+      (scheduleToEdit ? (careLogs || []).find(l => l.nextSchedulePromotedScheduleId === scheduleData.id)?.id : null);
+
+    if (targetReminderId) {
       setCareLogs(prev => {
         const next = prev.map(l => {
-          if (l.id === scheduleData.originReminderLogId) {
+          if (l.id === targetReminderId) {
             return {
               ...l,
+              nextScheduleDate: scheduleData.date, // 일정 날짜 수정 시 알람 날짜도 실시간 동기화
               nextScheduleCompleted: true,
               nextScheduleCompletedDate: scheduleData.date,
               nextSchedulePromotedScheduleId: scheduleData.id,
@@ -540,12 +571,15 @@ export default function App() {
     showToast('알람 완료 상태가 변경되었습니다 ✅');
   };
 
-  // 알람(차기 예정 작업) 날짜 변경
+  // 알람(차기 예정 작업) 날짜 변경 (연결된 일정과 양방향 실시간 동기화)
   const handleUpdateReminderDate = (logId, newDate) => {
     if (!newDate) return;
+    let promotedSchedId = null;
+
     setCareLogs(prev => {
       const next = prev.map(log => {
         if (log.id === logId) {
+          promotedSchedId = log.nextSchedulePromotedScheduleId || null;
           return {
             ...log,
             nextScheduleDate: newDate,
@@ -557,6 +591,28 @@ export default function App() {
       saveCareLogs(next);
       return next;
     });
+
+    // 해당 알람에 연결된 공식 일정이 있거나, originReminderLogId로 가리키는 일정이 있다면 그 일정 날짜도 함께 동기화
+    setSchedules(prev => {
+      let changed = false;
+      const next = prev.map(s => {
+        if (s.id === promotedSchedId || s.originReminderLogId === logId) {
+          changed = true;
+          return {
+            ...s,
+            date: newDate,
+            updatedAt: new Date().toISOString()
+          };
+        }
+        return s;
+      });
+      if (changed) {
+        saveSchedules(next);
+        return next;
+      }
+      return prev;
+    });
+
     showToast(`알람 날짜가 ${newDate}로 변경되었습니다 📅`);
   };
 
