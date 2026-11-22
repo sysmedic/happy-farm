@@ -40,7 +40,7 @@ export default function CareLogFormModal({
   const [time, setTime] = useState(logToEdit?.time || getCurrentTimeString());
   const [category, setCategory] = useState(normalizeCategoryId(logToEdit?.category || initialValues?.category) || '');
   const [title, setTitle] = useState(logToEdit?.title || initialValues?.title || '');
-  const [details, setDetails] = useState(logToEdit?.details || '');
+  const [details, setDetails] = useState(logToEdit?.details || initialValues?.details || '');
   // 신규 등록 시에는 항상 깨끗한 빈칸("")으로 시작 (지정이 아닌 예시 제시 원칙)
   const [operator, setOperator] = useState(logToEdit?.operator || '');
   const [cost, setCost] = useState(logToEdit?.cost ? String(logToEdit.cost) : '');
@@ -247,6 +247,8 @@ export default function CareLogFormModal({
       nextScheduleTime: hasNextSchedule ? (nextScheduleTime || null) : null,
       nextScheduleTitle: hasNextSchedule ? nextScheduleTitle.trim() : null,
       completed: true,
+      linkedScheduleId: initialValues?.linkedScheduleId || null,
+      linkedReminderLogId: initialValues?.linkedReminderLogId || null,
       createdAt: logToEdit?.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };

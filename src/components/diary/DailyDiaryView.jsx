@@ -38,6 +38,7 @@ export default function DailyDiaryView({
   onDeleteSchedule,
   onEditSchedule,
   onEditCareLog,
+  onUpdateReminderDate,
   onNavigateToReport
 }) {
   const [selectedDate, setSelectedDate] = useState(initialDate || getTodayDateString());
@@ -48,6 +49,10 @@ export default function DailyDiaryView({
 
   // 다이어리 서브 탭: 'schedules'(일정) 또는 'logs'(관리 내역)
   const [activeDiaryTab, setActiveDiaryTab] = useState(initialTab || 'schedules');
+
+  // 알람 인라인 날짜 변경 상태
+  const [editingReminderDateId, setEditingReminderDateId] = useState(null);
+  const [tempReminderDate, setTempReminderDate] = useState('');
 
   // 외부(보고서 등)에서 날짜나 탭이 변경되어 진입했을 때 실시간 동기화
   useEffect(() => {
@@ -685,15 +690,20 @@ export default function DailyDiaryView({
                                   className="btn btn-primary btn-sm"
                                   onClick={() => {
                                     const targetEntity = (entities || []).find(e => e.id === sched.entityId || e.tagNumber === sched.tagNumber);
+                                    const todayDate = getTodayDateString();
+                                    const isFuture = selectedDate > todayDate;
+                                    const effectiveDate = isFuture ? todayDate : selectedDate;
                                     onOpenCareLogModal(
                                       targetEntity || { tagNumber: sched.tagNumber, name: entityName, id: sched.entityId },
-                                      selectedDate,
+                                      effectiveDate,
                                       {
                                         category: sched.category || 'routine',
                                         title: cleanTitle || sched.title || '',
-                                        date: selectedDate,
+                                        date: effectiveDate,
                                         time: sched.time || undefined,
-                                        entityId: sched.entityId || (targetEntity ? targetEntity.id : '')
+                                        entityId: sched.entityId || (targetEntity ? targetEntity.id : ''),
+                                        details: sched.memo || '',
+                                        linkedScheduleId: sched.id
                                       }
                                     );
                                   }}
@@ -709,7 +719,7 @@ export default function DailyDiaryView({
                                     border: '1px solid #047857',
                                     boxShadow: '0 1px 3px rgba(4, 120, 87, 0.3)'
                                   }}
-                                  title="이 일정으로 새 관리기록 작성 (분류·작업명 자동 입력)"
+                                  title="이 일정으로 새 관리기록 작성 (분류·작업명·메모 자동 입력)"
                                 >
                                   <Plus size={12} />
                                   <span>기록</span>
@@ -857,7 +867,7 @@ export default function DailyDiaryView({
                         }}>
                           <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                             <span>🔔</span>
-                            <span>개체 연동 알림 ({scheduledTasks.length}건)</span>
+                            <span>알람 ({scheduledTasks.length}건)</span>
                           </span>
                           <span style={{
                             fontSize: '0.72rem',
@@ -871,7 +881,7 @@ export default function DailyDiaryView({
                           </span>
                         </div>
                         <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                          ※ 개체 관리기록에서 지정한 차기 예정일 작업입니다.
+                          ※ 개체 관리기록에서 등록한 도래 예정 작업입니다.
                         </div>
                       </div>
 
@@ -881,6 +891,10 @@ export default function DailyDiaryView({
                         const reminderCardId = `reminder-${task.id}`;
                         const isDone = Boolean(task.nextScheduleCompleted);
                         const isExpanded = expandedCompletedIds.has(reminderCardId);
+                        const isEarlyCompleted = isDone && Boolean(task.nextScheduleCompletedDate) && task.nextScheduleCompletedDate !== task.nextScheduleDate;
+                        const earlyDateText = task.nextScheduleCompletedDate 
+                          ? `${parseInt(task.nextScheduleCompletedDate.slice(5, 7), 10)}월 ${parseInt(task.nextScheduleCompletedDate.slice(8, 10), 10)}일에 미리 처리됨`
+                          : '미리 처리됨';
 
                       // 1. 완료 상태이면서 접힌 모드: 1행 콤팩트 가로 배치 [체크박스 + 개체번호 + 작업이름(말줄임)]
                       if (isDone && !isExpanded) {
@@ -973,9 +987,24 @@ export default function DailyDiaryView({
                               </span>
                             </div>
 
-                            {/* 우측 펼치기 힌트 아이콘 */}
-                            <div style={{ color: 'var(--text-subtle)', display: 'flex', alignItems: 'center', flexShrink: 0, paddingLeft: '0.2rem' }} title="상세 내용 펼치기">
-                              <ChevronDown size={14} />
+                            {/* 우측: 미리 처리됨 뱃지 및 펼치기 힌트 아이콘 */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexShrink: 0 }}>
+                              {isEarlyCompleted && (
+                                <span style={{
+                                  fontSize: '0.72rem',
+                                  color: '#059669',
+                                  background: 'rgba(16, 185, 129, 0.12)',
+                                  padding: '0.1rem 0.35rem',
+                                  borderRadius: 'var(--radius-sm)',
+                                  fontWeight: 700,
+                                  whiteSpace: 'nowrap'
+                                }}>
+                                  {earlyDateText}
+                                </span>
+                              )}
+                              <div style={{ color: 'var(--text-subtle)', display: 'flex', alignItems: 'center', paddingLeft: '0.2rem' }} title="상세 내용 펼치기">
+                                <ChevronDown size={14} />
+                              </div>
                             </div>
                           </div>
                         );
@@ -1052,8 +1081,21 @@ export default function DailyDiaryView({
                               )}
                             </div>
 
-                            {/* 우측 상단: [기록] 버튼 및 다시 접기 버튼 */}
+                            {/* 우측 상단: 미리완료 뱃지 또는 [기록] 버튼 및 다시 접기 버튼 */}
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', flexShrink: 0 }}>
+                              {isEarlyCompleted && (
+                                <span style={{
+                                  fontSize: '0.72rem',
+                                  color: '#059669',
+                                  background: 'rgba(16, 185, 129, 0.12)',
+                                  padding: '0.15rem 0.45rem',
+                                  borderRadius: 'var(--radius-sm)',
+                                  fontWeight: 700,
+                                  whiteSpace: 'nowrap'
+                                }}>
+                                  {earlyDateText}
+                                </span>
+                              )}
                               {isDone && isExpanded && (
                                 <button
                                   type="button"
@@ -1065,21 +1107,28 @@ export default function DailyDiaryView({
                                   <ChevronUp size={13} />
                                 </button>
                               )}
-                              {onOpenCareLogModal && (
+                              {!isDone && onOpenCareLogModal && (
                                 <button 
-                                  type="button"
+                                  type="button" 
                                   className="btn btn-primary btn-sm"
-                                  onClick={() => onOpenCareLogModal(
-                                    targetEntity || { tagNumber: task.tagNumber, name: entityName, id: task.entityId },
-                                    selectedDate,
-                                    {
-                                      category: task.category || 'treatment',
-                                      title: task.nextScheduleTitle || '',
-                                      date: selectedDate,
-                                      time: task.nextScheduleTime || undefined,
-                                      entityId: task.entityId || (targetEntity ? targetEntity.id : '')
-                                    }
-                                  )}
+                                  onClick={() => {
+                                    const todayDate = getTodayDateString();
+                                    const isFuture = selectedDate > todayDate;
+                                    const effectiveDate = isFuture ? todayDate : selectedDate;
+                                    onOpenCareLogModal(
+                                      targetEntity || { tagNumber: task.tagNumber, name: entityName, id: task.entityId },
+                                      effectiveDate,
+                                      {
+                                        category: task.category || 'treatment',
+                                        title: task.nextScheduleTitle || '',
+                                        date: effectiveDate,
+                                        time: task.nextScheduleTime || undefined,
+                                        entityId: task.entityId || (targetEntity ? targetEntity.id : ''),
+                                        details: task.details || '',
+                                        linkedReminderLogId: task.id
+                                      }
+                                    );
+                                  }}
                                   style={{ 
                                     fontSize: '0.75rem', 
                                     padding: '0.2rem 0.55rem', 
@@ -1092,7 +1141,7 @@ export default function DailyDiaryView({
                                     border: '1px solid #047857',
                                     boxShadow: '0 1px 3px rgba(4, 120, 87, 0.3)'
                                   }}
-                                  title="이 예정 작업으로 새 관리기록 작성 (분류·작업명 자동 입력)"
+                                  title="이 알람으로 새 관리기록 작성 (분류·작업명 자동 입력)"
                                 >
                                   <Plus size={12} />
                                   <span>기록</span>
@@ -1101,7 +1150,7 @@ export default function DailyDiaryView({
                             </div>
                           </div>
 
-                          {/* 2행: [시간] [차기 예정 작업명 (말줄임)] (좌측) & [수정] 버튼 (우측) */}
+                          {/* 2행: [시간] [차기 예정 작업명 (말줄임)] (좌측) & [액션 버튼 그룹] (우측) */}
                           <div style={{
                             display: 'flex',
                             alignItems: 'center',
@@ -1149,30 +1198,140 @@ export default function DailyDiaryView({
                               </div>
                             </div>
 
-                            {onEditCareLog && (
+                            {/* 우측 액션 버튼 그룹 */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', flexShrink: 0 }}>
+                              {!isDone && onOpenScheduleModal && (
+                                <button
+                                  type="button"
+                                  className="btn btn-outline btn-sm"
+                                  onClick={() => {
+                                    onOpenScheduleModal(task.nextScheduleDate || selectedDate, {
+                                      entityId: task.entityId,
+                                      tagNumber: task.tagNumber,
+                                      category: task.category || 'routine',
+                                      title: task.nextScheduleTitle || '',
+                                      time: task.nextScheduleTime || '',
+                                      memo: task.details || '',
+                                      originReminderLogId: task.id
+                                    });
+                                  }}
+                                  title="이 알람을 공식 영농 일정으로 등록 (캘린더에 일정 등록)"
+                                  style={{
+                                    fontSize: '0.72rem',
+                                    padding: '0.15rem 0.45rem',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '0.2rem',
+                                    height: '24px',
+                                    color: '#d97706',
+                                    borderColor: '#d97706',
+                                    background: 'rgba(217, 119, 6, 0.06)'
+                                  }}
+                                >
+                                  <Calendar size={11} />
+                                  <span>일정으로</span>
+                                </button>
+                              )}
+
+                              {!isDone && onUpdateReminderDate && (
+                                <button
+                                  type="button"
+                                  className="btn btn-outline btn-sm"
+                                  onClick={() => {
+                                    if (editingReminderDateId === task.id) {
+                                      setEditingReminderDateId(null);
+                                    } else {
+                                      setEditingReminderDateId(task.id);
+                                      setTempReminderDate(task.nextScheduleDate || selectedDate);
+                                    }
+                                  }}
+                                  title="알람 날짜 변경 (미루기/당기기)"
+                                  style={{
+                                    fontSize: '0.72rem',
+                                    padding: '0.15rem 0.45rem',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '0.2rem',
+                                    height: '24px',
+                                    color: 'var(--text-main)',
+                                    background: 'var(--bg-card)'
+                                  }}
+                                >
+                                  <Clock size={11} />
+                                  <span>날짜변경</span>
+                                </button>
+                              )}
+
+                              {onEditCareLog && (
+                                <button
+                                  type="button"
+                                  className="btn btn-outline btn-sm btn-icon-only"
+                                  onClick={() => onEditCareLog(task, { focusNextSchedule: true })}
+                                  title="이 차기 예정 작업의 원본 관리기록(예정일/작업명 등) 수정"
+                                  style={{
+                                    width: '24px',
+                                    height: '24px',
+                                    padding: 0,
+                                    flexShrink: 0,
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    border: '1px solid var(--text-muted)',
+                                    color: 'var(--text-main)',
+                                    background: 'var(--bg-card)',
+                                    borderRadius: 'var(--radius-sm)'
+                                  }}
+                                >
+                                  <Edit2 size={12} />
+                                </button>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* 3행: 인라인 날짜 변경 폼 */}
+                          {editingReminderDateId === task.id && (
+                            <div style={{
+                              marginTop: '0.4rem',
+                              paddingTop: '0.4rem',
+                              borderTop: '1px dashed rgba(245, 158, 11, 0.35)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.4rem',
+                              flexWrap: 'wrap'
+                            }}>
+                              <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--color-accent)' }}>
+                                알람 날짜 변경:
+                              </span>
+                              <input 
+                                type="date"
+                                className="form-control form-control-sm"
+                                style={{ width: '135px', padding: '0.15rem 0.4rem', fontSize: '0.8rem' }}
+                                value={tempReminderDate}
+                                onChange={(e) => setTempReminderDate(e.target.value)}
+                              />
                               <button
                                 type="button"
-                                className="btn btn-outline btn-sm btn-icon-only"
-                                onClick={() => onEditCareLog(task, { focusNextSchedule: true })}
-                                title="이 차기 예정 작업의 원본 관리기록(예정일/작업명 등) 수정"
-                                style={{
-                                  width: '24px',
-                                  height: '24px',
-                                  padding: 0,
-                                  flexShrink: 0,
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  border: '1px solid var(--text-muted)',
-                                  color: 'var(--text-main)',
-                                  background: 'var(--bg-card)',
-                                  borderRadius: 'var(--radius-sm)'
+                                className="btn btn-primary btn-sm"
+                                style={{ padding: '0.15rem 0.55rem', fontSize: '0.75rem' }}
+                                onClick={() => {
+                                  if (tempReminderDate && onUpdateReminderDate) {
+                                    onUpdateReminderDate(task.id, tempReminderDate);
+                                  }
+                                  setEditingReminderDateId(null);
                                 }}
                               >
-                                <Edit2 size={12} />
+                                적용
                               </button>
-                            )}
-                          </div>
+                              <button
+                                type="button"
+                                className="btn btn-outline btn-sm"
+                                style={{ padding: '0.15rem 0.45rem', fontSize: '0.75rem' }}
+                                onClick={() => setEditingReminderDateId(null)}
+                              >
+                                취소
+                              </button>
+                            </div>
+                          )}
                         </div>
                       );
                       })}

@@ -74,6 +74,7 @@ export default function App() {
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
   const [scheduleTargetDate, setScheduleTargetDate] = useState(getTodayDateString());
   const [scheduleToEdit, setScheduleToEdit] = useState(null);
+  const [scheduleInitialData, setScheduleInitialData] = useState(null);
 
   const [printSheetEntity, setPrintSheetEntity] = useState(null);
   const [returnToDetailEntity, setReturnToDetailEntity] = useState(null);
@@ -250,6 +251,44 @@ export default function App() {
       showToast(`개체 [${savedLog.entityName}]의 관리 내역이 등록되었습니다.`);
     }
 
+    // 1. 등록된 일정에서 [+ 기록]을 작성한 경우:
+    // 해당 일정을 즉시 완료(completed: true) 처리하고 날짜도 실제 처리일(savedLog.date)로 이동
+    if (savedLog.linkedScheduleId) {
+      setSchedules(prev => {
+        const next = prev.map(s => {
+          if (s.id === savedLog.linkedScheduleId) {
+            return {
+              ...s,
+              completed: true,
+              completedAt: new Date().toISOString(),
+              date: savedLog.date, // 실제 기록 처리일(오늘)로 이동
+              updatedAt: new Date().toISOString()
+            };
+          }
+          return s;
+        });
+        saveSchedules(next);
+        return next;
+      });
+    }
+
+    // 2. 알람(차기 예정 작업)에서 [+ 기록]을 작성한 경우:
+    // 원본 알람 로그를 찾아 완료 처리하고, 실제 처리일(savedLog.date)을 기록
+    if (savedLog.linkedReminderLogId) {
+      updatedLogs = updatedLogs.map(l => {
+        if (l.id === savedLog.linkedReminderLogId) {
+          return {
+            ...l,
+            nextScheduleCompleted: true,
+            nextScheduleCompletedDate: savedLog.date, // 실제 처리일(오늘)
+            nextScheduleCompletedAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          };
+        }
+        return l;
+      });
+    }
+
     setCareLogs(updatedLogs);
     saveCareLogs(updatedLogs);
 
@@ -338,10 +377,11 @@ export default function App() {
     showToast('관리 분류가 삭제되었습니다.');
   };
 
-  // 영농 일정 모달 열기
-  const handleOpenScheduleModal = (dateStr) => {
+  // 영농 일정 모달 열기 (initialData 지원: 개체/제목/메모/알람ID 등 자동 채움)
+  const handleOpenScheduleModal = (dateStr, initialData = null) => {
     setScheduleTargetDate(dateStr || getTodayDateString());
     setScheduleToEdit(null);
+    setScheduleInitialData(initialData || null);
     setIsScheduleModalOpen(true);
   };
 
@@ -349,6 +389,7 @@ export default function App() {
   const handleEditSchedule = (sched) => {
     setScheduleToEdit(sched);
     setScheduleTargetDate(sched.date);
+    setScheduleInitialData(null);
     setIsScheduleModalOpen(true);
   };
 
@@ -365,8 +406,30 @@ export default function App() {
       saveSchedules(next);
       return next;
     });
+
+    // 알람에서 공식 일정으로 승격/등록한 경우 원본 알람 완료 표기
+    if (scheduleData.originReminderLogId) {
+      setCareLogs(prev => {
+        const next = prev.map(l => {
+          if (l.id === scheduleData.originReminderLogId) {
+            return {
+              ...l,
+              nextScheduleCompleted: true,
+              nextScheduleCompletedDate: scheduleData.date,
+              nextSchedulePromotedScheduleId: scheduleData.id,
+              updatedAt: new Date().toISOString()
+            };
+          }
+          return l;
+        });
+        saveCareLogs(next);
+        return next;
+      });
+    }
+
     setIsScheduleModalOpen(false);
     setScheduleToEdit(null);
+    setScheduleInitialData(null);
     showToast(scheduleToEdit ? '영농 일정이 수정되었습니다 📅' : '새 영농 일정이 등록되었습니다 📅');
   };
 
@@ -390,7 +453,7 @@ export default function App() {
     showToast('일정 완료 상태가 변경되었습니다 ✅');
   };
 
-  // 차기 예정 작업(리마인더) 완료/미완료 토글
+  // 알람(차기 예정 작업) 완료/미완료 토글
   const handleToggleReminderComplete = (logId) => {
     setCareLogs(prev => {
       const next = prev.map(log => {
@@ -399,6 +462,7 @@ export default function App() {
           return {
             ...log,
             nextScheduleCompleted: nextCompleted,
+            nextScheduleCompletedDate: nextCompleted ? (log.nextScheduleCompletedDate || getTodayDateString()) : null,
             nextScheduleCompletedAt: nextCompleted ? new Date().toISOString() : null
           };
         }
@@ -407,7 +471,27 @@ export default function App() {
       saveCareLogs(next);
       return next;
     });
-    showToast('예정 작업 완료 상태가 변경되었습니다 ✅');
+    showToast('알람 완료 상태가 변경되었습니다 ✅');
+  };
+
+  // 알람(차기 예정 작업) 날짜 변경
+  const handleUpdateReminderDate = (logId, newDate) => {
+    if (!newDate) return;
+    setCareLogs(prev => {
+      const next = prev.map(log => {
+        if (log.id === logId) {
+          return {
+            ...log,
+            nextScheduleDate: newDate,
+            updatedAt: new Date().toISOString()
+          };
+        }
+        return log;
+      });
+      saveCareLogs(next);
+      return next;
+    });
+    showToast(`알람 날짜가 ${newDate}로 변경되었습니다 📅`);
   };
 
   // 영농 일정 삭제
@@ -538,6 +622,7 @@ export default function App() {
                 onDeleteSchedule={handleDeleteSchedule}
                 onEditSchedule={handleEditSchedule}
                 onEditCareLog={handleOpenEditCareLog}
+                onUpdateReminderDate={handleUpdateReminderDate}
                 onNavigateToReport={(date) => {
                   setTargetReportDate(date);
                   setActiveTab('report');
@@ -665,10 +750,12 @@ export default function App() {
         <ScheduleFormModal
           initialDate={scheduleTargetDate}
           scheduleToEdit={scheduleToEdit}
+          initialData={scheduleInitialData}
           entities={entities}
           onClose={() => {
             setIsScheduleModalOpen(false);
             setScheduleToEdit(null);
+            setScheduleInitialData(null);
           }}
           onSave={handleSaveSchedule}
           onDelete={handleDeleteSchedule}

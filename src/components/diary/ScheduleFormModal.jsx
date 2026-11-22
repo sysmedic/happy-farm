@@ -39,6 +39,7 @@ const QUICK_TITLES = {
 export default function ScheduleFormModal({
   initialDate,
   scheduleToEdit,
+  initialData = null,
   entities = [],
   onClose,
   onSave,
@@ -46,13 +47,17 @@ export default function ScheduleFormModal({
 }) {
   const isEditing = Boolean(scheduleToEdit);
 
-  const [date, setDate] = useState(scheduleToEdit?.date || initialDate || getTodayDateString());
-  const [time, setTime] = useState(scheduleToEdit?.time || '');
-  const [targetType, setTargetType] = useState(scheduleToEdit?.entityId ? 'entity' : 'farm');
-  const [selectedEntityId, setSelectedEntityId] = useState(scheduleToEdit?.entityId || '');
-  const [category, setCategory] = useState(scheduleToEdit?.category || 'routine');
-  const [title, setTitle] = useState(scheduleToEdit?.title || '');
-  const [memo, setMemo] = useState(scheduleToEdit?.memo || '');
+  const [date, setDate] = useState(scheduleToEdit?.date || initialData?.date || initialDate || getTodayDateString());
+  const [time, setTime] = useState(scheduleToEdit?.time || initialData?.time || '');
+  const [targetType, setTargetType] = useState(
+    (scheduleToEdit?.entityId || initialData?.entityId) ? 'entity' : 'farm'
+  );
+  const [selectedEntityId, setSelectedEntityId] = useState(
+    scheduleToEdit?.entityId || initialData?.entityId || ''
+  );
+  const [category, setCategory] = useState(scheduleToEdit?.category || initialData?.category || 'routine');
+  const [title, setTitle] = useState(scheduleToEdit?.title || initialData?.title || '');
+  const [memo, setMemo] = useState(scheduleToEdit?.memo || initialData?.memo || '');
   const [errorMsg, setErrorMsg] = useState('');
 
   const handleDelete = () => {
@@ -133,6 +138,7 @@ export default function ScheduleFormModal({
       category,
       title: title.trim(),
       memo: memo.trim(),
+      originReminderLogId: initialData?.originReminderLogId || scheduleToEdit?.originReminderLogId || null,
       completed: scheduleToEdit ? scheduleToEdit.completed : false,
       completedAt: scheduleToEdit ? scheduleToEdit.completedAt : null,
       createdAt: scheduleToEdit?.createdAt || new Date().toISOString()
