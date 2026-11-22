@@ -544,8 +544,9 @@ export default function DailyDiaryView({
                               overflow: 'hidden'
                             }}>
                               <CheckCircle2 size={16} color="var(--color-primary)" style={{ flexShrink: 0 }} />
-                              {/* 개체번호 (클릭 시 원본 관리기록 및 다음 일정 열람) */}
+                              {/* 개체번호 (클릭 시 원본 관리기록 및 다음 일정 열람 - 대시 밑줄 및 초록색 호버) */}
                               <span 
+                                className="spec-link-mother"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   if (onEditCareLog) onEditCareLog(task, { focusNextSchedule: true });
@@ -555,11 +556,9 @@ export default function DailyDiaryView({
                                   cursor: 'pointer', 
                                   fontSize: '0.92rem', 
                                   fontWeight: 800, 
-                                  color: 'var(--text-main)', 
                                   letterSpacing: '-0.01em',
-                                  textDecoration: 'underline',
-                                  textDecorationColor: 'rgba(0, 0, 0, 0.2)',
-                                  textUnderlineOffset: '3px',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
                                   flexShrink: 0 
                                 }}
                               >
@@ -637,8 +636,9 @@ export default function DailyDiaryView({
                           {/* 1행: [체크박스] [개체번호] [별명]   ...   [기록] 버튼 & 접기버튼 (우측 상단) */}
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', width: '100%' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap', minWidth: 0, flex: 1 }}>
-                              {/* 개체번호 (클릭 시 원본 관리기록 및 다음 일정 열람) */}
+                              {/* 개체번호 (클릭 시 원본 관리기록 및 다음 일정 열람 - 대시 밑줄 및 초록색 호버) */}
                               <span 
+                                className="spec-link-mother"
                                 onClick={() => {
                                   if (onEditCareLog) onEditCareLog(task, { focusNextSchedule: true });
                                 }}
@@ -647,11 +647,9 @@ export default function DailyDiaryView({
                                   cursor: 'pointer', 
                                   fontSize: '0.95rem', 
                                   fontWeight: 800, 
-                                  color: 'var(--text-main)',
                                   letterSpacing: '-0.01em',
-                                  textDecoration: 'underline',
-                                  textDecorationColor: 'rgba(0, 0, 0, 0.2)',
-                                  textUnderlineOffset: '3px'
+                                  display: 'inline-flex',
+                                  alignItems: 'center'
                                 }}
                               >
                                 {task.tagNumber}
@@ -1030,6 +1028,7 @@ export default function DailyDiaryView({
                               {sched.tagNumber ? (
                                 <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem', flexShrink: 0 }}>
                                   <span 
+                                    className="spec-link-mother"
                                     onClick={(e) => {
                                       e.stopPropagation();
                                       onOpenEntityDetail(sched.tagNumber);
@@ -1039,11 +1038,9 @@ export default function DailyDiaryView({
                                       cursor: 'pointer', 
                                       fontSize: '0.92rem', 
                                       fontWeight: 800, 
-                                      color: 'var(--text-main)',
                                       letterSpacing: '-0.01em',
-                                      textDecoration: 'underline',
-                                      textDecorationColor: 'rgba(0, 0, 0, 0.2)',
-                                      textUnderlineOffset: '3px'
+                                      display: 'inline-flex',
+                                      alignItems: 'center'
                                     }}
                                   >
                                     {sched.tagNumber}
@@ -1147,17 +1144,16 @@ export default function DailyDiaryView({
                               {/* 개체번호 (캡슐 제거, 굵고 시원한 텍스트) 또는 농장 공통 뱃지 */}
                               {sched.tagNumber ? (
                                 <span 
+                                  className="spec-link-mother"
                                   onClick={() => onOpenEntityDetail(sched.tagNumber)}
                                   title="클릭 시 이 개체의 관리 내역으로 이동"
                                   style={{ 
                                     cursor: 'pointer', 
                                     fontSize: '0.95rem', 
                                     fontWeight: 800, 
-                                    color: 'var(--text-main)',
                                     letterSpacing: '-0.01em',
-                                    textDecoration: 'underline',
-                                    textDecorationColor: 'rgba(0, 0, 0, 0.2)',
-                                    textUnderlineOffset: '3px',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
                                     flexShrink: 0 
                                   }}
                                 >
