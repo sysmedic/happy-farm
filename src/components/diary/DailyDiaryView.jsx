@@ -566,12 +566,12 @@ export default function DailyDiaryView({
                                 {task.tagNumber}
                               </span>
 
-                              {/* 소 이름: 박스 없는 자연스러운 순수 텍스트 */}
+                              {/* 소 이름: 또렷하고 선명한 텍스트 */}
                               {entityName && (
                                 <span style={{ 
-                                  fontSize: '0.88rem', 
-                                  fontWeight: 600, 
-                                  color: 'var(--text-subtle)',
+                                  fontSize: '0.92rem', 
+                                  fontWeight: 700, 
+                                  color: 'var(--text-main)',
                                   flexShrink: 0 
                                 }}>
                                   {entityName}
@@ -657,12 +657,12 @@ export default function DailyDiaryView({
                                 {task.tagNumber}
                               </span>
 
-                              {/* 소 이름: 박스 없는 자연스러운 순수 텍스트 */}
+                              {/* 소 이름: 또렷하고 선명한 텍스트 */}
                               {entityName && (
                                 <span style={{ 
-                                  fontSize: '0.9rem', 
-                                  fontWeight: 600, 
-                                  color: 'var(--text-subtle)' 
+                                  fontSize: '0.92rem', 
+                                  fontWeight: 700, 
+                                  color: 'var(--text-main)' 
                                 }}>
                                   {entityName}
                                 </span>
@@ -1050,9 +1050,9 @@ export default function DailyDiaryView({
                                   </span>
                                   {entityName && (
                                     <span style={{ 
-                                      fontSize: '0.88rem', 
-                                      fontWeight: 600, 
-                                      color: 'var(--text-subtle)',
+                                      fontSize: '0.92rem', 
+                                      fontWeight: 700, 
+                                      color: 'var(--text-main)',
                                       flexShrink: 0 
                                     }}>
                                       {entityName}
@@ -1178,12 +1178,12 @@ export default function DailyDiaryView({
                                 </span>
                               )}
 
-                              {/* 별명 (개체명: 박스 없는 자연스러운 순수 텍스트) */}
+                              {/* 별명 (개체명: 또렷하고 선명한 텍스트) */}
                               {sched.tagNumber && entityName && (
                                 <span style={{ 
-                                  fontSize: '0.9rem', 
-                                  fontWeight: 600, 
-                                  color: 'var(--text-subtle)' 
+                                  fontSize: '0.92rem', 
+                                  fontWeight: 700, 
+                                  color: 'var(--text-main)' 
                                 }}>
                                   {entityName}
                                 </span>
