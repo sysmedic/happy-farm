@@ -455,34 +455,14 @@ export default function DailyDiaryView({
           {/* 탭 1: 알람 화면 (미처리 알람이 있을 때만 활성화) */}
           {activeDiaryTab === 'reminders' && (
             <div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', marginBottom: '0.75rem' }}>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  gap: '0.4rem',
-                  fontSize: '0.92rem',
-                  fontWeight: 700,
-                  color: 'var(--color-accent)'
-                }}>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                    <span>🔔</span>
-                    <span>도래한 알람 ({scheduledTasks.length}건)</span>
-                  </span>
-                  <span style={{
-                    fontSize: '0.72rem',
-                    color: 'var(--color-accent)',
-                    background: 'rgba(245, 158, 11, 0.15)',
-                    padding: '0.15rem 0.45rem',
-                    borderRadius: 'var(--radius-sm)',
-                    fontWeight: 700
-                  }}>
-                    D-Day 오늘
-                  </span>
-                </div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                  ※ 개체 관리기록에서 등록한 도래 예정 작업입니다. [일정으로]를 눌러 공식 일정으로 등록하세요.
-                </div>
+              {/* 상단 콤팩트 안내문 (중복 타이틀 및 엉터리 D-Day 제거, 일정 등록 문구 일치) */}
+              <div style={{
+                fontSize: '0.78rem',
+                color: 'var(--text-muted)',
+                marginBottom: '0.65rem',
+                lineHeight: 1.4
+              }}>
+                ※ 개체 관리기록에서 연동된 예정 작업입니다. [일정 등록]을 눌러 공식 일정으로 등록할 수 있습니다.
               </div>
 
               {scheduledTasks.length === 0 ? (
@@ -544,38 +524,39 @@ export default function DailyDiaryView({
                               overflow: 'hidden'
                             }}>
                               <CheckCircle2 size={16} color="var(--color-primary)" style={{ flexShrink: 0 }} />
-                              {/* 개체번호 (클릭 시 원본 관리기록 및 다음 일정 열람 - 대시 밑줄 및 초록색 호버) */}
-                              <span 
-                                className="spec-link-mother"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  if (onEditCareLog) onEditCareLog(task, { focusNextSchedule: true });
-                                }}
-                                title="클릭 시 이 알람이 등록된 원본 관리기록 열람"
-                                style={{ 
-                                  cursor: 'pointer', 
-                                  fontSize: '0.92rem', 
-                                  fontWeight: 800, 
-                                  letterSpacing: '-0.01em',
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  flexShrink: 0 
-                                }}
-                              >
-                                {task.tagNumber}
-                              </span>
-
-                              {/* 소 이름: 선명하고 적당한 두께의 텍스트 */}
-                              {entityName && (
-                                <span style={{ 
-                                  fontSize: '0.92rem', 
-                                  fontWeight: 600, 
-                                  color: 'var(--text-main)',
-                                  flexShrink: 0 
-                                }}>
-                                  {entityName}
+                              <div style={{ display: 'inline-flex', alignItems: 'baseline', gap: '0.45rem', flexShrink: 0 }}>
+                                {/* 개체번호 (클릭 시 원본 관리기록 및 다음 일정 열람 - 대시 밑줄 및 초록색 호버) */}
+                                <span 
+                                  className="spec-link-mother"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (onEditCareLog) onEditCareLog(task, { focusNextSchedule: true });
+                                  }}
+                                  title="클릭 시 이 알람이 등록된 원본 관리기록 열람"
+                                  style={{ 
+                                    cursor: 'pointer', 
+                                    fontSize: '0.92rem', 
+                                    fontWeight: 800, 
+                                    letterSpacing: '-0.01em',
+                                    display: 'inline-block',
+                                    lineHeight: 1.25
+                                  }}
+                                >
+                                  {task.tagNumber}
                                 </span>
-                              )}
+
+                                {/* 소 이름: 선명하고 적당한 두께의 텍스트 (바닥선 칼정렬) */}
+                                {entityName && (
+                                  <span style={{ 
+                                    fontSize: '0.92rem', 
+                                    fontWeight: 600, 
+                                    color: 'var(--text-main)',
+                                    lineHeight: 1.25
+                                  }}>
+                                    {entityName}
+                                  </span>
+                                )}
+                              </div>
 
                               {/* 작업 이름: 원래 선명한 텍스트 컬러 유지 (var(--text-main)), 좁으면 말줄임, 가로줄 없음 */}
                               <span style={{ 
@@ -635,7 +616,7 @@ export default function DailyDiaryView({
                         >
                           {/* 1행: [체크박스] [개체번호] [별명]   ...   [기록] 버튼 & 접기버튼 (우측 상단) */}
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', width: '100%' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap', minWidth: 0, flex: 1 }}>
+                            <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.45rem', flexWrap: 'wrap', minWidth: 0, flex: 1 }}>
                               {/* 개체번호 (클릭 시 원본 관리기록 및 다음 일정 열람 - 대시 밑줄 및 초록색 호버) */}
                               <span 
                                 className="spec-link-mother"
@@ -648,19 +629,20 @@ export default function DailyDiaryView({
                                   fontSize: '0.95rem', 
                                   fontWeight: 800, 
                                   letterSpacing: '-0.01em',
-                                  display: 'inline-flex',
-                                  alignItems: 'center'
+                                  display: 'inline-block',
+                                  lineHeight: 1.25
                                 }}
                               >
                                 {task.tagNumber}
                               </span>
 
-                              {/* 소 이름: 선명하고 적당한 두께의 텍스트 */}
+                              {/* 소 이름: 선명하고 적당한 두께의 텍스트 (바닥선 칼정렬) */}
                               {entityName && (
                                 <span style={{ 
                                   fontSize: '0.92rem', 
                                   fontWeight: 600, 
-                                  color: 'var(--text-main)' 
+                                  color: 'var(--text-main)',
+                                  lineHeight: 1.25
                                 }}>
                                   {entityName}
                                 </span>
@@ -1026,7 +1008,7 @@ export default function DailyDiaryView({
 
                               {/* 개체번호 (캡슐 제거, 굵고 시원한 텍스트) 또는 농장 공통 뱃지 */}
                               {sched.tagNumber ? (
-                                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem', flexShrink: 0 }}>
+                                <div style={{ display: 'inline-flex', alignItems: 'baseline', gap: '0.45rem', flexShrink: 0 }}>
                                   <span 
                                     className="spec-link-mother"
                                     onClick={(e) => {
@@ -1039,8 +1021,8 @@ export default function DailyDiaryView({
                                       fontSize: '0.92rem', 
                                       fontWeight: 800, 
                                       letterSpacing: '-0.01em',
-                                      display: 'inline-flex',
-                                      alignItems: 'center'
+                                      display: 'inline-block',
+                                      lineHeight: 1.25
                                     }}
                                   >
                                     {sched.tagNumber}
@@ -1050,6 +1032,7 @@ export default function DailyDiaryView({
                                       fontSize: '0.92rem', 
                                       fontWeight: 600, 
                                       color: 'var(--text-main)',
+                                      lineHeight: 1.25,
                                       flexShrink: 0 
                                     }}>
                                       {entityName}
@@ -1143,22 +1126,35 @@ export default function DailyDiaryView({
 
                               {/* 개체번호 (캡슐 제거, 굵고 시원한 텍스트) 또는 농장 공통 뱃지 */}
                               {sched.tagNumber ? (
-                                <span 
-                                  className="spec-link-mother"
-                                  onClick={() => onOpenEntityDetail(sched.tagNumber)}
-                                  title="클릭 시 이 개체의 관리 내역으로 이동"
-                                  style={{ 
-                                    cursor: 'pointer', 
-                                    fontSize: '0.95rem', 
-                                    fontWeight: 800, 
-                                    letterSpacing: '-0.01em',
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    flexShrink: 0 
-                                  }}
-                                >
-                                  {sched.tagNumber}
-                                </span>
+                                <div style={{ display: 'inline-flex', alignItems: 'baseline', gap: '0.45rem', flexShrink: 0 }}>
+                                  <span 
+                                    className="spec-link-mother"
+                                    onClick={() => onOpenEntityDetail(sched.tagNumber)}
+                                    title="클릭 시 이 개체의 관리 내역으로 이동"
+                                    style={{ 
+                                      cursor: 'pointer', 
+                                      fontSize: '0.95rem', 
+                                      fontWeight: 800, 
+                                      letterSpacing: '-0.01em',
+                                      display: 'inline-block',
+                                      lineHeight: 1.25
+                                    }}
+                                  >
+                                    {sched.tagNumber}
+                                  </span>
+
+                                  {/* 별명 (개체명: 선명하고 적당한 두께의 텍스트, 바닥선 칼정렬) */}
+                                  {entityName && (
+                                    <span style={{ 
+                                      fontSize: '0.92rem', 
+                                      fontWeight: 600, 
+                                      color: 'var(--text-main)',
+                                      lineHeight: 1.25
+                                    }}>
+                                      {entityName}
+                                    </span>
+                                  )}
+                                </div>
                               ) : (
                                 <span style={{
                                   fontSize: '0.82rem',
@@ -1171,17 +1167,6 @@ export default function DailyDiaryView({
                                   flexShrink: 0
                                 }}>
                                   {entityName || '농장 공통'}
-                                </span>
-                              )}
-
-                              {/* 별명 (개체명: 선명하고 적당한 두께의 텍스트) */}
-                              {sched.tagNumber && entityName && (
-                                <span style={{ 
-                                  fontSize: '0.92rem', 
-                                  fontWeight: 600, 
-                                  color: 'var(--text-main)' 
-                                }}>
-                                  {entityName}
                                 </span>
                               )}
                             </div>
@@ -1440,22 +1425,35 @@ export default function DailyDiaryView({
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap', minWidth: 0, flex: 1 }}>
                             {/* 개체번호 (일정 카드와 동일한 대시 밑줄 및 초록색 호버) 또는 농장 공통 뱃지 */}
                             {log.tagNumber ? (
-                              <span
-                                className="spec-link-mother"
-                                onClick={() => onOpenEntityDetail(log.tagNumber)}
-                                title="클릭 시 이 개체의 관리 내역으로 이동"
-                                style={{ 
-                                  cursor: 'pointer',
-                                  fontSize: '0.95rem',
-                                  fontWeight: 800,
-                                  letterSpacing: '-0.01em',
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  flexShrink: 0
-                                }}
-                              >
-                                {log.tagNumber}
-                              </span>
+                              <div style={{ display: 'inline-flex', alignItems: 'baseline', gap: '0.45rem', flexShrink: 0 }}>
+                                <span
+                                  className="spec-link-mother"
+                                  onClick={() => onOpenEntityDetail(log.tagNumber)}
+                                  title="클릭 시 이 개체의 관리 내역으로 이동"
+                                  style={{ 
+                                    cursor: 'pointer',
+                                    fontSize: '0.95rem',
+                                    fontWeight: 800,
+                                    letterSpacing: '-0.01em',
+                                    display: 'inline-block',
+                                    lineHeight: 1.25
+                                  }}
+                                >
+                                  {log.tagNumber}
+                                </span>
+
+                                {/* 소 이름: 일정 카드와 동일한 선명하고 자연스러운 텍스트 (바닥선 칼정렬) */}
+                                {entityName && (
+                                  <span style={{ 
+                                    fontSize: '0.92rem', 
+                                    fontWeight: 600, 
+                                    color: 'var(--text-main)',
+                                    lineHeight: 1.25
+                                  }}>
+                                    {entityName}
+                                  </span>
+                                )}
+                              </div>
                             ) : (
                               <span style={{
                                 fontSize: '0.82rem',
@@ -1468,18 +1466,6 @@ export default function DailyDiaryView({
                                 flexShrink: 0
                               }}>
                                 {entityName || '농장 공통'}
-                              </span>
-                            )}
-
-                            {/* 소 이름: 일정 카드와 동일한 선명하고 자연스러운 텍스트 */}
-                            {log.tagNumber && entityName && (
-                              <span style={{ 
-                                fontSize: '0.92rem', 
-                                fontWeight: 600, 
-                                color: 'var(--text-main)',
-                                flexShrink: 0 
-                              }}>
-                                {entityName}
                               </span>
                             )}
 
