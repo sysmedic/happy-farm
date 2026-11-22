@@ -881,6 +881,7 @@ export default function EntityList({
                 {/* 1층: 최우선 식별자 "개체식별번호" & "현재 사육 상태 배지" */}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.45rem', marginBottom: '0.35rem' }}>
                   <h3 
+                    className="spec-link-mother"
                     style={{ 
                       margin: 0, 
                       fontSize: '1.12rem', 
@@ -892,7 +893,11 @@ export default function EntityList({
                       letterSpacing: '-0.025em',
                       whiteSpace: 'nowrap',
                       minWidth: 0,
-                      cursor: 'pointer' 
+                      cursor: 'pointer',
+                      borderBottom: '1px dashed var(--text-muted)',
+                      lineHeight: 1.25,
+                      display: 'inline-flex',
+                      alignItems: 'center'
                     }}
                     onClick={() => onOpenEntityDetail(entity.tagNumber)}
                     title="클릭 시 이 개체의 상세 프로필로 이동"

@@ -344,7 +344,7 @@ export default function EntityDetailModal({
                   </div>
                 </div>
 
-                {/* 2행: 소 이름(호칭) + 사육단계 · 축사 위치 · 월령 (개체 카드 2층과 100% 동일 규격) */}
+                {/* 2행: 소 이름(호칭) + 사육단계 · 월령 · 축사 위치 (소 고유 정보 우선 정렬) */}
                 <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '0.45rem', marginTop: '0.35rem', fontSize: '0.92rem' }}>
                   <span style={{ fontWeight: 700, fontSize: '1.05rem', color: 'var(--text-main)' }}>
                     {entity.name}
@@ -354,11 +354,11 @@ export default function EntityDetailModal({
                   </span>
                   <span style={{ color: 'var(--border-color)', fontWeight: 300, margin: '0 0.1rem' }}>•</span>
                   <span style={{ fontWeight: 600, color: 'var(--text-muted)' }}>
-                    {entity.barn || '축사 미지정'}
+                    {age.text}
                   </span>
                   <span style={{ color: 'var(--border-color)', fontWeight: 300, margin: '0 0.1rem' }}>•</span>
                   <span style={{ fontWeight: 600, color: 'var(--text-muted)' }}>
-                    {age.text}
+                    {entity.barn || '축사 미지정'}
                   </span>
                 </div>
               </div>
