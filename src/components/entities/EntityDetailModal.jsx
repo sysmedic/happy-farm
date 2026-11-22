@@ -884,11 +884,19 @@ export default function EntityDetailModal({
                               fontWeight: 700,
                               fontSize: '0.88rem',
                               color: 'var(--text-main)',
-                              opacity: 0.7,
+                              opacity: 0.85,
                               whiteSpace: 'nowrap',
-                              flexShrink: 0
+                              flexShrink: 0,
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '0.35rem'
                             }}>
-                              {log.date}
+                              <span>{log.date}</span>
+                              {log.time && (
+                                <span style={{ fontWeight: 600, fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                                  {log.time}
+                                </span>
+                              )}
                             </span>
                           </div>
 
