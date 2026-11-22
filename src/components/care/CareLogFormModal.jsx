@@ -13,23 +13,6 @@ import {
   normalizeCategoryId
 } from '../../lib/types.js';
 
-const LAST_OPERATOR_STORAGE_KEY = 'happy_farm_last_operator';
-
-const getInitialOperator = (logToEdit, careLogs) => {
-  if (logToEdit?.operator) return logToEdit.operator;
-  try {
-    const saved = localStorage.getItem(LAST_OPERATOR_STORAGE_KEY);
-    if (saved && saved.trim()) return saved.trim();
-  } catch (e) {
-    // ignore
-  }
-  if (careLogs && careLogs.length > 0) {
-    const latestWithOp = careLogs.find(l => l.operator && l.operator.trim());
-    if (latestWithOp) return latestWithOp.operator;
-  }
-  return '';
-};
-
 export default function CareLogFormModal({
   preselectedEntity,
   logToEdit,
@@ -46,6 +29,11 @@ export default function CareLogFormModal({
 }) {
   const isEditing = Boolean(logToEdit);
   const defaultOwnerName = farmSettings?.ownerName || '농장주';
+  const farmWorkers = Array.isArray(farmSettings?.workers) ? farmSettings.workers : [];
+
+  // 환경설정에 등록된 농장 대표자 및 작업자들로만 예시 목록 구성 (일반명칭 수의사/수정사 제외)
+  const operatorSuggestions = Array.from(new Set([defaultOwnerName, ...farmWorkers])).filter(Boolean);
+
   const categoriesToDisplay = careCategories || CARE_CATEGORIES;
   const [selectedEntityId, setSelectedEntityId] = useState(logToEdit?.entityId || initialValues?.entityId || preselectedEntity?.id || '');
   const [date, setDate] = useState(logToEdit?.date || initialValues?.date || getTodayDateString());
@@ -53,7 +41,7 @@ export default function CareLogFormModal({
   const [category, setCategory] = useState(normalizeCategoryId(logToEdit?.category || initialValues?.category) || '');
   const [title, setTitle] = useState(logToEdit?.title || initialValues?.title || '');
   const [details, setDetails] = useState(logToEdit?.details || '');
-  // 지정이 아니라 예시로 제시되도록 수정 모드가 아닐 때는 빈칸으로 시작
+  // 신규 등록 시에는 항상 깨끗한 빈칸("")으로 시작 (지정이 아닌 예시 제시 원칙)
   const [operator, setOperator] = useState(logToEdit?.operator || '');
   const [cost, setCost] = useState(logToEdit?.cost ? String(logToEdit.cost) : '');
 
@@ -102,14 +90,15 @@ export default function CareLogFormModal({
       setCategory(normalizeCategoryId(logToEdit.category));
       setTitle(logToEdit.title);
       setDetails(logToEdit.details || '');
-      setOperator(logToEdit.operator || getInitialOperator(null, careLogs));
+      setOperator(logToEdit.operator || '');
       setCost(logToEdit.cost ? String(logToEdit.cost) : '');
       setHasNextSchedule(Boolean(logToEdit.nextScheduleDate));
       setNextScheduleDate(logToEdit.nextScheduleDate || '');
       setNextScheduleTime(logToEdit.nextScheduleTime || '');
       setNextScheduleTitle(logToEdit.nextScheduleTitle || '');
     } else {
-      setOperator(getInitialOperator(null, careLogs));
+      // 신규 등록 시 강제 지정하지 않고 항상 빈 문자열로 초기화 (예시 칩으로 선택 가능)
+      setOperator('');
       if (initialValues) {
         if (initialValues.category) setCategory(normalizeCategoryId(initialValues.category));
         else setCategory('');
@@ -241,13 +230,6 @@ export default function CareLogFormModal({
     }
 
     const trimmedOperator = operator.trim();
-    if (trimmedOperator) {
-      try {
-        localStorage.setItem(LAST_OPERATOR_STORAGE_KEY, trimmedOperator);
-      } catch (err) {
-        // ignore storage quota error
-      }
-    }
 
     const logData = {
       id: logToEdit?.id || `LOG-${Date.now()}`,
@@ -595,7 +577,7 @@ export default function CareLogFormModal({
                     className="form-input"
                     value={operator}
                     onChange={(e) => setOperator(e.target.value)}
-                    placeholder={`예: ${defaultOwnerName}, 수의사 (선택사항)`}
+                    placeholder={`예: ${defaultOwnerName} (선택사항)`}
                     style={{ paddingRight: operator ? '30px' : '10px' }}
                   />
                   {operator && (
@@ -621,30 +603,32 @@ export default function CareLogFormModal({
                   )}
                 </div>
 
-                {/* 이모지 없는 단정한 예시 칩 (클릭 시 간편 입력) */}
-                <div style={{ display: 'flex', gap: '0.4rem', marginTop: '0.45rem', flexWrap: 'wrap', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)', marginRight: '0.2rem' }}>예시 선택:</span>
-                  {[defaultOwnerName, '수의사', '수정사'].map((chipName) => (
-                    <button
-                      key={chipName}
-                      type="button"
-                      onClick={() => setOperator(chipName)}
-                      style={{
-                        fontSize: '0.78rem',
-                        padding: '0.22rem 0.65rem',
-                        borderRadius: 'var(--radius-full)',
-                        background: operator === chipName ? 'var(--color-primary-light)' : 'var(--bg-card-subtle)',
-                        border: `1px solid ${operator === chipName ? 'var(--color-primary)' : 'var(--border-color)'}`,
-                        color: operator === chipName ? 'var(--color-primary)' : 'var(--text-main)',
-                        cursor: 'pointer',
-                        fontWeight: operator === chipName ? 700 : 500,
-                        transition: 'all 0.15s ease'
-                      }}
-                    >
-                      {chipName}
-                    </button>
-                  ))}
-                </div>
+                {/* 환경설정에 등록된 농장 인원만 노출되는 예시 선택 칩 (일반명칭 수의사/수정사 제외) */}
+                {operatorSuggestions.length > 0 && (
+                  <div style={{ display: 'flex', gap: '0.4rem', marginTop: '0.45rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)', marginRight: '0.2rem' }}>예시 선택:</span>
+                    {operatorSuggestions.map((chipName) => (
+                      <button
+                        key={chipName}
+                        type="button"
+                        onClick={() => setOperator(chipName)}
+                        style={{
+                          fontSize: '0.78rem',
+                          padding: '0.22rem 0.65rem',
+                          borderRadius: 'var(--radius-full)',
+                          background: operator === chipName ? 'var(--color-primary-light)' : 'var(--bg-card-subtle)',
+                          border: `1px solid ${operator === chipName ? 'var(--color-primary)' : 'var(--border-color)'}`,
+                          color: operator === chipName ? 'var(--color-primary)' : 'var(--text-main)',
+                          cursor: 'pointer',
+                          fontWeight: operator === chipName ? 700 : 500,
+                          transition: 'all 0.15s ease'
+                        }}
+                      >
+                        {chipName}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="form-group">

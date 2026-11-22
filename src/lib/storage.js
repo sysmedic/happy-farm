@@ -23,17 +23,21 @@ export const DEFAULT_FARM_SETTINGS = {
   farmName: '행복농장',
   ownerName: '관리자',
   address: '',
+  workers: [], // 추가 작업자 / 담당자 명단
   startTab: 'entities' // 'entities' (개체관리) | 'diary' (캘린더)
 };
 
 export function loadFarmSettings() {
   try {
+    // 과거 레거시 작업자 캐시 잔재 완전 삭제
+    try { localStorage.removeItem('happy_farm_last_operator'); } catch (e) {}
     const raw = localStorage.getItem(STORAGE_SETTINGS_KEY);
     if (!raw) return { ...DEFAULT_FARM_SETTINGS };
     const parsed = JSON.parse(raw);
     return {
       ...DEFAULT_FARM_SETTINGS,
       ...parsed,
+      workers: Array.isArray(parsed.workers) ? parsed.workers : [],
       // 하위 호환성 및 보정 (calendar로 들어와도 diary로 매핑)
       startTab: parsed.startTab === 'calendar' ? 'diary' : (parsed.startTab || 'entities')
     };

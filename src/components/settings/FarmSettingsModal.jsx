@@ -4,6 +4,7 @@ import {
   Settings, 
   Building2, 
   User, 
+  Users,
   MapPin, 
   Compass, 
   Cloud, 
@@ -62,15 +63,36 @@ export default function FarmSettingsModal({
     farmName: farmSettings?.farmName || '행복농장',
     ownerName: farmSettings?.ownerName || '관리자',
     address: farmSettings?.address || '',
+    workers: Array.isArray(farmSettings?.workers) ? farmSettings.workers : [],
     startTab: farmSettings?.startTab || 'entities'
   });
 
+  const [newWorkerInput, setNewWorkerInput] = useState('');
   const [isSavedRecently, setIsSavedRecently] = useState(false);
 
   const handleInputChange = (field, value) => {
     setFormValues(prev => ({
       ...prev,
       [field]: value
+    }));
+  };
+
+  const handleAddWorker = () => {
+    const trimmed = newWorkerInput.trim();
+    if (!trimmed) return;
+    if (!formValues.workers.includes(trimmed)) {
+      setFormValues(prev => ({
+        ...prev,
+        workers: [...prev.workers, trimmed]
+      }));
+    }
+    setNewWorkerInput('');
+  };
+
+  const handleDeleteWorker = (workerName) => {
+    setFormValues(prev => ({
+      ...prev,
+      workers: prev.workers.filter(w => w !== workerName)
     }));
   };
 
@@ -185,6 +207,95 @@ export default function FarmSettingsModal({
                   onChange={(e) => handleInputChange('ownerName', e.target.value)}
                   required
                 />
+              </div>
+
+              <div className="settings-field-group">
+                <label className="settings-label" htmlFor="new-worker-input">
+                  <Users size={16} />
+                  <span>농장 관리자 및 작업자 등록 (선택 사항)</span>
+                </label>
+                <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.45rem' }}>
+                  <input
+                    id="new-worker-input"
+                    type="text"
+                    className="settings-input"
+                    placeholder="작업자 이름 입력 후 추가 (예: 김영희, 박수의사)"
+                    value={newWorkerInput}
+                    onChange={(e) => setNewWorkerInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleAddWorker();
+                      }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    className="btn btn-outline"
+                    onClick={handleAddWorker}
+                    style={{ flexShrink: 0, padding: '0 1rem', fontWeight: 700 }}
+                  >
+                    추가
+                  </button>
+                </div>
+                <span className="field-hint" style={{ marginBottom: '0.65rem' }}>
+                  등록된 인원은 관리 기록 작성 시 '예시 선택' 버튼으로 바로 제시됩니다.
+                </span>
+
+                {/* 등록된 작업자 칩 목록 */}
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.45rem', marginTop: '0.4rem' }}>
+                  {/* 대표자는 기본 고정 태그로 표시 */}
+                  <div style={{
+                    fontSize: '0.82rem',
+                    padding: '0.3rem 0.75rem',
+                    borderRadius: 'var(--radius-full)',
+                    background: 'var(--color-primary-light)',
+                    border: '1px solid var(--color-primary)',
+                    color: 'var(--color-primary)',
+                    fontWeight: 700,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.35rem'
+                  }}>
+                    <span>{formValues.ownerName || '농장주'} (대표자)</span>
+                  </div>
+
+                  {formValues.workers?.map((worker) => (
+                    <div 
+                      key={worker}
+                      style={{
+                        fontSize: '0.82rem',
+                        padding: '0.3rem 0.65rem 0.3rem 0.75rem',
+                        borderRadius: 'var(--radius-full)',
+                        background: 'var(--bg-card-subtle)',
+                        border: '1px solid var(--border-color)',
+                        color: 'var(--text-main)',
+                        fontWeight: 600,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.35rem'
+                      }}
+                    >
+                      <span>{worker}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteWorker(worker)}
+                        title={`${worker} 삭제`}
+                        style={{
+                          background: 'transparent',
+                          border: 'none',
+                          cursor: 'pointer',
+                          color: 'var(--text-muted)',
+                          padding: 0,
+                          display: 'flex',
+                          alignItems: 'center'
+                        }}
+                      >
+                        <X size={13} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               <div className="settings-field-group">
