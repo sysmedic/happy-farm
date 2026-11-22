@@ -566,11 +566,11 @@ export default function DailyDiaryView({
                                 {task.tagNumber}
                               </span>
 
-                              {/* 소 이름: 또렷하고 선명한 텍스트 */}
+                              {/* 소 이름: 선명하고 적당한 두께의 텍스트 */}
                               {entityName && (
                                 <span style={{ 
                                   fontSize: '0.92rem', 
-                                  fontWeight: 700, 
+                                  fontWeight: 600, 
                                   color: 'var(--text-main)',
                                   flexShrink: 0 
                                 }}>
@@ -657,11 +657,11 @@ export default function DailyDiaryView({
                                 {task.tagNumber}
                               </span>
 
-                              {/* 소 이름: 또렷하고 선명한 텍스트 */}
+                              {/* 소 이름: 선명하고 적당한 두께의 텍스트 */}
                               {entityName && (
                                 <span style={{ 
                                   fontSize: '0.92rem', 
-                                  fontWeight: 700, 
+                                  fontWeight: 600, 
                                   color: 'var(--text-main)' 
                                 }}>
                                   {entityName}
@@ -1051,7 +1051,7 @@ export default function DailyDiaryView({
                                   {entityName && (
                                     <span style={{ 
                                       fontSize: '0.92rem', 
-                                      fontWeight: 700, 
+                                      fontWeight: 600, 
                                       color: 'var(--text-main)',
                                       flexShrink: 0 
                                     }}>
@@ -1178,11 +1178,11 @@ export default function DailyDiaryView({
                                 </span>
                               )}
 
-                              {/* 별명 (개체명: 또렷하고 선명한 텍스트) */}
+                              {/* 별명 (개체명: 선명하고 적당한 두께의 텍스트) */}
                               {sched.tagNumber && entityName && (
                                 <span style={{ 
                                   fontSize: '0.92rem', 
-                                  fontWeight: 700, 
+                                  fontWeight: 600, 
                                   color: 'var(--text-main)' 
                                 }}>
                                   {entityName}
