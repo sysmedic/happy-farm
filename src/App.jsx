@@ -646,6 +646,7 @@ export default function App() {
           entities={entities}
           careLogs={careLogs}
           careCategories={allCareCategories}
+          farmSettings={farmSettings}
           onAddCustomCategory={handleAddCustomCategory}
           onDeleteCustomCategory={handleDeleteCustomCategory}
           onClose={() => {

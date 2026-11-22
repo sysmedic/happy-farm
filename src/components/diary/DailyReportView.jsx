@@ -1542,10 +1542,10 @@ export default function DailyReportView({
             alignItems: 'center'
           }}>
             <div style={{ fontSize: '0.85rem', color: '#475569' }}>
-              행복 농장 (Happy Farm System) • 고객등록카드 기반 개체식별 관리
+              {currentFarmName} • 개체식별 및 사양관리 일일보고서
             </div>
             <div style={{ fontSize: '0.9rem', fontWeight: 700 }}>
-              관리 책임자: 홍길동 (서명 또는 인)
+              관리 책임자: {currentOwnerName} (서명 또는 인)
             </div>
           </div>
         </div>

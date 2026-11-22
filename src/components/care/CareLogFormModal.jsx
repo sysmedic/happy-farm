@@ -37,6 +37,7 @@ export default function CareLogFormModal({
   entities,
   careLogs,
   careCategories,
+  farmSettings,
   onAddCustomCategory,
   onDeleteCustomCategory,
   onClose,
@@ -44,6 +45,7 @@ export default function CareLogFormModal({
   onDelete
 }) {
   const isEditing = Boolean(logToEdit);
+  const defaultOwnerName = farmSettings?.ownerName || '농장주';
   const categoriesToDisplay = careCategories || CARE_CATEGORIES;
   const [selectedEntityId, setSelectedEntityId] = useState(logToEdit?.entityId || initialValues?.entityId || preselectedEntity?.id || '');
   const [date, setDate] = useState(logToEdit?.date || initialValues?.date || getTodayDateString());
@@ -51,7 +53,8 @@ export default function CareLogFormModal({
   const [category, setCategory] = useState(normalizeCategoryId(logToEdit?.category || initialValues?.category) || '');
   const [title, setTitle] = useState(logToEdit?.title || initialValues?.title || '');
   const [details, setDetails] = useState(logToEdit?.details || '');
-  const [operator, setOperator] = useState(() => getInitialOperator(logToEdit, careLogs));
+  // 지정이 아니라 예시로 제시되도록 수정 모드가 아닐 때는 빈칸으로 시작
+  const [operator, setOperator] = useState(logToEdit?.operator || '');
   const [cost, setCost] = useState(logToEdit?.cost ? String(logToEdit.cost) : '');
 
   // 새 커스텀 분류 추가 상태
@@ -592,10 +595,7 @@ export default function CareLogFormModal({
                     className="form-input"
                     value={operator}
                     onChange={(e) => setOperator(e.target.value)}
-                    onClick={() => {
-                      if (operator) setOperator('');
-                    }}
-                    placeholder="예: 홍길동, 김수의사 (선택)"
+                    placeholder={`예: ${defaultOwnerName}, 수의사 (선택사항)`}
                     style={{ paddingRight: operator ? '30px' : '10px' }}
                   />
                   {operator && (
@@ -619,6 +619,31 @@ export default function CareLogFormModal({
                       <X size={14} />
                     </button>
                   )}
+                </div>
+
+                {/* 이모지 없는 단정한 예시 칩 (클릭 시 간편 입력) */}
+                <div style={{ display: 'flex', gap: '0.4rem', marginTop: '0.45rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)', marginRight: '0.2rem' }}>예시 선택:</span>
+                  {[defaultOwnerName, '수의사', '수정사'].map((chipName) => (
+                    <button
+                      key={chipName}
+                      type="button"
+                      onClick={() => setOperator(chipName)}
+                      style={{
+                        fontSize: '0.78rem',
+                        padding: '0.22rem 0.65rem',
+                        borderRadius: 'var(--radius-full)',
+                        background: operator === chipName ? 'var(--color-primary-light)' : 'var(--bg-card-subtle)',
+                        border: `1px solid ${operator === chipName ? 'var(--color-primary)' : 'var(--border-color)'}`,
+                        color: operator === chipName ? 'var(--color-primary)' : 'var(--text-main)',
+                        cursor: 'pointer',
+                        fontWeight: operator === chipName ? 700 : 500,
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      {chipName}
+                    </button>
+                  ))}
                 </div>
               </div>
 
