@@ -4,6 +4,7 @@ import {
   ChevronRight,
   ChevronDown,
   ChevronUp,
+  Calendar,
   Calendar as CalendarIcon,
   Clock,
   Plus,
