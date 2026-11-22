@@ -34,6 +34,7 @@ export default function DailyDiaryView({
   onOpenEntityDetail,
   onOpenCareLogModal,
   onOpenScheduleModal,
+  onSaveSchedule,
   onToggleScheduleComplete,
   onToggleReminderComplete,
   onDeleteSchedule,
@@ -132,11 +133,38 @@ export default function DailyDiaryView({
     return dailySchedules.filter(s => !s.completed).length;
   }, [dailySchedules]);
   const totalDailySchedulesCount = dailySchedules.length;
-  // A안: 모두 완료 시 깔끔한 체크(✔), 미완료 시 남은 건수(숫자)
+  // 모든 일정 완료 여부 (모든 일정 소화 시 숫자 0으로 표기)
   const isScheduleAllDone = totalDailySchedulesCount > 0 && pendingDailySchedulesCount === 0;
-  const scheduleBadgeContent = isScheduleAllDone
-    ? '✔'
-    : String(pendingDailySchedulesCount);
+  const scheduleBadgeContent = String(pendingDailySchedulesCount);
+
+  // 알람에서 [일정 등록] 클릭 시 모달 없이 원클릭으로 즉각 일정 등록
+  const handlePromoteAlarmToSchedule = (task) => {
+    if (!task) return;
+    const targetEntity = (entities || []).find(e => e.id === task.entityId || e.tagNumber === task.tagNumber);
+    const newSchedule = {
+      id: `sched_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+      date: task.nextScheduleDate || selectedDate,
+      time: task.nextScheduleTime || '',
+      entityId: task.entityId || (targetEntity ? targetEntity.id : ''),
+      tagNumber: task.tagNumber || '',
+      entityName: task.entityName || (targetEntity ? targetEntity.name : ''),
+      category: task.category || 'routine',
+      title: task.nextScheduleTitle || '예정 작업',
+      memo: task.details || '',
+      completed: false,
+      originReminderLogId: task.id,
+      createdAt: new Date().toISOString()
+    };
+
+    if (onSaveSchedule) {
+      onSaveSchedule(newSchedule);
+    } else if (onOpenScheduleModal) {
+      onOpenScheduleModal(task.nextScheduleDate || selectedDate, newSchedule);
+    }
+
+    // 일정이 추가되었으므로 즉시 일정 탭으로 화면 전환
+    setActiveDiaryTab('schedules');
+  };
 
   // 전체 미완료 합계 (달력 뱃지 등 호환성)
   const pendingScheduleCount = pendingDailySchedulesCount + pendingRemindersCount;
@@ -743,22 +771,12 @@ export default function DailyDiaryView({
                                   <ChevronUp size={13} />
                                 </button>
                               )}
-                              {!isDone && onOpenScheduleModal && (
+                              {!isDone && (onSaveSchedule || onOpenScheduleModal) && (
                                 <button
                                   type="button"
                                   className="btn btn-outline btn-sm"
-                                  onClick={() => {
-                                    onOpenScheduleModal(task.nextScheduleDate || selectedDate, {
-                                      entityId: task.entityId,
-                                      tagNumber: task.tagNumber,
-                                      category: task.category || 'routine',
-                                      title: task.nextScheduleTitle || '',
-                                      time: task.nextScheduleTime || '',
-                                      memo: task.details || '',
-                                      originReminderLogId: task.id
-                                    });
-                                  }}
-                                  title="이 알람을 공식 영농 일정으로 등록 (캘린더에 일정 등록)"
+                                  onClick={() => handlePromoteAlarmToSchedule(task)}
+                                  title="클릭 즉시 공식 영농 일정으로 등록 (모달 없이 즉각 반영)"
                                   style={{
                                     fontSize: '0.75rem',
                                     fontWeight: 700,

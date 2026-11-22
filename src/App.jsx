@@ -617,6 +617,7 @@ export default function App() {
                   setIsCareLogModalOpen(true);
                 }}
                 onOpenScheduleModal={handleOpenScheduleModal}
+                onSaveSchedule={handleSaveSchedule}
                 onToggleScheduleComplete={handleToggleScheduleComplete}
                 onToggleReminderComplete={handleToggleReminderComplete}
                 onDeleteSchedule={handleDeleteSchedule}
