@@ -486,7 +486,7 @@ export default function DailyDiaryView({
               </button>
             )}
 
-            {/* 2. 일정 탭 (20px 정원형 및 동일 0.75rem 규격) */}
+            {/* 2. 일정 탭 (20px 정원형, 스카이 블루 #0284c7 공식 테마) */}
             <button
               type="button"
               className={`diary-dock-tab tab-schedules ${activeDiaryTab === 'schedules' ? 'active' : ''}`}
@@ -514,7 +514,7 @@ export default function DailyDiaryView({
                       ? { background: '#10b981', color: '#fff', border: '1px solid transparent' }
                       : { background: 'rgba(16, 185, 129, 0.15)', color: '#059669', border: '1px solid rgba(16, 185, 129, 0.3)' }
                     : activeDiaryTab === 'schedules'
-                    ? { background: 'var(--color-primary)', color: '#fff', border: '1px solid transparent' }
+                    ? { background: '#0284c7', color: '#fff', border: '1px solid transparent' }
                     : { background: 'var(--bg-card)', color: 'var(--text-subtle)', border: '1px solid var(--border-color)' }
                   )
                 }}
@@ -1178,8 +1178,8 @@ export default function DailyDiaryView({
                           key={sched.id}
                           className="diary-item-card"
                           style={{
-                            background: isDone ? 'var(--bg-card)' : 'rgba(245, 158, 11, 0.08)',
-                            border: `1px solid ${isDone ? 'var(--border-color)' : 'rgba(245, 158, 11, 0.3)'}`,
+                            background: isDone ? 'var(--bg-card)' : 'rgba(2, 132, 199, 0.05)',
+                            border: `1px solid ${isDone ? 'var(--border-color)' : 'rgba(2, 132, 199, 0.25)'}`,
                             borderRadius: 'var(--radius-md)',
                             padding: '0.65rem 0.85rem',
                             display: 'flex',

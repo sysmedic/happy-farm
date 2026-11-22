@@ -2426,21 +2426,25 @@ form.modal-content {
   box-shadow: var(--shadow-sm);
 }
 
-/* [일정] 탭 활성화 시: 테마에 맞춘 화사한 오렌지/호박색 공식 컬러 */
+/* [일정] 탭 활성화 시: 청명한 스카이 블루 공식 컬러 */
 .diary-dock-tab.active.tab-schedules {
-  color: var(--color-accent, #f59e0b) !important;
+  color: #0284c7 !important;
+}
+
+[data-theme='dark'] .diary-dock-tab.active.tab-schedules {
+  color: #38bdf8 !important;
 }
 
 .diary-dock-tab.tab-schedules .diary-tab-count {
-  background: rgba(245, 158, 11, 0.15);
-  color: var(--color-accent, #f59e0b);
-  border: 1px solid rgba(245, 158, 11, 0.3);
+  background: rgba(2, 132, 199, 0.12);
+  color: #0284c7;
+  border: 1px solid rgba(2, 132, 199, 0.3);
 }
 
 [data-theme='dark'] .diary-dock-tab.tab-schedules .diary-tab-count {
-  background: rgba(245, 158, 11, 0.25);
-  color: #fbbf24;
-  border-color: rgba(245, 158, 11, 0.45);
+  background: rgba(14, 165, 233, 0.2);
+  color: #38bdf8;
+  border-color: rgba(14, 165, 233, 0.4);
 }
 
 /* [관리 내역] 탭 활성화 시: 테마에 맞춘 산뜻한 에메랄드 초록 계열 */
