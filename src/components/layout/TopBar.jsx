@@ -63,7 +63,7 @@ export default function TopBar({
 
   return (
     <header className="topbar">
-      {/* Brand Logo & Current View Title (농장 아이콘 터치 시 나이트/라이트 모드 전환) */}
+      {/* 1. 좌측: 농장 브랜드 로고 (농장 아이콘 터치 시 나이트/라이트 모드 전환) */}
       <div className="brand-section">
         <button
           type="button"
@@ -74,10 +74,14 @@ export default function TopBar({
         >
           <Sprout size={22} />
         </button>
+      </div>
+
+      {/* 2. 중앙: 농장 아이콘과 탭 메뉴 사이 여백의 정중앙에 위치하는 현재 화면명 */}
+      <div className="topbar-center-title-box">
         <h1 className="topbar-view-title">{currentTitle}</h1>
       </div>
 
-      {/* Main Navigation Tabs (모바일에서는 아이콘만 노출, 데스크톱에서는 텍스트 함께 노출) */}
+      {/* 3. 우측: Main Navigation Tabs (모바일에서는 아이콘만 노출, 데스크톱에서는 텍스트 함께 노출) */}
       <nav className="nav-tabs" aria-label="메인 메뉴">
         <button
           className={`nav-tab-item ${activeTab === 'entities' ? 'active' : ''}`}

@@ -202,17 +202,29 @@ a:hover {
   gap: 0.75rem;
   cursor: pointer;
   user-select: none;
+  flex-shrink: 0;
+}
+
+/* 농장 아이콘과 탭 메뉴 사이 여백의 정중앙에 위치하는 타이틀 박스 */
+.topbar-center-title-box {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  padding: 0 0.75rem;
 }
 
 .topbar-view-title {
   margin: 0;
-  font-size: 1.2rem;
+  font-size: 1.15rem;
   font-weight: 800;
   color: var(--text-main);
   letter-spacing: -0.025em;
   white-space: nowrap;
   line-height: 1.2;
   user-select: none;
+  text-align: center;
 }
 
 .brand-logo-icon {
@@ -2641,7 +2653,7 @@ form.modal-content {
     z-index: 100;
   }
 
-  /* 브랜드 섹션: 로고 아이콘 + 현재 화면 타이틀 노출 */
+  /* 브랜드 섹션: 로고 아이콘만 단독 노출 */
   .brand-title,
   .brand-subtitle,
   .brand-section>div:not(.brand-logo-icon) {
@@ -2651,17 +2663,28 @@ form.modal-content {
   .brand-section {
     display: flex;
     align-items: center;
-    gap: 0.55rem;
+    gap: 0;
     flex-shrink: 0;
   }
 
+  /* 농장 아이콘과 메뉴 탭바 사이 여백의 정중앙에 위치 */
+  .topbar-center-title-box {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    padding: 0 0.25rem;
+  }
+
   .topbar-view-title {
-    font-size: 1.05rem;
+    font-size: 1.02rem;
     font-weight: 800;
     color: var(--text-main);
     letter-spacing: -0.025em;
     white-space: nowrap;
     margin: 0;
+    text-align: center;
   }
 
   .brand-logo-icon {
