@@ -112,23 +112,35 @@ export default function EntityDetailModal({
     if (careLogs && careLogs.length > 0) {
       careLogs.forEach(log => {
         const isMatch = log.entityId === entity.id || log.tagNumber === entity.tagNumber;
-        if (isMatch && log.nextScheduleDate && log.nextScheduleDate >= today && !log.nextScheduleCompleted) {
-          list.push({
-            id: `CARE-${log.id}`,
-            type: 'careLog',
-            date: log.nextScheduleDate,
-            time: log.nextScheduleTime || '',
-            title: log.nextScheduleTitle || '예정 작업',
-            sourceLog: log
-          });
+        if (!isMatch || !log.nextScheduleDate || log.nextScheduleDate < today || log.nextScheduleCompleted) {
+          return;
         }
+
+        // 이미 공식 일정으로 승격된 경우 schedules 쪽에서 처리하도록 건너뜀 (중복 방지)
+        if (log.nextSchedulePromotedScheduleId) {
+          const hasLinkedSchedule = (schedules || []).some(s => s.id === log.nextSchedulePromotedScheduleId);
+          if (hasLinkedSchedule) return;
+        }
+
+        // 이미 동일 날짜에 해당 개체의 완료 관리기록이 등록되어 있는 경우 차기 일정에서 제외
+        const alreadyDoneInLogs = allEntityLogs.some(al => al.date === log.nextScheduleDate && al.id !== log.id);
+        if (alreadyDoneInLogs) return;
+
+        list.push({
+          id: `CARE-${log.id}`,
+          type: 'careLog',
+          date: log.nextScheduleDate,
+          time: log.nextScheduleTime || '',
+          title: log.nextScheduleTitle || '예정 작업',
+          sourceLog: log
+        });
       });
     }
 
     // 2) 다이어리 스케줄에서 지정된 일정
     if (schedules && schedules.length > 0) {
       schedules.forEach(sc => {
-        const isMatch = sc.entityId === entity.id || sc.targetEntityId === entity.id;
+        const isMatch = sc.entityId === entity.id || sc.tagNumber === entity.tagNumber || sc.targetEntityId === entity.id;
         if (isMatch && sc.date && sc.date >= today && !sc.completed) {
           list.push({
             id: `SCHED-${sc.id}`,
@@ -148,7 +160,7 @@ export default function EntityDetailModal({
       if (cmp !== 0) return cmp;
       return (a.time || '').localeCompare(b.time || '');
     });
-  }, [entity, careLogs, schedules, today]);
+  }, [entity, careLogs, schedules, today, allEntityLogs]);
 
   // D-Day 계산 함수
   const getDdayBadge = (targetDate) => {

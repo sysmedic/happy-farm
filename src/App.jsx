@@ -253,10 +253,12 @@ export default function App() {
 
     // 1. 등록된 일정에서 [+ 기록]을 작성한 경우:
     // 해당 일정을 즉시 완료(completed: true) 처리하고 날짜도 실제 처리일(savedLog.date)로 이동
+    let linkedOriginReminderLogId = null;
     if (savedLog.linkedScheduleId) {
       setSchedules(prev => {
         const next = prev.map(s => {
           if (s.id === savedLog.linkedScheduleId) {
+            linkedOriginReminderLogId = s.originReminderLogId;
             return {
               ...s,
               completed: true,
@@ -272,15 +274,33 @@ export default function App() {
       });
     }
 
-    // 2. 알람(차기 예정 작업)에서 [+ 기록]을 작성한 경우:
+    // 2. 알람(차기 예정 작업)에서 [+ 기록]을 작성했거나, 일정의 원본 알람이 있는 경우:
     // 원본 알람 로그를 찾아 완료 처리하고, 실제 처리일(savedLog.date)을 기록
-    if (savedLog.linkedReminderLogId) {
+    const targetReminderId = savedLog.linkedReminderLogId || linkedOriginReminderLogId;
+    if (targetReminderId) {
       updatedLogs = updatedLogs.map(l => {
-        if (l.id === savedLog.linkedReminderLogId) {
+        if (l.id === targetReminderId) {
           return {
             ...l,
             nextScheduleCompleted: true,
             nextScheduleCompletedDate: savedLog.date, // 실제 처리일(오늘)
+            nextScheduleCompletedAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          };
+        }
+        return l;
+      });
+    }
+
+    // 3. 지능형 안전장치: 같은 개체에 대해 동일 날짜(savedLog.date)의 미완료 차기 예정 작업이 있다면 자동 완료 동기화
+    if (savedLog.entityId && savedLog.date) {
+      updatedLogs = updatedLogs.map(l => {
+        const isSameEntity = l.entityId === savedLog.entityId || l.tagNumber === savedLog.tagNumber;
+        if (isSameEntity && l.nextScheduleDate === savedLog.date && !l.nextScheduleCompleted) {
+          return {
+            ...l,
+            nextScheduleCompleted: true,
+            nextScheduleCompletedDate: savedLog.date,
             nextScheduleCompletedAt: new Date().toISOString(),
             updatedAt: new Date().toISOString()
           };
@@ -433,16 +453,19 @@ export default function App() {
     showToast(scheduleToEdit ? '영농 일정이 수정되었습니다 📅' : '새 영농 일정이 등록되었습니다 📅');
   };
 
-  // 영농 일정 완료/미완료 토글
+  // 영농 일정 완료/미완료 토글 (알람과 100% 양방향 동기화)
   const handleToggleScheduleComplete = (scheduleId) => {
+    let linkedReminderId = null;
+    let nextComp = false;
     setSchedules(prev => {
       const next = prev.map(s => {
         if (s.id === scheduleId) {
-          const nextCompleted = !s.completed;
+          nextComp = !s.completed;
+          linkedReminderId = s.originReminderLogId;
           return {
             ...s,
-            completed: nextCompleted,
-            completedAt: nextCompleted ? new Date().toISOString() : null
+            completed: nextComp,
+            completedAt: nextComp ? new Date().toISOString() : null
           };
         }
         return s;
@@ -450,20 +473,44 @@ export default function App() {
       saveSchedules(next);
       return next;
     });
+
+    if (linkedReminderId) {
+      setCareLogs(prev => {
+        const next = prev.map(l => {
+          if (l.id === linkedReminderId) {
+            return {
+              ...l,
+              nextScheduleCompleted: nextComp,
+              nextScheduleCompletedDate: nextComp ? getTodayDateString() : null,
+              nextScheduleCompletedAt: nextComp ? new Date().toISOString() : null,
+              updatedAt: new Date().toISOString()
+            };
+          }
+          return l;
+        });
+        saveCareLogs(next);
+        return next;
+      });
+    }
+
     showToast('일정 완료 상태가 변경되었습니다 ✅');
   };
 
-  // 알람(차기 예정 작업) 완료/미완료 토글
+  // 알람(차기 예정 작업) 완료/미완료 토글 (승격된 일정과 100% 양방향 동기화)
   const handleToggleReminderComplete = (logId) => {
+    let promotedSchedId = null;
+    let nextCompleted = false;
     setCareLogs(prev => {
       const next = prev.map(log => {
         if (log.id === logId) {
-          const nextCompleted = !log.nextScheduleCompleted;
+          nextCompleted = !log.nextScheduleCompleted;
+          promotedSchedId = log.nextSchedulePromotedScheduleId;
           return {
             ...log,
             nextScheduleCompleted: nextCompleted,
             nextScheduleCompletedDate: nextCompleted ? (log.nextScheduleCompletedDate || getTodayDateString()) : null,
-            nextScheduleCompletedAt: nextCompleted ? new Date().toISOString() : null
+            nextScheduleCompletedAt: nextCompleted ? new Date().toISOString() : null,
+            updatedAt: new Date().toISOString()
           };
         }
         return log;
@@ -471,6 +518,25 @@ export default function App() {
       saveCareLogs(next);
       return next;
     });
+
+    if (promotedSchedId) {
+      setSchedules(prev => {
+        const next = prev.map(s => {
+          if (s.id === promotedSchedId) {
+            return {
+              ...s,
+              completed: nextCompleted,
+              completedAt: nextCompleted ? new Date().toISOString() : null,
+              updatedAt: new Date().toISOString()
+            };
+          }
+          return s;
+        });
+        saveSchedules(next);
+        return next;
+      });
+    }
+
     showToast('알람 완료 상태가 변경되었습니다 ✅');
   };
 
