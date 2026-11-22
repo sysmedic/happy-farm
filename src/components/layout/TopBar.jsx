@@ -3,7 +3,6 @@ import {
   Sprout, 
   Calendar, 
   FileText, 
-  Cloud, 
   Plus,
   Moon,
   Sun
@@ -49,9 +48,8 @@ function CowIcon({ size = 26, strokeWidth = 1.35, className = '' }) {
 // 탭별 현재 화면 이름 매핑
 const TAB_TITLES = {
   entities: '개체 관리',
-  diary: '다이어리',
-  report: '일일 보고서',
-  cloud: '드라이브'
+  diary: '캘린더',
+  report: '일일 보고서'
 };
 
 export default function TopBar({ 
@@ -59,18 +57,47 @@ export default function TopBar({
   onSelectTab, 
   theme, 
   onToggleTheme,
-  onOpenCareLogModal
+  onOpenCareLogModal,
+  onOpenSettingsModal,
+  startTab = 'entities'
 }) {
   const currentTitle = TAB_TITLES[activeTab] || '개체 관리';
 
+  // 시작 화면 설정에 따라 탭 순서 동적 결정 (보고서는 항상 3번째)
+  const tabOrder = startTab === 'diary'
+    ? ['diary', 'entities', 'report']
+    : ['entities', 'diary', 'report'];
+
+  const tabConfigs = {
+    entities: {
+      id: 'entities',
+      title: '개체관리 (목록 및 상세 정보)',
+      label: '개체관리',
+      icon: <CowIcon size={26} strokeWidth={1.35} className="nav-tab-icon" />
+    },
+    diary: {
+      id: 'diary',
+      title: '캘린더 (월간 일정 및 타임라인)',
+      label: '캘린더',
+      icon: <Calendar size={22} strokeWidth={1.5} className="nav-tab-icon" />
+    },
+    report: {
+      id: 'report',
+      title: '일일보고 (영농일지 및 모바일 보고서)',
+      label: '일일보고',
+      icon: <FileText size={22} strokeWidth={1.5} className="nav-tab-icon" />
+    }
+  };
+
   return (
     <header className="topbar">
-      {/* 1. 좌측: 농장 브랜드 버튼 (독립된 은은한 원형 틴트 버튼 스타일, 추후 환경설정 모달 연동) */}
+      {/* 1. 좌측: 농장 브랜드 버튼 (독립된 은은한 원형 틴트 버튼 스타일, 터치 시 환경설정 모달 열림) */}
       <div className="brand-section">
         <button
           type="button"
           className="farm-brand-btn"
-          title="농장 환경 설정 (준비 중)"
+          onClick={onOpenSettingsModal}
+          title="농장 환경 설정 (농장 정보, 시작화면, 구글 드라이브 백업)"
           aria-label="농장 환경 설정"
         >
           <Sprout size={20} strokeWidth={2.2} className="farm-brand-icon" />
@@ -82,49 +109,26 @@ export default function TopBar({
         <h1 className="topbar-view-title">{currentTitle}</h1>
       </div>
 
-      {/* 3. 우측: 메인 메뉴 탭바 + 독립 분리된 나이트/라이트 모드 버튼 + 기록추가 액션 */}
+      {/* 3. 우측: 3대 핵심 메뉴 탭바 + 독립 분리된 나이트/라이트 모드 버튼 + 기록추가 액션 */}
       <div className="topbar-right-group">
         <nav className="nav-tabs" aria-label="메인 메뉴">
-          <button
-            className={`nav-tab-item ${activeTab === 'entities' ? 'active' : ''}`}
-            onClick={() => onSelectTab('entities')}
-            title="개체관리 (목록 및 상세 정보)"
-            aria-label="개체관리"
-          >
-            <CowIcon size={26} strokeWidth={1.35} className="nav-tab-icon" />
-            <span className="nav-tab-text">개체관리</span>
-          </button>
-
-          <button
-            className={`nav-tab-item ${activeTab === 'diary' ? 'active' : ''}`}
-            onClick={() => onSelectTab('diary')}
-            title="다이어리 (일정 및 타임라인)"
-            aria-label="다이어리"
-          >
-            <Calendar size={22} strokeWidth={1.5} className="nav-tab-icon" />
-            <span className="nav-tab-text">다이어리</span>
-          </button>
-
-          {/* 일일보고: 다이어리와 드라이브 사이 배치 */}
-          <button
-            className={`nav-tab-item nav-tab-report ${activeTab === 'report' ? 'active' : ''}`}
-            onClick={() => onSelectTab('report')}
-            title="일일보고 (영농일지 및 모바일 보고서)"
-            aria-label="일일보고"
-          >
-            <FileText size={22} strokeWidth={1.5} className="nav-tab-icon" />
-            <span className="nav-tab-text">일일보고</span>
-          </button>
-
-          <button
-            className={`nav-tab-item ${activeTab === 'cloud' ? 'active' : ''}`}
-            onClick={() => onSelectTab('cloud')}
-            title="드라이브 (구글 드라이브 백업/복원)"
-            aria-label="드라이브"
-          >
-            <Cloud size={22} strokeWidth={1.5} className="nav-tab-icon" />
-            <span className="nav-tab-text">드라이브</span>
-          </button>
+          {tabOrder.map((tabId) => {
+            const config = tabConfigs[tabId];
+            if (!config) return null;
+            const isActive = activeTab === tabId;
+            return (
+              <button
+                key={config.id}
+                className={`nav-tab-item ${config.id === 'report' ? 'nav-tab-report' : ''} ${isActive ? 'active' : ''}`}
+                onClick={() => onSelectTab(config.id)}
+                title={config.title}
+                aria-label={config.label}
+              >
+                {config.icon}
+                <span className="nav-tab-text">{config.label}</span>
+              </button>
+            );
+          })}
         </nav>
 
         {/* 나이트/라이트 모드 독립 원형 버튼 */}

@@ -10,6 +10,7 @@ import DailyDiaryView from './components/diary/DailyDiaryView.jsx';
 import DailyReportView from './components/diary/DailyReportView.jsx';
 import GoogleDriveView from './components/backup/GoogleDriveView.jsx';
 import ScheduleFormModal from './components/diary/ScheduleFormModal.jsx';
+import FarmSettingsModal from './components/settings/FarmSettingsModal.jsx';
 import { 
   loadEntities, 
   saveEntities, 
@@ -17,7 +18,9 @@ import {
   saveCareLogs, 
   loadSchedules,
   saveSchedules,
-  resetToSampleData 
+  resetToSampleData,
+  loadFarmSettings,
+  saveFarmSettings
 } from './lib/storage.js';
 import { 
   getTodayDateString, 
@@ -38,13 +41,23 @@ export default function App() {
     return [...DEFAULT_CARE_CATEGORIES, ...customCategories];
   }, [customCategories]);
 
+  // 농장 환경 설정 (농장명, 대표자명, 시작화면 등)
+  const [farmSettings, setFarmSettings] = useState(() => loadFarmSettings());
+
   // 현재 활성화된 탭 ('entities' | 'diary' | 'report' | 'cloud')
-  const [activeTab, setActiveTab] = useState('entities');
+  // 시작 화면 설정(farmSettings.startTab)에 따라 초기 탭 자동 결정
+  const [activeTab, setActiveTab] = useState(() => {
+    const settings = loadFarmSettings();
+    return settings.startTab === 'diary' ? 'diary' : 'entities';
+  });
 
   // 테마 ('light' | 'dark')
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem('happy_farm_theme') || 'light';
   });
+
+  // 환경 설정 모달 상태
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
 
   // 모달 및 뷰 제어 상태
   const [selectedEntityForDetail, setSelectedEntityForDetail] = useState(null);
@@ -78,7 +91,13 @@ export default function App() {
   }, [theme]);
 
   // 모달이 열려 있을 때 뒷배경(body/html) 스크롤 잠금 및 닫힐 때 마지막 스크롤 위치 100% 복원
-  const isAnyModalOpen = Boolean(selectedEntityForDetail || isEntityModalOpen || isCareLogModalOpen || isScheduleModalOpen);
+  const isAnyModalOpen = Boolean(
+    selectedEntityForDetail || 
+    isEntityModalOpen || 
+    isCareLogModalOpen || 
+    isScheduleModalOpen ||
+    isSettingsModalOpen
+  );
   const savedScrollYRef = useRef(0);
 
   useEffect(() => {
@@ -116,6 +135,12 @@ export default function App() {
       setToastMessage(null);
       toastTimerRef.current = null;
     }, 2000);
+  };
+
+  // 농장 환경 설정 저장 처리
+  const handleSaveFarmSettings = (newSettings) => {
+    setFarmSettings(newSettings);
+    saveFarmSettings(newSettings);
   };
 
   const handleToggleTheme = () => {
@@ -421,6 +446,8 @@ export default function App() {
           setCareLogInitialValues(null);
           setIsCareLogModalOpen(true);
         }}
+        onOpenSettingsModal={() => setIsSettingsModalOpen(true)}
+        startTab={farmSettings.startTab}
       />
 
       {/* 토스트 알림 */}
@@ -525,6 +552,7 @@ export default function App() {
                 careLogs={careLogs}
                 schedules={schedules}
                 careCategories={allCareCategories}
+                farmSettings={farmSettings}
                 onOpenEntityDetail={handleOpenEntityDetail}
                 onOpenCareLogModal={(entity = null) => {
                   setCareLogPreselectedEntity(entity);
@@ -537,10 +565,11 @@ export default function App() {
                   setInitialDiaryTab('logs');
                   setActiveTab('diary');
                 }}
-                onNavigateToCloud={() => setActiveTab('cloud')}
+                onNavigateToCloud={() => setIsSettingsModalOpen(true)}
               />
             )}
 
+            {/* 레거시 클라우드 탭 직접 접근 시에도 환경설정 모달과 호환 지원 */}
             {activeTab === 'cloud' && (
               <GoogleDriveView
                 entities={entities}
@@ -642,6 +671,20 @@ export default function App() {
           }}
           onSave={handleSaveSchedule}
           onDelete={handleDeleteSchedule}
+        />
+      )}
+
+      {/* 농장 환경 설정 모달 (농장 기본정보, 시작화면 선택, 구글 드라이브 백업) */}
+      {isSettingsModalOpen && (
+        <FarmSettingsModal
+          isOpen={isSettingsModalOpen}
+          onClose={() => setIsSettingsModalOpen(false)}
+          farmSettings={farmSettings}
+          onSaveSettings={handleSaveFarmSettings}
+          entities={entities}
+          careLogs={careLogs}
+          onDatabaseRestored={handleDatabaseRestored}
+          onShowToast={showToast}
         />
       )}
 

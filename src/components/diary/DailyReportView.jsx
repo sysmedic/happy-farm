@@ -50,7 +50,9 @@ function createReportImageBlob({
   activeCategories = [], 
   farmNotes,
   entities = [],
-  careCategories = []
+  careCategories = [],
+  farmName = '행복농장',
+  ownerName = '관리자'
 }) {
   return new Promise((resolve) => {
     // 모바일 스마트폰 화면 기준 가로폭 (370px) & 선명한 레티나 2배수 렌더링 (740px 해상도)
@@ -159,8 +161,8 @@ function createReportImageBlob({
     // 좌측: 영농보고서 타이틀
     ctx.textAlign = 'left';
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 15.5px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-    ctx.fillText('🌱 행복농장 일일 영농보고서', padding + 2, 33);
+    ctx.font = 'bold 15px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.fillText(`🌱 ${farmName} 일일 영농보고서`, padding + 2, 33);
 
     // 우측: 날짜 (2026. 03. 10. 세련된 점 포맷)
     const formattedDate = reportDate ? reportDate.replace(/-/g, '. ') + '.' : '';
@@ -411,7 +413,7 @@ function createReportImageBlob({
     ctx.textAlign = 'center';
     ctx.fillStyle = '#94a3b8';
     ctx.font = '11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-    ctx.fillText('행복 농장 • 고객등록카드 기반 개체식별 관리시스템', viewWidth / 2, totalHeight - 16);
+    ctx.fillText(`${farmName} • 대표: ${ownerName} • 한우 개체식별 관리시스템`, viewWidth / 2, totalHeight - 16);
     ctx.textAlign = 'left';
 
     canvas.toBlob((blob) => {
@@ -430,8 +432,11 @@ export default function DailyReportView({
   onOpenCareLogModal,
   onEditCareLog,
   onNavigateToDiary,
-  onNavigateToCloud
+  onNavigateToCloud,
+  farmSettings
 }) {
+  const currentFarmName = farmSettings?.farmName || '행복농장';
+  const currentOwnerName = farmSettings?.ownerName || '관리자';
   const [reportDate, setReportDate] = useState(targetDate || getTodayDateString());
   const todayStr = useMemo(() => getTodayDateString(), []);
 
@@ -572,18 +577,20 @@ export default function DailyReportView({
         activeCategories,
         farmNotes,
         entities,
-        careCategories
+        careCategories,
+        farmName: currentFarmName,
+        ownerName: currentOwnerName
       });
 
-      const fileName = `행복농장_일일보고서_${reportDate}.jpg`;
+      const fileName = `${currentFarmName}_일일보고서_${reportDate}.jpg`;
       const imageFile = imageBlob ? new File([imageBlob], fileName, { type: 'image/jpeg' }) : null;
 
       // 1. 스마트폰 navigator.share(파일 공유) 지원 시: 카카오톡/문자 사진 공유 창 오픈
       if (navigator.canShare && imageFile && navigator.canShare({ files: [imageFile] })) {
         await navigator.share({
           files: [imageFile],
-          title: `행복 농장 일일 보고서 (${reportDate})`,
-          text: `[행복 농장] ${reportDate} 일일 관리 보고서 사진입니다.`
+          title: `${currentFarmName} 일일 보고서 (${reportDate})`,
+          text: `[${currentFarmName}] ${reportDate} 일일 관리 보고서 사진입니다. (대표: ${currentOwnerName})`
         });
         setShareFeedback('보고서 사진(JPG) 공유가 완료되었습니다!');
         setTimeout(() => setShareFeedback(''), 3000);
@@ -602,7 +609,7 @@ export default function DailyReportView({
         URL.revokeObjectURL(url);
       }
 
-      let summaryText = `[행복 농장 일일 관리 보고서]\n일자: ${reportDate}\n총 관리 작업: ${dailyLogs.length}건 | 총 비용: ${totalCost.toLocaleString()}원\n\n[작업 내역]\n`;
+      let summaryText = `[${currentFarmName} 일일 관리 보고서]\n대표자: ${currentOwnerName}\n일자: ${reportDate}\n총 관리 작업: ${dailyLogs.length}건 | 총 비용: ${totalCost.toLocaleString()}원\n\n[작업 내역]\n`;
       dailyLogs.forEach((l, idx) => {
         const catObj = getCategoryById(l.category, careCategories);
         const ent = entities?.find(e => e.id === l.entityId || e.tagNumber === l.tagNumber);
@@ -1361,11 +1368,11 @@ export default function DailyReportView({
             <div style={{ display: 'inline-flex', flexDirection: 'column' }}>
               <h1 style={{ fontSize: '1.5rem', fontWeight: 900, color: '#0f172a', margin: '0 0 0.35rem 0', display: 'flex', alignItems: 'center', gap: '0.45rem', whiteSpace: 'nowrap' }}>
                 <span style={{ fontSize: '1.35rem' }}>🌱</span>
-                <span>행복 농장 일일 관리 보고서</span>
+                <span>{currentFarmName} 일일 관리 보고서</span>
               </h1>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', fontSize: '0.88rem', color: '#64748b', fontWeight: 600 }}>
                 <span>기준 일자: <strong style={{ color: '#0f172a' }}>{reportDate}</strong></span>
-                <span>작성: 홍길동 대표</span>
+                <span>작성/대표: <strong style={{ color: '#0f172a' }}>{currentOwnerName}</strong></span>
               </div>
             </div>
 

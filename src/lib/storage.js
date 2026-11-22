@@ -16,6 +16,46 @@ const STORAGE_ENTITIES_KEY = 'happy_farm_entities_v5';
 const STORAGE_LOGS_KEY = 'happy_farm_care_logs_v5';
 const STORAGE_SCHEDULES_KEY = 'happy_farm_schedules_v5';
 const STORAGE_CONFIG_KEY = 'happy_farm_config_v1';
+const STORAGE_SETTINGS_KEY = 'happy_farm_settings_v1';
+
+// 기본 농장 환경 설정
+export const DEFAULT_FARM_SETTINGS = {
+  farmName: '행복농장',
+  ownerName: '관리자',
+  address: '',
+  startTab: 'entities' // 'entities' (개체관리) | 'diary' (캘린더)
+};
+
+export function loadFarmSettings() {
+  try {
+    const raw = localStorage.getItem(STORAGE_SETTINGS_KEY);
+    if (!raw) return { ...DEFAULT_FARM_SETTINGS };
+    const parsed = JSON.parse(raw);
+    return {
+      ...DEFAULT_FARM_SETTINGS,
+      ...parsed,
+      // 하위 호환성 및 보정 (calendar로 들어와도 diary로 매핑)
+      startTab: parsed.startTab === 'calendar' ? 'diary' : (parsed.startTab || 'entities')
+    };
+  } catch (err) {
+    console.warn('[Storage] 농장 설정 로드 실패, 기본값 사용:', err);
+    return { ...DEFAULT_FARM_SETTINGS };
+  }
+}
+
+export function saveFarmSettings(settings) {
+  try {
+    const toSave = {
+      ...DEFAULT_FARM_SETTINGS,
+      ...settings
+    };
+    localStorage.setItem(STORAGE_SETTINGS_KEY, JSON.stringify(toSave));
+    return true;
+  } catch (err) {
+    console.error('[Storage] 농장 설정 저장 실패:', err);
+    return false;
+  }
+}
 
 // ==========================================================================
 // 필드 테스트용 10두 모범 레퍼런스 데이터 (샘플1~샘플10)
@@ -863,11 +903,12 @@ export function getSchedulesForDate(dateStr, allLogs) {
 }
 
 // Full Database Export / Import
-export function exportFullDatabase(entities, careLogs, customCategories, schedules) {
+export function exportFullDatabase(entities, careLogs, customCategories, schedules, farmSettings) {
   const data = {
     app: 'happy-farm',
-    version: '2.1.0',
+    version: '2.2.0',
     exportTimestamp: new Date().toISOString(),
+    farmSettings: farmSettings || loadFarmSettings(),
     entities: entities || loadEntities(),
     careLogs: careLogs || loadCareLogs(),
     schedules: schedules || loadSchedules(),
@@ -894,12 +935,17 @@ export function importFullDatabase(jsonString) {
       saveCustomCareCategories(data.customCategories);
     }
 
+    if (data.farmSettings && typeof data.farmSettings === 'object') {
+      saveFarmSettings(data.farmSettings);
+    }
+
     return { 
       success: true, 
       entityCount: entities.length, 
       logCount: careLogs.length,
       scheduleCount: schedules.length,
-      categoryCount: Array.isArray(data.customCategories) ? data.customCategories.length : 0
+      categoryCount: Array.isArray(data.customCategories) ? data.customCategories.length : 0,
+      hasFarmSettings: Boolean(data.farmSettings)
     };
   } catch (err) {
     return { success: false, error: err.message };
