@@ -6,9 +6,10 @@ import {
   Sparkles, 
   Check, 
   AlertCircle,
-  Trash2
+  Trash2,
+  Plus
 } from 'lucide-react';
-import { getTodayDateString } from '../../lib/types.js';
+import { getTodayDateString, normalizeCategoryId } from '../../lib/types.js';
 
 // 일정 전용 카테고리 프리셋 (types.js 4글자 표준 카테고리와 100% 동기화)
 export const SCHEDULE_CATEGORIES = [
@@ -45,11 +46,15 @@ export default function ScheduleFormModal({
   scheduleToEdit,
   initialData = null,
   entities = [],
+  careCategories,
+  onAddCustomCategory,
+  onDeleteCustomCategory,
   onClose,
   onSave,
   onDelete
 }) {
   const isEditing = Boolean(scheduleToEdit);
+  const categoriesToDisplay = careCategories || SCHEDULE_CATEGORIES;
 
   const [date, setDate] = useState(scheduleToEdit?.date || initialData?.date || initialDate || getTodayDateString());
   const [time, setTime] = useState(scheduleToEdit?.time || initialData?.time || '');
@@ -63,6 +68,56 @@ export default function ScheduleFormModal({
   const [title, setTitle] = useState(scheduleToEdit?.title || initialData?.title || '');
   const [memo, setMemo] = useState(scheduleToEdit?.memo || initialData?.memo || '');
   const [errorMsg, setErrorMsg] = useState('');
+
+  // 새 커스텀 분류 추가 상태
+  const [isAddingCategory, setIsAddingCategory] = useState(false);
+  const [newCatName, setNewCatName] = useState('');
+
+  // 새 커스텀 분류 생성
+  const handleCreateCategory = () => {
+    const trimmed = newCatName.trim();
+    if (!trimmed) {
+      alert('새 분류명을 입력해주세요.');
+      return;
+    }
+    if (categoriesToDisplay.some(c => c.label.toLowerCase() === trimmed.toLowerCase())) {
+      alert('이미 동일한 이름의 분류가 존재합니다.');
+      return;
+    }
+    const newCat = {
+      id: `custom_${Date.now()}`,
+      label: trimmed,
+      icon: '',
+      badgeClass: 'badge-cat-custom',
+      isCustom: true
+    };
+    if (onAddCustomCategory) {
+      onAddCustomCategory(newCat);
+    }
+    setCategory(newCat.id);
+    if (!title) {
+      setTitle(trimmed);
+    }
+    setIsAddingCategory(false);
+    setNewCatName('');
+  };
+
+  // 커스텀 분류 삭제 처리
+  const handleDeleteCategoryClick = (cat) => {
+    const isCurrentlySelected = category === cat.id;
+    let confirmMsg = `'${cat.label}' 분류를 삭제하시겠습니까?`;
+    if (isCurrentlySelected) {
+      confirmMsg = `⚠️ 현재 등록 폼에 '${cat.label}' 분류가 선택되어 있습니다.\n삭제 시 기본 분류('백신접종')로 자동 변경됩니다.\n\n정말 '${cat.label}' 분류를 삭제하시겠습니까?`;
+    }
+    if (window.confirm(confirmMsg)) {
+      if (onDeleteCustomCategory) {
+        onDeleteCustomCategory(cat.id);
+      }
+      if (isCurrentlySelected) {
+        setCategory('vaccine');
+      }
+    }
+  };
 
   const handleDelete = () => {
     if (!scheduleToEdit || !onDelete) return;
@@ -266,7 +321,7 @@ export default function ScheduleFormModal({
               )}
             </div>
 
-            {/* 3. 일정 분류 선택 (관리 내역 추가와 동일한 알약 캡슐 디자인) */}
+            {/* 3. 일정 분류 선택 (관리 내역 추가와 동일한 알약 캡슐 디자인 및 커스텀 분류 실시간 연동) */}
             <div className="form-group" style={{ marginBottom: '1.15rem' }}>
               <label className="form-label" style={{ fontWeight: 700, marginBottom: '0.45rem' }}>
                 일정 분류 선택
@@ -277,7 +332,7 @@ export default function ScheduleFormModal({
                 gap: '0.45rem',
                 marginTop: '0.25rem'
               }}>
-                {SCHEDULE_CATEGORIES.map(cat => {
+                {categoriesToDisplay.map(cat => {
                   const isSelected = category === cat.id;
                   return (
                     <button
@@ -305,12 +360,121 @@ export default function ScheduleFormModal({
                         width: '100%'
                       }}
                     >
+                      {cat.isCustom && (
+                        <span
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteCategoryClick(cat);
+                          }}
+                          title="이 커스텀 분류 삭제"
+                          style={{
+                            position: 'absolute',
+                            top: '2px',
+                            right: '4px',
+                            width: '14px',
+                            height: '14px',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            borderRadius: '50%',
+                            background: 'rgba(0, 0, 0, 0.08)',
+                            color: 'var(--text-muted)'
+                          }}
+                        >
+                          <X size={9} />
+                        </span>
+                      )}
                       {cat.icon && <span style={{ fontSize: '1.05rem', lineHeight: 1, flexShrink: 0 }}>{cat.icon}</span>}
                       <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{cat.label}</span>
                     </button>
                   );
                 })}
+
+                {/* 새 분류 추가 버튼 (관리 내역 모달과 동일한 3열 균등 알약 칩 형태) */}
+                <button
+                  type="button"
+                  onClick={() => setIsAddingCategory(prev => !prev)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.25rem',
+                    padding: '0.45rem 0.35rem',
+                    borderRadius: '9999px',
+                    border: isAddingCategory ? '1.5px solid var(--color-primary)' : '1px dashed var(--border-color)',
+                    background: isAddingCategory ? 'var(--color-primary-light)' : 'transparent',
+                    color: 'var(--color-primary)',
+                    fontWeight: 700,
+                    fontSize: '0.82rem',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease',
+                    whiteSpace: 'nowrap',
+                    width: '100%'
+                  }}
+                  title="새 일정 분류 직접 만들기"
+                >
+                  <Plus size={15} />
+                  <span>분류 추가</span>
+                </button>
               </div>
+
+              {/* 인라인 새 분류 생성 폼 */}
+              {isAddingCategory && (
+                <div style={{
+                  marginTop: '0.75rem',
+                  padding: '0.85rem 1rem',
+                  background: 'var(--bg-card-subtle)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: 'var(--radius-md)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.55rem',
+                  animation: 'fadeIn 0.15s ease-out'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-main)' }}>
+                      새 일정 분류명 입력
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsAddingCategory(false);
+                        setNewCatName('');
+                      }}
+                      style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '0.45rem' }}>
+                    <input
+                      type="text"
+                      className="form-input"
+                      placeholder="예: 발굽 손질, 제각, 방역소독 등"
+                      value={newCatName}
+                      onChange={(e) => setNewCatName(e.target.value)}
+                      style={{ height: '36px', fontSize: '0.88rem', flex: 1 }}
+                      maxLength={15}
+                      autoFocus
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleCreateCategory();
+                        }
+                      }}
+                    />
+                    <button
+                      type="button"
+                      className="btn btn-primary"
+                      onClick={handleCreateCategory}
+                      style={{ padding: '0 0.85rem', height: '36px', fontSize: '0.82rem', fontWeight: 700 }}
+                    >
+                      추가
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* 4. 빠른 제목 추천 프리셋 뱃지 */}

@@ -745,13 +745,16 @@ export default function App() {
         />
       )}
 
-      {/* 영농 일정 추가 및 수정 폼 모달 */}
+      {/* 영농 일정 추가 및 수정 폼 모달 (관리내역 모달과 100% 동일한 분류 카테고리 실시간 공유) */}
       {isScheduleModalOpen && (
         <ScheduleFormModal
           initialDate={scheduleTargetDate}
           scheduleToEdit={scheduleToEdit}
           initialData={scheduleInitialData}
           entities={entities}
+          careCategories={allCareCategories}
+          onAddCustomCategory={handleAddCustomCategory}
+          onDeleteCustomCategory={handleDeleteCustomCategory}
           onClose={() => {
             setIsScheduleModalOpen(false);
             setScheduleToEdit(null);

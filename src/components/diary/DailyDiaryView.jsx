@@ -1174,8 +1174,8 @@ export default function DailyDiaryView({
                                 </button>
                               )}
 
-                              {/* 개체번호가 있는 경우: [+ 기록] 버튼 (높이 24px, 수정 버튼과 우측 라인 일치) */}
-                              {sched.tagNumber && onOpenCareLogModal && (
+                              {/* 미완료 상태이고 개체번호가 있는 경우에만 [+ 기록] 버튼 표시 (완료된 일정은 기록버튼 제거) */}
+                              {!isDone && sched.tagNumber && onOpenCareLogModal && (
                                 <button 
                                   type="button" 
                                   className="btn btn-primary btn-sm"
