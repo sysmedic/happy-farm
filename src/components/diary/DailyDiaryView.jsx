@@ -796,8 +796,8 @@ export default function DailyDiaryView({
                                     gap: '0.25rem',
                                     height: '24px',
                                     borderRadius: 'var(--radius-sm)',
-                                    color: '#d97706',
-                                    border: '1px solid #d97706',
+                                    color: '#0284c7',
+                                    border: '1px solid #0284c7',
                                     background: 'var(--bg-card)',
                                     boxShadow: 'var(--shadow-sm)'
                                   }}
