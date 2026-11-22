@@ -1082,8 +1082,8 @@ export default function DailyDiaryView({
                               )}
                             </div>
 
-                            {/* 우측 상단: 미리완료 뱃지 또는 다시 접기 버튼 */}
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', flexShrink: 0 }}>
+                            {/* 우측 상단: 미리완료 뱃지 / [일정으로] 버튼 / 다시 접기 버튼 */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexShrink: 0 }}>
                               {isEarlyCompleted && (
                                 <span style={{
                                   fontSize: '0.72rem',
@@ -1103,15 +1103,51 @@ export default function DailyDiaryView({
                                   className="btn btn-outline btn-sm btn-icon-only"
                                   onClick={() => toggleExpandCompleted(reminderCardId)}
                                   title="다시 1줄로 접기"
-                                  style={{ width: '26px', height: '26px', padding: 0 }}
+                                  style={{ width: '24px', height: '24px', padding: 0 }}
                                 >
                                   <ChevronUp size={13} />
+                                </button>
+                              )}
+                              {!isDone && onOpenScheduleModal && (
+                                <button
+                                  type="button"
+                                  className="btn btn-outline btn-sm"
+                                  onClick={() => {
+                                    onOpenScheduleModal(task.nextScheduleDate || selectedDate, {
+                                      entityId: task.entityId,
+                                      tagNumber: task.tagNumber,
+                                      category: task.category || 'routine',
+                                      title: task.nextScheduleTitle || '',
+                                      time: task.nextScheduleTime || '',
+                                      memo: task.details || '',
+                                      originReminderLogId: task.id
+                                    });
+                                  }}
+                                  title="이 알람을 공식 영농 일정으로 등록 (캘린더에 일정 등록)"
+                                  style={{
+                                    fontSize: '0.75rem',
+                                    fontWeight: 700,
+                                    padding: '0.15rem 0.5rem',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '0.25rem',
+                                    height: '24px',
+                                    borderRadius: 'var(--radius-sm)',
+                                    color: '#d97706',
+                                    border: '1px solid #d97706',
+                                    background: 'rgba(217, 119, 6, 0.08)',
+                                    boxShadow: '0 1px 2px rgba(217, 119, 6, 0.15)'
+                                  }}
+                                >
+                                  <Calendar size={12} />
+                                  <span>일정으로</span>
                                 </button>
                               )}
                             </div>
                           </div>
 
-                          {/* 2행: [시간] [차기 예정 작업명 (말줄임)] (좌측) & [액션 버튼 그룹] (우측) */}
+                          {/* 2행: [시간] [차기 예정 작업명 (말줄임)] (좌측) & [날짜변경] 버튼 (우측) */}
                           <div style={{
                             display: 'flex',
                             alignItems: 'center',
@@ -1159,101 +1195,39 @@ export default function DailyDiaryView({
                               </div>
                             </div>
 
-                            {/* 우측 액션 버튼 그룹: [일정으로], [날짜변경] 동등한 크기 및 디자인 */}
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexShrink: 0 }}>
-                              {!isDone && onOpenScheduleModal && (
-                                <button
-                                  type="button"
-                                  className="btn btn-outline btn-sm"
-                                  onClick={() => {
-                                    onOpenScheduleModal(task.nextScheduleDate || selectedDate, {
-                                      entityId: task.entityId,
-                                      tagNumber: task.tagNumber,
-                                      category: task.category || 'routine',
-                                      title: task.nextScheduleTitle || '',
-                                      time: task.nextScheduleTime || '',
-                                      memo: task.details || '',
-                                      originReminderLogId: task.id
-                                    });
-                                  }}
-                                  title="이 알람을 공식 영농 일정으로 등록 (캘린더에 일정 등록)"
-                                  style={{
-                                    fontSize: '0.75rem',
-                                    fontWeight: 600,
-                                    padding: '0.2rem 0.55rem',
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    gap: '0.25rem',
-                                    height: '26px',
-                                    borderRadius: 'var(--radius-sm)',
-                                    color: '#d97706',
-                                    borderColor: '#d97706',
-                                    background: 'rgba(217, 119, 6, 0.08)'
-                                  }}
-                                >
-                                  <Calendar size={12} />
-                                  <span>일정으로</span>
-                                </button>
-                              )}
-
-                              {!isDone && onUpdateReminderDate && (
-                                <button
-                                  type="button"
-                                  className="btn btn-outline btn-sm"
-                                  onClick={() => {
-                                    if (editingReminderDateId === task.id) {
-                                      setEditingReminderDateId(null);
-                                    } else {
-                                      setEditingReminderDateId(task.id);
-                                      setTempReminderDate(task.nextScheduleDate || selectedDate);
-                                    }
-                                  }}
-                                  title="알람 날짜 변경 (미루기/당기기)"
-                                  style={{
-                                    fontSize: '0.75rem',
-                                    fontWeight: 600,
-                                    padding: '0.2rem 0.55rem',
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    gap: '0.25rem',
-                                    height: '26px',
-                                    borderRadius: 'var(--radius-sm)',
-                                    color: 'var(--text-main)',
-                                    borderColor: 'var(--border-color)',
-                                    background: 'var(--bg-card)'
-                                  }}
-                                >
-                                  <Clock size={12} />
-                                  <span>날짜변경</span>
-                                </button>
-                              )}
-
-                              {onEditCareLog && (
-                                <button
-                                  type="button"
-                                  className="btn btn-outline btn-sm btn-icon-only"
-                                  onClick={() => onEditCareLog(task, { focusNextSchedule: true })}
-                                  title="이 차기 예정 작업의 원본 관리기록(예정일/작업명 등) 수정"
-                                  style={{
-                                    width: '26px',
-                                    height: '26px',
-                                    padding: 0,
-                                    flexShrink: 0,
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    border: '1px solid var(--text-muted)',
-                                    color: 'var(--text-main)',
-                                    background: 'var(--bg-card)',
-                                    borderRadius: 'var(--radius-sm)'
-                                  }}
-                                >
-                                  <Edit2 size={12} />
-                                </button>
-                              )}
-                            </div>
+                            {/* 우측: 수정 버튼 자리에 [날짜변경] 버튼 배치 (수정 버튼과 동일한 외곽선 라인) */}
+                            {!isDone && onUpdateReminderDate && (
+                              <button
+                                type="button"
+                                className="btn btn-outline btn-sm"
+                                onClick={() => {
+                                  if (editingReminderDateId === task.id) {
+                                    setEditingReminderDateId(null);
+                                  } else {
+                                    setEditingReminderDateId(task.id);
+                                    setTempReminderDate(task.nextScheduleDate || selectedDate);
+                                  }
+                                }}
+                                title="알람 날짜 변경 (미루기/당기기)"
+                                style={{
+                                  fontSize: '0.75rem',
+                                  fontWeight: 600,
+                                  padding: '0.15rem 0.5rem',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  gap: '0.25rem',
+                                  height: '24px',
+                                  borderRadius: 'var(--radius-sm)',
+                                  color: 'var(--text-main)',
+                                  border: '1px solid var(--text-muted)',
+                                  background: 'var(--bg-card)'
+                                }}
+                              >
+                                <Clock size={12} />
+                                <span>날짜변경</span>
+                              </button>
+                            )}
                           </div>
 
                           {/* 3행: 인라인 날짜 변경 폼 */}
