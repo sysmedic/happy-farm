@@ -603,10 +603,10 @@ export default function CareLogFormModal({
                   )}
                 </div>
 
-                {/* 환경설정에 등록된 농장 인원만 노출되는 예시 선택 칩 (일반명칭 수의사/수정사 제외) */}
+                {/* 환경설정에 등록된 농장 인원만 노출되는 작업자 선택 칩 (일반명칭 수의사/수정사 제외) */}
                 {operatorSuggestions.length > 0 && (
                   <div style={{ display: 'flex', gap: '0.4rem', marginTop: '0.45rem', flexWrap: 'wrap', alignItems: 'center' }}>
-                    <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)', marginRight: '0.2rem' }}>예시 선택:</span>
+                    <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', marginRight: '0.2rem' }}>작업자:</span>
                     {operatorSuggestions.map((chipName) => (
                       <button
                         key={chipName}

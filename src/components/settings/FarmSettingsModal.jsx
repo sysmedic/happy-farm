@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   X, 
   Settings, 
@@ -67,6 +67,19 @@ export default function FarmSettingsModal({
     startTab: farmSettings?.startTab || 'entities'
   });
 
+  // 상위 farmSettings가 변경되거나 모달이 다시 열릴 때 폼 상태 동기화
+  useEffect(() => {
+    if (farmSettings) {
+      setFormValues({
+        farmName: farmSettings.farmName || '행복농장',
+        ownerName: farmSettings.ownerName || '관리자',
+        address: farmSettings.address || '',
+        workers: Array.isArray(farmSettings.workers) ? farmSettings.workers : [],
+        startTab: farmSettings.startTab || 'entities'
+      });
+    }
+  }, [farmSettings, isOpen]);
+
   const [newWorkerInput, setNewWorkerInput] = useState('');
   const [isSavedRecently, setIsSavedRecently] = useState(false);
 
@@ -77,23 +90,27 @@ export default function FarmSettingsModal({
     }));
   };
 
+  // 작업자 추가 시 별도의 저장 버튼 클릭 없이 즉시 자동 저장!
   const handleAddWorker = () => {
     const trimmed = newWorkerInput.trim();
     if (!trimmed) return;
     if (!formValues.workers.includes(trimmed)) {
-      setFormValues(prev => ({
-        ...prev,
-        workers: [...prev.workers, trimmed]
-      }));
+      const updatedWorkers = [...formValues.workers, trimmed];
+      const updatedForm = { ...formValues, workers: updatedWorkers };
+      setFormValues(updatedForm);
+      onSaveSettings(updatedForm);
+      if (onShowToast) onShowToast(`[${trimmed}] 작업자가 등록되었습니다.`);
     }
     setNewWorkerInput('');
   };
 
+  // 작업자 삭제 시에도 즉시 자동 저장!
   const handleDeleteWorker = (workerName) => {
-    setFormValues(prev => ({
-      ...prev,
-      workers: prev.workers.filter(w => w !== workerName)
-    }));
+    const updatedWorkers = formValues.workers.filter(w => w !== workerName);
+    const updatedForm = { ...formValues, workers: updatedWorkers };
+    setFormValues(updatedForm);
+    onSaveSettings(updatedForm);
+    if (onShowToast) onShowToast(`[${workerName}] 작업자가 삭제되었습니다.`);
   };
 
   const handleSaveInfo = (e) => {
