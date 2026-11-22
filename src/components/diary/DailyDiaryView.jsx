@@ -20,6 +20,7 @@ import {
 import {
   CARE_CATEGORIES,
   getTodayDateString,
+  getCurrentTimeString,
   getCategoryById
 } from '../../lib/types.js';
 import { SCHEDULE_CATEGORIES } from './ScheduleFormModal.jsx';
@@ -1270,7 +1271,7 @@ export default function DailyDiaryView({
                                         category: sched.category || 'routine',
                                         title: cleanTitle || sched.title || '',
                                         date: effectiveDate,
-                                        time: sched.time || undefined,
+                                        time: getCurrentTimeString(), // 예정시간이 아닌 실제 버튼 누른 현재 시각 기본 제시
                                         entityId: sched.entityId || (targetEntity ? targetEntity.id : ''),
                                         details: sched.memo || '',
                                         linkedScheduleId: sched.id
