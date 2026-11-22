@@ -1282,28 +1282,31 @@ export default function DailyDiaryView({
                               </div>
                             </div>
 
-                            {/* 개체번호가 있는 경우: 1행의 [+ 기록] 버튼 밑(2행 우측)에 콤팩트한 [✏️] 수정 아이콘 버튼 배치 (작업 제목 공간 최대 확보) */}
+                            {/* 개체번호가 있는 경우: 1행의 [+ 기록] 버튼 밑(2행 우측)에 [✏️ 수정] 버튼 배치 */}
                             {sched.tagNumber && onEditSchedule && (
                               <button
                                 type="button"
-                                className="btn btn-outline btn-sm btn-icon-only"
+                                className="btn btn-outline btn-sm"
                                 onClick={() => onEditSchedule(sched)}
                                 title="일정 수정"
                                 style={{
-                                  width: '24px',
-                                  height: '24px',
-                                  padding: 0,
+                                  fontSize: '0.75rem',
+                                  fontWeight: 600,
+                                  padding: '0.15rem 0.55rem',
                                   flexShrink: 0,
                                   display: 'inline-flex',
                                   alignItems: 'center',
                                   justifyContent: 'center',
+                                  gap: '0.25rem',
+                                  height: '24px',
+                                  borderRadius: 'var(--radius-sm)',
                                   border: '1px solid var(--text-muted)',
                                   color: 'var(--text-main)',
-                                  background: 'var(--bg-card)',
-                                  borderRadius: 'var(--radius-sm)'
+                                  background: 'var(--bg-card)'
                                 }}
                               >
                                 <Edit2 size={12} />
+                                <span>수정</span>
                               </button>
                             )}
                           </div>
