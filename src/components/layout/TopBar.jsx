@@ -4,7 +4,9 @@ import {
   Calendar, 
   FileText, 
   Cloud, 
-  Plus
+  Plus,
+  Moon,
+  Sun
 } from 'lucide-react';
 
 // 정감 있는 제각(除角) 한우 벡터 라인 아이콘 (뾰족한 제각 뿔 흔적 + 턱선 정리된 비경 하단 핏)
@@ -63,81 +65,96 @@ export default function TopBar({
 
   return (
     <header className="topbar">
-      {/* 1. 좌측: 농장 브랜드 로고 (농장 아이콘 터치 시 나이트/라이트 모드 전환) */}
+      {/* 1. 좌측: 농장 브랜드 버튼 (독립된 은은한 원형 틴트 버튼 스타일, 추후 환경설정 모달 연동) */}
       <div className="brand-section">
         <button
           type="button"
-          className="brand-logo-icon brand-theme-toggle-btn"
-          onClick={onToggleTheme}
-          title={theme === 'dark' ? '라이트 모드로 전환 ☀️' : '다크(나이트) 모드로 전환 🌙'}
-          aria-label={theme === 'dark' ? '라이트 모드로 전환' : '다크 모드로 전환'}
+          className="farm-brand-btn"
+          title="농장 환경 설정 (준비 중)"
+          aria-label="농장 환경 설정"
         >
-          <Sprout size={22} />
+          <Sprout size={20} strokeWidth={2.2} className="farm-brand-icon" />
         </button>
       </div>
 
-      {/* 2. 중앙: 농장 아이콘과 탭 메뉴 사이 여백의 정중앙에 위치하는 현재 화면명 */}
+      {/* 2. 중앙: 농장 아이콘과 우측 탭 메뉴 사이 여백의 정중앙에 위치하는 현재 화면명 */}
       <div className="topbar-center-title-box">
         <h1 className="topbar-view-title">{currentTitle}</h1>
       </div>
 
-      {/* 3. 우측: Main Navigation Tabs (모바일에서는 아이콘만 노출, 데스크톱에서는 텍스트 함께 노출) */}
-      <nav className="nav-tabs" aria-label="메인 메뉴">
-        <button
-          className={`nav-tab-item ${activeTab === 'entities' ? 'active' : ''}`}
-          onClick={() => onSelectTab('entities')}
-          title="개체관리 (목록 및 상세 정보)"
-          aria-label="개체관리"
-        >
-          <CowIcon size={26} strokeWidth={1.35} className="nav-tab-icon" />
-          <span className="nav-tab-text">개체관리</span>
-        </button>
+      {/* 3. 우측: 메인 메뉴 탭바 + 독립 분리된 나이트/라이트 모드 버튼 + 기록추가 액션 */}
+      <div className="topbar-right-group">
+        <nav className="nav-tabs" aria-label="메인 메뉴">
+          <button
+            className={`nav-tab-item ${activeTab === 'entities' ? 'active' : ''}`}
+            onClick={() => onSelectTab('entities')}
+            title="개체관리 (목록 및 상세 정보)"
+            aria-label="개체관리"
+          >
+            <CowIcon size={26} strokeWidth={1.35} className="nav-tab-icon" />
+            <span className="nav-tab-text">개체관리</span>
+          </button>
 
-        <button
-          className={`nav-tab-item ${activeTab === 'diary' ? 'active' : ''}`}
-          onClick={() => onSelectTab('diary')}
-          title="다이어리 (일정 및 타임라인)"
-          aria-label="다이어리"
-        >
-          <Calendar size={22} strokeWidth={1.5} className="nav-tab-icon" />
-          <span className="nav-tab-text">다이어리</span>
-        </button>
+          <button
+            className={`nav-tab-item ${activeTab === 'diary' ? 'active' : ''}`}
+            onClick={() => onSelectTab('diary')}
+            title="다이어리 (일정 및 타임라인)"
+            aria-label="다이어리"
+          >
+            <Calendar size={22} strokeWidth={1.5} className="nav-tab-icon" />
+            <span className="nav-tab-text">다이어리</span>
+          </button>
 
-        {/* 일일보고: 다이어리와 드라이브 사이 배치 */}
-        <button
-          className={`nav-tab-item nav-tab-report ${activeTab === 'report' ? 'active' : ''}`}
-          onClick={() => onSelectTab('report')}
-          title="일일보고 (영농일지 및 모바일 보고서)"
-          aria-label="일일보고"
-        >
-          <FileText size={22} strokeWidth={1.5} className="nav-tab-icon" />
-          <span className="nav-tab-text">일일보고</span>
-        </button>
+          {/* 일일보고: 다이어리와 드라이브 사이 배치 */}
+          <button
+            className={`nav-tab-item nav-tab-report ${activeTab === 'report' ? 'active' : ''}`}
+            onClick={() => onSelectTab('report')}
+            title="일일보고 (영농일지 및 모바일 보고서)"
+            aria-label="일일보고"
+          >
+            <FileText size={22} strokeWidth={1.5} className="nav-tab-icon" />
+            <span className="nav-tab-text">일일보고</span>
+          </button>
 
-        <button
-          className={`nav-tab-item ${activeTab === 'cloud' ? 'active' : ''}`}
-          onClick={() => onSelectTab('cloud')}
-          title="드라이브 (구글 드라이브 백업/복원)"
-          aria-label="드라이브"
-        >
-          <Cloud size={22} strokeWidth={1.5} className="nav-tab-icon" />
-          <span className="nav-tab-text">드라이브</span>
-        </button>
-      </nav>
+          <button
+            className={`nav-tab-item ${activeTab === 'cloud' ? 'active' : ''}`}
+            onClick={() => onSelectTab('cloud')}
+            title="드라이브 (구글 드라이브 백업/복원)"
+            aria-label="드라이브"
+          >
+            <Cloud size={22} strokeWidth={1.5} className="nav-tab-icon" />
+            <span className="nav-tab-text">드라이브</span>
+          </button>
+        </nav>
 
-      {/* Quick Action Buttons */}
-      <div className="topbar-actions">
-        {/* 현장 관리 기록 빠른 추가 (+) 버튼 (데스크톱 전용) */}
+        {/* 나이트/라이트 모드 독립 원형 버튼 */}
         <button
           type="button"
-          className="btn-quick-log"
-          onClick={() => onOpenCareLogModal && onOpenCareLogModal(null)}
-          title="현장 관리 기록 빠른 추가"
-          aria-label="현장 관리 기록 빠른 추가"
+          className="theme-toggle-btn"
+          onClick={onToggleTheme}
+          title={theme === 'dark' ? '라이트 모드로 전환 ☀️' : '다크(나이트) 모드로 전환 🌙'}
+          aria-label={theme === 'dark' ? '라이트 모드로 전환' : '다크 모드로 전환'}
         >
-          <Plus size={16} strokeWidth={2.5} />
-          <span className="quick-log-text">기록 추가</span>
+          {theme === 'dark' ? (
+            <Sun size={17} strokeWidth={2.2} className="theme-toggle-icon sun" />
+          ) : (
+            <Moon size={17} strokeWidth={2.2} className="theme-toggle-icon moon" />
+          )}
         </button>
+
+        {/* Quick Action Buttons (데스크톱 전용 기록 추가) */}
+        <div className="topbar-actions">
+          <button
+            type="button"
+            className="btn-quick-log"
+            onClick={() => onOpenCareLogModal && onOpenCareLogModal(null)}
+            title="현장 관리 기록 빠른 추가"
+            aria-label="현장 관리 기록 빠른 추가"
+          >
+            <Plus size={16} strokeWidth={2.5} />
+            <span className="quick-log-text">기록 추가</span>
+          </button>
+        </div>
       </div>
     </header>
   );
