@@ -889,13 +889,10 @@ export default function EntityList({
                       fontFamily: 'var(--font-family)',
                       fontVariantNumeric: 'tabular-nums',
                       fontFeatureSettings: '"tnum" 1',
-                      color: 'var(--text-main)', 
                       letterSpacing: '-0.025em',
                       whiteSpace: 'nowrap',
                       minWidth: 0,
                       cursor: 'pointer',
-                      borderBottom: '1px dashed var(--text-muted)',
-                      lineHeight: 1.25,
                       display: 'inline-flex',
                       alignItems: 'center'
                     }}

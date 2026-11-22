@@ -1213,8 +1213,8 @@ a:hover {
 }
 
 .spec-link-mother:hover {
-  color: var(--color-primary);
-  border-bottom-color: var(--color-primary);
+  color: var(--color-primary) !important;
+  border-bottom-color: var(--color-primary) !important;
 }
 
 /* 개체식별번호/모체/부체 전용 숫자 서체 (Pretendard 순수 숫자 고정폭) */
