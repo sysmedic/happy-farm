@@ -798,8 +798,8 @@ export default function DailyDiaryView({
                                     borderRadius: 'var(--radius-sm)',
                                     color: '#d97706',
                                     border: '1px solid #d97706',
-                                    background: 'rgba(217, 119, 6, 0.08)',
-                                    boxShadow: '0 1px 2px rgba(217, 119, 6, 0.15)'
+                                    background: 'var(--bg-card)',
+                                    boxShadow: 'var(--shadow-sm)'
                                   }}
                                 >
                                   <Calendar size={12} />
