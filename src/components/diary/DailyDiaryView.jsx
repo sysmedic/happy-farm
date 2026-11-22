@@ -1230,48 +1230,92 @@ export default function DailyDiaryView({
                             )}
                           </div>
 
-                          {/* 3행: 인라인 날짜 변경 폼 */}
+                          {/* 3행: 인라인 날짜 변경 폼 (양끝 정렬 & 카드 일체형 스타일) */}
                           {editingReminderDateId === task.id && (
                             <div style={{
-                              marginTop: '0.4rem',
-                              paddingTop: '0.4rem',
+                              marginTop: '0.45rem',
+                              paddingTop: '0.45rem',
                               borderTop: '1px dashed rgba(245, 158, 11, 0.35)',
                               display: 'flex',
                               alignItems: 'center',
-                              gap: '0.4rem',
-                              flexWrap: 'wrap'
+                              justifyContent: 'space-between',
+                              gap: '0.5rem',
+                              width: '100%'
                             }}>
-                              <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--color-accent)' }}>
-                                알람 날짜 변경:
-                              </span>
-                              <input 
-                                type="date"
-                                className="form-control form-control-sm"
-                                style={{ width: '135px', padding: '0.15rem 0.4rem', fontSize: '0.8rem' }}
-                                value={tempReminderDate}
-                                onChange={(e) => setTempReminderDate(e.target.value)}
-                              />
-                              <button
-                                type="button"
-                                className="btn btn-primary btn-sm"
-                                style={{ padding: '0.15rem 0.55rem', fontSize: '0.75rem' }}
-                                onClick={() => {
-                                  if (tempReminderDate && onUpdateReminderDate) {
-                                    onUpdateReminderDate(task.id, tempReminderDate);
-                                  }
-                                  setEditingReminderDateId(null);
-                                }}
-                              >
-                                적용
-                              </button>
-                              <button
-                                type="button"
-                                className="btn btn-outline btn-sm"
-                                style={{ padding: '0.15rem 0.45rem', fontSize: '0.75rem' }}
-                                onClick={() => setEditingReminderDateId(null)}
-                              >
-                                취소
-                              </button>
+                              {/* 좌측: 변경일 라벨 & 날짜 선택 인풋 */}
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flex: 1, minWidth: 0 }}>
+                                <span style={{ 
+                                  fontSize: '0.78rem', 
+                                  fontWeight: 700, 
+                                  color: 'var(--text-subtle)',
+                                  whiteSpace: 'nowrap',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '0.2rem'
+                                }}>
+                                  <Calendar size={12} color="var(--color-accent)" />
+                                  <span>변경일:</span>
+                                </span>
+                                <input 
+                                  type="date"
+                                  className="form-control form-control-sm"
+                                  style={{ 
+                                    maxWidth: '140px',
+                                    height: '24px',
+                                    padding: '0.1rem 0.4rem', 
+                                    fontSize: '0.78rem',
+                                    borderRadius: 'var(--radius-sm)',
+                                    border: '1px solid var(--border-color)',
+                                    background: 'var(--bg-card)'
+                                  }}
+                                  value={tempReminderDate}
+                                  onChange={(e) => setTempReminderDate(e.target.value)}
+                                />
+                              </div>
+
+                              {/* 우측: 상단 버튼 라인과 수직 정렬되는 [취소], [적용] 버튼 */}
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', flexShrink: 0 }}>
+                                <button
+                                  type="button"
+                                  className="btn btn-outline btn-sm"
+                                  style={{ 
+                                    height: '24px',
+                                    padding: '0.15rem 0.5rem', 
+                                    fontSize: '0.75rem',
+                                    fontWeight: 600,
+                                    borderRadius: 'var(--radius-sm)',
+                                    border: '1px solid var(--text-muted)',
+                                    color: 'var(--text-main)',
+                                    background: 'var(--bg-card)'
+                                  }}
+                                  onClick={() => setEditingReminderDateId(null)}
+                                >
+                                  취소
+                                </button>
+                                <button
+                                  type="button"
+                                  className="btn btn-primary btn-sm"
+                                  style={{ 
+                                    height: '24px',
+                                    padding: '0.15rem 0.55rem', 
+                                    fontSize: '0.75rem',
+                                    fontWeight: 700,
+                                    borderRadius: 'var(--radius-sm)',
+                                    background: '#047857',
+                                    borderColor: '#047857',
+                                    color: '#ffffff',
+                                    boxShadow: '0 1px 2px rgba(4, 120, 87, 0.2)'
+                                  }}
+                                  onClick={() => {
+                                    if (tempReminderDate && onUpdateReminderDate) {
+                                      onUpdateReminderDate(task.id, tempReminderDate);
+                                    }
+                                    setEditingReminderDateId(null);
+                                  }}
+                                >
+                                  적용
+                                </button>
+                              </div>
                             </div>
                           )}
                         </div>
