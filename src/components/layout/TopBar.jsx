@@ -7,7 +7,7 @@ import {
   Plus
 } from 'lucide-react';
 
-// 사용자 제공 시안 기반 정갈한 한우 벡터 라인 아이콘 (귀여운 뿔 & 넓은 귀, 큼직한 비경과 콧구멍)
+// 한우 벡터 라인 아이콘 (끝이 뾰족한 뿔 & 턱선 정리된 단일 주둥이 하단 핏)
 function CowIcon({ size = 26, strokeWidth = 1.35, className = '' }) {
   return (
     <svg
@@ -21,23 +21,23 @@ function CowIcon({ size = 26, strokeWidth = 1.35, className = '' }) {
       strokeLinejoin="round"
       className={className}
     >
-      {/* 좌측 뿔 */}
-      <path d="M7.5 5.5C6.5 3 6.8 1.8 8.5 1.5c1 1.5.8 2.8 0 4" />
-      {/* 우측 뿔 */}
-      <path d="M16.5 5.5c1-2.5.7-3.7-1-4-1 1.5-.8 2.8 0 4" />
+      {/* 뾰족한 좌측 뿔 */}
+      <path d="M7 5.5L5.5 1.5 8 3.8" />
+      {/* 뾰족한 우측 뿔 */}
+      <path d="M17 5.5l1.5-4L16 3.8" />
       {/* 이마선 */}
-      <path d="M7.5 5.5h9" />
+      <path d="M7 5.5h10" />
       {/* 좌측 귀 */}
-      <path d="M7.5 5.5C5 6 2 5.5 1.5 7.5c2 2 4 2 5.5 3" />
+      <path d="M7 5.5C4.8 6 2 5.5 1.5 7.5c2.2 2 4 2 5.5 3" />
       {/* 우측 귀 */}
-      <path d="M16.5 5.5c2.5.5 5.5 0 6 2-2 2-4 2-5.5 3" />
-      {/* 얼굴 외곽 (볼 & 턱선) */}
-      <path d="M7 10.5c-1 2.5-.8 5 .2 7 1.5 2.8 3.5 4 4.8 4s3.3-1.2 4.8-4c1-2 1.2-4.5.2-7" />
-      {/* 큼직한 둥근 돔형 주둥이(비경) 라인 */}
-      <path d="M6.5 13.5c1.8-2.2 3.6-3 5.5-3s3.7.8 5.5 3" />
+      <path d="M17 5.5c2.2.5 5 0 5.5 2-2.2 2-4 2-5.5 3" />
+      {/* 얼굴 외곽 (이중 턱선 제거하고 볼에서 주둥이로 자연스럽게 연결) */}
+      <path d="M7 11v1.5c0 4.5 2.2 7.5 5 7.5s5-3 5-7.5V11" />
+      {/* 주둥이 상단 돔 라인 */}
+      <path d="M7 13.5c1.5-1.8 3.2-2.5 5-2.5s3.5.7 5 2.5" />
       {/* 앙증맞은 콧구멍 2개 */}
-      <ellipse cx="10.5" cy="17.2" rx="0.75" ry="1.1" transform="rotate(-20 10.5 17.2)" fill="currentColor" stroke="none" />
-      <ellipse cx="13.5" cy="17.2" rx="0.75" ry="1.1" transform="rotate(20 13.5 17.2)" fill="currentColor" stroke="none" />
+      <ellipse cx="10.5" cy="16.5" rx="0.75" ry="1.1" transform="rotate(-20 10.5 16.5)" fill="currentColor" stroke="none" />
+      <ellipse cx="13.5" cy="16.5" rx="0.75" ry="1.1" transform="rotate(20 13.5 16.5)" fill="currentColor" stroke="none" />
     </svg>
   );
 }
