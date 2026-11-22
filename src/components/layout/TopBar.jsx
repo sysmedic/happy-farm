@@ -7,8 +7,8 @@ import {
   Plus
 } from 'lucide-react';
 
-// 정감 있는 제각(除角) 한우 벡터 라인 아이콘 (이마 양쪽 둥근 제각 몽우리 흔적 반영)
-function CowIcon({ size = 27, strokeWidth = 1.22, className = '' }) {
+// 사용자 제공 시안 기반 정갈한 한우 벡터 라인 아이콘 (귀여운 뿔 & 넓은 귀, 큼직한 비경과 콧구멍)
+function CowIcon({ size = 26, strokeWidth = 1.35, className = '' }) {
   return (
     <svg
       width={size}
@@ -21,21 +21,23 @@ function CowIcon({ size = 27, strokeWidth = 1.22, className = '' }) {
       strokeLinejoin="round"
       className={className}
     >
-      {/* 이마 라인 & 귀 위 양쪽 둥근 제각 흔적(몽우리) */}
-      <path d="M6 6.5c-.2-1.2.8-2 2-1.5 1.2.5 1.5 1.5 2 1.8 1.2-.6 2.8-.6 4 0 .5-.3.8-1.3 2-1.8 1.2-.5 2.2.3 2 1.5" />
-      {/* 부드러운 양쪽 귀 */}
-      <path d="M6 7c-2.8-.5-4.5.5-5 2.8 1.8 1.2 3.8.7 5-1" />
-      <path d="M18 7c2.8-.5 4.5.5 5 2.8-1.8 1.2-3.8.7-5-1" />
-      {/* 얼굴 윤곽 */}
-      <path d="M6 8v7.5c0 3.8 2.8 6.5 6 6.5s6-2.7 6-6.5V8" />
-      {/* 듬직하고 넓은 한우 비경(코/주둥이) */}
-      <path d="M7.5 14.5c0-1.2 2-1.8 4.5-1.8s4.5.6 4.5 1.8v2.5c0 1.5-2 2.2-4.5 2.2s-4.5-.7-4.5-2.2v-2.5z" />
-      {/* 또렷하고 순한 두 눈 */}
-      <circle cx="9" cy="10" r="1.1" fill="currentColor" stroke="none" />
-      <circle cx="15" cy="10" r="1.1" fill="currentColor" stroke="none" />
-      {/* 콧구멍 2개 */}
-      <circle cx="10.2" cy="16.5" r="0.75" fill="currentColor" stroke="none" />
-      <circle cx="13.8" cy="16.5" r="0.75" fill="currentColor" stroke="none" />
+      {/* 좌측 뿔 */}
+      <path d="M7.5 5.5C6.5 3 6.8 1.8 8.5 1.5c1 1.5.8 2.8 0 4" />
+      {/* 우측 뿔 */}
+      <path d="M16.5 5.5c1-2.5.7-3.7-1-4-1 1.5-.8 2.8 0 4" />
+      {/* 이마선 */}
+      <path d="M7.5 5.5h9" />
+      {/* 좌측 귀 */}
+      <path d="M7.5 5.5C5 6 2 5.5 1.5 7.5c2 2 4 2 5.5 3" />
+      {/* 우측 귀 */}
+      <path d="M16.5 5.5c2.5.5 5.5 0 6 2-2 2-4 2-5.5 3" />
+      {/* 얼굴 외곽 (볼 & 턱선) */}
+      <path d="M7 10.5c-1 2.5-.8 5 .2 7 1.5 2.8 3.5 4 4.8 4s3.3-1.2 4.8-4c1-2 1.2-4.5.2-7" />
+      {/* 큼직한 둥근 돔형 주둥이(비경) 라인 */}
+      <path d="M6.5 13.5c1.8-2.2 3.6-3 5.5-3s3.7.8 5.5 3" />
+      {/* 앙증맞은 콧구멍 2개 */}
+      <ellipse cx="10.5" cy="17.2" rx="0.75" ry="1.1" transform="rotate(-20 10.5 17.2)" fill="currentColor" stroke="none" />
+      <ellipse cx="13.5" cy="17.2" rx="0.75" ry="1.1" transform="rotate(20 13.5 17.2)" fill="currentColor" stroke="none" />
     </svg>
   );
 }
@@ -81,7 +83,7 @@ export default function TopBar({
           title="개체관리 (목록 및 상세 정보)"
           aria-label="개체관리"
         >
-          <CowIcon size={27} strokeWidth={1.22} className="nav-tab-icon" />
+          <CowIcon size={26} strokeWidth={1.35} className="nav-tab-icon" />
           <span className="nav-tab-text">개체관리</span>
         </button>
 
