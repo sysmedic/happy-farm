@@ -133,12 +133,16 @@ export function isStatusAllowedForGender(statusId, gender, breedOrStage = '') {
 
 export const DEFAULT_CARE_CATEGORIES = [
   { id: 'vaccine', label: '백신접종', icon: '💉', badgeClass: 'badge-cat-vaccine' },
-  { id: 'treatment', label: '진료·치료', icon: '💊', badgeClass: 'badge-cat-treatment' },
+  { id: 'treatment', label: '진료치료', icon: '💊', badgeClass: 'badge-cat-treatment' },
   { id: 'breeding', label: '인공수정', icon: '🧬', badgeClass: 'badge-cat-breeding' },
-  { id: 'calving', label: '분만', icon: '🐮', badgeClass: 'badge-cat-calving' },
-  { id: 'feed', label: '사료·영양', icon: '🌾', badgeClass: 'badge-cat-feed' },
+  { id: 'heat_check', label: '발정관찰', icon: '🔥', badgeClass: 'badge-cat-heat' },
+  { id: 'pregnancy_check', label: '임신감정', icon: '💖', badgeClass: 'badge-cat-pregnancy' },
+  { id: 'calving', label: '분만관리', icon: '🐮', badgeClass: 'badge-cat-calving' },
+  { id: 'shipment', label: '출하매매', icon: '🚛', badgeClass: 'badge-cat-shipment' },
   { id: 'weight', label: '체중측정', icon: '⚖️', badgeClass: 'badge-cat-weight' },
+  { id: 'feed', label: '사료영양', icon: '🌾', badgeClass: 'badge-cat-feed' },
   { id: 'routine', label: '방역점검', icon: '🛡️', badgeClass: 'badge-cat-routine' },
+  { id: 'other', label: '기타작업', icon: '📋', badgeClass: 'badge-cat-other' },
 ];
 
 export const CARE_CATEGORIES = DEFAULT_CARE_CATEGORIES;
@@ -170,12 +174,16 @@ export function saveCustomCareCategories(cats) {
 export const LEGACY_CATEGORY_MAP = {
   medication: 'treatment',
   insemination: 'breeding',
-  estrus: 'breeding',
+  estrus: 'heat_check',
+  heat: 'heat_check',
+  pregnancy: 'pregnancy_check',
   vaccination: 'vaccine',
   checkup: 'routine',
   sanitation: 'routine',
   birth: 'calving',
-  nutrition: 'feed'
+  nutrition: 'feed',
+  sale: 'shipment',
+  shipping: 'shipment'
 };
 
 // 카테고리 ID 정규화 함수 (어디서든 일관되게 레거시 ID를 표준 ID로 승격)
@@ -184,20 +192,26 @@ export function normalizeCategoryId(catId) {
   return LEGACY_CATEGORY_MAP[catId] || catId;
 }
 
-// 미등록 영문 카테고리에 대한 한글 라벨 폴백
+// 미등록 영문 카테고리에 대한 한글 라벨 폴백 (4글자 표준)
 export const FALLBACK_CATEGORY_LABELS = {
-  medication: '진료·치료',
+  medication: '진료치료',
   insemination: '인공수정',
   estrus: '발정관찰',
+  heat_check: '발정관찰',
+  pregnancy_check: '임신감정',
   vaccination: '백신접종',
   checkup: '방역점검',
   breeding: '인공수정',
-  treatment: '진료·치료',
+  treatment: '진료치료',
   vaccine: '백신접종',
-  calving: '분만',
-  feed: '사료·영양',
+  calving: '분만관리',
+  shipment: '출하매매',
+  sale: '출하매매',
+  shipping: '출하매매',
   weight: '체중측정',
-  routine: '방역점검'
+  feed: '사료영양',
+  routine: '방역점검',
+  other: '기타작업'
 };
 
 export function getCategoryById(catId, customCategories = []) {

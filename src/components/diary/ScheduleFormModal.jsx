@@ -10,27 +10,31 @@ import {
 } from 'lucide-react';
 import { getTodayDateString } from '../../lib/types.js';
 
-// 일정 전용 카테고리 프리셋
+// 일정 전용 카테고리 프리셋 (types.js 4글자 표준 카테고리와 100% 동기화)
 export const SCHEDULE_CATEGORIES = [
   { id: 'vaccine', label: '백신접종', icon: '💉', color: '#0ea5e9' },
+  { id: 'treatment', label: '진료치료', icon: '💊', color: '#ef4444' },
   { id: 'breeding', label: '인공수정', icon: '🧬', color: '#8b5cf6' },
-  { id: 'heat_check', label: '재발정 관찰', icon: '🔥', color: '#f97316' },
+  { id: 'heat_check', label: '발정관찰', icon: '🔥', color: '#f97316' },
   { id: 'pregnancy_check', label: '임신감정', icon: '💖', color: '#ec4899' },
-  { id: 'calving', label: '분만예정', icon: '🐮', color: '#10b981' },
-  { id: 'treatment', label: '진료·치료', icon: '💊', color: '#ef4444' },
-  { id: 'feed', label: '사료·영양', icon: '🌾', color: '#d97706' },
+  { id: 'calving', label: '분만관리', icon: '🐮', color: '#10b981' },
+  { id: 'shipment', label: '출하매매', icon: '🚛', color: '#0ea5e9' },
+  { id: 'weight', label: '체중측정', icon: '⚖️', color: '#64748b' },
+  { id: 'feed', label: '사료영양', icon: '🌾', color: '#d97706' },
   { id: 'routine', label: '방역점검', icon: '🛡️', color: '#14b8a6' },
-  { id: 'other', label: '기타 일정', icon: '📋', color: '#64748b' },
+  { id: 'other', label: '기타작업', icon: '📋', color: '#64748b' },
 ];
 
 // 카테고리별 빠른 제목 추천 목록
 const QUICK_TITLES = {
   vaccine: ['구제역 일제 정기 백신', '소 호흡기 5종 혼합 백신', '아까바네 백신 접종', '기생충 구충제 투약'],
+  treatment: ['호흡기 치료 경과 확인', '소화기/설사 투약 2차', '외과 처치 및 드레싱'],
   breeding: ['인공수정 시술 (수정사 방문)', '종모우 정액 준비 및 확인', '배란 유도제 투약'],
-  heat_check: ['수정 후 21일차 재발정 관찰', '초발정 징후 관찰', '승가 행위 및 점액 확인'],
+  heat_check: ['수정 후 21일차 발정관찰', '초발정 징후 관찰', '승가 행위 및 점액 확인'],
   pregnancy_check: ['수정 후 60일차 초음파 임신감정', '직장검사 임신 확인'],
   calving: ['분만 대기 및 분만사 이동', '초유 급여 준비 및 분만 관찰'],
-  treatment: ['호흡기 치료 경과 확인', '소화기/설사 투약 2차', '외과 처치 및 드레싱'],
+  shipment: ['농협 안심한우 공판장 출하 상차', '우시장 송아지 경매 출하', '생체중 계근 및 상차', '출하차량 운송 확인'],
+  weight: ['월령별 체중 계근', '비육 단계별 발육 측정', '출하 전 최종 체중 계근'],
   feed: ['배합사료 정기 입고 및 적재', '조사료(볏짚/알팔파) 공급', '미네랄/비타민 블록 교체'],
   routine: ['축사 내외부 안개분무 일제 소독', '환풍기 및 급수조 청소', '전기 시설 및 보온등 점검'],
   other: ['축협 조합 방문', '가축공제 보험 갱신', '농장 시설 보수'],
@@ -262,15 +266,16 @@ export default function ScheduleFormModal({
               )}
             </div>
 
-            {/* 3. 일정 분류 선택 */}
+            {/* 3. 일정 분류 선택 (관리 내역 추가와 동일한 알약 캡슐 디자인) */}
             <div className="form-group" style={{ marginBottom: '1.15rem' }}>
-              <label className="form-label" style={{ fontWeight: 700 }}>
-                일정 분류
+              <label className="form-label" style={{ fontWeight: 700, marginBottom: '0.45rem' }}>
+                일정 분류 선택
               </label>
               <div style={{ 
                 display: 'grid', 
                 gridTemplateColumns: 'repeat(3, 1fr)', 
-                gap: '0.45rem' 
+                gap: '0.45rem',
+                marginTop: '0.25rem'
               }}>
                 {SCHEDULE_CATEGORIES.map(cat => {
                   const isSelected = category === cat.id;
@@ -280,23 +285,28 @@ export default function ScheduleFormModal({
                       type="button"
                       onClick={() => handleCategoryChange(cat.id)}
                       style={{
-                        padding: '0.55rem 0.3rem',
-                        borderRadius: 'var(--radius-md)',
-                        border: isSelected ? `2px solid ${cat.color}` : '1px solid var(--border-color)',
-                        background: isSelected ? 'rgba(16, 185, 129, 0.12)' : 'var(--bg-card-subtle)',
-                        color: isSelected ? 'var(--color-primary)' : 'var(--text-main)',
-                        fontWeight: isSelected ? 800 : 500,
-                        fontSize: '0.8rem',
-                        cursor: 'pointer',
+                        position: 'relative',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        gap: '0.35rem',
-                        transition: 'all 0.15s ease'
+                        gap: '0.3rem',
+                        padding: '0.45rem 0.35rem',
+                        borderRadius: '9999px',
+                        border: isSelected ? '1.5px solid #10b981' : '1px solid var(--border-color)',
+                        background: isSelected ? 'rgba(16, 185, 129, 0.12)' : 'var(--bg-card)',
+                        color: isSelected ? '#059669' : 'var(--text-main)',
+                        fontWeight: isSelected ? 700 : 600,
+                        fontSize: '0.82rem',
+                        cursor: 'pointer',
+                        boxShadow: isSelected ? '0 1px 4px rgba(16, 185, 129, 0.2)' : 'none',
+                        transition: 'all 0.15s ease',
+                        whiteSpace: 'nowrap',
+                        minWidth: 0,
+                        width: '100%'
                       }}
                     >
-                      <span>{cat.icon}</span>
-                      <span>{cat.label}</span>
+                      {cat.icon && <span style={{ fontSize: '1.05rem', lineHeight: 1, flexShrink: 0 }}>{cat.icon}</span>}
+                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{cat.label}</span>
                     </button>
                   );
                 })}

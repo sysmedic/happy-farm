@@ -127,10 +127,14 @@ export default function DailyDiaryView({
     return scheduledTasks.filter(t => !t.nextScheduleCompleted).length;
   }, [scheduledTasks]);
 
-  // 미완료 영농 일정 건수
+  // 미완료 영농 일정 건수 및 전체 일정 건수
   const pendingDailySchedulesCount = useMemo(() => {
     return dailySchedules.filter(s => !s.completed).length;
   }, [dailySchedules]);
+  const totalDailySchedulesCount = dailySchedules.length;
+  const scheduleCountText = totalDailySchedulesCount > 0
+    ? `${pendingDailySchedulesCount}/${totalDailySchedulesCount}`
+    : '0';
 
   // 전체 미완료 합계 (달력 뱃지 등 호환성)
   const pendingScheduleCount = pendingDailySchedulesCount + pendingRemindersCount;
@@ -426,7 +430,7 @@ export default function DailyDiaryView({
               </button>
             )}
 
-            {/* 2. 일정 탭 */}
+            {/* 2. 일정 탭 (남은 건수 / 총 건수 표기) */}
             <button
               type="button"
               className={`diary-dock-tab tab-schedules ${activeDiaryTab === 'schedules' ? 'active' : ''}`}
@@ -435,9 +439,15 @@ export default function DailyDiaryView({
               <span>일정</span>
               <span 
                 className="diary-tab-count"
-                style={activeDiaryTab === 'schedules' ? { background: 'var(--color-primary)', color: '#fff' } : {}}
+                style={
+                  totalDailySchedulesCount > 0 && pendingDailySchedulesCount === 0
+                    ? { background: '#10b981', color: '#fff' }
+                    : activeDiaryTab === 'schedules'
+                    ? { background: 'var(--color-primary)', color: '#fff' }
+                    : {}
+                }
               >
-                {pendingDailySchedulesCount}
+                {scheduleCountText}
               </span>
             </button>
 
