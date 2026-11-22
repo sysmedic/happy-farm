@@ -93,9 +93,9 @@ export default function FarmSettingsModal({
   };
 
   return (
-    <div className="modal-backdrop settings-modal-backdrop" onClick={onClose}>
+    <div className="modal-overlay settings-modal-overlay" onClick={onClose}>
       <div 
-        className="modal-container settings-modal-container"
+        className="modal-content modal-content-lg settings-modal-content"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
@@ -114,7 +114,7 @@ export default function FarmSettingsModal({
           </div>
           <button 
             type="button" 
-            className="btn-modal-close" 
+            className="modal-close-btn" 
             onClick={onClose}
             aria-label="닫기"
           >
