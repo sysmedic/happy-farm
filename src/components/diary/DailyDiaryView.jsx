@@ -111,12 +111,25 @@ export default function DailyDiaryView({
   // 총 일정 건수
   const totalScheduleCount = dailySchedules.length + scheduledTasks.length;
 
-  // 미완료 일정 건수 (체크 해제된 일정 + 차기 예정 작업 중 미완료)
-  const pendingScheduleCount = useMemo(() => {
-    const uncompletedDaily = dailySchedules.filter(s => !s.completed).length;
-    const uncompletedReminders = scheduledTasks.filter(t => !t.nextScheduleCompleted).length;
-    return uncompletedDaily + uncompletedReminders;
-  }, [dailySchedules, scheduledTasks]);
+  // 미처리 알람 건수
+  const pendingRemindersCount = useMemo(() => {
+    return scheduledTasks.filter(t => !t.nextScheduleCompleted).length;
+  }, [scheduledTasks]);
+
+  // 미완료 영농 일정 건수
+  const pendingDailySchedulesCount = useMemo(() => {
+    return dailySchedules.filter(s => !s.completed).length;
+  }, [dailySchedules]);
+
+  // 전체 미완료 합계 (달력 뱃지 등 호환성)
+  const pendingScheduleCount = pendingDailySchedulesCount + pendingRemindersCount;
+
+  // 알람이 0건이 되었을 때 알람 탭에 머물러 있었다면 일정 탭으로 자동 복원 이동
+  useEffect(() => {
+    if (activeDiaryTab === 'reminders' && pendingRemindersCount === 0) {
+      setActiveDiaryTab('schedules');
+    }
+  }, [activeDiaryTab, pendingRemindersCount]);
 
   // 달력에 표시할 이벤트 있는 날짜 집합 (완료 로그 또는 예정 일정 전체)
   const datesWithActivity = useMemo(() => {
@@ -386,25 +399,41 @@ export default function DailyDiaryView({
             </div>
           </div>
 
-          {/* 독(Dock) 세그먼트 탭 바 */}
+          {/* 독(Dock) 세그먼트 탭 바: [알람] -> [일정] -> [관리 내역] */}
           <div className="diary-dock-tabs">
+            {/* 1. 알람 탭: 미처리 알람(pendingRemindersCount > 0)이 있을 때만 노출, 0건이면 자동 소멸 */}
+            {pendingRemindersCount > 0 && (
+              <button
+                type="button"
+                className={`diary-dock-tab tab-reminders ${activeDiaryTab === 'reminders' ? 'active' : ''}`}
+                onClick={() => setActiveDiaryTab('reminders')}
+              >
+                <span>🔔 알람</span>
+                <span className="diary-tab-count" style={{ background: '#f59e0b', color: '#fff' }}>
+                  {pendingRemindersCount}
+                </span>
+              </button>
+            )}
+
+            {/* 2. 일정 탭 */}
             <button
               type="button"
               className={`diary-dock-tab tab-schedules ${activeDiaryTab === 'schedules' ? 'active' : ''}`}
               onClick={() => setActiveDiaryTab('schedules')}
             >
-              <span>일정</span>
+              <span>📌 일정</span>
               <span className="diary-tab-count">
-                {pendingScheduleCount}
+                {pendingDailySchedulesCount}
               </span>
             </button>
 
+            {/* 3. 관리 내역 탭 */}
             <button
               type="button"
               className={`diary-dock-tab tab-logs ${activeDiaryTab === 'logs' ? 'active' : ''}`}
               onClick={() => setActiveDiaryTab('logs')}
             >
-              <span>관리 내역</span>
+              <span>📋 관리 내역</span>
               <span className="diary-tab-count">
                 {dailyLogs.length}
               </span>
@@ -412,32 +441,40 @@ export default function DailyDiaryView({
           </div>
 
           {/* 탭 1: 일정 화면 */}
-          {activeDiaryTab === 'schedules' && (
+          {/* 탭 1: 알람 화면 (미처리 알람이 있을 때만 활성화) */}
+          {activeDiaryTab === 'reminders' && (
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-                <h4 style={{
-                  fontSize: '0.92rem',
-                  fontWeight: 700,
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', marginBottom: '0.75rem' }}>
+                <div style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '0.35rem',
-                  margin: 0,
-                  color: 'var(--text-main)'
+                  justifyContent: 'space-between',
+                  gap: '0.4rem',
+                  fontSize: '0.92rem',
+                  fontWeight: 700,
+                  color: 'var(--color-accent)'
                 }}>
-                  <span>📌</span>
-                  <span>등록된 일정 ({dailySchedules.length}건)</span>
-                </h4>
-                <button
-                  className="btn btn-outline btn-sm"
-                  onClick={() => onOpenScheduleModal(selectedDate)}
-                  style={{ fontSize: '0.75rem', padding: '0.2rem 0.55rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
-                >
-                  <Plus size={12} />
-                  <span>일정 추가</span>
-                </button>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                    <span>🔔</span>
+                    <span>도래한 알람 ({scheduledTasks.length}건)</span>
+                  </span>
+                  <span style={{
+                    fontSize: '0.72rem',
+                    color: 'var(--color-accent)',
+                    background: 'rgba(245, 158, 11, 0.15)',
+                    padding: '0.15rem 0.45rem',
+                    borderRadius: 'var(--radius-sm)',
+                    fontWeight: 700
+                  }}>
+                    D-Day 오늘
+                  </span>
+                </div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                  ※ 개체 관리기록에서 등록한 도래 예정 작업입니다. [일정으로]를 눌러 공식 일정으로 등록하세요.
+                </div>
               </div>
 
-              {dailySchedules.length === 0 && scheduledTasks.length === 0 ? (
+              {scheduledTasks.length === 0 ? (
                 <div style={{
                   textAlign: 'center',
                   padding: '2.5rem 1rem',
@@ -446,446 +483,13 @@ export default function DailyDiaryView({
                   color: 'var(--text-muted)'
                 }}>
                   <Clock size={36} style={{ opacity: 0.3, marginBottom: '0.5rem', color: 'var(--color-accent)' }} />
-                  <div style={{ fontWeight: 600 }}>{selectedDate}에 등록된 일정이 없습니다.</div>
+                  <div style={{ fontWeight: 600 }}>현재 처리할 도래 알람이 없습니다.</div>
                   <p style={{ fontSize: '0.825rem', marginTop: '0.25rem' }}>
-                    새로운 영농 일정이나 진료/사료 계획을 등록해보세요.
+                    모든 알람이 처리되었거나 예정된 알람이 없습니다.
                   </p>
-                  <button
-                    className="btn btn-primary btn-sm"
-                    onClick={() => onOpenScheduleModal(selectedDate)}
-                    style={{ marginTop: '0.75rem' }}
-                  >
-                    <Plus size={14} />
-                    <span>이 날짜에 새 일정 추가</span>
-                  </button>
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
-                  {/* A. 직접 등록한 영농 스케줄 영역 */}
-                  {dailySchedules.length > 0 && (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
-                      {dailySchedules.map(sched => {
-                        const targetEntity = (entities || []).find(e => e.id === sched.entityId || e.tagNumber === sched.tagNumber);
-                        const entityName = sched.entityName || targetEntity?.name || '';
-                        const isDone = Boolean(sched.completed);
-                        const isExpanded = expandedCompletedIds.has(sched.id);
-                        const cleanTitle = entityName ? (sched.title || '').replace(new RegExp(`^\\[${entityName}\\]\\s*`), '') : (sched.title || '');
-
-                      // 1. 완료 상태이면서 접힌 모드: 1행 콤팩트 가로 배치 [체크박스 + 개체번호/농장공통 + 일정제목(말줄임)]
-                      if (isDone && !isExpanded) {
-                        return (
-                          <div
-                            key={sched.id}
-                            className="diary-item-card"
-                            onClick={() => toggleExpandCompleted(sched.id)}
-                            style={{
-                              background: 'var(--bg-card)',
-                              border: '1px solid var(--border-color)',
-                              borderRadius: 'var(--radius-md)',
-                              padding: '0.45rem 0.75rem',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'space-between',
-                              gap: '0.5rem',
-                              cursor: 'pointer',
-                              transition: 'all 0.2s ease',
-                              minHeight: '36px',
-                              overflow: 'hidden',
-                              opacity: 1
-                            }}
-                            title="클릭하여 상세 내용 펼치기"
-                          >
-                            <div style={{ 
-                              display: 'flex', 
-                              alignItems: 'center', 
-                              gap: '0.5rem', 
-                              minWidth: 0, 
-                              flex: 1, 
-                              overflow: 'hidden' 
-                            }}>
-                              {/* 완료 체크 원형 토글 버튼 */}
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  onToggleScheduleComplete(sched.id);
-                                }}
-                                style={{
-                                  background: 'none',
-                                  border: 'none',
-                                  cursor: 'pointer',
-                                  padding: '4px',
-                                  margin: '-4px',
-                                  color: 'var(--color-primary)',
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  flexShrink: 0,
-                                  borderRadius: '50%'
-                                }}
-                                title="미완료로 변경 (원래 카드로 복원)"
-                              >
-                                <CheckCircle2 size={19} color="var(--color-primary)" />
-                              </button>
-
-                              {/* 개체번호 뱃지 또는 농장 공통 뱃지 */}
-                              {sched.tagNumber ? (
-                                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', flexShrink: 0 }}>
-                                  <span 
-                                    className="badge badge-tag"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      onOpenEntityDetail(sched.tagNumber);
-                                    }}
-                                    title="클릭 시 이 개체의 관리 내역으로 이동"
-                                    style={{ cursor: 'pointer', fontSize: '0.75rem', padding: '0.15rem 0.45rem' }}
-                                  >
-                                    {sched.tagNumber}
-                                  </span>
-                                  {entityName && (
-                                    <span style={{ fontSize: '0.825rem', fontWeight: 700, color: 'var(--text-main)' }}>
-                                      {entityName}
-                                    </span>
-                                  )}
-                                </div>
-                              ) : (
-                                <span style={{
-                                  fontSize: '0.75rem',
-                                  color: 'var(--text-main)',
-                                  background: 'var(--bg-card-subtle)',
-                                  padding: '0.15rem 0.45rem',
-                                  borderRadius: '4px',
-                                  border: '1px solid var(--border-color)',
-                                  fontWeight: 600,
-                                  flexShrink: 0
-                                }}>
-                                  {entityName || '농장 공통'}
-                                </span>
-                              )}
-
-                              {/* 일정 제목: 원래 선명한 텍스트 컬러 유지 (var(--text-main)), 좁으면 말줄임, 가로줄 없음 */}
-                              <span style={{ 
-                                fontSize: '0.88rem', 
-                                fontWeight: 600,
-                                color: 'var(--text-main)', 
-                                textDecoration: 'none',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                whiteSpace: 'nowrap',
-                                minWidth: 0,
-                                flex: 1
-                              }}>
-                                {cleanTitle || sched.title}
-                              </span>
-                            </div>
-
-                            {/* 우측 펼치기 힌트 아이콘 */}
-                            <div style={{ color: 'var(--text-subtle)', display: 'flex', alignItems: 'center', flexShrink: 0, paddingLeft: '0.2rem' }} title="상세 내용 펼치기">
-                              <ChevronDown size={14} />
-                            </div>
-                          </div>
-                        );
-                      }
-
-                      // 2. 미완료 상태이거나, 사용자가 클릭하여 펼친 경우 (원래 3행 카드)
-                      return (
-                        <div 
-                          key={sched.id}
-                          className="diary-item-card"
-                          style={{
-                            background: isDone ? 'var(--bg-card)' : 'rgba(245, 158, 11, 0.08)',
-                            border: `1px solid ${isDone ? 'var(--border-color)' : 'rgba(245, 158, 11, 0.3)'}`,
-                            borderRadius: 'var(--radius-md)',
-                            padding: '0.65rem 0.85rem',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: '0.35rem',
-                            opacity: 1,
-                            transition: 'all 0.2s ease'
-                          }}
-                        >
-                          {/* 1행: [체크박스] [개체번호 or 농장공통] [별명] [간략한 시간]   ...   [수정][삭제] (우측 상단) */}
-                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', width: '100%' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap', minWidth: 0, flex: 1 }}>
-                              {/* 완료 체크 원형 토글 버튼 */}
-                              <button
-                                type="button"
-                                onClick={() => onToggleScheduleComplete(sched.id)}
-                                style={{
-                                  background: 'none',
-                                  border: 'none',
-                                  cursor: 'pointer',
-                                  padding: '4px',
-                                  margin: '-4px',
-                                  color: isDone ? 'var(--color-primary)' : 'var(--text-muted)',
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  flexShrink: 0,
-                                  borderRadius: '50%'
-                                }}
-                                title={isDone ? '미완료로 변경' : '완료로 표시'}
-                              >
-                                {isDone ? (
-                                  <CheckCircle2 size={19} color="var(--color-primary)" />
-                                ) : (
-                                  <Circle size={19} color="var(--text-muted)" />
-                                )}
-                              </button>
-
-                              {/* 개체번호 뱃지 또는 농장 공통 뱃지 */}
-                              {sched.tagNumber ? (
-                                <span 
-                                  className="badge badge-tag"
-                                  onClick={() => onOpenEntityDetail(sched.tagNumber)}
-                                  title="클릭 시 이 개체의 관리 내역으로 이동"
-                                  style={{ cursor: 'pointer', fontSize: '0.75rem', padding: '0.15rem 0.45rem', flexShrink: 0 }}
-                                >
-                                  {sched.tagNumber}
-                                </span>
-                              ) : (
-                                <span style={{
-                                  fontSize: '0.75rem',
-                                  color: 'var(--text-main)',
-                                  background: 'var(--bg-card-subtle)',
-                                  padding: '0.15rem 0.45rem',
-                                  borderRadius: '4px',
-                                  border: '1px solid var(--border-color)',
-                                  fontWeight: 600,
-                                  flexShrink: 0
-                                }}>
-                                  {entityName || '농장 공통'}
-                                </span>
-                              )}
-
-                              {/* 별명 (개체명) */}
-                              {sched.tagNumber && entityName && (
-                                <span style={{ 
-                                  fontSize: '0.85rem', 
-                                  fontWeight: 700, 
-                                  color: 'var(--text-main)' 
-                                }}>
-                                  {entityName}
-                                </span>
-                              )}
-                            </div>
-
-                            {/* 우측 조작 버튼 (펼침 시 다시 접기 버튼, [+ 기록] 또는 [✏️] 버튼) */}
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', flexShrink: 0 }}>
-                              {isDone && isExpanded && (
-                                <button
-                                  type="button"
-                                  className="btn btn-outline btn-sm btn-icon-only"
-                                  onClick={() => toggleExpandCompleted(sched.id)}
-                                  title="다시 1줄로 접기"
-                                  style={{ width: '26px', height: '26px', padding: 0 }}
-                                >
-                                  <ChevronUp size={13} />
-                                </button>
-                              )}
-
-                              {/* 개체번호가 있는 경우: [+ 기록] 버튼 */}
-                              {sched.tagNumber && onOpenCareLogModal && (
-                                <button 
-                                  type="button" 
-                                  className="btn btn-primary btn-sm"
-                                  onClick={() => {
-                                    const targetEntity = (entities || []).find(e => e.id === sched.entityId || e.tagNumber === sched.tagNumber);
-                                    const todayDate = getTodayDateString();
-                                    const isFuture = selectedDate > todayDate;
-                                    const effectiveDate = isFuture ? todayDate : selectedDate;
-                                    onOpenCareLogModal(
-                                      targetEntity || { tagNumber: sched.tagNumber, name: entityName, id: sched.entityId },
-                                      effectiveDate,
-                                      {
-                                        category: sched.category || 'routine',
-                                        title: cleanTitle || sched.title || '',
-                                        date: effectiveDate,
-                                        time: sched.time || undefined,
-                                        entityId: sched.entityId || (targetEntity ? targetEntity.id : ''),
-                                        details: sched.memo || '',
-                                        linkedScheduleId: sched.id
-                                      }
-                                    );
-                                  }}
-                                  style={{ 
-                                    fontSize: '0.75rem', 
-                                    padding: '0.2rem 0.55rem', 
-                                    flexShrink: 0,
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    gap: '0.25rem',
-                                    minWidth: '54px',
-                                    justifyContent: 'center',
-                                    border: '1px solid #047857',
-                                    boxShadow: '0 1px 3px rgba(4, 120, 87, 0.3)'
-                                  }}
-                                  title="이 일정으로 새 관리기록 작성 (분류·작업명·메모 자동 입력)"
-                                >
-                                  <Plus size={12} />
-                                  <span>기록</span>
-                                </button>
-                              )}
-
-                              {/* 개체번호가 없는 경우: 기록 버튼 대신 해당 위치에 [✏️] 수정 버튼 배치 */}
-                              {!sched.tagNumber && onEditSchedule && (
-                                <button
-                                  type="button"
-                                  className="btn btn-outline btn-sm btn-icon-only"
-                                  onClick={() => onEditSchedule(sched)}
-                                  title="일정 수정"
-                                  style={{
-                                    width: '24px',
-                                    height: '24px',
-                                    padding: 0,
-                                    flexShrink: 0,
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    border: '1px solid var(--text-muted)',
-                                    color: 'var(--text-main)',
-                                    background: 'var(--bg-card)',
-                                    borderRadius: 'var(--radius-sm)'
-                                  }}
-                                >
-                                  <Edit2 size={12} />
-                                </button>
-                              )}
-                            </div>
-                          </div>
-
-                          {/* 2행: [시간] [일정 제목 (말줄임)] (좌측) & [수정] 버튼 (우측) */}
-                          <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            gap: '0.6rem',
-                            width: '100%',
-                            paddingLeft: 0,
-                            marginTop: '0.15rem'
-                          }}>
-                            <div style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '0.45rem',
-                              flex: 1,
-                              minWidth: 0
-                            }}>
-                              {sched.time && (
-                                <span style={{
-                                  fontWeight: 700,
-                                  fontSize: '0.92rem',
-                                  color: 'var(--text-main)',
-                                  opacity: 0.7,
-                                  whiteSpace: 'nowrap',
-                                  flexShrink: 0
-                                }}>
-                                  {sched.time.startsWith('0') ? sched.time.slice(1) : sched.time}
-                                </span>
-                              )}
-
-                              <div 
-                                style={{
-                                  fontWeight: 700,
-                                  fontSize: '0.92rem',
-                                  color: 'var(--text-main)',
-                                  textDecoration: isDone ? 'line-through' : 'none',
-                                  overflow: 'hidden',
-                                  textOverflow: 'ellipsis',
-                                  whiteSpace: 'nowrap',
-                                  flex: 1,
-                                  minWidth: 0
-                                }}
-                                title={cleanTitle || sched.title}
-                              >
-                                {cleanTitle || sched.title}
-                              </div>
-                            </div>
-
-                            {/* 개체번호가 있는 경우: 1행의 [+ 기록] 버튼 바로 밑(2행 우측)에 [✏️] 수정 버튼 배치 */}
-                            {sched.tagNumber && onEditSchedule && (
-                              <button
-                                type="button"
-                                className="btn btn-outline btn-sm btn-icon-only"
-                                onClick={() => onEditSchedule(sched)}
-                                title="일정 수정"
-                                style={{
-                                  width: '24px',
-                                  height: '24px',
-                                  padding: 0,
-                                  flexShrink: 0,
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  border: '1px solid var(--text-muted)',
-                                  color: 'var(--text-main)',
-                                  background: 'var(--bg-card)',
-                                  borderRadius: 'var(--radius-sm)'
-                                }}
-                              >
-                                <Edit2 size={12} />
-                              </button>
-                            )}
-                          </div>
-
-                          {/* 3행: 상세 메모 (메모가 있을 때만 렌더링) */}
-                          {sched.memo && (
-                            <div style={{
-                              fontSize: '0.8rem',
-                              color: 'var(--text-muted)',
-                              paddingLeft: 0,
-                              wordBreak: 'break-word',
-                              lineHeight: 1.35
-                            }}>
-                              ※ {sched.memo}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                    </div>
-                  )}
-
-                  {/* B. 기존 관리기록에서 자동 파생된 D-Day 차기 예정 작업 (리마인더 분리 영역) */}
-                  {scheduledTasks.length > 0 && (
-                    <div style={{
-                      marginTop: dailySchedules.length > 0 ? '1rem' : '0',
-                      paddingTop: dailySchedules.length > 0 ? '1rem' : '0',
-                      borderTop: dailySchedules.length > 0 ? '1px dashed var(--border-color)' : 'none',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '0.65rem'
-                    }}>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', marginBottom: '0.1rem' }}>
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          gap: '0.4rem',
-                          fontSize: '0.85rem',
-                          fontWeight: 700,
-                          color: 'var(--color-accent)'
-                        }}>
-                          <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                            <span>🔔</span>
-                            <span>알람 ({scheduledTasks.length}건)</span>
-                          </span>
-                          <span style={{
-                            fontSize: '0.72rem',
-                            color: 'var(--color-accent)',
-                            background: 'rgba(245, 158, 11, 0.15)',
-                            padding: '0.15rem 0.45rem',
-                            borderRadius: 'var(--radius-sm)',
-                            fontWeight: 700
-                          }}>
-                            D-Day 오늘
-                          </span>
-                        </div>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                          ※ 개체 관리기록에서 등록한 도래 예정 작업입니다.
-                        </div>
-                      </div>
-
                       {scheduledTasks.map(task => {
                         const targetEntity = (entities || []).find(e => e.id === task.entityId || e.tagNumber === task.tagNumber);
                         const entityName = task.entityName || targetEntity?.name || '';
@@ -929,21 +533,39 @@ export default function DailyDiaryView({
                               overflow: 'hidden'
                             }}>
                               <CheckCircle2 size={16} color="var(--color-primary)" style={{ flexShrink: 0 }} />
-                              {/* 개체번호 뱃지 */}
+                              {/* 개체번호 (캡슐 제거, 굵고 시원한 텍스트로 가독성 극대화) */}
                               <span 
-                                className="badge badge-tag"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   onOpenEntityDetail(task.tagNumber);
                                 }}
                                 title="클릭 시 이 개체의 관리 내역으로 이동"
-                                style={{ cursor: 'pointer', fontSize: '0.75rem', padding: '0.15rem 0.45rem', flexShrink: 0 }}
+                                style={{ 
+                                  cursor: 'pointer', 
+                                  fontSize: '0.92rem', 
+                                  fontWeight: 800, 
+                                  color: 'var(--text-main)', 
+                                  letterSpacing: '-0.01em',
+                                  textDecoration: 'underline',
+                                  textDecorationColor: 'rgba(0, 0, 0, 0.2)',
+                                  textUnderlineOffset: '3px',
+                                  flexShrink: 0 
+                                }}
                               >
                                 {task.tagNumber}
                               </span>
 
                               {entityName && (
-                                <span style={{ fontSize: '0.825rem', fontWeight: 700, color: 'var(--text-main)', flexShrink: 0 }}>
+                                <span style={{ 
+                                  fontSize: '0.82rem', 
+                                  fontWeight: 700, 
+                                  color: 'var(--text-subtle)',
+                                  background: 'rgba(0, 0, 0, 0.04)',
+                                  padding: '0.1rem 0.4rem',
+                                  borderRadius: 'var(--radius-sm)',
+                                  border: '1px solid rgba(0, 0, 0, 0.06)',
+                                  flexShrink: 0 
+                                }}>
                                   {entityName}
                                 </span>
                               )}
@@ -1007,12 +629,20 @@ export default function DailyDiaryView({
                           {/* 1행: [체크박스] [개체번호] [별명]   ...   [기록] 버튼 & 접기버튼 (우측 상단) */}
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', width: '100%' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap', minWidth: 0, flex: 1 }}>
-                              {/* 개체번호 뱃지 */}
+                              {/* 개체번호 (캡슐 제거, 굵고 시원한 텍스트로 가독성 극대화) */}
                               <span 
-                                className="badge badge-tag"
                                 onClick={() => onOpenEntityDetail(task.tagNumber)}
                                 title="클릭 시 이 개체의 관리 내역으로 이동"
-                                style={{ cursor: 'pointer', fontSize: '0.75rem', padding: '0.15rem 0.45rem' }}
+                                style={{ 
+                                  cursor: 'pointer', 
+                                  fontSize: '0.95rem', 
+                                  fontWeight: 800, 
+                                  color: 'var(--text-main)',
+                                  letterSpacing: '-0.01em',
+                                  textDecoration: 'underline',
+                                  textDecorationColor: 'rgba(0, 0, 0, 0.2)',
+                                  textUnderlineOffset: '3px'
+                                }}
                               >
                                 {task.tagNumber}
                               </span>
@@ -1020,9 +650,13 @@ export default function DailyDiaryView({
                               {/* 별명 (소 이름) */}
                               {entityName && (
                                 <span style={{ 
-                                  fontSize: '0.85rem', 
+                                  fontSize: '0.82rem', 
                                   fontWeight: 700, 
-                                  color: 'var(--text-main)' 
+                                  color: 'var(--text-subtle)',
+                                  background: 'rgba(0, 0, 0, 0.04)',
+                                  padding: '0.1rem 0.4rem',
+                                  borderRadius: 'var(--radius-sm)',
+                                  border: '1px solid rgba(0, 0, 0, 0.06)'
                                 }}>
                                   {entityName}
                                 </span>
@@ -1270,6 +904,466 @@ export default function DailyDiaryView({
                       })}
                     </div>
                   )}
+                </div>
+              )}
+
+          {activeDiaryTab === 'schedules' && (
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+                <h4 style={{
+                  fontSize: '0.92rem',
+                  fontWeight: 700,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.35rem',
+                  margin: 0,
+                  color: 'var(--text-main)'
+                }}>
+                  <span>📌</span>
+                  <span>등록된 일정 ({dailySchedules.length}건)</span>
+                </h4>
+                <button
+                  className="btn btn-outline btn-sm"
+                  onClick={() => onOpenScheduleModal(selectedDate)}
+                  style={{ fontSize: '0.75rem', padding: '0.2rem 0.55rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
+                >
+                  <Plus size={12} />
+                  <span>일정 추가</span>
+                </button>
+              </div>
+
+              {dailySchedules.length === 0 ? (
+                <div style={{
+                  textAlign: 'center',
+                  padding: '2.5rem 1rem',
+                  background: 'var(--bg-card-subtle)',
+                  borderRadius: 'var(--radius-md)',
+                  color: 'var(--text-muted)'
+                }}>
+                  <Clock size={36} style={{ opacity: 0.3, marginBottom: '0.5rem', color: 'var(--color-accent)' }} />
+                  <div style={{ fontWeight: 600 }}>{selectedDate}에 등록된 일정이 없습니다.</div>
+                  <p style={{ fontSize: '0.825rem', marginTop: '0.25rem' }}>
+                    새로운 영농 일정이나 진료/사료 계획을 등록해보세요.
+                  </p>
+                  <button
+                    className="btn btn-primary btn-sm"
+                    onClick={() => onOpenScheduleModal(selectedDate)}
+                    style={{ marginTop: '0.75rem' }}
+                  >
+                    <Plus size={14} />
+                    <span>이 날짜에 새 일정 추가</span>
+                  </button>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+                  {dailySchedules.map(sched => {
+                        const targetEntity = (entities || []).find(e => e.id === sched.entityId || e.tagNumber === sched.tagNumber);
+                        const entityName = sched.entityName || targetEntity?.name || '';
+                        const isDone = Boolean(sched.completed);
+                        const isExpanded = expandedCompletedIds.has(sched.id);
+                        const cleanTitle = entityName ? (sched.title || '').replace(new RegExp(`^\\[${entityName}\\]\\s*`), '') : (sched.title || '');
+
+                      // 1. 완료 상태이면서 접힌 모드: 1행 콤팩트 가로 배치 [체크박스 + 개체번호/농장공통 + 일정제목(말줄임)]
+                      if (isDone && !isExpanded) {
+                        return (
+                          <div
+                            key={sched.id}
+                            className="diary-item-card"
+                            onClick={() => toggleExpandCompleted(sched.id)}
+                            style={{
+                              background: 'var(--bg-card)',
+                              border: '1px solid var(--border-color)',
+                              borderRadius: 'var(--radius-md)',
+                              padding: '0.45rem 0.75rem',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              gap: '0.5rem',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s ease',
+                              minHeight: '36px',
+                              overflow: 'hidden',
+                              opacity: 1
+                            }}
+                            title="클릭하여 상세 내용 펼치기"
+                          >
+                            <div style={{ 
+                              display: 'flex', 
+                              alignItems: 'center', 
+                              gap: '0.5rem', 
+                              minWidth: 0, 
+                              flex: 1, 
+                              overflow: 'hidden' 
+                            }}>
+                              {/* 완료 체크 원형 토글 버튼 */}
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onToggleScheduleComplete(sched.id);
+                                }}
+                                style={{
+                                  background: 'none',
+                                  border: 'none',
+                                  cursor: 'pointer',
+                                  padding: '4px',
+                                  margin: '-4px',
+                                  color: 'var(--color-primary)',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  flexShrink: 0,
+                                  borderRadius: '50%'
+                                }}
+                                title="미완료로 변경 (원래 카드로 복원)"
+                              >
+                                <CheckCircle2 size={19} color="var(--color-primary)" />
+                              </button>
+
+                              {/* 개체번호 (캡슐 제거, 굵고 시원한 텍스트) 또는 농장 공통 뱃지 */}
+                              {sched.tagNumber ? (
+                                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem', flexShrink: 0 }}>
+                                  <span 
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      onOpenEntityDetail(sched.tagNumber);
+                                    }}
+                                    title="클릭 시 이 개체의 관리 내역으로 이동"
+                                    style={{ 
+                                      cursor: 'pointer', 
+                                      fontSize: '0.92rem', 
+                                      fontWeight: 800, 
+                                      color: 'var(--text-main)',
+                                      letterSpacing: '-0.01em',
+                                      textDecoration: 'underline',
+                                      textDecorationColor: 'rgba(0, 0, 0, 0.2)',
+                                      textUnderlineOffset: '3px'
+                                    }}
+                                  >
+                                    {sched.tagNumber}
+                                  </span>
+                                  {entityName && (
+                                    <span style={{ 
+                                      fontSize: '0.82rem', 
+                                      fontWeight: 700, 
+                                      color: 'var(--text-subtle)',
+                                      background: 'rgba(0, 0, 0, 0.04)',
+                                      padding: '0.1rem 0.4rem',
+                                      borderRadius: 'var(--radius-sm)',
+                                      border: '1px solid rgba(0, 0, 0, 0.06)'
+                                    }}>
+                                      {entityName}
+                                    </span>
+                                  )}
+                                </div>
+                              ) : (
+                                <span style={{
+                                  fontSize: '0.82rem',
+                                  color: 'var(--text-main)',
+                                  background: 'var(--bg-card-subtle)',
+                                  padding: '0.15rem 0.45rem',
+                                  borderRadius: 'var(--radius-sm)',
+                                  border: '1px solid var(--border-color)',
+                                  fontWeight: 700,
+                                  flexShrink: 0
+                                }}>
+                                  {entityName || '농장 공통'}
+                                </span>
+                              )}
+
+                              {/* 일정 제목: 원래 선명한 텍스트 컬러 유지 (var(--text-main)), 좁으면 말줄임, 가로줄 없음 */}
+                              <span style={{ 
+                                fontSize: '0.88rem', 
+                                fontWeight: 600,
+                                color: 'var(--text-main)', 
+                                textDecoration: 'none',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                                minWidth: 0,
+                                flex: 1
+                              }}>
+                                {cleanTitle || sched.title}
+                              </span>
+                            </div>
+
+                            {/* 우측 펼치기 힌트 아이콘 */}
+                            <div style={{ color: 'var(--text-subtle)', display: 'flex', alignItems: 'center', flexShrink: 0, paddingLeft: '0.2rem' }} title="상세 내용 펼치기">
+                              <ChevronDown size={14} />
+                            </div>
+                          </div>
+                        );
+                      }
+
+                      // 2. 미완료 상태이거나, 사용자가 클릭하여 펼친 경우 (원래 3행 카드)
+                      return (
+                        <div 
+                          key={sched.id}
+                          className="diary-item-card"
+                          style={{
+                            background: isDone ? 'var(--bg-card)' : 'rgba(245, 158, 11, 0.08)',
+                            border: `1px solid ${isDone ? 'var(--border-color)' : 'rgba(245, 158, 11, 0.3)'}`,
+                            borderRadius: 'var(--radius-md)',
+                            padding: '0.65rem 0.85rem',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '0.35rem',
+                            opacity: 1,
+                            transition: 'all 0.2s ease'
+                          }}
+                        >
+                          {/* 1행: [체크박스] [개체번호 or 농장공통] [별명] [간략한 시간]   ...   [수정][삭제] (우측 상단) */}
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', width: '100%' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap', minWidth: 0, flex: 1 }}>
+                              {/* 완료 체크 원형 토글 버튼 */}
+                              <button
+                                type="button"
+                                onClick={() => onToggleScheduleComplete(sched.id)}
+                                style={{
+                                  background: 'none',
+                                  border: 'none',
+                                  cursor: 'pointer',
+                                  padding: '4px',
+                                  margin: '-4px',
+                                  color: isDone ? 'var(--color-primary)' : 'var(--text-muted)',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  flexShrink: 0,
+                                  borderRadius: '50%'
+                                }}
+                                title={isDone ? '미완료로 변경' : '완료로 표시'}
+                              >
+                                {isDone ? (
+                                  <CheckCircle2 size={19} color="var(--color-primary)" />
+                                ) : (
+                                  <Circle size={19} color="var(--text-muted)" />
+                                )}
+                              </button>
+
+                              {/* 개체번호 (캡슐 제거, 굵고 시원한 텍스트) 또는 농장 공통 뱃지 */}
+                              {sched.tagNumber ? (
+                                <span 
+                                  onClick={() => onOpenEntityDetail(sched.tagNumber)}
+                                  title="클릭 시 이 개체의 관리 내역으로 이동"
+                                  style={{ 
+                                    cursor: 'pointer', 
+                                    fontSize: '0.95rem', 
+                                    fontWeight: 800, 
+                                    color: 'var(--text-main)',
+                                    letterSpacing: '-0.01em',
+                                    textDecoration: 'underline',
+                                    textDecorationColor: 'rgba(0, 0, 0, 0.2)',
+                                    textUnderlineOffset: '3px',
+                                    flexShrink: 0 
+                                  }}
+                                >
+                                  {sched.tagNumber}
+                                </span>
+                              ) : (
+                                <span style={{
+                                  fontSize: '0.82rem',
+                                  color: 'var(--text-main)',
+                                  background: 'var(--bg-card-subtle)',
+                                  padding: '0.15rem 0.45rem',
+                                  borderRadius: 'var(--radius-sm)',
+                                  border: '1px solid var(--border-color)',
+                                  fontWeight: 700,
+                                  flexShrink: 0
+                                }}>
+                                  {entityName || '농장 공통'}
+                                </span>
+                              )}
+
+                              {/* 별명 (개체명) */}
+                              {sched.tagNumber && entityName && (
+                                <span style={{ 
+                                  fontSize: '0.82rem', 
+                                  fontWeight: 700, 
+                                  color: 'var(--text-subtle)',
+                                  background: 'rgba(0, 0, 0, 0.04)',
+                                  padding: '0.1rem 0.4rem',
+                                  borderRadius: 'var(--radius-sm)',
+                                  border: '1px solid rgba(0, 0, 0, 0.06)'
+                                }}>
+                                  {entityName}
+                                </span>
+                              )}
+                            </div>
+
+                            {/* 우측 조작 버튼 (펼침 시 다시 접기 버튼, [+ 기록] 또는 [✏️] 버튼) */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', flexShrink: 0 }}>
+                              {isDone && isExpanded && (
+                                <button
+                                  type="button"
+                                  className="btn btn-outline btn-sm btn-icon-only"
+                                  onClick={() => toggleExpandCompleted(sched.id)}
+                                  title="다시 1줄로 접기"
+                                  style={{ width: '26px', height: '26px', padding: 0 }}
+                                >
+                                  <ChevronUp size={13} />
+                                </button>
+                              )}
+
+                              {/* 개체번호가 있는 경우: [+ 기록] 버튼 */}
+                              {sched.tagNumber && onOpenCareLogModal && (
+                                <button 
+                                  type="button" 
+                                  className="btn btn-primary btn-sm"
+                                  onClick={() => {
+                                    const targetEntity = (entities || []).find(e => e.id === sched.entityId || e.tagNumber === sched.tagNumber);
+                                    const todayDate = getTodayDateString();
+                                    const isFuture = selectedDate > todayDate;
+                                    const effectiveDate = isFuture ? todayDate : selectedDate;
+                                    onOpenCareLogModal(
+                                      targetEntity || { tagNumber: sched.tagNumber, name: entityName, id: sched.entityId },
+                                      effectiveDate,
+                                      {
+                                        category: sched.category || 'routine',
+                                        title: cleanTitle || sched.title || '',
+                                        date: effectiveDate,
+                                        time: sched.time || undefined,
+                                        entityId: sched.entityId || (targetEntity ? targetEntity.id : ''),
+                                        details: sched.memo || '',
+                                        linkedScheduleId: sched.id
+                                      }
+                                    );
+                                  }}
+                                  style={{ 
+                                    fontSize: '0.75rem', 
+                                    padding: '0.2rem 0.55rem', 
+                                    flexShrink: 0,
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '0.25rem',
+                                    minWidth: '54px',
+                                    justifyContent: 'center',
+                                    border: '1px solid #047857',
+                                    boxShadow: '0 1px 3px rgba(4, 120, 87, 0.3)'
+                                  }}
+                                  title="이 일정으로 새 관리기록 작성 (분류·작업명·메모 자동 입력)"
+                                >
+                                  <Plus size={12} />
+                                  <span>기록</span>
+                                </button>
+                              )}
+
+                              {/* 개체번호가 없는 경우: 기록 버튼 대신 해당 위치에 [✏️] 수정 버튼 배치 */}
+                              {!sched.tagNumber && onEditSchedule && (
+                                <button
+                                  type="button"
+                                  className="btn btn-outline btn-sm btn-icon-only"
+                                  onClick={() => onEditSchedule(sched)}
+                                  title="일정 수정"
+                                  style={{
+                                    width: '24px',
+                                    height: '24px',
+                                    padding: 0,
+                                    flexShrink: 0,
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    border: '1px solid var(--text-muted)',
+                                    color: 'var(--text-main)',
+                                    background: 'var(--bg-card)',
+                                    borderRadius: 'var(--radius-sm)'
+                                  }}
+                                >
+                                  <Edit2 size={12} />
+                                </button>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* 2행: [시간] [일정 제목 (말줄임)] (좌측) & [수정] 버튼 (우측) */}
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            gap: '0.6rem',
+                            width: '100%',
+                            paddingLeft: 0,
+                            marginTop: '0.15rem'
+                          }}>
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.45rem',
+                              flex: 1,
+                              minWidth: 0
+                            }}>
+                              {sched.time && (
+                                <span style={{
+                                  fontWeight: 700,
+                                  fontSize: '0.92rem',
+                                  color: 'var(--text-main)',
+                                  opacity: 0.7,
+                                  whiteSpace: 'nowrap',
+                                  flexShrink: 0
+                                }}>
+                                  {sched.time.startsWith('0') ? sched.time.slice(1) : sched.time}
+                                </span>
+                              )}
+
+                              <div 
+                                style={{
+                                  fontWeight: 700,
+                                  fontSize: '0.92rem',
+                                  color: 'var(--text-main)',
+                                  textDecoration: isDone ? 'line-through' : 'none',
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis',
+                                  whiteSpace: 'nowrap',
+                                  flex: 1,
+                                  minWidth: 0
+                                }}
+                                title={cleanTitle || sched.title}
+                              >
+                                {cleanTitle || sched.title}
+                              </div>
+                            </div>
+
+                            {/* 개체번호가 있는 경우: 1행의 [+ 기록] 버튼 바로 밑(2행 우측)에 [✏️] 수정 버튼 배치 */}
+                            {sched.tagNumber && onEditSchedule && (
+                              <button
+                                type="button"
+                                className="btn btn-outline btn-sm btn-icon-only"
+                                onClick={() => onEditSchedule(sched)}
+                                title="일정 수정"
+                                style={{
+                                  width: '24px',
+                                  height: '24px',
+                                  padding: 0,
+                                  flexShrink: 0,
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  border: '1px solid var(--text-muted)',
+                                  color: 'var(--text-main)',
+                                  background: 'var(--bg-card)',
+                                  borderRadius: 'var(--radius-sm)'
+                                }}
+                              >
+                                <Edit2 size={12} />
+                              </button>
+                            )}
+                          </div>
+
+                          {/* 3행: 상세 메모 (메모가 있을 때만 렌더링) */}
+                          {sched.memo && (
+                            <div style={{
+                              fontSize: '0.8rem',
+                              color: 'var(--text-muted)',
+                              paddingLeft: 0,
+                              wordBreak: 'break-word',
+                              lineHeight: 1.35
+                            }}>
+                              ※ {sched.memo}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                 </div>
               )}
             </div>
