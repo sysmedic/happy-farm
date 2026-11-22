@@ -433,7 +433,10 @@ export default function DailyDiaryView({
               onClick={() => handleTabClick('schedules')}
             >
               <span>일정</span>
-              <span className="diary-tab-count">
+              <span 
+                className="diary-tab-count"
+                style={activeDiaryTab === 'schedules' ? { background: 'var(--color-primary)', color: '#fff' } : {}}
+              >
                 {pendingDailySchedulesCount}
               </span>
             </button>
@@ -445,7 +448,10 @@ export default function DailyDiaryView({
               onClick={() => handleTabClick('logs')}
             >
               <span>관리 내역</span>
-              <span className="diary-tab-count">
+              <span 
+                className="diary-tab-count"
+                style={activeDiaryTab === 'logs' ? { background: 'var(--color-primary)', color: '#fff' } : {}}
+              >
                 {dailyLogs.length}
               </span>
             </button>
@@ -895,23 +901,22 @@ export default function DailyDiaryView({
 
           {activeDiaryTab === 'schedules' && (
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-                <h4 style={{
-                  fontSize: '0.92rem',
-                  fontWeight: 700,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.35rem',
-                  margin: 0,
-                  color: 'var(--text-main)'
-                }}>
-                  <span>📌</span>
-                  <span>등록된 일정 ({dailySchedules.length}건)</span>
-                </h4>
+              {/* 상단 액션 바: 중복 타이틀 제거 및 [일정 추가] 버튼 우측 배치 */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: '0.65rem' }}>
                 <button
                   className="btn btn-outline btn-sm"
                   onClick={() => onOpenScheduleModal(selectedDate)}
-                  style={{ fontSize: '0.75rem', padding: '0.2rem 0.55rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
+                  style={{
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    padding: '0.15rem 0.55rem',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.25rem',
+                    height: '24px',
+                    borderRadius: 'var(--radius-sm)'
+                  }}
+                  title="선택한 일자에 새 영농 일정 등록"
                 >
                   <Plus size={12} />
                   <span>일정 추가</span>
@@ -1095,35 +1100,9 @@ export default function DailyDiaryView({
                             transition: 'all 0.2s ease'
                           }}
                         >
-                          {/* 1행: [체크박스] [개체번호 or 농장공통] [별명] [간략한 시간]   ...   [수정][삭제] (우측 상단) */}
+                          {/* 1행: [개체번호 or 농장공통] [별명]   ...   [+ 기록] (우측 상단, 체크박스는 위치 정렬을 위해 숨김) */}
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', width: '100%' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap', minWidth: 0, flex: 1 }}>
-                              {/* 완료 체크 원형 토글 버튼 */}
-                              <button
-                                type="button"
-                                onClick={() => onToggleScheduleComplete(sched.id)}
-                                style={{
-                                  background: 'none',
-                                  border: 'none',
-                                  cursor: 'pointer',
-                                  padding: '4px',
-                                  margin: '-4px',
-                                  color: isDone ? 'var(--color-primary)' : 'var(--text-muted)',
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  flexShrink: 0,
-                                  borderRadius: '50%'
-                                }}
-                                title={isDone ? '미완료로 변경' : '완료로 표시'}
-                              >
-                                {isDone ? (
-                                  <CheckCircle2 size={19} color="var(--color-primary)" />
-                                ) : (
-                                  <Circle size={19} color="var(--text-muted)" />
-                                )}
-                              </button>
-
                               {/* 개체번호 (캡슐 제거, 굵고 시원한 텍스트) 또는 농장 공통 뱃지 */}
                               {sched.tagNumber ? (
                                 <div style={{ display: 'inline-flex', alignItems: 'baseline', gap: '0.45rem', flexShrink: 0 }}>
@@ -1171,7 +1150,7 @@ export default function DailyDiaryView({
                               )}
                             </div>
 
-                            {/* 우측 조작 버튼 (펼침 시 다시 접기 버튼, [+ 기록] 또는 [✏️] 버튼) */}
+                            {/* 우측 조작 버튼 (펼침 시 다시 접기 버튼, [+ 기록] 또는 [수정] 버튼) */}
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', flexShrink: 0 }}>
                               {isDone && isExpanded && (
                                 <button
@@ -1179,13 +1158,13 @@ export default function DailyDiaryView({
                                   className="btn btn-outline btn-sm btn-icon-only"
                                   onClick={() => toggleExpandCompleted(sched.id)}
                                   title="다시 1줄로 접기"
-                                  style={{ width: '26px', height: '26px', padding: 0 }}
+                                  style={{ width: '24px', height: '24px', padding: 0 }}
                                 >
                                   <ChevronUp size={13} />
                                 </button>
                               )}
 
-                              {/* 개체번호가 있는 경우: [+ 기록] 버튼 */}
+                              {/* 개체번호가 있는 경우: [+ 기록] 버튼 (높이 24px, 수정 버튼과 우측 라인 일치) */}
                               {sched.tagNumber && onOpenCareLogModal && (
                                 <button 
                                   type="button" 
@@ -1211,15 +1190,19 @@ export default function DailyDiaryView({
                                   }}
                                   style={{ 
                                     fontSize: '0.75rem', 
-                                    padding: '0.2rem 0.55rem', 
+                                    fontWeight: 700,
+                                    padding: '0.15rem 0.55rem', 
                                     flexShrink: 0,
                                     display: 'inline-flex',
                                     alignItems: 'center',
-                                    gap: '0.25rem',
-                                    minWidth: '54px',
                                     justifyContent: 'center',
+                                    gap: '0.25rem',
+                                    height: '24px',
+                                    borderRadius: 'var(--radius-sm)',
                                     border: '1px solid #047857',
-                                    boxShadow: '0 1px 3px rgba(4, 120, 87, 0.3)'
+                                    background: '#047857',
+                                    color: '#ffffff',
+                                    boxShadow: '0 1px 2px rgba(4, 120, 87, 0.2)'
                                   }}
                                   title="이 일정으로 새 관리기록 작성 (분류·작업명·메모 자동 입력)"
                                 >
@@ -1303,28 +1286,31 @@ export default function DailyDiaryView({
                               </div>
                             </div>
 
-                            {/* 개체번호가 있는 경우: 1행의 [+ 기록] 버튼 바로 밑(2행 우측)에 [✏️] 수정 버튼 배치 */}
+                            {/* 개체번호가 있는 경우: 1행의 [+ 기록] 버튼 바로 밑(2행 우측)에 [✏️ 수정] 버튼 배치 (높이 24px 수직 일치) */}
                             {sched.tagNumber && onEditSchedule && (
                               <button
                                 type="button"
-                                className="btn btn-outline btn-sm btn-icon-only"
+                                className="btn btn-outline btn-sm"
                                 onClick={() => onEditSchedule(sched)}
                                 title="일정 수정"
                                 style={{
-                                  width: '24px',
-                                  height: '24px',
-                                  padding: 0,
+                                  fontSize: '0.75rem',
+                                  fontWeight: 600,
+                                  padding: '0.15rem 0.55rem',
                                   flexShrink: 0,
                                   display: 'inline-flex',
                                   alignItems: 'center',
                                   justifyContent: 'center',
+                                  gap: '0.25rem',
+                                  height: '24px',
+                                  borderRadius: 'var(--radius-sm)',
                                   border: '1px solid var(--text-muted)',
                                   color: 'var(--text-main)',
-                                  background: 'var(--bg-card)',
-                                  borderRadius: 'var(--radius-sm)'
+                                  background: 'var(--bg-card)'
                                 }}
                               >
                                 <Edit2 size={12} />
+                                <span>수정</span>
                               </button>
                             )}
                           </div>
