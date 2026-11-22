@@ -1198,11 +1198,7 @@ export default function DailyDiaryView({
                                     justifyContent: 'center',
                                     gap: '0.25rem',
                                     height: '24px',
-                                    borderRadius: 'var(--radius-sm)',
-                                    border: '1px solid #047857',
-                                    background: '#047857',
-                                    color: '#ffffff',
-                                    boxShadow: '0 1px 2px rgba(4, 120, 87, 0.2)'
+                                    borderRadius: 'var(--radius-sm)'
                                   }}
                                   title="이 일정으로 새 관리기록 작성 (분류·작업명·메모 자동 입력)"
                                 >
