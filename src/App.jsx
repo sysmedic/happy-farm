@@ -8,6 +8,7 @@ import EntityPrintSheet from './components/entities/EntityPrintSheet.jsx';
 import CareLogFormModal from './components/care/CareLogFormModal.jsx';
 import DailyDiaryView from './components/diary/DailyDiaryView.jsx';
 import DailyReportView from './components/diary/DailyReportView.jsx';
+import FarmCommonHistoryView from './components/diary/FarmCommonHistoryView.jsx';
 import GoogleDriveView from './components/backup/GoogleDriveView.jsx';
 import ScheduleFormModal from './components/diary/ScheduleFormModal.jsx';
 import FarmSettingsModal from './components/settings/FarmSettingsModal.jsx';
@@ -740,7 +741,7 @@ export default function App() {
                 initialDate={targetDiaryDate}
                 initialTab={initialDiaryTab}
                 onOpenEntityDetail={handleOpenEntityDetail}
-                onOpenFarmCommonHistory={() => setIsFarmCommonModalOpen(true)}
+                onOpenFarmCommonHistory={() => setActiveTab('farm')}
                 onOpenCareLogModal={(entity = null, date = null, initialValues = null) => {
                   setCareLogPreselectedEntity(entity);
                   setCareLogInitialValues(initialValues);
@@ -770,7 +771,7 @@ export default function App() {
                 careCategories={allCareCategories}
                 farmSettings={farmSettings}
                 onOpenEntityDetail={handleOpenEntityDetail}
-                onOpenFarmCommonHistory={() => setIsFarmCommonModalOpen(true)}
+                onOpenFarmCommonHistory={() => setActiveTab('farm')}
                 onOpenCareLogModal={(entity = null) => {
                   setCareLogPreselectedEntity(entity);
                   setCareLogInitialValues(null);
@@ -783,6 +784,20 @@ export default function App() {
                   setActiveTab('diary');
                 }}
                 onNavigateToCloud={() => setIsSettingsModalOpen(true)}
+              />
+            )}
+
+            {activeTab === 'farm' && (
+              <FarmCommonHistoryView
+                careLogs={careLogs}
+                careCategories={allCareCategories}
+                onOpenCareLogModal={(entity = null, date = null, initialValues = null) => {
+                  setCareLogPreselectedEntity(entity);
+                  setCareLogInitialValues(initialValues);
+                  setIsCareLogModalOpen(true);
+                }}
+                onEditCareLog={handleOpenEditCareLog}
+                onDeleteCareLog={handleDeleteCareLog}
               />
             )}
 

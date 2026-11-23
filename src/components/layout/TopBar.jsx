@@ -45,11 +45,41 @@ function CowIcon({ size = 26, strokeWidth = 1.35, className = '' }) {
   );
 }
 
+// 한국형 한우 우사(축사 건물) 벡터 라인 아이콘 (용마루 환기탑 + 맞배지붕 + 우방 펜스)
+function CattleBarnIcon({ size = 22, strokeWidth = 1.4, className = '' }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={strokeWidth}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      {/* 상단 용마루 환기탑 (벤틸레이터 배기 루프) */}
+      <path d="M9.5 3.5h5l.7 2h-6.4z" />
+      {/* 완만한 우사 맞배지붕 */}
+      <path d="M3 9l9-3.5 9 3.5" />
+      {/* 우사 외곽 기둥과 바닥 */}
+      <path d="M5 9v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9" />
+      {/* 우사 파이프 펜스 레일 (가로 2줄) */}
+      <path d="M5 13.5h14" />
+      <path d="M5 17.5h14" />
+      {/* 중앙 우방 분할 세로 기둥 */}
+      <path d="M12 9v12" />
+    </svg>
+  );
+}
+
 // 탭별 현재 화면 이름 매핑
 const TAB_TITLES = {
   entities: '개체 관리',
   diary: '캘린더',
-  report: '일일 보고서'
+  report: '일일 보고서',
+  farm: '농장일지'
 };
 
 export default function TopBar({ 
@@ -63,10 +93,10 @@ export default function TopBar({
 }) {
   const currentTitle = TAB_TITLES[activeTab] || '개체 관리';
 
-  // 시작 화면 설정에 따라 탭 순서 동적 결정 (보고서는 항상 3번째)
+  // 시작 화면 설정에 따라 탭 순서 동적 결정 (보고서는 3번째, 농장일지는 4번째)
   const tabOrder = startTab === 'diary'
-    ? ['diary', 'entities', 'report']
-    : ['entities', 'diary', 'report'];
+    ? ['diary', 'entities', 'report', 'farm']
+    : ['entities', 'diary', 'report', 'farm'];
 
   const tabConfigs = {
     entities: {
@@ -86,6 +116,12 @@ export default function TopBar({
       title: '일일보고 (영농일지 및 모바일 보고서)',
       label: '일일보고',
       icon: <FileText size={22} strokeWidth={1.5} className="nav-tab-icon" />
+    },
+    farm: {
+      id: 'farm',
+      title: '농장일지 (축사 소독, 방역, 시설 전체 이력)',
+      label: '농장일지',
+      icon: <CattleBarnIcon size={22} strokeWidth={1.4} className="nav-tab-icon" />
     }
   };
 
