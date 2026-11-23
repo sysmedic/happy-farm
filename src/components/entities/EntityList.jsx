@@ -1028,12 +1028,34 @@ export default function EntityList({
                   </button>
 
                   <button 
-                    className={`btn ${isHistory ? 'btn-secondary' : 'btn-primary'} btn-sm`}
+                    className="btn btn-sm"
                     onClick={() => onOpenCareLogModal(entity)}
                     title={isShipped ? "출하 완료된 개체 (과거 이력 추가)" : isDeceased ? "폐사/도태된 개체 (과거 이력 추가)" : "이 개체에 관리 기록 추가"}
-                    style={{ flex: 1, height: '36px', fontWeight: 700, gap: '0.4rem' }}
+                    style={{ 
+                      flex: 1, 
+                      height: '36px', 
+                      fontWeight: 800, 
+                      gap: '0.4rem',
+                      borderRadius: 'var(--radius-sm)',
+                      ...(isHistory 
+                        ? {
+                            background: 'rgba(14, 165, 233, 0.12)',
+                            border: '1px solid #0ea5e9',
+                            color: '#0369a1'
+                          }
+                        : {
+                            background: 'rgba(16, 185, 129, 0.14)',
+                            border: '1px solid #10b981',
+                            color: '#065f46'
+                          }
+                      )
+                    }}
                   >
-                    <ClipboardList size={15} />
+                    <ClipboardList 
+                      size={15} 
+                      color={isHistory ? '#0369a1' : '#065f46'} 
+                      strokeWidth={2.2} 
+                    />
                     <span>{isHistory ? '이력 추가' : '관리 추가'}</span>
                   </button>
                 </div>
