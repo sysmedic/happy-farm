@@ -301,18 +301,39 @@ export default function CareLogFormModal({
               </div>
             )}
 
-            {/* 대상 개체: 상세 모달 등에서 진입 시 외부 박스 없이 개체번호 + 별명만 심플 표시 */}
+            {/* 대상 개체: 개체 상세정보와 100% 동일한 규격으로 인라인 표시 (불필요한 라벨 및 박스 제거) */}
             {preselectedEntity || isEditing ? (
-              <div className="form-group" style={{ marginBottom: '1.25rem' }}>
-                <label className="form-label">관리 대상 개체</label>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
-                  <span className="entity-ear-tag" style={{ height: '34px', fontSize: '1.05rem', padding: '0 0.65rem', cursor: 'default' }}>
-                    {currentSelectedEntity?.tagNumber}
-                  </span>
-                  <span style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-main)', lineHeight: 1.2 }}>
-                    {currentSelectedEntity?.name}
-                  </span>
-                </div>
+              <div style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '0.65rem', 
+                marginBottom: '1.25rem',
+                minWidth: 0,
+                overflow: 'hidden'
+              }}>
+                <span style={{ 
+                  fontSize: '1.18rem', 
+                  fontWeight: 800, 
+                  color: 'var(--text-main)', 
+                  fontFamily: 'var(--font-family)',
+                  fontVariantNumeric: 'tabular-nums',
+                  fontFeatureSettings: '"tnum" 1',
+                  letterSpacing: '-0.025em',
+                  whiteSpace: 'nowrap',
+                  flexShrink: 0 
+                }}>
+                  {currentSelectedEntity?.tagNumber}
+                </span>
+                <span style={{ 
+                  fontSize: '1.05rem', 
+                  fontWeight: 700, 
+                  color: 'var(--text-main)', 
+                  overflow: 'hidden', 
+                  textOverflow: 'ellipsis', 
+                  whiteSpace: 'nowrap' 
+                }}>
+                  {currentSelectedEntity?.name}
+                </span>
               </div>
             ) : (
               /* 미지정 진입 시 (예: 메인 FAB 등): 기존 개체 선택 드롭다운 유지 */
