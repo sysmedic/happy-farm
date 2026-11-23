@@ -12,7 +12,8 @@ import {
   ClipboardList,
   RotateCcw,
   Sparkles,
-  Tag
+  Tag,
+  Droplets
 } from 'lucide-react';
 import { 
   CARE_CATEGORIES, 
@@ -177,45 +178,49 @@ export default function FarmCommonHistoryView({
   ];
 
   return (
-    <div className="farm-common-history-view" style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-      {/* 1. 상단 2단 미니 통계 대시보드 (공통작업 건수 + 최근 소독일, 50%:50% 시원한 2분할) */}
+    <div className="farm-common-history-view" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+      {/* 1. 상단 초슬림 1줄 인라인 대시보드 (A안: 높이 38px, 세로 낭비 60% 압축) */}
       <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(2, 1fr)', 
-        gap: '0.75rem' 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'space-between', 
+        background: 'var(--bg-card)', 
+        border: '1px solid var(--border-color)', 
+        borderRadius: 'var(--radius-md)', 
+        padding: '0.45rem 0.85rem',
+        boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
+        gap: '0.5rem'
       }}>
-        <div style={{ 
-          background: 'var(--bg-card)', 
-          border: '1px solid var(--border-color)', 
-          borderRadius: 'var(--radius-md)', 
-          padding: '0.85rem 1rem',
-          boxShadow: 'var(--shadow-sm)'
-        }}>
-          <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontWeight: 700 }}>공통작업 건수</span>
-          <div style={{ fontSize: '1.45rem', fontWeight: 800, color: 'var(--text-main)', marginTop: '0.2rem' }}>
-            {stats.totalCount} <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>건</span>
-          </div>
+        {/* 좌측: 공통작업 건수 */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', minWidth: 0 }}>
+          <ClipboardList size={14} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600, whiteSpace: 'nowrap' }}>
+            공통작업
+          </span>
+          <strong style={{ fontSize: '0.92rem', color: 'var(--text-main)', fontWeight: 800 }}>
+            {stats.totalCount}건
+          </strong>
         </div>
 
-        <div style={{ 
-          background: 'var(--bg-card)', 
-          border: '1px solid var(--border-color)', 
-          borderRadius: 'var(--radius-md)', 
-          padding: '0.85rem 1rem',
-          boxShadow: 'var(--shadow-sm)'
-        }}>
-          <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontWeight: 700 }}>최근 소독일</span>
-          <div style={{ 
-            fontSize: '1.25rem', 
-            fontWeight: 800, 
+        {/* 중앙 미니 구분선 */}
+        <div style={{ width: '1px', height: '14px', background: 'var(--border-color)', flexShrink: 0 }} />
+
+        {/* 우측: 최근 소독일 */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', minWidth: 0, justifyContent: 'flex-end' }}>
+          <Droplets size={14} style={{ color: '#0284c7', flexShrink: 0 }} />
+          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600, whiteSpace: 'nowrap' }}>
+            최근 소독
+          </span>
+          <strong style={{ 
+            fontSize: '0.92rem', 
             color: '#0284c7', 
-            marginTop: '0.25rem',
+            fontWeight: 800,
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             textOverflow: 'ellipsis'
           }}>
             {stats.latestDisinfectionDate}
-          </div>
+          </strong>
         </div>
       </div>
 
