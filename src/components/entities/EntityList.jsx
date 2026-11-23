@@ -438,9 +438,9 @@ export default function EntityList({
             setSelectedBreed('all');
             setSelectedBarn('all');
           }}
-          title="출하 및 폐사 이력 개체 보기"
+          title="출하 및 기타 이력 개체 보기"
         >
-          <span className="segment-label">출하·폐사</span>
+          <span className="segment-label">출하·기타</span>
           <span className="segment-count">{stats.historyCount}</span>
         </button>
       </div>
@@ -544,7 +544,7 @@ export default function EntityList({
             <input
               type="text"
               className="search-input"
-              placeholder={isHistoryMode ? "출하/폐사 개체번호(이표), 이름, 초성 검색..." : "개체번호(이표), 이름, 축사, 초성(예: ㅂㅅㅇ) 검색..."}
+              placeholder={isHistoryMode ? "출하/기타 개체번호(이표), 이름, 초성 검색..." : "개체번호(이표), 이름, 축사, 초성(예: ㅂㅅㅇ) 검색..."}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -572,7 +572,7 @@ export default function EntityList({
             {ENTITY_STATUSES.filter(st => !isHistoricalStatus(st.id)).map(st => (
               <option key={st.id} value={st.id}>{st.icon} {st.label}</option>
             ))}
-            <option value="history">🏷️ 출하·폐사 ({stats.historyCount}두)</option>
+            <option value="history">🏷️ 출하·기타 ({stats.historyCount}두)</option>
             <option value="shipped">🏷️ 출하 완료</option>
             <option value="deceased">🪦 폐사 / 도태</option>
             <option value="all">📜 농장 전체 이력 (총 {entities.length}두)</option>

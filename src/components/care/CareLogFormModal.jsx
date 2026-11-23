@@ -358,7 +358,7 @@ export default function CareLogFormModal({
                     </optgroup>
                   )}
                   {historyEntities.length > 0 && (
-                    <optgroup label="사육 이력 개체 (출하·폐사)">
+                    <optgroup label="사육 이력 개체 (출하·기타)">
                       {historyEntities.map(ent => (
                         <option key={ent.id} value={ent.id}>
                           {ent.status === 'deceased' ? '🪦 [폐사] ' : '🏷️ [출하] '}{ent.tagNumber} {ent.name}
