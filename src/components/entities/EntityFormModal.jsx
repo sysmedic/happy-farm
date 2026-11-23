@@ -213,7 +213,7 @@ export default function EntityFormModal({
   return (
     <div className="modal-overlay" onClick={onClose}>
       <form 
-        className="modal-content modal-content-lg" 
+        className="modal-content modal-content-lg entity-form-modal" 
         onClick={(e) => e.stopPropagation()} 
         onSubmit={handleSubmit}
       >

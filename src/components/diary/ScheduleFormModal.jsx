@@ -245,7 +245,7 @@ export default function ScheduleFormModal({
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div 
-        className="modal-content modal-content-md"
+        className="modal-content modal-content-md schedule-modal"
         onClick={(e) => e.stopPropagation()}
         style={{ maxWidth: '540px' }}
       >

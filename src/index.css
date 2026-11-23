@@ -2241,6 +2241,24 @@ form.modal-content {
   box-shadow: 0 0 0 3px var(--color-primary-light);
 }
 
+/* 영농 일정 모달 - 스카이 블루 입력창 포커스 테마 연계 */
+.schedule-modal .form-input:focus,
+.schedule-modal .form-select:focus,
+.schedule-modal .form-textarea:focus {
+  outline: none;
+  border-color: #0284c7 !important;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.16) !important;
+}
+
+/* 신규 개체 등록/수정 모달 - 소프트 인디고 입력창 포커스 테마 연계 */
+.entity-form-modal .form-input:focus,
+.entity-form-modal .form-select:focus,
+.entity-form-modal .form-textarea:focus {
+  outline: none;
+  border-color: #6366f1 !important;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.16) !important;
+}
+
 .form-textarea {
   resize: vertical;
   min-height: 80px;
