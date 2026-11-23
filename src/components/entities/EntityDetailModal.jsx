@@ -876,9 +876,26 @@ export default function EntityDetailModal({
                           marginBottom: '0.3rem',
                           width: '100%'
                         }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem', minWidth: 0, flex: 1 }}>
-                            <span className={`badge ${catObj.badgeClass}`} style={{ flexShrink: 0, borderRadius: '9999px', padding: '0.18rem 0.55rem', fontSize: '0.78rem', fontWeight: 700 }}>
-                              {catObj.icon} {catObj.label}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem', minWidth: 0, flex: 1, height: '24px' }}>
+                            <span 
+                              className={`badge ${catObj.badgeClass}`} 
+                              style={{ 
+                                flexShrink: 0, 
+                                borderRadius: '9999px', 
+                                padding: '0 0.55rem', 
+                                height: '24px',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '0.28rem',
+                                fontSize: '0.76rem', 
+                                fontWeight: 700,
+                                lineHeight: 1,
+                                boxSizing: 'border-box'
+                              }}
+                            >
+                              {catObj.icon && <span style={{ fontSize: '0.8rem', lineHeight: 1, display: 'inline-flex', alignItems: 'center' }}>{catObj.icon}</span>}
+                              <span style={{ lineHeight: 1, display: 'inline-flex', alignItems: 'center' }}>{catObj.label}</span>
                             </span>
                             <span style={{
                               fontWeight: 700,
@@ -887,13 +904,15 @@ export default function EntityDetailModal({
                               flexShrink: 0,
                               display: 'inline-flex',
                               alignItems: 'center',
-                              gap: '0.35rem'
+                              height: '24px',
+                              gap: '0.35rem',
+                              lineHeight: 1
                             }}>
-                              <span style={{ color: 'var(--text-main)', opacity: 0.85 }}>
+                              <span style={{ color: 'var(--text-main)', opacity: 0.85, lineHeight: 1 }}>
                                 {log.date}
                               </span>
                               {log.time && (
-                                <span style={{ fontWeight: 700, fontSize: '0.84rem', color: 'var(--text-muted)' }}>
+                                <span style={{ fontWeight: 700, fontSize: '0.84rem', color: 'var(--text-muted)', lineHeight: 1 }}>
                                   {log.time}
                                 </span>
                               )}
