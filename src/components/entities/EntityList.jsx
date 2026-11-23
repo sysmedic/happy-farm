@@ -550,13 +550,25 @@ export default function EntityList({
             />
           </div>
           <button 
-            className="btn btn-primary"
+            className="btn"
             onClick={() => onOpenEntityModal()}
-            style={{ whiteSpace: 'nowrap', flexShrink: 0 }}
-            title="신규 개체 등록"
+            style={{ 
+              whiteSpace: 'nowrap', 
+              flexShrink: 0,
+              fontWeight: 800,
+              background: 'rgba(99, 102, 241, 0.14)',
+              border: '1px solid #6366f1',
+              color: '#312e81',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.35rem',
+              borderRadius: 'var(--radius-sm)',
+              boxShadow: 'var(--shadow-sm)'
+            }}
+            title="새로운 개체 마스터 등록"
           >
-            <Plus size={16} />
-            <span>신규 등록</span>
+            <Plus size={16} color="#312e81" strokeWidth={2.5} />
+            <span>개체 등록</span>
           </button>
         </div>
 
