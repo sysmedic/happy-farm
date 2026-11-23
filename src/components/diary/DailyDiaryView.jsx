@@ -1344,11 +1344,11 @@ export default function DailyDiaryView({
                                 </button>
                               )}
 
-                              {/* 미완료 상태이고 개체번호가 있는 경우에만 [+ 기록] 버튼 표시 (아웃라인 에메랄드 그린 스타일로 세련되게 통일) */}
+                              {/* 미완료 상태이고 개체번호가 있는 경우에만 [+ 기록] 버튼 표시 (1안: 소프트 에메랄드 틴트로 전달력과 조화 동시 확보) */}
                               {!isDone && sched.tagNumber && onOpenCareLogModal && (
                                 <button 
                                   type="button" 
-                                  className="btn btn-outline btn-sm"
+                                  className="btn btn-sm"
                                   onClick={() => {
                                     const targetEntity = (entities || []).find(e => e.id === sched.entityId || e.tagNumber === sched.tagNumber);
                                     const todayDate = getTodayDateString();
@@ -1370,7 +1370,7 @@ export default function DailyDiaryView({
                                   }}
                                   style={{ 
                                     fontSize: '0.75rem', 
-                                    fontWeight: 700,
+                                    fontWeight: 800,
                                     padding: '0.15rem 0.55rem', 
                                     flexShrink: 0,
                                     display: 'inline-flex',
@@ -1379,13 +1379,13 @@ export default function DailyDiaryView({
                                     gap: '0.25rem',
                                     height: '24px',
                                     borderRadius: 'var(--radius-sm)',
-                                    color: '#059669',
-                                    borderColor: '#10b981',
-                                    background: 'var(--bg-card)'
+                                    color: '#065f46',
+                                    border: '1px solid #10b981',
+                                    background: 'rgba(16, 185, 129, 0.15)'
                                   }}
                                   title="이 일정으로 새 관리기록 작성 (분류·작업명·메모 자동 입력)"
                                 >
-                                  <Plus size={12} color="#059669" />
+                                  <Plus size={12} color="#065f46" strokeWidth={2.5} />
                                   <span>기록</span>
                                 </button>
                               )}
