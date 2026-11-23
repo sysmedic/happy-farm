@@ -473,15 +473,25 @@ export default function EntityFormModal({
               </button>
               <button 
                 type="submit" 
-                className={`btn ${isEditing ? 'btn-outline' : 'btn-primary'}`}
+                className="btn"
                 style={isEditing ? {
                   border: '1px solid var(--text-muted)',
                   color: 'var(--text-main)',
                   fontWeight: 700,
                   background: 'var(--bg-card)'
-                } : {}}
+                } : {
+                  fontWeight: 800,
+                  background: 'rgba(99, 102, 241, 0.14)',
+                  border: '1px solid #6366f1',
+                  color: '#312e81',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                  borderRadius: 'var(--radius-sm)',
+                  boxShadow: 'var(--shadow-sm)'
+                }}
               >
-                <Save size={16} />
+                <Save size={16} color={isEditing ? 'currentColor' : '#312e81'} strokeWidth={isEditing ? 2 : 2.4} />
                 <span>{isEditing ? '변경사항 저장' : '개체 등록 완료'}</span>
               </button>
             </div>
