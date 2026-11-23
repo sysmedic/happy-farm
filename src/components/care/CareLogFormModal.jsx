@@ -560,9 +560,18 @@ export default function CareLogFormModal({
                     />
                     <button
                       type="button"
-                      className="btn btn-primary"
+                      className="btn btn-sm"
                       onClick={handleCreateCategory}
-                      style={{ height: '36px', padding: '0 0.95rem', fontSize: '0.88rem', fontWeight: 700, whiteSpace: 'nowrap' }}
+                      style={{
+                        height: '36px',
+                        padding: '0 0.95rem',
+                        fontSize: '0.88rem',
+                        fontWeight: 700,
+                        whiteSpace: 'nowrap',
+                        background: 'rgba(16, 185, 129, 0.14)',
+                        border: '1px solid #10b981',
+                        color: '#065f46'
+                      }}
                     >
                       등록 및 선택
                     </button>
@@ -849,15 +858,25 @@ export default function CareLogFormModal({
               </button>
               <button 
                 type="submit" 
-                className={`btn ${isEditing ? 'btn-outline' : 'btn-primary'}`}
+                className="btn"
                 style={isEditing ? {
                   border: '1px solid var(--text-muted)',
                   color: 'var(--text-main)',
                   fontWeight: 700,
                   background: 'var(--bg-card)'
-                } : {}}
+                } : {
+                  fontWeight: 700,
+                  background: 'rgba(16, 185, 129, 0.14)',
+                  border: '1px solid #10b981',
+                  color: '#065f46',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                  borderRadius: 'var(--radius-sm)',
+                  boxShadow: 'var(--shadow-sm)'
+                }}
               >
-                <Save size={16} />
+                <Save size={16} color={isEditing ? 'currentColor' : '#065f46'} strokeWidth={isEditing ? 2 : 2.2} />
                 <span>{isEditing ? '수정 사항 저장' : '관리 기록 저장'}</span>
               </button>
             </div>
