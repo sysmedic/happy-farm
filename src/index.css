@@ -1284,7 +1284,7 @@ a:hover {
 
 
 
-/* 개체 등록/수정 모달 - 사육 단계 버튼 소프트 에메랄드 틴트 */
+/* 개체 등록/수정 모달 - 사육 단계 버튼 소프트 인디고 틴트 (개체 마스터 등록 테마 연계) */
 .stage-select-btn {
   display: flex;
   align-items: center;
@@ -1308,17 +1308,17 @@ a:hover {
 }
 
 .stage-select-btn.active {
-  background: rgba(16, 185, 129, 0.12) !important;
-  color: #059669 !important;
-  border: 1.5px solid #10b981 !important;
-  font-weight: 700;
-  box-shadow: 0 1px 4px rgba(16, 185, 129, 0.12);
+  background: rgba(99, 102, 241, 0.14) !important;
+  color: #312e81 !important;
+  border: 1.5px solid #6366f1 !important;
+  font-weight: 800;
+  box-shadow: 0 1px 4px rgba(99, 102, 241, 0.15);
 }
 
 [data-theme='dark'] .stage-select-btn.active {
-  background: rgba(16, 185, 129, 0.18) !important;
-  color: #34d399 !important;
-  border: 1.5px solid #10b981 !important;
+  background: rgba(99, 102, 241, 0.22) !important;
+  color: #c7d2fe !important;
+  border: 1.5px solid #818cf8 !important;
 }
 
 /* 개체 등록/수정 모달 - 성별 버튼 소프트 파스텔 틴트 */

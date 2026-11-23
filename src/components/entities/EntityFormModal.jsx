@@ -280,7 +280,7 @@ export default function EntityFormModal({
                 />
               </div>
 
-              {/* 사육 단계 선택 (소프트 에메랄드 틴트 적용) */}
+              {/* 사육 단계 선택 (소프트 인디고 틴트 적용) */}
               <div className="form-group full-width">
                 <label className="form-label">
                   사육 단계 <span className="required">*</span>
