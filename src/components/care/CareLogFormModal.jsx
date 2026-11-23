@@ -83,6 +83,23 @@ export default function CareLogFormModal({
     });
   }, [allCategories, currentSelectedEntity, isFarmCommon]);
 
+  const [date, setDate] = useState(logToEdit?.date || initialValues?.date || getTodayDateString());
+  const [time, setTime] = useState(logToEdit?.time || getCurrentTimeString());
+  const [category, setCategory] = useState(normalizeCategoryId(logToEdit?.category || initialValues?.category) || '');
+  const [title, setTitle] = useState(logToEdit?.title || initialValues?.title || '');
+  const [details, setDetails] = useState(logToEdit?.details || initialValues?.details || '');
+  // 신규 등록 시에는 항상 깨끗한 빈칸("")으로 시작 (지정이 아닌 예시 제시 원칙)
+  const [operator, setOperator] = useState(logToEdit?.operator || '');
+  const [cost, setCost] = useState(logToEdit?.cost ? String(logToEdit.cost) : '');
+
+  // 빠른 추천 제목 목록 (localStorage 연동)
+  const [quickTitlesMap, setQuickTitlesMap] = useState(() => loadQuickTitlesMap());
+  const [isAddingQuickTitle, setIsAddingQuickTitle] = useState(false);
+  const [newQuickTitleInput, setNewQuickTitleInput] = useState('');
+
+  const currentCategoryKey = normalizeCategoryId(category);
+  const currentQuickTitles = quickTitlesMap[currentCategoryKey] || [];
+
   // 대상 개체 전환(개체 <-> 농장 공통 또는 거세우 선택) 시 선택 불가능한 카테고리가 남아있으면 안전하게 자동 리셋
   useEffect(() => {
     if (!category) return;
@@ -100,22 +117,6 @@ export default function CareLogFormModal({
       }
     }
   }, [isFarmCommon, currentSelectedEntity, category, allCategories]);
-  const [date, setDate] = useState(logToEdit?.date || initialValues?.date || getTodayDateString());
-  const [time, setTime] = useState(logToEdit?.time || getCurrentTimeString());
-  const [category, setCategory] = useState(normalizeCategoryId(logToEdit?.category || initialValues?.category) || '');
-  const [title, setTitle] = useState(logToEdit?.title || initialValues?.title || '');
-  const [details, setDetails] = useState(logToEdit?.details || initialValues?.details || '');
-  // 신규 등록 시에는 항상 깨끗한 빈칸("")으로 시작 (지정이 아닌 예시 제시 원칙)
-  const [operator, setOperator] = useState(logToEdit?.operator || '');
-  const [cost, setCost] = useState(logToEdit?.cost ? String(logToEdit.cost) : '');
-
-  // 빠른 추천 제목 목록 (localStorage 연동)
-  const [quickTitlesMap, setQuickTitlesMap] = useState(() => loadQuickTitlesMap());
-  const [isAddingQuickTitle, setIsAddingQuickTitle] = useState(false);
-  const [newQuickTitleInput, setNewQuickTitleInput] = useState('');
-
-  const currentCategoryKey = normalizeCategoryId(category);
-  const currentQuickTitles = quickTitlesMap[currentCategoryKey] || [];
 
   // 빠른 추천 제목 추가
   const handleAddQuickTitle = (titleToAdd) => {
