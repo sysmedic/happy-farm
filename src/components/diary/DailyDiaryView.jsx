@@ -1062,24 +1062,27 @@ export default function DailyDiaryView({
 
           {activeDiaryTab === 'schedules' && (
             <div>
-              {/* 상단 액션 바: 중복 타이틀 제거 및 [일정 추가] 버튼 우측 배치 */}
+              {/* 상단 액션 바: 중복 타이틀 제거 및 [일정 추가] 버튼 우측 배치 (일정 전용 스카이 블루 테마) */}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: '0.65rem' }}>
                 <button
                   className="btn btn-outline btn-sm"
                   onClick={() => onOpenScheduleModal(selectedDate)}
                   style={{
                     fontSize: '0.75rem',
-                    fontWeight: 600,
-                    padding: '0.15rem 0.55rem',
+                    fontWeight: 700,
+                    padding: '0.15rem 0.6rem',
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: '0.25rem',
                     height: '24px',
-                    borderRadius: 'var(--radius-sm)'
+                    borderRadius: 'var(--radius-sm)',
+                    color: '#0284c7',
+                    borderColor: '#0284c7',
+                    background: 'var(--bg-card)'
                   }}
                   title="선택한 일자에 새 영농 일정 등록"
                 >
-                  <Plus size={12} />
+                  <Plus size={12} color="#0284c7" />
                   <span>일정 추가</span>
                 </button>
               </div>
@@ -1092,17 +1095,26 @@ export default function DailyDiaryView({
                   borderRadius: 'var(--radius-md)',
                   color: 'var(--text-muted)'
                 }}>
-                  <Clock size={36} style={{ opacity: 0.3, marginBottom: '0.5rem', color: 'var(--color-accent)' }} />
+                  <Clock size={36} style={{ opacity: 0.35, marginBottom: '0.5rem', color: '#0284c7' }} />
                   <div style={{ fontWeight: 600 }}>{selectedDate}에 등록된 일정이 없습니다.</div>
                   <p style={{ fontSize: '0.825rem', marginTop: '0.25rem' }}>
                     새로운 영농 일정이나 진료/사료 계획을 등록해보세요.
                   </p>
                   <button
-                    className="btn btn-primary btn-sm"
+                    className="btn btn-sm"
                     onClick={() => onOpenScheduleModal(selectedDate)}
-                    style={{ marginTop: '0.75rem' }}
+                    style={{
+                      marginTop: '0.75rem',
+                      backgroundColor: '#0284c7',
+                      borderColor: '#0284c7',
+                      color: '#ffffff',
+                      fontWeight: 700,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.35rem'
+                    }}
                   >
-                    <Plus size={14} />
+                    <Plus size={14} color="#ffffff" />
                     <span>이 날짜에 새 일정 추가</span>
                   </button>
                 </div>
