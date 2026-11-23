@@ -333,22 +333,22 @@ export default function DailyDiaryView({
                 const hasSchedule = datesWithPendingSchedules.has(item.dateStr);
                 const hasLog = datesWithCareLogs.has(item.dateStr);
 
-                // 소프트 파스텔 배경 및 테두리
+                // 1안 모던 슬레이트 & 차콜 테마 배경 및 테두리
                 const cellBg = !item.isCurrentMonth 
                   ? 'transparent' 
                   : isSelected 
-                    ? 'rgba(16, 185, 129, 0.16)' 
+                    ? 'rgba(51, 65, 85, 0.12)' 
                     : 'var(--bg-card-subtle)';
 
                 const cellBorder = !item.isCurrentMonth
                   ? 'none'
                   : isSelected
-                    ? '2px solid var(--color-primary)'
+                    ? '2px solid #334155'
                     : isToday
                       ? '1.5px solid var(--border-color)'
                       : '1px solid var(--border-color)';
 
-                const textColor = isSelected ? '#065f46' : 'var(--text-main)';
+                const textColor = isSelected ? '#0f172a' : 'var(--text-main)';
 
                 return (
                   <button
@@ -378,7 +378,7 @@ export default function DailyDiaryView({
                       padding: 0
                     }}
                   >
-                    {/* 1안: '오늘' 텍스트를 상단에 플로팅시켜 숫자의 정중앙 높이(가로 라인) 완벽 일치 */}
+                    {/* '오늘' 텍스트를 상단에 플로팅 (에메랄드 그린 제거 후 모던 차콜/슬레이트 적용) */}
                     {isToday && (
                       <span style={{
                         position: 'absolute',
@@ -387,7 +387,7 @@ export default function DailyDiaryView({
                         transform: 'translateX(-50%)',
                         fontSize: '0.58rem',
                         fontWeight: 800,
-                        color: isSelected ? '#047857' : 'var(--color-primary)',
+                        color: isSelected ? '#334155' : 'var(--text-muted)',
                         lineHeight: 1,
                         letterSpacing: '-0.02em',
                         pointerEvents: 'none',
@@ -399,13 +399,13 @@ export default function DailyDiaryView({
 
                     <span>{item.dayNumber}</span>
 
-                    {/* 하단 3색 미니 도트 콤보 (알람: 주황, 일정: 블루, 관리기록: 그린) */}
+                    {/* 하단 3색 미니 도트 콤보 (알람: 주황, 일정: 블루, 관리기록: 그린) - 시인성 강화 5.5px + 화이트 링 */}
                     {(hasReminder || hasSchedule || hasLog) && (
                       <div style={{
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        gap: '2.5px',
+                        gap: '3.5px',
                         position: 'absolute',
                         bottom: '3px',
                         left: '50%',
@@ -416,10 +416,11 @@ export default function DailyDiaryView({
                           <span 
                             title="미처리 알람 있음"
                             style={{
-                              width: '4px',
-                              height: '4px',
+                              width: '5.5px',
+                              height: '5.5px',
                               borderRadius: '50%',
                               background: '#f59e0b',
+                              boxShadow: '0 0 0 1px rgba(255, 255, 255, 0.95)',
                               flexShrink: 0
                             }} 
                           />
@@ -428,10 +429,11 @@ export default function DailyDiaryView({
                           <span 
                             title="미완료 일정 있음"
                             style={{
-                              width: '4px',
-                              height: '4px',
+                              width: '5.5px',
+                              height: '5.5px',
                               borderRadius: '50%',
                               background: '#0284c7',
+                              boxShadow: '0 0 0 1px rgba(255, 255, 255, 0.95)',
                               flexShrink: 0
                             }} 
                           />
@@ -440,10 +442,11 @@ export default function DailyDiaryView({
                           <span 
                             title="완료 관리기록 있음"
                             style={{
-                              width: '4px',
-                              height: '4px',
+                              width: '5.5px',
+                              height: '5.5px',
                               borderRadius: '50%',
-                              background: '#059669',
+                              background: '#10b981',
+                              boxShadow: '0 0 0 1px rgba(255, 255, 255, 0.95)',
                               flexShrink: 0
                             }} 
                           />
@@ -478,17 +481,27 @@ export default function DailyDiaryView({
                   <span>일정</span>
                 </span>
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
-                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#059669', display: 'inline-block' }} />
+                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10b981', display: 'inline-block' }} />
                   <span>관리 내역</span>
                 </span>
               </div>
               <button
                 className="btn btn-outline btn-sm"
                 onClick={() => onOpenScheduleModal(selectedDate)}
-                style={{ fontSize: '0.75rem', padding: '0.2rem 0.55rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
+                style={{
+                  fontSize: '0.75rem',
+                  padding: '0.2rem 0.6rem',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.25rem',
+                  color: '#0284c7',
+                  borderColor: '#0284c7',
+                  fontWeight: 700,
+                  background: 'var(--bg-card)'
+                }}
                 title="선택한 일자에 새 영농 일정 등록"
               >
-                <Plus size={12} />
+                <Plus size={13} color="#0284c7" />
                 <span>일정 추가</span>
               </button>
             </div>
