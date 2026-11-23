@@ -13,6 +13,9 @@ import {
   normalizeCategoryId
 } from '../../lib/types.js';
 
+// 번식 전용 카테고리 (암소 전용: 거세/수소에서 제외)
+const BREEDING_CATEGORY_IDS = new Set(['breeding', 'heat_check', 'pregnancy_check', 'calving']);
+
 export default function CareLogFormModal({
   preselectedEntity,
   logToEdit,
@@ -34,8 +37,23 @@ export default function CareLogFormModal({
   // 환경설정에 등록된 농장 대표자 및 작업자들로만 예시 목록 구성 (일반명칭 수의사/수정사 제외)
   const operatorSuggestions = Array.from(new Set([defaultOwnerName, ...farmWorkers])).filter(Boolean);
 
-  const categoriesToDisplay = careCategories || CARE_CATEGORIES;
+  const allCategories = careCategories || CARE_CATEGORIES;
   const [selectedEntityId, setSelectedEntityId] = useState(logToEdit?.entityId || initialValues?.entityId || preselectedEntity?.id || '');
+
+  // 현재 선택된 개체 정보
+  const currentSelectedEntity = useMemo(() => {
+    return (entities || []).find(e => e.id === selectedEntityId) || preselectedEntity || null;
+  }, [entities, selectedEntityId, preselectedEntity]);
+
+  // 지능형 분류 필터링:
+  // 거세우('castrated') 또는 수컷('male') 개체의 경우 번식 카테고리 4종(인공수정, 발정관찰, 임신감정, 분만관리) 완전 제외!
+  const categoriesToDisplay = useMemo(() => {
+    const isMaleOrCastrated = currentSelectedEntity && (currentSelectedEntity.gender === 'castrated' || currentSelectedEntity.gender === 'male');
+    if (isMaleOrCastrated) {
+      return allCategories.filter(cat => !BREEDING_CATEGORY_IDS.has(normalizeCategoryId(cat.id)));
+    }
+    return allCategories;
+  }, [allCategories, currentSelectedEntity]);
   const [date, setDate] = useState(logToEdit?.date || initialValues?.date || getTodayDateString());
   const [time, setTime] = useState(logToEdit?.time || getCurrentTimeString());
   const [category, setCategory] = useState(normalizeCategoryId(logToEdit?.category || initialValues?.category) || '');
@@ -260,7 +278,17 @@ export default function CareLogFormModal({
     });
   };
 
-  const currentSelectedEntity = entities.find(e => e.id === selectedEntityId) || preselectedEntity;
+  // 개체 변경 시 거세/수소인데 번식 카테고리가 선택되어 있었다면 안전하게 초기화
+  useEffect(() => {
+    const normCurrentCat = normalizeCategoryId(category);
+    if (BREEDING_CATEGORY_IDS.has(normCurrentCat)) {
+      const isMaleOrCastrated = currentSelectedEntity && (currentSelectedEntity.gender === 'castrated' || currentSelectedEntity.gender === 'male');
+      if (isMaleOrCastrated) {
+        setCategory('');
+        setTitle('');
+      }
+    }
+  }, [currentSelectedEntity, category]);
 
   return (
     <div className="modal-overlay" onClick={onClose}>

@@ -26,6 +26,9 @@ export const SCHEDULE_CATEGORIES = [
   { id: 'other', label: '기타작업', icon: '📋', color: '#64748b' },
 ];
 
+// 번식 전용 카테고리 (암소 전용: 농장 공통 및 거세/수소에서 제외)
+export const BREEDING_CATEGORY_IDS = new Set(['breeding', 'heat_check', 'pregnancy_check', 'calving']);
+
 // 카테고리별 빠른 제목 추천 목록
 const QUICK_TITLES = {
   vaccine: ['구제역 일제 정기 백신', '소 호흡기 5종 혼합 백신', '아까바네 백신 접종', '기생충 구충제 투약'],
@@ -54,7 +57,7 @@ export default function ScheduleFormModal({
   onDelete
 }) {
   const isEditing = Boolean(scheduleToEdit);
-  const categoriesToDisplay = careCategories || SCHEDULE_CATEGORIES;
+  const allCategories = careCategories || SCHEDULE_CATEGORIES;
 
   const [date, setDate] = useState(scheduleToEdit?.date || initialData?.date || initialDate || getTodayDateString());
   const [time, setTime] = useState(scheduleToEdit?.time || initialData?.time || '');
@@ -68,6 +71,39 @@ export default function ScheduleFormModal({
   const [title, setTitle] = useState(scheduleToEdit?.title || initialData?.title || '');
   const [memo, setMemo] = useState(scheduleToEdit?.memo || initialData?.memo || '');
   const [errorMsg, setErrorMsg] = useState('');
+
+  // 선택된 대상 개체 정보 (개체 개별 일정 시)
+  const selectedEntity = useMemo(() => {
+    if (targetType !== 'entity') return null;
+    return (entities || []).find(e => e.id === selectedEntityId) || null;
+  }, [entities, targetType, selectedEntityId]);
+
+  // 지능형 분류 필터링:
+  // 1) 농장 공통('farm'): 번식 카테고리 4종(인공수정, 발정관찰, 임신감정, 분만관리) 제외
+  // 2) 개체 개별('entity') 중 거세우/수컷: 번식 카테고리 4종 제외
+  // 3) 암컷 개체: 전체 11종 및 커스텀 분류 전체 표시
+  const categoriesToDisplay = useMemo(() => {
+    const isMaleOrCastrated = selectedEntity && (selectedEntity.gender === 'castrated' || selectedEntity.gender === 'male');
+    const isFarmCommon = targetType === 'farm';
+    
+    if (isFarmCommon || isMaleOrCastrated) {
+      return allCategories.filter(cat => !BREEDING_CATEGORY_IDS.has(normalizeCategoryId(cat.id)));
+    }
+    return allCategories;
+  }, [allCategories, targetType, selectedEntity]);
+
+  // 대상 변경(농장공통 전환 또는 거세우 선택)으로 인해 현재 선택 카테고리가 제외된 경우 안전하게 자동 전환
+  useEffect(() => {
+    const normCurrentCat = normalizeCategoryId(category);
+    if (BREEDING_CATEGORY_IDS.has(normCurrentCat)) {
+      const isMaleOrCastrated = selectedEntity && (selectedEntity.gender === 'castrated' || selectedEntity.gender === 'male');
+      const isFarmCommon = targetType === 'farm';
+      if (isFarmCommon || isMaleOrCastrated) {
+        setCategory(isFarmCommon ? 'routine' : 'treatment');
+        setTitle('');
+      }
+    }
+  }, [targetType, selectedEntity, category]);
 
   // 새 커스텀 분류 추가 상태
   const [isAddingCategory, setIsAddingCategory] = useState(false);
