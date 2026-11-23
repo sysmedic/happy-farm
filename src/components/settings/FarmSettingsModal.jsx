@@ -10,9 +10,13 @@ import {
   Cloud, 
   Check, 
   Sparkles,
-  Calendar
+  Calendar,
+  RotateCw,
+  Clock,
+  ShieldCheck
 } from 'lucide-react';
 import GoogleDriveView from '../backup/GoogleDriveView.jsx';
+import { CURRENT_APP_VERSION, LAST_UPDATED_DATE, UPDATE_HISTORY } from '../../constants/appVersion.js';
 
 // 한우 벡터 라인 아이콘 (모달 내부 카드용)
 function ModalCowIcon({ size = 24, strokeWidth = 1.35, className = '' }) {
@@ -82,6 +86,16 @@ export default function FarmSettingsModal({
 
   const [newWorkerInput, setNewWorkerInput] = useState('');
   const [isSavedRecently, setIsSavedRecently] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  // 최신 버전 캐시 강제 갱신 (로컬 데이터 100% 보존 새로고침)
+  const handleForceUpdate = () => {
+    setIsUpdating(true);
+    if (onShowToast) onShowToast('최신 버전을 확인하고 프로그램을 안전하게 새로고침합니다...');
+    setTimeout(() => {
+      window.location.reload(true);
+    }, 600);
+  };
 
   const handleInputChange = (field, value) => {
     setFormValues(prev => ({
@@ -186,6 +200,14 @@ export default function FarmSettingsModal({
           >
             <Cloud size={16} />
             <span>백업</span>
+          </button>
+          <button
+            type="button"
+            className={`settings-nav-tab-btn ${activeTab === 'updates' ? 'active' : ''}`}
+            onClick={() => setActiveTab('updates')}
+          >
+            <Sparkles size={16} />
+            <span>업데이트</span>
           </button>
         </div>
 
@@ -406,6 +428,82 @@ export default function FarmSettingsModal({
                 careLogs={careLogs}
                 onDatabaseRestored={onDatabaseRestored}
               />
+            </div>
+          )}
+
+          {/* 4. 업데이트 및 패치노트 전용 탭 */}
+          {activeTab === 'updates' && (
+            <div className="settings-updates-section">
+              {/* 상단 현재 버전 & 새로고침 카드 */}
+              <div className="update-status-card">
+                <div className="update-status-header">
+                  <div className="update-version-badge-wrap">
+                    <span className="update-current-version">{CURRENT_APP_VERSION}</span>
+                    <span className="update-latest-pill">최신 버전 사용 중</span>
+                  </div>
+                  <button
+                    type="button"
+                    className="btn-update-refresh"
+                    onClick={handleForceUpdate}
+                    disabled={isUpdating}
+                    title="브라우저 캐시를 비우고 최신 파일로 새로고침"
+                  >
+                    <RotateCw size={15} className={isUpdating ? 'spin' : ''} />
+                    <span>{isUpdating ? '새로고침 중...' : '최신 버전으로 새로고침'}</span>
+                  </button>
+                </div>
+
+                <div className="update-meta-row">
+                  <span className="update-release-date">
+                    <Clock size={13} style={{ verticalAlign: 'middle', marginRight: '4px' }} />
+                    최근 릴리즈: {LAST_UPDATED_DATE}
+                  </span>
+                  <span className="update-safe-notice">
+                    <ShieldCheck size={14} style={{ verticalAlign: 'middle', marginRight: '4px', color: '#10b981' }} />
+                    모든 개체 및 영농일지 데이터는 영구 보존됩니다
+                  </span>
+                </div>
+              </div>
+
+              {/* 하단 패치노트 타임라인 목록 */}
+              <div className="update-history-container">
+                <h3 className="update-history-title">버전별 업데이트 내역</h3>
+                <div className="update-timeline">
+                  {UPDATE_HISTORY.map((item, idx) => (
+                    <div key={item.version} className={`update-timeline-item ${idx === 0 ? 'is-current' : ''}`}>
+                      <div className="update-timeline-marker">
+                        <div className="update-timeline-dot" />
+                        {idx < UPDATE_HISTORY.length - 1 && <div className="update-timeline-line" />}
+                      </div>
+                      <div className="update-timeline-content">
+                        <div className="update-item-header">
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap' }}>
+                            <span className="update-item-version">{item.version}</span>
+                            {item.badge && (
+                              <span 
+                                className="update-item-badge" 
+                                style={{ 
+                                  color: item.badgeColor || '#059669', 
+                                  background: item.badgeBg || 'rgba(16, 185, 129, 0.14)' 
+                                }}
+                              >
+                                {item.badge}
+                              </span>
+                            )}
+                          </div>
+                          <span className="update-item-date">{item.date}</span>
+                        </div>
+                        <h4 className="update-item-title">{item.title}</h4>
+                        <ul className="update-item-highlights">
+                          {item.highlights.map((h, hIdx) => (
+                            <li key={hIdx}>{h}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           )}
         </div>
