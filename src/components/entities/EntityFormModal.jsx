@@ -480,7 +480,7 @@ export default function EntityFormModal({
                   fontWeight: 700,
                   background: 'var(--bg-card)'
                 } : {
-                  fontWeight: 800,
+                  fontWeight: 700,
                   background: 'rgba(99, 102, 241, 0.14)',
                   border: '1px solid #6366f1',
                   color: '#312e81',
@@ -491,7 +491,7 @@ export default function EntityFormModal({
                   boxShadow: 'var(--shadow-sm)'
                 }}
               >
-                <Save size={16} color={isEditing ? 'currentColor' : '#312e81'} strokeWidth={isEditing ? 2 : 2.4} />
+                <Save size={16} color={isEditing ? 'currentColor' : '#312e81'} strokeWidth={isEditing ? 2 : 2.2} />
                 <span>{isEditing ? '변경사항 저장' : '개체 등록 완료'}</span>
               </button>
             </div>

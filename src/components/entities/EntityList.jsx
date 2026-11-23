@@ -555,7 +555,7 @@ export default function EntityList({
             style={{ 
               whiteSpace: 'nowrap', 
               flexShrink: 0,
-              fontWeight: 800,
+              fontWeight: 700,
               background: 'rgba(99, 102, 241, 0.14)',
               border: '1px solid #6366f1',
               color: '#312e81',
@@ -567,7 +567,7 @@ export default function EntityList({
             }}
             title="새로운 개체 마스터 등록"
           >
-            <Plus size={16} color="#312e81" strokeWidth={2.5} />
+            <Plus size={16} color="#312e81" strokeWidth={2.2} />
             <span>개체 등록</span>
           </button>
         </div>
