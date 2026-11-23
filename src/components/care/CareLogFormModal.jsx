@@ -564,7 +564,7 @@ export default function CareLogFormModal({
                       onClick={handleCreateCategory}
                       style={{
                         height: '36px',
-                        padding: '0 0.95rem',
+                        padding: '0 0.85rem',
                         fontSize: '0.88rem',
                         fontWeight: 700,
                         whiteSpace: 'nowrap',
@@ -573,7 +573,7 @@ export default function CareLogFormModal({
                         color: '#065f46'
                       }}
                     >
-                      등록 및 선택
+                      추가
                     </button>
                   </div>
                 </div>
