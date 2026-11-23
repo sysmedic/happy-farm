@@ -9,13 +9,60 @@ import {
   User, 
   DollarSign, 
   X,
-  ClipboardList
+  ClipboardList,
+  RotateCcw,
+  Sparkles,
+  Tag
 } from 'lucide-react';
 import { 
   CARE_CATEGORIES, 
   getCategoryById, 
   normalizeCategoryId 
 } from '../../lib/types.js';
+
+// 텍스트 내 검색어 형광펜 하이라이트 컴포넌트
+function HighlightText({ text, query }) {
+  if (!text) return null;
+  if (!query || !query.trim()) return <>{text}</>;
+
+  const q = query.trim();
+  const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const parts = String(text).split(new RegExp(`(${escaped})`, 'gi'));
+
+  return (
+    <>
+      {parts.map((part, i) => 
+        part.toLowerCase() === q.toLowerCase() ? (
+          <mark
+            key={i}
+            style={{
+              background: '#fef08a',
+              color: '#854d0e',
+              padding: '0.05rem 0.25rem',
+              borderRadius: '3px',
+              fontWeight: 800
+            }}
+          >
+            {part}
+          </mark>
+        ) : (
+          part
+        )
+      )}
+    </>
+  );
+}
+
+// 자주 찾는 농장 공통 작업 퀵 태그 추천
+const QUICK_SEARCH_TAGS = [
+  '안개분무',
+  '생석회',
+  '일제소독',
+  '환풍기',
+  '톱밥',
+  '사료',
+  '구충'
+];
 
 export default function FarmCommonHistoryView({
   careLogs = [],
@@ -26,6 +73,7 @@ export default function FarmCommonHistoryView({
 }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [periodFilter, setPeriodFilter] = useState('all'); // 'all', '1m', '3m', 'year'
 
   const allCategories = careCategories || CARE_CATEGORIES;
 
@@ -36,16 +84,45 @@ export default function FarmCommonHistoryView({
       .sort((a, b) => new Date(b.date + ' ' + (b.time || '00:00')) - new Date(a.date + ' ' + (a.time || '00:00')));
   }, [careLogs]);
 
-  // 검색어 및 카테고리 필터링
+  // 기간 필터 판단 헬퍼
+  const isDateInPeriod = (dateStr, period) => {
+    if (!dateStr || period === 'all') return true;
+    const logDate = new Date(dateStr);
+    if (isNaN(logDate.getTime())) return true;
+    
+    const now = new Date();
+    if (period === '1m') {
+      const oneMonthAgo = new Date(now);
+      oneMonthAgo.setDate(now.getDate() - 30);
+      return logDate >= oneMonthAgo;
+    }
+    if (period === '3m') {
+      const threeMonthsAgo = new Date(now);
+      threeMonthsAgo.setDate(now.getDate() - 90);
+      return logDate >= threeMonthsAgo;
+    }
+    if (period === 'year') {
+      const currentYear = now.getFullYear().toString();
+      return dateStr.startsWith(currentYear);
+    }
+    return true;
+  };
+
+  // 검색어, 카테고리, 기간 필터링
   const filteredLogs = useMemo(() => {
     return farmCommonLogs.filter(log => {
-      // 1. 카테고리 필터
+      // 1. 기간 필터
+      if (!isDateInPeriod(log.date, periodFilter)) {
+        return false;
+      }
+
+      // 2. 카테고리 필터
       if (selectedCategory !== 'all') {
         const normCat = normalizeCategoryId(log.category);
         if (normCat !== selectedCategory) return false;
       }
 
-      // 2. 검색어 필터 (제목, 세부내용, 작업자, 날짜)
+      // 3. 검색어 필터 (제목, 세부내용, 작업자, 날짜)
       if (searchQuery.trim()) {
         const q = searchQuery.trim().toLowerCase();
         const matchTitle = (log.title || '').toLowerCase().includes(q);
@@ -57,7 +134,7 @@ export default function FarmCommonHistoryView({
 
       return true;
     });
-  }, [farmCommonLogs, selectedCategory, searchQuery]);
+  }, [farmCommonLogs, periodFilter, selectedCategory, searchQuery]);
 
   // 상단 요약 통계
   const stats = useMemo(() => {
@@ -73,8 +150,25 @@ export default function FarmCommonHistoryView({
     return { totalCount, latestDate, yearlyCost };
   }, [farmCommonLogs]);
 
+  // 퀵 태그 클릭 토글 핸들러
+  const handleTagClick = (tag) => {
+    if (searchQuery.trim() === tag) {
+      setSearchQuery('');
+    } else {
+      setSearchQuery(tag);
+    }
+  };
+
+  // 모든 필터 초기화
+  const hasActiveFilters = searchQuery.trim() !== '' || selectedCategory !== 'all' || periodFilter !== 'all';
+  const handleResetFilters = () => {
+    setSearchQuery('');
+    setSelectedCategory('all');
+    setPeriodFilter('all');
+  };
+
   return (
-    <div className="farm-common-history-view" style={{ display: 'flex', flexDirection: 'column', gap: '1.15rem' }}>
+    <div className="farm-common-history-view" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       {/* 1. 상단 3단 미니 통계 대시보드 */}
       <div style={{ 
         display: 'grid', 
@@ -121,7 +215,7 @@ export default function FarmCommonHistoryView({
         </div>
       </div>
 
-      {/* 2. 검색 및 [+ 공통 기록 추가] 액션 바 */}
+      {/* 2. 검색창 및 [+ 공통 기록 추가] 액션 바 */}
       <div className="search-action-wrapper" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
         <div className="search-input-group" style={{ flex: 1, position: 'relative' }}>
           <Search size={18} className="search-input-icon" />
@@ -146,6 +240,7 @@ export default function FarmCommonHistoryView({
                 cursor: 'pointer',
                 color: 'var(--text-muted)'
               }}
+              title="검색어 지우기"
             >
               <X size={15} />
             </button>
@@ -184,94 +279,239 @@ export default function FarmCommonHistoryView({
         )}
       </div>
 
-      {/* 3. 카테고리 필터 칩 바 */}
-      <div style={{ display: 'flex', gap: '0.4rem', overflowX: 'auto', paddingBottom: '0.25rem' }}>
-        <button
-          type="button"
-          onClick={() => setSelectedCategory('all')}
-          style={{
-            padding: '0.35rem 0.85rem',
-            fontSize: '0.82rem',
-            fontWeight: selectedCategory === 'all' ? 800 : 600,
-            borderRadius: '9999px',
-            border: selectedCategory === 'all' ? '1.5px solid #10b981' : '1px solid var(--border-color)',
-            background: selectedCategory === 'all' ? 'rgba(16, 185, 129, 0.12)' : 'var(--bg-card)',
-            color: selectedCategory === 'all' ? '#065f46' : 'var(--text-main)',
-            cursor: 'pointer',
-            whiteSpace: 'nowrap',
-            transition: 'all 0.15s ease'
-          }}
-        >
-          전체 ({farmCommonLogs.length})
-        </button>
-        {allCategories
-          .filter(cat => ['routine', 'treatment', 'feed', 'etc'].includes(cat.id) || cat.isCustom)
-          .map(cat => {
-            const isSelected = selectedCategory === cat.id;
-            const count = farmCommonLogs.filter(l => normalizeCategoryId(l.category) === cat.id).length;
-            return (
-              <button
-                key={cat.id}
-                type="button"
-                onClick={() => setSelectedCategory(cat.id)}
-                style={{
-                  padding: '0.35rem 0.85rem',
-                  fontSize: '0.82rem',
-                  fontWeight: isSelected ? 800 : 600,
-                  borderRadius: '9999px',
-                  border: isSelected ? '1.5px solid #10b981' : '1px solid var(--border-color)',
-                  background: isSelected ? 'rgba(16, 185, 129, 0.12)' : 'var(--bg-card)',
-                  color: isSelected ? '#065f46' : 'var(--text-main)',
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.3rem',
-                  transition: 'all 0.15s ease'
-                }}
-              >
-                {cat.icon && <span>{cat.icon}</span>}
-                <span>{cat.label} ({count})</span>
-              </button>
-            );
-          })}
+      {/* 3. 🏷️ 원터치 퀵 검색 추천 태그 칩 바 */}
+      <div style={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        gap: '0.35rem', 
+        overflowX: 'auto', 
+        paddingBottom: '0.15rem' 
+      }}>
+        <span style={{ 
+          fontSize: '0.78rem', 
+          fontWeight: 700, 
+          color: 'var(--text-muted)', 
+          display: 'inline-flex', 
+          alignItems: 'center', 
+          gap: '0.2rem',
+          flexShrink: 0,
+          marginRight: '0.2rem'
+        }}>
+          <Tag size={13} />
+          추천 검색:
+        </span>
+        {QUICK_SEARCH_TAGS.map(tag => {
+          const isSelected = searchQuery.trim() === tag;
+          return (
+            <button
+              key={tag}
+              type="button"
+              onClick={() => handleTagClick(tag)}
+              style={{
+                fontSize: '0.78rem',
+                fontWeight: isSelected ? 800 : 600,
+                padding: '0.2rem 0.55rem',
+                borderRadius: 'var(--radius-sm)',
+                border: isSelected ? '1px solid #0284c7' : '1px solid var(--border-color)',
+                background: isSelected ? 'rgba(2, 132, 199, 0.12)' : 'var(--bg-card-subtle)',
+                color: isSelected ? '#0284c7' : 'var(--text-muted)',
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              #{tag}
+            </button>
+          );
+        })}
       </div>
 
-      {/* 4. 타임라인 카드 목록 */}
+      {/* 4. 기간 필터 & 카테고리 필터 통합 툴바 */}
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        gap: '0.5rem',
+        background: 'var(--bg-card)',
+        padding: '0.65rem 0.75rem',
+        borderRadius: 'var(--radius-md)',
+        border: '1px solid var(--border-color)'
+      }}>
+        {/* 상단: 기간 필터 탭 */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', marginRight: '0.2rem' }}>
+              조회 기간:
+            </span>
+            {[
+              { id: 'all', label: '전체' },
+              { id: '1m', label: '최근 1개월' },
+              { id: '3m', label: '최근 3개월' },
+              { id: 'year', label: `${new Date().getFullYear()}년 전체` }
+            ].map(p => {
+              const isSelected = periodFilter === p.id;
+              return (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => setPeriodFilter(p.id)}
+                  style={{
+                    padding: '0.25rem 0.65rem',
+                    fontSize: '0.8rem',
+                    fontWeight: isSelected ? 800 : 600,
+                    borderRadius: 'var(--radius-sm)',
+                    border: isSelected ? '1px solid #10b981' : '1px solid transparent',
+                    background: isSelected ? 'rgba(16, 185, 129, 0.12)' : 'transparent',
+                    color: isSelected ? '#065f46' : 'var(--text-muted)',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  {p.label}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* 활성 필터 초기화 버튼 */}
+          {hasActiveFilters && (
+            <button
+              type="button"
+              onClick={handleResetFilters}
+              style={{
+                fontSize: '0.78rem',
+                fontWeight: 700,
+                color: '#dc2626',
+                background: 'rgba(239, 68, 68, 0.08)',
+                border: '1px solid rgba(239, 68, 68, 0.25)',
+                padding: '0.2rem 0.55rem',
+                borderRadius: 'var(--radius-sm)',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.25rem'
+              }}
+              title="검색어 및 모든 필터 초기화"
+            >
+              <RotateCcw size={12} />
+              필터 초기화
+            </button>
+          )}
+        </div>
+
+        {/* 하단: 카테고리 필터 칩 바 */}
+        <div style={{ display: 'flex', gap: '0.35rem', overflowX: 'auto', paddingTop: '0.2rem', borderTop: '1px dashed var(--border-color)' }}>
+          <button
+            type="button"
+            onClick={() => setSelectedCategory('all')}
+            style={{
+              padding: '0.25rem 0.75rem',
+              fontSize: '0.8rem',
+              fontWeight: selectedCategory === 'all' ? 800 : 600,
+              borderRadius: '9999px',
+              border: selectedCategory === 'all' ? '1.5px solid #10b981' : '1px solid var(--border-color)',
+              background: selectedCategory === 'all' ? 'rgba(16, 185, 129, 0.12)' : 'var(--bg-card-subtle)',
+              color: selectedCategory === 'all' ? '#065f46' : 'var(--text-main)',
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            전체 분류 ({farmCommonLogs.length})
+          </button>
+          {allCategories
+            .filter(cat => ['routine', 'treatment', 'feed', 'etc'].includes(cat.id) || cat.isCustom)
+            .map(cat => {
+              const isSelected = selectedCategory === cat.id;
+              const count = farmCommonLogs.filter(l => normalizeCategoryId(l.category) === cat.id).length;
+              return (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => setSelectedCategory(cat.id)}
+                  style={{
+                    padding: '0.25rem 0.75rem',
+                    fontSize: '0.8rem',
+                    fontWeight: isSelected ? 800 : 600,
+                    borderRadius: '9999px',
+                    border: isSelected ? '1.5px solid #10b981' : '1px solid var(--border-color)',
+                    background: isSelected ? 'rgba(16, 185, 129, 0.12)' : 'var(--bg-card-subtle)',
+                    color: isSelected ? '#065f46' : 'var(--text-main)',
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.3rem',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  {cat.icon && <span>{cat.icon}</span>}
+                  <span>{cat.label} ({count})</span>
+                </button>
+              );
+            })}
+        </div>
+      </div>
+
+      {/* 5. 검색 결과 건수 안내 */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 0.2rem' }}>
+        <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-muted)' }}>
+          조회된 농장 기록 <strong style={{ color: 'var(--text-main)' }}>{filteredLogs.length}</strong>건
+          {searchQuery && (
+            <span style={{ marginLeft: '0.4rem', color: '#0284c7' }}>
+              ("{searchQuery}" 검색 일치)
+            </span>
+          )}
+        </span>
+      </div>
+
+      {/* 6. 타임라인 카드 목록 */}
       {filteredLogs.length === 0 ? (
         <div className="empty-state card" style={{ padding: '3.5rem 1.5rem', textAlign: 'center', background: 'var(--bg-card)' }}>
           <ClipboardList size={40} strokeWidth={1.5} style={{ opacity: 0.45, marginBottom: '0.65rem', color: 'var(--text-muted)' }} />
           <p style={{ margin: 0, fontWeight: 700, fontSize: '0.98rem', color: 'var(--text-main)' }}>
-            {searchQuery ? `"${searchQuery}" 검색 결과가 없습니다.` : '등록된 농장 공통 관리 기록이 없습니다.'}
+            {searchQuery || periodFilter !== 'all' || selectedCategory !== 'all'
+              ? '조건에 맞는 농장 공통 관리 기록이 없습니다.' 
+              : '등록된 농장 공통 관리 기록이 없습니다.'}
           </p>
           <p style={{ margin: '0.45rem 0 0 0', fontSize: '0.84rem', color: 'var(--text-muted)' }}>
-            축사 소독, 방역, 생석회 살포, 시설 청소 내역을 영농일지에 등록해보세요.
+            축사 소독, 방역, 생석회 살포, 시설 청소 내역을 등록하여 관리해보세요.
           </p>
-          {onOpenCareLogModal && (
-            <button
-              type="button"
-              className="btn btn-sm"
-              onClick={() => onOpenCareLogModal('FARM_COMMON', null, {
-                isFarmCommon: true,
-                entityId: 'FARM_COMMON',
-                entityName: '농장 공통'
-              })}
-              style={{
-                marginTop: '1.15rem',
-                background: 'rgba(16, 185, 129, 0.14)',
-                border: '1.5px solid #10b981',
-                color: '#065f46',
-                fontWeight: 700,
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.35rem',
-                padding: '0.5rem 1rem'
-              }}
-            >
-              <Plus size={15} />
-              <span>새 공통 기록 작성</span>
-            </button>
-          )}
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', marginTop: '1.15rem' }}>
+            {hasActiveFilters && (
+              <button
+                type="button"
+                className="btn btn-sm btn-outline"
+                onClick={handleResetFilters}
+                style={{ fontWeight: 700 }}
+              >
+                필터 초기화
+              </button>
+            )}
+            {onOpenCareLogModal && (
+              <button
+                type="button"
+                className="btn btn-sm"
+                onClick={() => onOpenCareLogModal('FARM_COMMON', null, {
+                  isFarmCommon: true,
+                  entityId: 'FARM_COMMON',
+                  entityName: '농장 공통'
+                })}
+                style={{
+                  background: 'rgba(16, 185, 129, 0.14)',
+                  border: '1.5px solid #10b981',
+                  color: '#065f46',
+                  fontWeight: 700,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.35rem',
+                  padding: '0.5rem 1rem'
+                }}
+              >
+                <Plus size={15} />
+                <span>새 공통 기록 작성</span>
+              </button>
+            )}
+          </div>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
@@ -304,7 +544,7 @@ export default function FarmCommonHistoryView({
                       gap: '0.3rem' 
                     }}>
                       <Calendar size={14} style={{ opacity: 0.7 }} />
-                      {log.date}
+                      <HighlightText text={log.date} query={searchQuery} />
                     </span>
                     {log.time && (
                       <span style={{ fontSize: '0.84rem', color: 'var(--text-muted)', fontWeight: 600 }}>
@@ -354,12 +594,12 @@ export default function FarmCommonHistoryView({
                   </div>
                 </div>
 
-                {/* 2행: 작업명 (굵고 선명한 텍스트) */}
+                {/* 2행: 작업명 (굵고 선명한 텍스트 + 하이라이트) */}
                 <div style={{ fontSize: '1.02rem', fontWeight: 800, color: 'var(--text-main)' }}>
-                  {log.title}
+                  <HighlightText text={log.title} query={searchQuery} />
                 </div>
 
-                {/* 3행: 세부 내용 (소독약품명, 살포량 등) */}
+                {/* 3행: 세부 내용 (소독약품명, 살포량 등 + 하이라이트) */}
                 {log.details && (
                   <div style={{ 
                     fontSize: '0.86rem', 
@@ -370,7 +610,7 @@ export default function FarmCommonHistoryView({
                     lineHeight: 1.5,
                     whiteSpace: 'pre-wrap'
                   }}>
-                    {log.details}
+                    <HighlightText text={log.details} query={searchQuery} />
                   </div>
                 )}
 
@@ -389,7 +629,7 @@ export default function FarmCommonHistoryView({
                   {log.operator && (
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
                       <User size={13} />
-                      작업자: <strong>{log.operator}</strong>
+                      작업자: <strong><HighlightText text={log.operator} query={searchQuery} /></strong>
                     </span>
                   )}
                   {log.cost ? (

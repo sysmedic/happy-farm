@@ -45,8 +45,8 @@ function CowIcon({ size = 26, strokeWidth = 1.35, className = '' }) {
   );
 }
 
-// 한국형 한우 우사(축사 건물) 벡터 라인 아이콘 (한우 아이콘에 맞춘 26px 핏, 외곽선 정돈)
-function CattleBarnIcon({ size = 26, strokeWidth = 1.35, className = '' }) {
+// 한국형 한우 우사(축사 건물) 벡터 라인 아이콘 (단정한 24px 핏, 외곽선 정돈)
+function CattleBarnIcon({ size = 24, strokeWidth = 1.35, className = '' }) {
   return (
     <svg
       width={size}
@@ -121,7 +121,7 @@ export default function TopBar({
       id: 'farm',
       title: '농장 일지 (축사 소독, 방역, 시설 전체 이력)',
       label: '농장 일지',
-      icon: <CattleBarnIcon size={26} strokeWidth={1.35} className="nav-tab-icon" />
+      icon: <CattleBarnIcon size={24} strokeWidth={1.35} className="nav-tab-icon" />
     }
   };
 
