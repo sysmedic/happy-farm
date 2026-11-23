@@ -140,10 +140,14 @@ export const DEFAULT_CARE_CATEGORIES = [
   { id: 'calving', label: '분만관리', icon: '🐮', badgeClass: 'badge-cat-calving' },
   { id: 'shipment', label: '출하매매', icon: '🚛', badgeClass: 'badge-cat-shipment' },
   { id: 'weight', label: '체중측정', icon: '⚖️', badgeClass: 'badge-cat-weight' },
-  { id: 'feed', label: '사료영양', icon: '🌾', badgeClass: 'badge-cat-feed' },
-  { id: 'routine', label: '방역점검', icon: '🛡️', badgeClass: 'badge-cat-routine' },
-  { id: 'other', label: '기타작업', icon: '📋', badgeClass: 'badge-cat-other' },
+  { id: 'routine', label: '방역소독', icon: '🛡️', badgeClass: 'badge-cat-routine' },
+  { id: 'facility', label: '시설환경', icon: '🛠️', badgeClass: 'badge-cat-facility' },
+  { id: 'feed', label: '사료자재', icon: '🌾', badgeClass: 'badge-cat-feed' },
+  { id: 'other', label: '퇴비기타', icon: '📋', badgeClass: 'badge-cat-other' },
 ];
+
+// 농장 공통 4대 핵심 분류 ID 세트 (방역소독, 시설환경, 사료자재, 퇴비기타)
+export const FARM_COMMON_CATEGORY_IDS = new Set(['routine', 'facility', 'feed', 'other']);
 
 export const CARE_CATEGORIES = DEFAULT_CARE_CATEGORIES;
 
@@ -180,10 +184,15 @@ export const LEGACY_CATEGORY_MAP = {
   vaccination: 'vaccine',
   checkup: 'routine',
   sanitation: 'routine',
+  disinfection: 'routine',
+  facility: 'facility',
+  maintenance: 'facility',
+  repair: 'facility',
   birth: 'calving',
   nutrition: 'feed',
   sale: 'shipment',
-  shipping: 'shipment'
+  shipping: 'shipment',
+  compost: 'other'
 };
 
 // 카테고리 ID 정규화 함수 (어디서든 일관되게 레거시 ID를 표준 ID로 승격)
@@ -200,7 +209,7 @@ export const FALLBACK_CATEGORY_LABELS = {
   heat_check: '발정관찰',
   pregnancy_check: '임신감정',
   vaccination: '백신접종',
-  checkup: '방역점검',
+  checkup: '방역소독',
   breeding: '인공수정',
   treatment: '진료치료',
   vaccine: '백신접종',
@@ -209,9 +218,10 @@ export const FALLBACK_CATEGORY_LABELS = {
   sale: '출하매매',
   shipping: '출하매매',
   weight: '체중측정',
-  feed: '사료영양',
-  routine: '방역점검',
-  other: '기타작업'
+  feed: '사료자재',
+  routine: '방역소독',
+  facility: '시설환경',
+  other: '퇴비기타'
 };
 
 export function getCategoryById(catId, customCategories = []) {

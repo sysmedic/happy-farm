@@ -55,11 +55,18 @@ export default function CareLogFormModal({
   }, [entities, selectedEntityId, preselectedEntity, isFarmCommon]);
 
   // 지능형 분류 필터링:
-  // 1) 농장 공통('FARM_COMMON'): 번식 카테고리 4종(인공수정, 발정관찰, 임신감정, 분만관리) 제외
+  // 1) 농장 공통('FARM_COMMON'): 축약된 4대 표준 분류 (방역소독, 시설환경, 사료자재, 퇴비기타) + 커스텀 분류만 깔끔하게 노출!
   // 2) 거세우('castrated') 또는 수컷('male') 개체의 경우 번식 카테고리 4종 완전 제외!
   const categoriesToDisplay = useMemo(() => {
+    if (isFarmCommon) {
+      return allCategories.filter(cat => {
+        const norm = normalizeCategoryId(cat.id);
+        return norm === 'routine' || norm === 'facility' || norm === 'feed' || norm === 'other' || cat.isCustom;
+      });
+    }
+
     const isMaleOrCastrated = currentSelectedEntity && (currentSelectedEntity.gender === 'castrated' || currentSelectedEntity.gender === 'male');
-    if (isFarmCommon || isMaleOrCastrated) {
+    if (isMaleOrCastrated) {
       return allCategories.filter(cat => !BREEDING_CATEGORY_IDS.has(normalizeCategoryId(cat.id)));
     }
     return allCategories;
@@ -164,16 +171,28 @@ export default function CareLogFormModal({
   const handleCategorySelect = (catId) => {
     setCategory(catId);
     if (!title) {
-      if (catId === 'vaccine') setTitle('구제역 정기 백신 접종');
-      else if (catId === 'breeding') setTitle('인공수정 시술');
-      else if (catId === 'treatment') setTitle('진료 및 처방 투약');
-      else if (catId === 'calving') setTitle('자연 분만 출산');
-      else if (catId === 'feed') setTitle('특수 영양제 및 미네랄 급여');
-      else if (catId === 'weight') setTitle('정기 체중 측정');
-      else if (catId === 'routine') setTitle('축사 소독 및 환경 점검');
-      else {
-        const found = categoriesToDisplay.find(c => c.id === catId);
-        if (found) setTitle(found.label);
+      if (isFarmCommon) {
+        if (catId === 'routine') setTitle('축사 내외부 안개분무 일제 소독');
+        else if (catId === 'facility') setTitle('우사 바닥 깔짚(톱밥) 교체');
+        else if (catId === 'feed') setTitle('조사료(볏짚/사일리지) 입고 및 적재');
+        else if (catId === 'other') setTitle('퇴비사 분뇨 교반(뒤집기) 작업');
+        else {
+          const found = categoriesToDisplay.find(c => c.id === catId);
+          if (found) setTitle(found.label);
+        }
+      } else {
+        if (catId === 'vaccine') setTitle('구제역 정기 백신 접종');
+        else if (catId === 'breeding') setTitle('인공수정 시술');
+        else if (catId === 'treatment') setTitle('진료 및 처방 투약');
+        else if (catId === 'calving') setTitle('자연 분만 출산');
+        else if (catId === 'facility') setTitle('축사 보수 및 환경 정비');
+        else if (catId === 'feed') setTitle('특수 영양제 및 미네랄 급여');
+        else if (catId === 'weight') setTitle('정기 체중 측정');
+        else if (catId === 'routine') setTitle('축사 소독 및 환경 점검');
+        else {
+          const found = categoriesToDisplay.find(c => c.id === catId);
+          if (found) setTitle(found.label);
+        }
       }
     }
   };

@@ -58,11 +58,11 @@ function HighlightText({ text, query }) {
 const QUICK_SEARCH_TAGS = [
   '안개분무',
   '생석회',
-  '일제소독',
+  '톱밥교체',
+  '급수조',
   '환풍기',
-  '톱밥',
-  '사료',
-  '구충'
+  '사료입고',
+  '퇴비교반'
 ];
 
 export default function FarmCommonHistoryView({
@@ -393,16 +393,32 @@ export default function FarmCommonHistoryView({
         >
           전체 분류 ({farmCommonLogs.length})
         </button>
-        {allCategories
-          .filter(cat => ['routine', 'treatment', 'feed', 'etc'].includes(cat.id) || cat.isCustom)
-          .map(cat => {
-            const isSelected = selectedCategory === cat.id;
-            const count = farmCommonLogs.filter(l => normalizeCategoryId(l.category) === cat.id).length;
+        {/* 농장 공통 4대 표준 분류 (방역소독, 시설환경, 사료자재, 퇴비기타) 및 커스텀 분류 */}
+        {(() => {
+          const standardOrder = ['routine', 'facility', 'feed', 'other'];
+          const filtered = allCategories.filter(cat => {
+            const norm = normalizeCategoryId(cat.id);
+            return standardOrder.includes(norm) || cat.isCustom;
+          });
+          // 표준 4대 분류 우선 순위 정렬
+          filtered.sort((a, b) => {
+            const idxA = standardOrder.indexOf(normalizeCategoryId(a.id));
+            const idxB = standardOrder.indexOf(normalizeCategoryId(b.id));
+            if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+            if (idxA !== -1) return -1;
+            if (idxB !== -1) return 1;
+            return 0;
+          });
+
+          return filtered.map(cat => {
+            const normId = normalizeCategoryId(cat.id);
+            const isSelected = selectedCategory === normId || selectedCategory === cat.id;
+            const count = farmCommonLogs.filter(l => normalizeCategoryId(l.category) === normId).length;
             return (
               <button
                 key={cat.id}
                 type="button"
-                onClick={() => setSelectedCategory(cat.id)}
+                onClick={() => setSelectedCategory(isSelected ? 'all' : normId)}
                 style={{
                   padding: '0.25rem 0.75rem',
                   fontSize: '0.8rem',
@@ -423,7 +439,8 @@ export default function FarmCommonHistoryView({
                 <span>{cat.label} ({count})</span>
               </button>
             );
-          })}
+          });
+        })()}
       </div>
 
       {/* 6. 검색 결과 건수 안내 및 우측 [필터 초기화] 링크 */}

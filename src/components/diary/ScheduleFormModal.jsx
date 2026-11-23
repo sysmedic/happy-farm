@@ -39,9 +39,11 @@ const QUICK_TITLES = {
   calving: ['분만 대기 및 분만사 이동', '초유 급여 준비 및 분만 관찰'],
   shipment: ['농협 안심한우 공판장 출하 상차', '우시장 송아지 경매 출하', '생체중 계근 및 상차', '출하차량 운송 확인'],
   weight: ['월령별 체중 계근', '비육 단계별 발육 측정', '출하 전 최종 체중 계근'],
-  feed: ['배합사료 정기 입고 및 적재', '조사료(볏짚/알팔파) 공급', '미네랄/비타민 블록 교체'],
-  routine: ['축사 내외부 안개분무 일제 소독', '환풍기 및 급수조 청소', '전기 시설 및 보온등 점검'],
-  other: ['축협 조합 방문', '가축공제 보험 갱신', '농장 시설 보수'],
+  // ── 농장 공통 4대 표준 분류 추천 제목 ──
+  routine: ['축사 내외부 안개분무 일제 소독', '축사 진입로 생석회 도포', '차량 소독조 약품 교체', '파리·모기 방제제 살포', '쥐 구서제(쥐약) 설치'],
+  facility: ['우사 바닥 깔짚(톱밥) 교체', '우사 바닥 로터리 뒤집기', '자동 급수조(워터컵) 일제 청소', '환풍기 모터 청소 및 점검', '급수 배관 동파 방지 점검', '축사 시설 및 펜스 보수'],
+  feed: ['조사료(볏짚/사일리지) 입고 및 적재', '배합사료 정기 벌크 입고', '사료빈 내부 결로 점검 및 청소', '미네랄/비타민 스톤 일괄 교체'],
+  other: ['퇴비사 분뇨 교반(뒤집기) 작업', '가축분뇨 부숙도 검사 의뢰', '부숙 퇴비 농경지 반출', '지하수 음용수 수질검사 의뢰', '농장 가축재해보험 갱신'],
 };
 
 export default function ScheduleFormModal({
@@ -89,14 +91,19 @@ export default function ScheduleFormModal({
   }, [entities, targetType, selectedEntityId]);
 
   // 지능형 분류 필터링:
-  // 1) 농장 공통('farm'): 번식 카테고리 4종(인공수정, 발정관찰, 임신감정, 분만관리) 제외
+  // 1) 농장 공통('farm'): 축약된 4대 표준 분류 (방역소독, 시설환경, 사료자재, 퇴비기타) + 커스텀 분류만 깔끔하게 노출!
   // 2) 개체 개별('entity') 중 거세우/수컷: 번식 카테고리 4종 제외
-  // 3) 암컷 개체: 전체 11종 및 커스텀 분류 전체 표시
+  // 3) 개체 개별('entity') 암컷: 전체 12종 및 커스텀 분류 전체 표시
   const categoriesToDisplay = useMemo(() => {
+    if (targetType === 'farm') {
+      return allCategories.filter(cat => {
+        const norm = normalizeCategoryId(cat.id);
+        return norm === 'routine' || norm === 'facility' || norm === 'feed' || norm === 'other' || cat.isCustom;
+      });
+    }
+
     const isMaleOrCastrated = selectedEntity && (selectedEntity.gender === 'castrated' || selectedEntity.gender === 'male');
-    const isFarmCommon = targetType === 'farm';
-    
-    if (isFarmCommon || isMaleOrCastrated) {
+    if (isMaleOrCastrated) {
       return allCategories.filter(cat => !BREEDING_CATEGORY_IDS.has(normalizeCategoryId(cat.id)));
     }
     return allCategories;
@@ -105,15 +112,21 @@ export default function ScheduleFormModal({
   // 대상 변경(농장공통 전환 또는 거세우 선택)으로 인해 현재 선택 카테고리가 제외된 경우 안전하게 자동 전환
   useEffect(() => {
     const normCurrentCat = normalizeCategoryId(category);
-    if (BREEDING_CATEGORY_IDS.has(normCurrentCat)) {
+    if (targetType === 'farm') {
+      // 농장 공통에서 허용되지 않는 개체 전용 분류(백신, 진료, 번식4종, 출하, 체중 등)가 선택되어 있다면 기본인 'routine'(방역소독)으로 전환
+      if (!['routine', 'facility', 'feed', 'other'].includes(normCurrentCat) && !allCategories.find(c => c.id === normCurrentCat && c.isCustom)) {
+        setCategory('routine');
+        setTitle('');
+      }
+    } else {
+      // 개체 개별 선택 시 거세우/수컷인데 번식 카테고리인 경우
       const isMaleOrCastrated = selectedEntity && (selectedEntity.gender === 'castrated' || selectedEntity.gender === 'male');
-      const isFarmCommon = targetType === 'farm';
-      if (isFarmCommon || isMaleOrCastrated) {
-        setCategory(isFarmCommon ? 'routine' : 'treatment');
+      if (isMaleOrCastrated && BREEDING_CATEGORY_IDS.has(normCurrentCat)) {
+        setCategory('treatment');
         setTitle('');
       }
     }
-  }, [targetType, selectedEntity, category]);
+  }, [targetType, selectedEntity, category, allCategories]);
 
   // 새 커스텀 분류 추가 상태
   const [isAddingCategory, setIsAddingCategory] = useState(false);
