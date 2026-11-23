@@ -214,18 +214,20 @@ export default function ScheduleFormModal({
         style={{ maxWidth: '540px' }}
       >
         <div className="modal-header">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Calendar size={20} color="var(--color-primary)" />
-            <h3 style={{ fontSize: '1.15rem', fontWeight: 800 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem' }}>
+            <Calendar size={22} color="#0284c7" />
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0, color: 'var(--text-main)' }}>
               {isEditing ? '일정 수정' : '새 일정 추가'}
             </h3>
           </div>
           <button 
             type="button" 
-            className="btn btn-outline btn-sm btn-icon-only" 
+            className="modal-close-btn" 
             onClick={onClose}
+            title="창 닫기"
+            aria-label="닫기"
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
 
@@ -279,27 +281,66 @@ export default function ScheduleFormModal({
               </div>
             </div>
 
-            {/* 2. 대상 구분 (농장 공통 vs 특정 개체 지정) */}
+            {/* 2. 대상 구분 (스카이 블루 2분할 세그먼트 스위치 탭) */}
             <div className="form-group" style={{ marginBottom: '1.15rem' }}>
-              <label className="form-label" style={{ fontWeight: 700 }}>
+              <label className="form-label" style={{ fontWeight: 700, marginBottom: '0.45rem' }}>
                 일정 대상
               </label>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginBottom: '0.6rem' }}>
+              <div style={{ 
+                display: 'grid', 
+                gridTemplateColumns: '1fr 1fr', 
+                gap: '0.35rem', 
+                background: 'var(--bg-card-subtle)',
+                padding: '0.25rem',
+                borderRadius: 'var(--radius-md)',
+                border: '1px solid var(--border-color)',
+                marginBottom: '0.6rem' 
+              }}>
                 <button
                   type="button"
-                  className={`btn ${targetType === 'farm' ? 'btn-primary' : 'btn-outline'}`}
                   onClick={() => setTargetType('farm')}
-                  style={{ padding: '0.6rem 0.5rem', fontSize: '0.9rem' }}
+                  style={{ 
+                    padding: '0.55rem 0.5rem', 
+                    fontSize: '0.88rem',
+                    fontWeight: targetType === 'farm' ? 800 : 600,
+                    borderRadius: 'var(--radius-sm)',
+                    border: targetType === 'farm' ? '1px solid #0284c7' : '1px solid transparent',
+                    background: targetType === 'farm' ? '#0284c7' : 'transparent',
+                    color: targetType === 'farm' ? '#ffffff' : 'var(--text-muted)',
+                    boxShadow: targetType === 'farm' ? '0 1px 3px rgba(2, 132, 199, 0.3)' : 'none',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.35rem'
+                  }}
                 >
-                  🌾 농장 공통 일정
+                  <span>🌾</span>
+                  <span>농장 공통 일정</span>
                 </button>
                 <button
                   type="button"
-                  className={`btn ${targetType === 'entity' ? 'btn-primary' : 'btn-outline'}`}
                   onClick={() => setTargetType('entity')}
-                  style={{ padding: '0.6rem 0.5rem', fontSize: '0.9rem' }}
+                  style={{ 
+                    padding: '0.55rem 0.5rem', 
+                    fontSize: '0.88rem',
+                    fontWeight: targetType === 'entity' ? 800 : 600,
+                    borderRadius: 'var(--radius-sm)',
+                    border: targetType === 'entity' ? '1px solid #0284c7' : '1px solid transparent',
+                    background: targetType === 'entity' ? '#0284c7' : 'transparent',
+                    color: targetType === 'entity' ? '#ffffff' : 'var(--text-muted)',
+                    boxShadow: targetType === 'entity' ? '0 1px 3px rgba(2, 132, 199, 0.3)' : 'none',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.35rem'
+                  }}
                 >
-                  🐂 개체 개별 일정
+                  <span>🐂</span>
+                  <span>개체 개별 일정</span>
                 </button>
               </div>
 
@@ -347,13 +388,13 @@ export default function ScheduleFormModal({
                         gap: '0.3rem',
                         padding: '0.45rem 0.35rem',
                         borderRadius: '9999px',
-                        border: isSelected ? '1.5px solid #10b981' : '1px solid var(--border-color)',
-                        background: isSelected ? 'rgba(16, 185, 129, 0.12)' : 'var(--bg-card)',
-                        color: isSelected ? '#059669' : 'var(--text-main)',
-                        fontWeight: isSelected ? 700 : 600,
+                        border: isSelected ? '1.5px solid #0284c7' : '1px solid var(--border-color)',
+                        background: isSelected ? 'rgba(2, 132, 199, 0.12)' : 'var(--bg-card)',
+                        color: isSelected ? '#0284c7' : 'var(--text-main)',
+                        fontWeight: isSelected ? 800 : 600,
                         fontSize: '0.82rem',
                         cursor: 'pointer',
-                        boxShadow: isSelected ? '0 1px 4px rgba(16, 185, 129, 0.2)' : 'none',
+                        boxShadow: isSelected ? '0 1px 4px rgba(2, 132, 199, 0.25)' : 'none',
                         transition: 'all 0.15s ease',
                         whiteSpace: 'nowrap',
                         minWidth: 0,
@@ -401,10 +442,10 @@ export default function ScheduleFormModal({
                     gap: '0.25rem',
                     padding: '0.45rem 0.35rem',
                     borderRadius: '9999px',
-                    border: isAddingCategory ? '1.5px solid var(--color-primary)' : '1px dashed var(--border-color)',
-                    background: isAddingCategory ? 'var(--color-primary-light)' : 'transparent',
-                    color: 'var(--color-primary)',
-                    fontWeight: 700,
+                    border: isAddingCategory ? '1.5px solid #0284c7' : '1px dashed var(--border-color)',
+                    background: isAddingCategory ? 'rgba(2, 132, 199, 0.12)' : 'transparent',
+                    color: '#0284c7',
+                    fontWeight: isAddingCategory ? 800 : 700,
                     fontSize: '0.82rem',
                     cursor: 'pointer',
                     transition: 'all 0.15s ease',
@@ -413,7 +454,7 @@ export default function ScheduleFormModal({
                   }}
                   title="새 일정 분류 직접 만들기"
                 >
-                  <Plus size={15} />
+                  <Plus size={15} color="#0284c7" />
                   <span>분류 추가</span>
                 </button>
               </div>
@@ -466,9 +507,17 @@ export default function ScheduleFormModal({
                     />
                     <button
                       type="button"
-                      className="btn btn-primary"
+                      className="btn"
                       onClick={handleCreateCategory}
-                      style={{ padding: '0 0.85rem', height: '36px', fontSize: '0.82rem', fontWeight: 700 }}
+                      style={{ 
+                        padding: '0 0.85rem', 
+                        height: '36px', 
+                        fontSize: '0.82rem', 
+                        fontWeight: 700,
+                        background: '#0284c7',
+                        borderColor: '#0284c7',
+                        color: '#ffffff'
+                      }}
                     >
                       추가
                     </button>
@@ -580,15 +629,18 @@ export default function ScheduleFormModal({
               </button>
               <button 
                 type="submit" 
-                className={`btn ${isEditing ? 'btn-outline' : 'btn-primary'}`}
+                className="btn"
                 style={{
-                  fontWeight: 700,
-                  minWidth: '100px',
-                  ...(isEditing ? {
-                    border: '1px solid var(--text-muted)',
-                    color: 'var(--text-main)',
-                    background: 'var(--bg-card)'
-                  } : {})
+                  fontWeight: 800,
+                  minWidth: '105px',
+                  background: '#0284c7',
+                  borderColor: '#0284c7',
+                  color: '#ffffff',
+                  boxShadow: '0 2px 4px rgba(2, 132, 199, 0.25)',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.35rem'
                 }}
               >
                 <Check size={16} />
