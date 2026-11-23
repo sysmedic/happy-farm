@@ -1025,7 +1025,7 @@ export default function EntityDetailModal({
             {(entity.status === 'shipped' || entity.status === 'deceased') ? (
               <button 
                 type="button"
-                className="btn btn-sm" 
+                className="btn" 
                 onClick={() => onOpenCareLogModal(entity)}
                 style={{
                   fontWeight: 800,
@@ -1034,7 +1034,7 @@ export default function EntityDetailModal({
                   color: '#0369a1',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '0.35rem'
+                  gap: '0.4rem'
                 }}
               >
                 <Plus size={16} color="#0369a1" strokeWidth={2.3} />
@@ -1043,7 +1043,7 @@ export default function EntityDetailModal({
             ) : (
               <button 
                 type="button"
-                className="btn btn-sm" 
+                className="btn" 
                 onClick={() => onOpenCareLogModal(entity)}
                 style={{
                   fontWeight: 800,
@@ -1052,7 +1052,7 @@ export default function EntityDetailModal({
                   color: '#065f46',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '0.35rem'
+                  gap: '0.4rem'
                 }}
               >
                 <Plus size={16} color="#065f46" strokeWidth={2.3} />
