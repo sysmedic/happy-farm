@@ -1025,19 +1025,37 @@ export default function EntityDetailModal({
             {(entity.status === 'shipped' || entity.status === 'deceased') ? (
               <button 
                 type="button"
-                className="btn btn-outline" 
+                className="btn btn-sm" 
                 onClick={() => onOpenCareLogModal(entity)}
+                style={{
+                  fontWeight: 800,
+                  background: 'rgba(14, 165, 233, 0.12)',
+                  border: '1px solid #0ea5e9',
+                  color: '#0369a1',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.35rem'
+                }}
               >
-                <Plus size={16} />
+                <Plus size={16} color="#0369a1" strokeWidth={2.3} />
                 <span>과거 기록 추가</span>
               </button>
             ) : (
               <button 
                 type="button"
-                className="btn btn-primary" 
+                className="btn btn-sm" 
                 onClick={() => onOpenCareLogModal(entity)}
+                style={{
+                  fontWeight: 800,
+                  background: 'rgba(16, 185, 129, 0.14)',
+                  border: '1px solid #10b981',
+                  color: '#065f46',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.35rem'
+                }}
               >
-                <Plus size={16} />
+                <Plus size={16} color="#065f46" strokeWidth={2.3} />
                 <span>관리 기록 추가</span>
               </button>
             )}
