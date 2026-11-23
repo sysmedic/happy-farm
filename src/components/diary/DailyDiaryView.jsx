@@ -1344,11 +1344,11 @@ export default function DailyDiaryView({
                                 </button>
                               )}
 
-                              {/* 미완료 상태이고 개체번호가 있는 경우에만 [+ 기록] 버튼 표시 (완료된 일정은 기록버튼 제거) */}
+                              {/* 미완료 상태이고 개체번호가 있는 경우에만 [+ 기록] 버튼 표시 (아웃라인 에메랄드 그린 스타일로 세련되게 통일) */}
                               {!isDone && sched.tagNumber && onOpenCareLogModal && (
                                 <button 
                                   type="button" 
-                                  className="btn btn-primary btn-sm"
+                                  className="btn btn-outline btn-sm"
                                   onClick={() => {
                                     const targetEntity = (entities || []).find(e => e.id === sched.entityId || e.tagNumber === sched.tagNumber);
                                     const todayDate = getTodayDateString();
@@ -1378,11 +1378,14 @@ export default function DailyDiaryView({
                                     justifyContent: 'center',
                                     gap: '0.25rem',
                                     height: '24px',
-                                    borderRadius: 'var(--radius-sm)'
+                                    borderRadius: 'var(--radius-sm)',
+                                    color: '#059669',
+                                    borderColor: '#10b981',
+                                    background: 'var(--bg-card)'
                                   }}
                                   title="이 일정으로 새 관리기록 작성 (분류·작업명·메모 자동 입력)"
                                 >
-                                  <Plus size={12} />
+                                  <Plus size={12} color="#059669" />
                                   <span>기록</span>
                                 </button>
                               )}
