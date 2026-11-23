@@ -121,11 +121,20 @@ export default function CareLogFormModal({
         if (initialValues.category) setCategory(normalizeCategoryId(initialValues.category));
         else setCategory('');
         if (initialValues.title) setTitle(initialValues.title);
+        else setTitle('');
         if (initialValues.date) setDate(initialValues.date);
+        else setDate(getTodayDateString());
         if (initialValues.time) setTime(initialValues.time);
+        else setTime(getCurrentTimeString());
         if (initialValues.entityId) setSelectedEntityId(initialValues.entityId);
+        if (initialValues.details) setDetails(initialValues.details);
+        else setDetails('');
       } else {
         setCategory('');
+        setTitle('');
+        setDetails('');
+        setDate(getTodayDateString());
+        setTime(getCurrentTimeString());
       }
       if (preselectedEntity) {
         setSelectedEntityId(preselectedEntity.id);
