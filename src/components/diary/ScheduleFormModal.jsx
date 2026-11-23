@@ -7,9 +7,17 @@ import {
   Check, 
   AlertCircle,
   Trash2,
-  Plus
+  Plus,
+  RotateCcw,
+  BookmarkPlus
 } from 'lucide-react';
-import { getTodayDateString, normalizeCategoryId } from '../../lib/types.js';
+import { 
+  getTodayDateString, 
+  normalizeCategoryId,
+  loadQuickTitlesMap,
+  saveQuickTitlesMap,
+  DEFAULT_QUICK_TITLES
+} from '../../lib/types.js';
 
 // 일정 전용 카테고리 프리셋 (types.js 4글자 표준 카테고리와 100% 동기화)
 export const SCHEDULE_CATEGORIES = [
@@ -21,9 +29,10 @@ export const SCHEDULE_CATEGORIES = [
   { id: 'calving', label: '분만관리', icon: '🐮', color: '#10b981' },
   { id: 'shipment', label: '출하매매', icon: '🚛', color: '#0ea5e9' },
   { id: 'weight', label: '체중측정', icon: '⚖️', color: '#64748b' },
-  { id: 'feed', label: '사료영양', icon: '🌾', color: '#d97706' },
-  { id: 'routine', label: '방역점검', icon: '🛡️', color: '#14b8a6' },
-  { id: 'other', label: '기타작업', icon: '📋', color: '#64748b' },
+  { id: 'routine', label: '방역소독', icon: '🛡️', color: '#10b981' },
+  { id: 'facility', label: '시설환경', icon: '🛠️', color: '#f59e0b' },
+  { id: 'feed', label: '사료자재', icon: '🌾', color: '#d97706' },
+  { id: 'other', label: '퇴비기타', icon: '📋', color: '#64748b' },
 ];
 
 // 번식 전용 카테고리 (암소 전용: 농장 공통 및 거세/수소에서 제외)
@@ -139,6 +148,56 @@ export default function ScheduleFormModal({
       }
     }
   }, [targetType, selectedEntity, category, allCategories]);
+
+  // 빠른 추천 제목 목록 (localStorage 연동)
+  const [quickTitlesMap, setQuickTitlesMap] = useState(() => loadQuickTitlesMap());
+  const [isAddingQuickTitle, setIsAddingQuickTitle] = useState(false);
+  const [newQuickTitleInput, setNewQuickTitleInput] = useState('');
+
+  const currentCategoryKey = normalizeCategoryId(category);
+  const currentQuickTitles = quickTitlesMap[currentCategoryKey] || [];
+
+  // 빠른 추천 제목 추가
+  const handleAddQuickTitle = (titleToAdd) => {
+    const trimmed = (titleToAdd || newQuickTitleInput).trim();
+    if (!trimmed || !currentCategoryKey) return;
+
+    setQuickTitlesMap(prev => {
+      const existing = prev[currentCategoryKey] || [];
+      if (existing.includes(trimmed)) return prev;
+      const updated = { ...prev, [currentCategoryKey]: [...existing, trimmed] };
+      saveQuickTitlesMap(updated);
+      return updated;
+    });
+
+    setNewQuickTitleInput('');
+    setIsAddingQuickTitle(false);
+  };
+
+  // 빠른 추천 제목 삭제
+  const handleRemoveQuickTitle = (titleToRemove, e) => {
+    if (e) e.stopPropagation();
+    if (!currentCategoryKey) return;
+
+    setQuickTitlesMap(prev => {
+      const existing = prev[currentCategoryKey] || [];
+      const updated = { ...prev, [currentCategoryKey]: existing.filter(t => t !== titleToRemove) };
+      saveQuickTitlesMap(updated);
+      return updated;
+    });
+  };
+
+  // 빠른 추천 기본값 복원
+  const handleResetQuickTitles = () => {
+    if (window.confirm('이 분류의 빠른 제목 추천을 기본 상태로 복원하시겠습니까?')) {
+      const defaultForCat = DEFAULT_QUICK_TITLES[currentCategoryKey] || [];
+      setQuickTitlesMap(prev => {
+        const updated = { ...prev, [currentCategoryKey]: [...defaultForCat] };
+        saveQuickTitlesMap(updated);
+        return updated;
+      });
+    }
+  };
 
   // 새 커스텀 분류 추가 상태
   const [isAddingCategory, setIsAddingCategory] = useState(false);
@@ -592,37 +651,146 @@ export default function ScheduleFormModal({
               )}
             </div>
 
-            {/* 4. 빠른 제목 추천 프리셋 뱃지 (스카이 블루 테마 컬러 적용) */}
-            {QUICK_TITLES[category] && (
+            {/* 4. 빠른 제목 추천 프리셋 뱃지 (스카이 블루 테마 + 직접 추가/삭제 지원) */}
+            {currentCategoryKey && (
               <div style={{ marginBottom: '0.85rem' }}>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.35rem' }}>
-                  빠른 제목 추천 (클릭 시 자동 입력):
-                </span>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
-                  {QUICK_TITLES[category].map((presetTitle, idx) => {
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.35rem' }}>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                    빠른 제목 추천 (클릭 시 자동 입력):
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleResetQuickTitles}
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      fontSize: '0.72rem',
+                      color: 'var(--text-muted)',
+                      cursor: 'pointer',
+                      padding: 0,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.2rem'
+                    }}
+                    title="이 분류의 빠른 추천 목록을 기본 상태로 복원"
+                  >
+                    <RotateCcw size={11} />
+                    <span>기본 복원</span>
+                  </button>
+                </div>
+
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', alignItems: 'center' }}>
+                  {currentQuickTitles.map((presetTitle, idx) => {
                     const isSelected = title === presetTitle;
                     return (
-                      <button
+                      <div
                         key={idx}
-                        type="button"
-                        onClick={() => setTitle(presetTitle)}
                         style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
                           background: isSelected ? '#0284c7' : 'rgba(2, 132, 199, 0.07)',
                           color: isSelected ? '#ffffff' : '#0284c7',
                           border: isSelected ? '1px solid #0284c7' : '1px solid rgba(2, 132, 199, 0.25)',
                           borderRadius: '9999px',
-                          padding: '0.25rem 0.6rem',
+                          padding: '0.2rem 0.5rem 0.2rem 0.65rem',
                           fontSize: '0.76rem',
                           fontWeight: isSelected ? 700 : 600,
-                          cursor: 'pointer',
                           boxShadow: isSelected ? '0 1px 3px rgba(2, 132, 199, 0.3)' : 'none',
-                          transition: 'all 0.15s ease'
+                          transition: 'all 0.15s ease',
+                          gap: '0.3rem'
                         }}
                       >
-                        {presetTitle}
-                      </button>
+                        <span 
+                          onClick={() => setTitle(presetTitle)}
+                          style={{ cursor: 'pointer' }}
+                        >
+                          {presetTitle}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={(e) => handleRemoveQuickTitle(presetTitle, e)}
+                          title="이 추천 항목 삭제"
+                          style={{
+                            background: 'transparent',
+                            border: 'none',
+                            color: isSelected ? '#ffffff' : 'rgba(2, 132, 199, 0.65)',
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            padding: '1px',
+                            borderRadius: '50%',
+                            lineHeight: 1
+                          }}
+                        >
+                          <X size={12} />
+                        </button>
+                      </div>
                     );
                   })}
+
+                  {/* [+ 추천 추가] 칩 버튼 또는 인라인 인풋 */}
+                  {!isAddingQuickTitle ? (
+                    <button
+                      type="button"
+                      onClick={() => setIsAddingQuickTitle(true)}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.2rem',
+                        background: 'transparent',
+                        color: '#0284c7',
+                        border: '1px dashed rgba(2, 132, 199, 0.45)',
+                        borderRadius: '9999px',
+                        padding: '0.2rem 0.55rem',
+                        fontSize: '0.76rem',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease'
+                      }}
+                      title="새 추천 제목 직접 추가"
+                    >
+                      <Plus size={13} />
+                      <span>추천 추가</span>
+                    </button>
+                  ) : (
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', background: 'var(--bg-card)', padding: '0.15rem 0.35rem', borderRadius: '9999px', border: '1px solid #0284c7' }}>
+                      <input
+                        type="text"
+                        value={newQuickTitleInput}
+                        onChange={(e) => setNewQuickTitleInput(e.target.value)}
+                        placeholder="새 추천 제목"
+                        style={{ height: '22px', fontSize: '0.76rem', padding: '0 0.35rem', width: '120px', border: 'none', outline: 'none', background: 'transparent', color: 'var(--text-main)' }}
+                        autoFocus
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleAddQuickTitle();
+                          } else if (e.key === 'Escape') {
+                            setIsAddingQuickTitle(false);
+                            setNewQuickTitleInput('');
+                          }
+                        }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleAddQuickTitle()}
+                        style={{ height: '20px', padding: '0 0.4rem', fontSize: '0.72rem', background: '#0284c7', color: '#fff', border: 'none', borderRadius: '9999px', cursor: 'pointer', fontWeight: 700 }}
+                      >
+                        추가
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsAddingQuickTitle(false);
+                          setNewQuickTitleInput('');
+                        }}
+                        style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'inline-flex' }}
+                      >
+                        <X size={12} />
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -640,6 +808,33 @@ export default function ScheduleFormModal({
                 onChange={(e) => setTitle(e.target.value)}
                 required
               />
+
+              {/* 현재 입력한 제목을 이 분류의 빠른 추천으로 원클릭 등록 버튼 */}
+              {title.trim() && !currentQuickTitles.includes(title.trim()) && (
+                <button
+                  type="button"
+                  onClick={() => handleAddQuickTitle(title.trim())}
+                  style={{
+                    marginTop: '0.4rem',
+                    background: 'rgba(2, 132, 199, 0.08)',
+                    border: '1px solid rgba(2, 132, 199, 0.25)',
+                    borderRadius: 'var(--radius-sm)',
+                    color: '#0284c7',
+                    fontSize: '0.76rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.3rem',
+                    padding: '0.25rem 0.55rem',
+                    transition: 'all 0.15s ease'
+                  }}
+                  title="현재 입력한 제목을 이 분류의 빠른 추천 목록에 추가"
+                >
+                  <BookmarkPlus size={13} />
+                  <span>현재 제목을 빠른 추천으로 저장</span>
+                </button>
+              )}
             </div>
 
             {/* 6. 상세 메모 */}

@@ -311,3 +311,53 @@ export function getKoreanChoseong(str) {
   }
   return result.toLowerCase();
 }
+
+// ==========================================================================
+// 빠른 제목 추천 (Quick Titles) 기본 목록 및 사용자 맞춤 스토리지
+// ==========================================================================
+
+export const DEFAULT_QUICK_TITLES = {
+  vaccine: ['구제역 일제 정기 백신', '소 호흡기 5종 혼합 백신', '아까바네 백신 접종', '기생충 구충제 투약'],
+  treatment: ['호흡기 치료 경과 확인', '소화기/설사 투약 2차', '외과 처치 및 드레싱'],
+  breeding: ['인공수정 시술 (수정사 방문)', '종모우 정액 준비 및 확인', '배란 유도제 투약'],
+  heat_check: ['수정 후 21일차 발정관찰', '초발정 징후 관찰', '승가 행위 및 점액 확인'],
+  pregnancy_check: ['수정 후 60일차 초음파 임신감정', '직장검사 임신 확인'],
+  calving: ['분만 대기 및 분만사 이동', '초유 급여 준비 및 분만 관찰'],
+  shipment: ['농협 안심한우 공판장 출하 상차', '우시장 송아지 경매 출하', '생체중 계근 및 상차', '출하차량 운송 확인'],
+  weight: ['월령별 체중 계근', '비육 단계별 발육 측정', '출하 전 최종 체중 계근'],
+  routine: ['축사 내외부 안개분무 일제 소독', '축사 진입로 생석회 도포', '차량 소독조 약품 교체', '파리·모기 방제제 살포', '쥐 구서제(쥐약) 설치'],
+  facility: ['우사 바닥 깔짚(톱밥) 교체', '우사 바닥 로터리 뒤집기', '자동 급수조(워터컵) 일제 청소', '환풍기 모터 청소 및 점검', '급수 배관 동파 방지 점검', '축사 시설 및 펜스 보수'],
+  feed: ['조사료(볏짚/사일리지) 입고 및 적재', '배합사료 정기 벌크 입고', '사료빈 내부 결로 점검 및 청소', '미네랄/비타민 스톤 일괄 교체'],
+  other: ['퇴비사 분뇨 교반(뒤집기) 작업', '가축분뇨 부숙도 검사 의뢰', '부숙 퇴비 농경지 반출', '지하수 음용수 수질검사 의뢰', '농장 가축재해보험 갱신']
+};
+
+const STORAGE_CUSTOM_QUICK_TITLES_KEY = 'happy_farm_custom_quick_titles_v1';
+
+export function loadQuickTitlesMap() {
+  try {
+    const raw = localStorage.getItem(STORAGE_CUSTOM_QUICK_TITLES_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object') {
+        const merged = { ...DEFAULT_QUICK_TITLES };
+        for (const [k, v] of Object.entries(parsed)) {
+          if (Array.isArray(v)) {
+            merged[k] = v;
+          }
+        }
+        return merged;
+      }
+    }
+  } catch (e) {
+    console.error('Failed to load custom quick titles:', e);
+  }
+  return { ...DEFAULT_QUICK_TITLES };
+}
+
+export function saveQuickTitlesMap(map) {
+  try {
+    localStorage.setItem(STORAGE_CUSTOM_QUICK_TITLES_KEY, JSON.stringify(map));
+  } catch (e) {
+    console.error('Failed to save custom quick titles:', e);
+  }
+}
