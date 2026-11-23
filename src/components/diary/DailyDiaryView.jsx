@@ -632,11 +632,12 @@ export default function DailyDiaryView({
           {/* 탭 1: 알람 화면 (미처리 알람이 있을 때만 활성화) */}
           {activeDiaryTab === 'reminders' && (
             <div>
-              {/* 상단 콤팩트 안내문 (중복 타이틀 및 엉터리 D-Day 제거, 일정 등록 문구 일치) */}
+              {/* 상단 콤팩트 안내문 (카드 본문 시작선과 수직 칼정렬: padding 0 0.85rem) */}
               <div style={{
                 fontSize: '0.78rem',
                 color: 'var(--text-muted)',
                 marginBottom: '0.65rem',
+                padding: '0 0.85rem',
                 lineHeight: 1.4
               }}>
                 ※ 개체 관리기록에서 연동된 예정 작업입니다. [일정 등록]을 눌러 공식 일정으로 등록할 수 있습니다.
@@ -1062,8 +1063,14 @@ export default function DailyDiaryView({
 
           {activeDiaryTab === 'schedules' && (
             <div>
-              {/* 상단 액션 바: 중복 타이틀 제거 및 [일정 추가] 버튼 우측 배치 (일정 전용 스카이 블루 테마) */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: '0.65rem' }}>
+              {/* 상단 액션 바: 중복 타이틀 제거 및 [일정 추가] 버튼 우측 배치 (일정 전용 스카이 블루 테마, 카드 내부 버튼과 수직 칼정렬) */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'flex-end',
+                marginBottom: '0.65rem',
+                padding: '0 0.85rem'
+              }}>
                 <button
                   className="btn btn-outline btn-sm"
                   onClick={() => onOpenScheduleModal(selectedDate)}
@@ -1507,8 +1514,14 @@ export default function DailyDiaryView({
           {/* 탭 3: 관리 내역 화면 */}
           {activeDiaryTab === 'logs' && (
             <div>
-              {/* 상단 액션 바: 중복 타이틀 제거 및 [일일 보고서] 버튼 우측 배치 (일정 탭과 완벽 일치) */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: '0.65rem' }}>
+              {/* 상단 액션 바: 중복 타이틀 제거 및 [일일 보고서] 버튼 우측 배치 (일정 탭 및 카드 내부 버튼과 수직 칼정렬) */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'flex-end',
+                marginBottom: '0.65rem',
+                padding: '0 0.85rem'
+              }}>
                 <button
                   className="btn btn-outline btn-sm"
                   onClick={() => onNavigateToReport(selectedDate)}
