@@ -177,33 +177,38 @@ export default function DailyDiaryView({
     }
   }, [activeDiaryTab, pendingRemindersCount]);
 
-  // 달력에 표시할 이벤트 있는 날짜 집합 (완료 로그 또는 예정 일정 전체)
-  const datesWithActivity = useMemo(() => {
+  // 1. 미처리 알람이 있는 날짜 집합 (주황색 도트: #f59e0b)
+  const datesWithPendingReminders = useMemo(() => {
     const set = new Set();
     careLogs.forEach(l => {
-      if (l.date) set.add(l.date);
-      if (l.nextScheduleDate) set.add(l.nextScheduleDate);
+      if (l.nextScheduleDate && !l.nextScheduleCompleted) {
+        set.add(l.nextScheduleDate);
+      }
     });
-    (schedules || []).forEach(s => {
-      if (s.date) set.add(s.date);
-    });
-    return set;
-  }, [careLogs, schedules]);
-
-  // 스마트 투톤(제안2)을 위한 관리기록 전용 일자
-  const datesWithCareLogs = useMemo(() => {
-    const set = new Set();
-    careLogs.forEach(l => { if (l.date) set.add(l.date); });
     return set;
   }, [careLogs]);
 
-  // 스마트 투톤(제안2)을 위한 일정(할 일) 전용 일자
-  const datesWithSchedules = useMemo(() => {
+  // 2. 미완료 일정이 있는 날짜 집합 (스카이 블루 도트: #0284c7)
+  const datesWithPendingSchedules = useMemo(() => {
     const set = new Set();
-    careLogs.forEach(l => { if (l.nextScheduleDate) set.add(l.nextScheduleDate); });
-    (schedules || []).forEach(s => { if (s.date) set.add(s.date); });
+    (schedules || []).forEach(s => {
+      if (s.date && !s.completed) {
+        set.add(s.date);
+      }
+    });
     return set;
-  }, [careLogs, schedules]);
+  }, [schedules]);
+
+  // 3. 당일 수행 완료된 관리기록이 있는 날짜 집합 (에메랄드 그린 도트: #059669)
+  const datesWithCareLogs = useMemo(() => {
+    const set = new Set();
+    careLogs.forEach(l => {
+      if (l.date) {
+        set.add(l.date);
+      }
+    });
+    return set;
+  }, [careLogs]);
 
   // 달력 날짜 매트릭스 생성
   const calendarDays = useMemo(() => {
@@ -324,7 +329,9 @@ export default function DailyDiaryView({
               {calendarDays.map((item, index) => {
                 const isSelected = item.dateStr === selectedDate;
                 const isToday = item.dateStr === todayStr;
-                const hasActivity = datesWithActivity.has(item.dateStr);
+                const hasReminder = datesWithPendingReminders.has(item.dateStr);
+                const hasSchedule = datesWithPendingSchedules.has(item.dateStr);
+                const hasLog = datesWithCareLogs.has(item.dateStr);
 
                 // 소프트 파스텔 배경 및 테두리
                 const cellBg = !item.isCurrentMonth 
@@ -392,16 +399,56 @@ export default function DailyDiaryView({
 
                     <span>{item.dayNumber}</span>
 
-                    {/* 하단 활동 기록 점 */}
-                    {hasActivity && (
-                      <span style={{
-                        width: '4.5px',
-                        height: '4.5px',
-                        borderRadius: '50%',
-                        background: isSelected ? 'var(--color-primary)' : 'var(--color-primary)',
+                    {/* 하단 3색 미니 도트 콤보 (알람: 주황, 일정: 블루, 관리기록: 그린) */}
+                    {(hasReminder || hasSchedule || hasLog) && (
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '2.5px',
                         position: 'absolute',
-                        bottom: '3px'
-                      }} />
+                        bottom: '3px',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        pointerEvents: 'none'
+                      }}>
+                        {hasReminder && (
+                          <span 
+                            title="미처리 알람 있음"
+                            style={{
+                              width: '4px',
+                              height: '4px',
+                              borderRadius: '50%',
+                              background: '#f59e0b',
+                              flexShrink: 0
+                            }} 
+                          />
+                        )}
+                        {hasSchedule && (
+                          <span 
+                            title="미완료 일정 있음"
+                            style={{
+                              width: '4px',
+                              height: '4px',
+                              borderRadius: '50%',
+                              background: '#0284c7',
+                              flexShrink: 0
+                            }} 
+                          />
+                        )}
+                        {hasLog && (
+                          <span 
+                            title="완료 관리기록 있음"
+                            style={{
+                              width: '4px',
+                              height: '4px',
+                              borderRadius: '50%',
+                              background: '#059669',
+                              flexShrink: 0
+                            }} 
+                          />
+                        )}
+                      </div>
                     )}
                   </button>
                 );
@@ -420,10 +467,21 @@ export default function DailyDiaryView({
               fontSize: '0.75rem',
               color: 'var(--text-muted)'
             }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--color-primary)', display: 'inline-block' }} />
-                일정/작업 기록 있음
-              </span>
+              {/* 3색 범례: 알람(주황) · 일정(블루) · 관리 내역(그린) */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap', fontSize: '0.74rem' }}>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
+                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#f59e0b', display: 'inline-block' }} />
+                  <span>알람</span>
+                </span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
+                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#0284c7', display: 'inline-block' }} />
+                  <span>일정</span>
+                </span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
+                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#059669', display: 'inline-block' }} />
+                  <span>관리 내역</span>
+                </span>
+              </div>
               <button
                 className="btn btn-outline btn-sm"
                 onClick={() => onOpenScheduleModal(selectedDate)}
