@@ -214,11 +214,10 @@ export default function ScheduleFormModal({
         style={{ maxWidth: '540px' }}
       >
         <div className="modal-header">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem' }}>
-            <Calendar size={22} color="#0284c7" />
-            <h3 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0, color: 'var(--text-main)' }}>
+          <div className="modal-header-title">
+            <span style={{ fontWeight: 800, fontSize: '1.25rem' }}>
               {isEditing ? '일정 수정' : '새 일정 추가'}
-            </h3>
+            </span>
           </div>
           <button 
             type="button" 
@@ -526,32 +525,37 @@ export default function ScheduleFormModal({
               )}
             </div>
 
-            {/* 4. 빠른 제목 추천 프리셋 뱃지 */}
+            {/* 4. 빠른 제목 추천 프리셋 뱃지 (스카이 블루 테마 컬러 적용) */}
             {QUICK_TITLES[category] && (
               <div style={{ marginBottom: '0.85rem' }}>
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.35rem' }}>
                   빠른 제목 추천 (클릭 시 자동 입력):
                 </span>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
-                  {QUICK_TITLES[category].map((presetTitle, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => setTitle(presetTitle)}
-                      style={{
-                        background: title === presetTitle ? 'var(--color-primary)' : 'var(--bg-card-subtle)',
-                        color: title === presetTitle ? '#fff' : 'var(--text-muted)',
-                        border: '1px solid var(--border-color)',
-                        borderRadius: '9999px',
-                        padding: '0.25rem 0.55rem',
-                        fontSize: '0.75rem',
-                        fontWeight: 600,
-                        cursor: 'pointer'
-                      }}
-                    >
-                      {presetTitle}
-                    </button>
-                  ))}
+                  {QUICK_TITLES[category].map((presetTitle, idx) => {
+                    const isSelected = title === presetTitle;
+                    return (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => setTitle(presetTitle)}
+                        style={{
+                          background: isSelected ? '#0284c7' : 'rgba(2, 132, 199, 0.07)',
+                          color: isSelected ? '#ffffff' : '#0284c7',
+                          border: isSelected ? '1px solid #0284c7' : '1px solid rgba(2, 132, 199, 0.25)',
+                          borderRadius: '9999px',
+                          padding: '0.25rem 0.6rem',
+                          fontSize: '0.76rem',
+                          fontWeight: isSelected ? 700 : 600,
+                          cursor: 'pointer',
+                          boxShadow: isSelected ? '0 1px 3px rgba(2, 132, 199, 0.3)' : 'none',
+                          transition: 'all 0.15s ease'
+                        }}
+                      >
+                        {presetTitle}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}
