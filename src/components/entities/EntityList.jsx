@@ -467,12 +467,18 @@ export default function EntityList({
                 role="button"
                 tabIndex={0}
               >
-                <div 
-                  className="stat-icon-wrapper" 
-                  style={{ background: cardDef.bg, color: cardDef.color }}
+                <span 
+                  style={{ 
+                    fontSize: '1.05rem', 
+                    lineHeight: 1, 
+                    display: 'inline-flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    flexShrink: 0 
+                  }}
                 >
                   {cardDef.icon}
-                </div>
+                </span>
                 <div className="stat-info">
                   <span className="stat-label">{cardDef.label}</span>
                   <span className="stat-value" style={{ color: cardDef.color }}>
@@ -506,12 +512,18 @@ export default function EntityList({
                 role="button"
                 tabIndex={0}
               >
-                <div 
-                  className="stat-icon-wrapper" 
-                  style={{ background: cardDef.bg, color: cardDef.color }}
+                <span 
+                  style={{ 
+                    fontSize: '1.05rem', 
+                    lineHeight: 1, 
+                    display: 'inline-flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    flexShrink: 0 
+                  }}
                 >
                   {cardDef.icon}
-                </div>
+                </span>
                 <div className="stat-info">
                   {!hideChipText && <span className="stat-label">{cardDef.label}</span>}
                   <span className="stat-value" style={{ color: cardDef.color }}>
