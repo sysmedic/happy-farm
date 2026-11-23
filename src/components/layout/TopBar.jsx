@@ -45,8 +45,8 @@ function CowIcon({ size = 26, strokeWidth = 1.35, className = '' }) {
   );
 }
 
-// 한국형 한우 우사(축사 건물) 벡터 라인 아이콘 (용마루 환기탑 + 맞배지붕 + 우방 펜스)
-function CattleBarnIcon({ size = 22, strokeWidth = 1.4, className = '' }) {
+// 한국형 한우 우사(축사 건물) 벡터 라인 아이콘 (한우 아이콘에 맞춘 26px 핏, 외곽선 정돈)
+function CattleBarnIcon({ size = 26, strokeWidth = 1.35, className = '' }) {
   return (
     <svg
       width={size}
@@ -61,15 +61,15 @@ function CattleBarnIcon({ size = 22, strokeWidth = 1.4, className = '' }) {
     >
       {/* 상단 용마루 환기탑 (벤틸레이터 배기 루프) */}
       <path d="M9.5 3.5h5l.7 2h-6.4z" />
-      {/* 완만한 우사 맞배지붕 */}
-      <path d="M3 9l9-3.5 9 3.5" />
-      {/* 우사 외곽 기둥과 바닥 */}
-      <path d="M5 9v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9" />
+      {/* 완만한 우사 맞배지붕 (처마 끝 돌출부 선명화) */}
+      <path d="M2.5 9.2L12 5.5l9.5 3.7" />
+      {/* 우사 외곽 기둥과 바닥 (단단한 하부 프레임) */}
+      <path d="M4.8 9.5v10.5a1 1 0 0 0 1 1h12.4a1 1 0 0 0 1-1V9.5" />
       {/* 우사 파이프 펜스 레일 (가로 2줄) */}
-      <path d="M5 13.5h14" />
-      <path d="M5 17.5h14" />
+      <path d="M4.8 13.5h14.4" />
+      <path d="M4.8 17.5h14.4" />
       {/* 중앙 우방 분할 세로 기둥 */}
-      <path d="M12 9v12" />
+      <path d="M12 9.5v11.5" />
     </svg>
   );
 }
@@ -79,7 +79,7 @@ const TAB_TITLES = {
   entities: '개체 관리',
   diary: '캘린더',
   report: '일일 보고서',
-  farm: '농장일지'
+  farm: '농장 일지'
 };
 
 export default function TopBar({ 
@@ -93,7 +93,7 @@ export default function TopBar({
 }) {
   const currentTitle = TAB_TITLES[activeTab] || '개체 관리';
 
-  // 시작 화면 설정에 따라 탭 순서 동적 결정 (보고서는 3번째, 농장일지는 4번째)
+  // 시작 화면 설정에 따라 탭 순서 동적 결정 (보고서는 3번째, 농장 일지는 4번째)
   const tabOrder = startTab === 'diary'
     ? ['diary', 'entities', 'report', 'farm']
     : ['entities', 'diary', 'report', 'farm'];
@@ -119,9 +119,9 @@ export default function TopBar({
     },
     farm: {
       id: 'farm',
-      title: '농장일지 (축사 소독, 방역, 시설 전체 이력)',
-      label: '농장일지',
-      icon: <CattleBarnIcon size={22} strokeWidth={1.4} className="nav-tab-icon" />
+      title: '농장 일지 (축사 소독, 방역, 시설 전체 이력)',
+      label: '농장 일지',
+      icon: <CattleBarnIcon size={26} strokeWidth={1.35} className="nav-tab-icon" />
     }
   };
 

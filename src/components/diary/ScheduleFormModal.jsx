@@ -61,9 +61,19 @@ export default function ScheduleFormModal({
 
   const [date, setDate] = useState(scheduleToEdit?.date || initialData?.date || initialDate || getTodayDateString());
   const [time, setTime] = useState(scheduleToEdit?.time || initialData?.time || '');
-  const [targetType, setTargetType] = useState(
-    (scheduleToEdit?.entityId || initialData?.entityId) ? 'entity' : 'farm'
-  );
+  const [targetType, setTargetType] = useState(() => {
+    if (scheduleToEdit) {
+      return scheduleToEdit.entityId ? 'entity' : 'farm';
+    }
+    if (initialData?.targetType) {
+      return initialData.targetType;
+    }
+    if (initialData?.entityId) {
+      return 'entity';
+    }
+    // 새 일정 추가 기본값: 첫 번째 탭인 '개체 개별'
+    return 'entity';
+  });
   const [selectedEntityId, setSelectedEntityId] = useState(
     scheduleToEdit?.entityId || initialData?.entityId || ''
   );
@@ -333,27 +343,6 @@ export default function ScheduleFormModal({
               }}>
                 <button
                   type="button"
-                  onClick={() => setTargetType('farm')}
-                  style={{ 
-                    padding: '0.55rem 0.5rem', 
-                    fontSize: '0.88rem',
-                    fontWeight: targetType === 'farm' ? 800 : 600,
-                    borderRadius: 'var(--radius-sm)',
-                    border: targetType === 'farm' ? '1px solid #0284c7' : '1px solid transparent',
-                    background: targetType === 'farm' ? '#0284c7' : 'transparent',
-                    color: targetType === 'farm' ? '#ffffff' : 'var(--text-muted)',
-                    boxShadow: targetType === 'farm' ? '0 1px 3px rgba(2, 132, 199, 0.3)' : 'none',
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                >
-                  농장 공통
-                </button>
-                <button
-                  type="button"
                   onClick={() => setTargetType('entity')}
                   style={{ 
                     padding: '0.55rem 0.5rem', 
@@ -372,6 +361,27 @@ export default function ScheduleFormModal({
                   }}
                 >
                   개체 개별
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTargetType('farm')}
+                  style={{ 
+                    padding: '0.55rem 0.5rem', 
+                    fontSize: '0.88rem',
+                    fontWeight: targetType === 'farm' ? 800 : 600,
+                    borderRadius: 'var(--radius-sm)',
+                    border: targetType === 'farm' ? '1px solid #0284c7' : '1px solid transparent',
+                    background: targetType === 'farm' ? '#0284c7' : 'transparent',
+                    color: targetType === 'farm' ? '#ffffff' : 'var(--text-muted)',
+                    boxShadow: targetType === 'farm' ? '0 1px 3px rgba(2, 132, 199, 0.3)' : 'none',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  농장 공통
                 </button>
               </div>
 

@@ -389,7 +389,7 @@ export default function FarmSettingsModal({
                     사육 중인 한우 목록과 상세 이력, 월령, 계통, 번식 상태를 한눈에 먼저 확인합니다.
                   </p>
                   <div className="start-tab-preview-badge">
-                    탑바 순서: <strong>[ 개체관리 ]</strong> ➔ [ 캘린더 ] ➔ [ 일일보고 ] ➔ [ 농장일지 ]
+                    탑바 순서: <strong>[ 개체관리 ]</strong> ➔ [ 캘린더 ] ➔ [ 일일보고 ] ➔ [ 농장 일지 ]
                   </div>
                 </div>
 
@@ -413,7 +413,7 @@ export default function FarmSettingsModal({
                     오늘 및 이번 달의 분만·수정·백신 일정과 타임라인 일정을 가장 먼저 체크합니다.
                   </p>
                   <div className="start-tab-preview-badge">
-                    탑바 순서: <strong>[ 캘린더 ]</strong> ➔ [ 개체관리 ] ➔ [ 일일보고 ] ➔ [ 농장일지 ]
+                    탑바 순서: <strong>[ 캘린더 ]</strong> ➔ [ 개체관리 ] ➔ [ 일일보고 ] ➔ [ 농장 일지 ]
                   </div>
                 </div>
               </div>
