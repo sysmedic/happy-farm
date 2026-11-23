@@ -311,12 +311,10 @@ export default function ScheduleFormModal({
                     transition: 'all 0.15s ease',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.35rem'
+                    justifyContent: 'center'
                   }}
                 >
-                  <span>🌾</span>
-                  <span>농장 공통 일정</span>
+                  농장 공통
                 </button>
                 <button
                   type="button"
@@ -334,12 +332,10 @@ export default function ScheduleFormModal({
                     transition: 'all 0.15s ease',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.35rem'
+                    justifyContent: 'center'
                   }}
                 >
-                  <span>🐂</span>
-                  <span>개체 개별 일정</span>
+                  개체 개별
                 </button>
               </div>
 
