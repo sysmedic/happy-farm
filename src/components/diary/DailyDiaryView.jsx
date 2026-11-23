@@ -33,6 +33,7 @@ export default function DailyDiaryView({
   initialDate,
   initialTab = 'schedules',
   onOpenEntityDetail,
+  onOpenFarmCommonHistory,
   onOpenCareLogModal,
   onOpenScheduleModal,
   onSaveSchedule,
@@ -1225,17 +1226,26 @@ export default function DailyDiaryView({
                                   )}
                                 </div>
                               ) : (
-                                <span style={{
-                                  fontSize: '0.82rem',
-                                  color: 'var(--text-main)',
-                                  background: 'var(--bg-card-subtle)',
-                                  padding: '0.15rem 0.45rem',
-                                  borderRadius: 'var(--radius-sm)',
-                                  border: '1px solid var(--border-color)',
-                                  fontWeight: 700,
-                                  flexShrink: 0
-                                }}>
-                                  {entityName || '농장 공통'}
+                                <span 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (onOpenFarmCommonHistory) onOpenFarmCommonHistory();
+                                  }}
+                                  title="클릭 시 농장 공통 관리 이력(소독·방역 전체 이력) 모아보기"
+                                  style={{
+                                    fontSize: '0.82rem',
+                                    color: 'var(--text-main)',
+                                    background: 'var(--bg-card-subtle)',
+                                    padding: '0.15rem 0.45rem',
+                                    borderRadius: 'var(--radius-sm)',
+                                    border: '1px solid var(--border-color)',
+                                    fontWeight: 700,
+                                    flexShrink: 0,
+                                    cursor: onOpenFarmCommonHistory ? 'pointer' : 'default',
+                                    transition: 'all 0.15s ease'
+                                  }}
+                                >
+                                  {entityName || '농장 공통'} 🚜
                                 </span>
                               )}
 
@@ -1315,17 +1325,26 @@ export default function DailyDiaryView({
                                   )}
                                 </div>
                               ) : (
-                                <span style={{
-                                  fontSize: '0.82rem',
-                                  color: 'var(--text-main)',
-                                  background: 'var(--bg-card-subtle)',
-                                  padding: '0.15rem 0.45rem',
-                                  borderRadius: 'var(--radius-sm)',
-                                  border: '1px solid var(--border-color)',
-                                  fontWeight: 700,
-                                  flexShrink: 0
-                                }}>
-                                  {entityName || '농장 공통'}
+                                <span 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (onOpenFarmCommonHistory) onOpenFarmCommonHistory();
+                                  }}
+                                  title="클릭 시 농장 공통 관리 이력(소독·방역 전체 이력) 모아보기"
+                                  style={{
+                                    fontSize: '0.82rem',
+                                    color: 'var(--text-main)',
+                                    background: 'var(--bg-card-subtle)',
+                                    padding: '0.15rem 0.45rem',
+                                    borderRadius: 'var(--radius-sm)',
+                                    border: '1px solid var(--border-color)',
+                                    fontWeight: 700,
+                                    flexShrink: 0,
+                                    cursor: onOpenFarmCommonHistory ? 'pointer' : 'default',
+                                    transition: 'all 0.15s ease'
+                                  }}
+                                >
+                                  {entityName || '농장 공통'} 🚜
                                 </span>
                               )}
                             </div>
@@ -1344,29 +1363,49 @@ export default function DailyDiaryView({
                                 </button>
                               )}
 
-                              {/* 미완료 상태이고 개체번호가 있는 경우에만 [+ 기록] 버튼 표시 (1안: 소프트 에메랄드 틴트로 전달력과 조화 동시 확보) */}
-                              {!isDone && sched.tagNumber && onOpenCareLogModal && (
+                              {/* 미완료 상태일 때 [+ 기록] 버튼 표시 (개체 일정 및 농장 공통 일정 모두 지원) */}
+                              {!isDone && onOpenCareLogModal && (
                                 <button 
                                   type="button" 
                                   className="btn btn-sm"
                                   onClick={() => {
-                                    const targetEntity = (entities || []).find(e => e.id === sched.entityId || e.tagNumber === sched.tagNumber);
                                     const todayDate = getTodayDateString();
                                     const isFuture = selectedDate > todayDate;
                                     const effectiveDate = isFuture ? todayDate : selectedDate;
-                                    onOpenCareLogModal(
-                                      targetEntity || { tagNumber: sched.tagNumber, name: entityName, id: sched.entityId },
-                                      effectiveDate,
-                                      {
-                                        category: sched.category || 'routine',
-                                        title: cleanTitle || sched.title || '',
-                                        date: effectiveDate,
-                                        time: getCurrentTimeString(), // 예정시간이 아닌 실제 버튼 누른 현재 시각 기본 제시
-                                        entityId: sched.entityId || (targetEntity ? targetEntity.id : ''),
-                                        details: sched.memo || '',
-                                        linkedScheduleId: sched.id
-                                      }
-                                    );
+
+                                    if (sched.tagNumber) {
+                                      const targetEntity = (entities || []).find(e => e.id === sched.entityId || e.tagNumber === sched.tagNumber);
+                                      onOpenCareLogModal(
+                                        targetEntity || { tagNumber: sched.tagNumber, name: entityName, id: sched.entityId },
+                                        effectiveDate,
+                                        {
+                                          category: sched.category || 'routine',
+                                          title: cleanTitle || sched.title || '',
+                                          date: effectiveDate,
+                                          time: getCurrentTimeString(), // 예정시간이 아닌 실제 버튼 누른 현재 시각 기본 제시
+                                          entityId: sched.entityId || (targetEntity ? targetEntity.id : ''),
+                                          details: sched.memo || '',
+                                          linkedScheduleId: sched.id
+                                        }
+                                      );
+                                    } else {
+                                      // 농장 공통 일정 (시설, 방역, 소독 등 영농일지 정식 기록 연계)
+                                      onOpenCareLogModal(
+                                        'FARM_COMMON',
+                                        effectiveDate,
+                                        {
+                                          isFarmCommon: true,
+                                          entityId: 'FARM_COMMON',
+                                          entityName: '농장 공통',
+                                          category: sched.category || 'routine',
+                                          title: cleanTitle || sched.title || '',
+                                          date: effectiveDate,
+                                          time: getCurrentTimeString(),
+                                          details: sched.memo || '',
+                                          linkedScheduleId: sched.id
+                                        }
+                                      );
+                                    }
                                   }}
                                   style={{ 
                                     fontSize: '0.75rem', 
@@ -1387,31 +1426,6 @@ export default function DailyDiaryView({
                                 >
                                   <Plus size={12} color="#065f46" strokeWidth={2.5} />
                                   <span>기록</span>
-                                </button>
-                              )}
-
-                              {/* 개체번호가 없는 경우: 기록 버튼 대신 해당 위치에 [✏️] 수정 버튼 배치 */}
-                              {!sched.tagNumber && onEditSchedule && (
-                                <button
-                                  type="button"
-                                  className="btn btn-outline btn-sm btn-icon-only"
-                                  onClick={() => onEditSchedule(sched)}
-                                  title="일정 수정"
-                                  style={{
-                                    width: '24px',
-                                    height: '24px',
-                                    padding: 0,
-                                    flexShrink: 0,
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    border: '1px solid var(--text-muted)',
-                                    color: 'var(--text-main)',
-                                    background: 'var(--bg-card)',
-                                    borderRadius: 'var(--radius-sm)'
-                                  }}
-                                >
-                                  <Edit2 size={12} />
                                 </button>
                               )}
                             </div>
@@ -1465,8 +1479,8 @@ export default function DailyDiaryView({
                               </div>
                             </div>
 
-                            {/* 개체번호가 있는 경우: 1행의 [+ 기록] 버튼 밑(2행 우측)에 [✏️ 수정] 버튼 배치 */}
-                            {sched.tagNumber && onEditSchedule && (
+                            {/* [✏️ 수정] 버튼 (개체 및 농장 공통 모두 동일하게 2행 우측 칼정렬) */}
+                            {onEditSchedule && (
                               <button
                                 type="button"
                                 className="btn btn-outline btn-sm"
@@ -1633,17 +1647,25 @@ export default function DailyDiaryView({
                                 )}
                               </div>
                             ) : (
-                              <span style={{
-                                fontSize: '0.82rem',
-                                color: 'var(--text-main)',
-                                background: 'var(--bg-card-subtle)',
-                                padding: '0.15rem 0.45rem',
-                                borderRadius: 'var(--radius-sm)',
-                                border: '1px solid var(--border-color)',
-                                fontWeight: 700,
-                                flexShrink: 0
-                              }}>
-                                {entityName || '농장 공통'}
+                              <span 
+                                onClick={() => {
+                                  if (onOpenFarmCommonHistory) onOpenFarmCommonHistory();
+                                }}
+                                title="클릭 시 농장 공통 관리 이력(소독·방역 전체 이력) 모아보기"
+                                style={{
+                                  fontSize: '0.82rem',
+                                  color: 'var(--text-main)',
+                                  background: 'var(--bg-card-subtle)',
+                                  padding: '0.15rem 0.45rem',
+                                  borderRadius: 'var(--radius-sm)',
+                                  border: '1px solid var(--border-color)',
+                                  fontWeight: 700,
+                                  flexShrink: 0,
+                                  cursor: onOpenFarmCommonHistory ? 'pointer' : 'default',
+                                  transition: 'all 0.15s ease'
+                                }}
+                              >
+                                {entityName || '농장 공통'} 🚜
                               </span>
                             )}
 

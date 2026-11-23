@@ -911,6 +911,14 @@ a:hover {
   box-shadow: var(--shadow-sm);
 }
 
+.view-segment-btn.active.farm-active {
+  background: var(--bg-card);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  font-weight: 800;
+  box-shadow: var(--shadow-sm);
+}
+
 .view-segment-btn .segment-count {
   font-size: 0.8rem;
   font-weight: 800;
@@ -945,6 +953,12 @@ a:hover {
   background: var(--bg-card);
   color: #cbd5e1;
   border-color: rgba(148, 163, 184, 0.4);
+}
+
+[data-theme="dark"] .view-segment-btn.active.farm-active {
+  background: var(--bg-card);
+  color: #34d399;
+  border-color: rgba(52, 211, 153, 0.4);
 }
 
 

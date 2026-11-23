@@ -11,6 +11,7 @@ import DailyReportView from './components/diary/DailyReportView.jsx';
 import GoogleDriveView from './components/backup/GoogleDriveView.jsx';
 import ScheduleFormModal from './components/diary/ScheduleFormModal.jsx';
 import FarmSettingsModal from './components/settings/FarmSettingsModal.jsx';
+import FarmCommonHistoryModal from './components/care/FarmCommonHistoryModal.jsx';
 import { 
   loadEntities, 
   saveEntities, 
@@ -58,6 +59,8 @@ export default function App() {
 
   // 환경 설정 모달 상태
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  // 농장 공통 관리 이력 모달 상태
+  const [isFarmCommonModalOpen, setIsFarmCommonModalOpen] = useState(false);
 
   // 모달 및 뷰 제어 상태
   const [selectedEntityForDetail, setSelectedEntityForDetail] = useState(null);
@@ -97,7 +100,8 @@ export default function App() {
     isEntityModalOpen || 
     isCareLogModalOpen || 
     isScheduleModalOpen ||
-    isSettingsModalOpen
+    isSettingsModalOpen ||
+    isFarmCommonModalOpen
   );
   const savedScrollYRef = useRef(0);
 
@@ -707,6 +711,7 @@ export default function App() {
                 careLogs={careLogs}
                 careCategories={allCareCategories}
                 onOpenEntityDetail={handleOpenEntityDetail}
+                onOpenFarmCommonHistory={() => setIsFarmCommonModalOpen(true)}
                 onOpenEntityModal={(entity = null) => {
                   setEntityToEdit(entity);
                   setIsEntityModalOpen(true);
@@ -721,6 +726,8 @@ export default function App() {
                   setPrintSheetEntity(entity);
                 }}
                 onDeleteEntity={handleDeleteEntity}
+                onEditCareLog={handleOpenEditCareLog}
+                onDeleteCareLog={handleDeleteCareLog}
               />
             )}
 
@@ -733,6 +740,7 @@ export default function App() {
                 initialDate={targetDiaryDate}
                 initialTab={initialDiaryTab}
                 onOpenEntityDetail={handleOpenEntityDetail}
+                onOpenFarmCommonHistory={() => setIsFarmCommonModalOpen(true)}
                 onOpenCareLogModal={(entity = null, date = null, initialValues = null) => {
                   setCareLogPreselectedEntity(entity);
                   setCareLogInitialValues(initialValues);
@@ -762,6 +770,7 @@ export default function App() {
                 careCategories={allCareCategories}
                 farmSettings={farmSettings}
                 onOpenEntityDetail={handleOpenEntityDetail}
+                onOpenFarmCommonHistory={() => setIsFarmCommonModalOpen(true)}
                 onOpenCareLogModal={(entity = null) => {
                   setCareLogPreselectedEntity(entity);
                   setCareLogInitialValues(null);
@@ -899,6 +908,23 @@ export default function App() {
           careLogs={careLogs}
           onDatabaseRestored={handleDatabaseRestored}
           onShowToast={showToast}
+        />
+      )}
+
+      {/* 농장 공통 관리 이력 모달 (축사 소독, 방역, 시설 점검 전체 이력 및 검색) */}
+      {isFarmCommonModalOpen && (
+        <FarmCommonHistoryModal
+          isOpen={isFarmCommonModalOpen}
+          onClose={() => setIsFarmCommonModalOpen(false)}
+          careLogs={careLogs}
+          careCategories={allCareCategories}
+          onOpenCareLogModal={(entity = null, date = null, initialValues = null) => {
+            setCareLogPreselectedEntity(entity);
+            setCareLogInitialValues(initialValues);
+            setIsCareLogModalOpen(true);
+          }}
+          onEditCareLog={handleOpenEditCareLog}
+          onDeleteCareLog={handleDeleteCareLog}
         />
       )}
 

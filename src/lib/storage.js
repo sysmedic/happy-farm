@@ -712,6 +712,36 @@ export const INITIAL_SAMPLE_CARE_LOGS = [
     "nextScheduleTitle": "KPN 보증정액 인공수정 시술",
     "nextScheduleCompleted": false,
     "createdAt": "2026-11-21T07:30:00Z"
+  },
+  {
+    "id": "LOG-1035",
+    "entityId": null,
+    "tagNumber": null,
+    "entityName": "농장 공통",
+    "isFarmCommon": true,
+    "date": "2026-11-18",
+    "time": "10:00",
+    "category": "routine",
+    "title": "축사 내외부 안개분무 일제 소독",
+    "details": "생석회 도포 구역 확인 및 구제역·ASF 방역 안개분무 소독액 120L 전구역 살포 완료.",
+    "operator": "농장주",
+    "cost": 35000,
+    "createdAt": "2026-11-18T10:00:00Z"
+  },
+  {
+    "id": "LOG-1036",
+    "entityId": null,
+    "tagNumber": null,
+    "entityName": "농장 공통",
+    "isFarmCommon": true,
+    "date": "2026-11-05",
+    "time": "15:30",
+    "category": "routine",
+    "title": "환풍기 모터 점검 및 방진망 청소",
+    "details": "동절기 대비 환풍기 8대 가동 상태 점검 및 방진망 고압 세척.",
+    "operator": "농장주",
+    "cost": 0,
+    "createdAt": "2026-11-05T15:30:00Z"
   }
 ];
 
@@ -815,7 +845,7 @@ export function loadCareLogs() {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.length > 0) {
         let hasModified = false;
-        const normalized = parsed.map(log => {
+        let normalized = parsed.map(log => {
           const normCat = normalizeCategoryId(log.category);
           const normTag = formatTagNumber(log.tagNumber);
           if (log.category !== normCat || log.tagNumber !== normTag) {
@@ -867,6 +897,14 @@ export function loadCareLogs() {
           }
         } catch (e) {
           // 자동 치유 파싱 예외 무시
+        }
+
+        // 농장 공통 관리기록 샘플이 전혀 없는 경우 기본 방역/소독 모범 데이터 2건 보강
+        const hasFarmCommon = normalized.some(l => l.isFarmCommon || (!l.entityId && l.entityName === '농장 공통'));
+        if (!hasFarmCommon) {
+          const sampleCommons = INITIAL_SAMPLE_CARE_LOGS.filter(l => l.isFarmCommon);
+          normalized = [...normalized, ...sampleCommons];
+          hasModified = true;
         }
 
         // 레거시 카테고리(insemination, birth 등) 또는 알람 자동치유가 수행된 경우 스토리지 즉시 갱신 저장

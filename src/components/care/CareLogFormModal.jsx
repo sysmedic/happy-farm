@@ -38,22 +38,32 @@ export default function CareLogFormModal({
   const operatorSuggestions = Array.from(new Set([defaultOwnerName, ...farmWorkers])).filter(Boolean);
 
   const allCategories = careCategories || CARE_CATEGORIES;
-  const [selectedEntityId, setSelectedEntityId] = useState(logToEdit?.entityId || initialValues?.entityId || preselectedEntity?.id || '');
+  const initialEntityId = logToEdit 
+    ? (logToEdit.isFarmCommon || (!logToEdit.entityId && logToEdit.entityName === '농장 공통') ? 'FARM_COMMON' : logToEdit.entityId)
+    : (initialValues?.entityId || preselectedEntity?.id || (preselectedEntity === 'FARM_COMMON' ? 'FARM_COMMON' : ''));
+  const [selectedEntityId, setSelectedEntityId] = useState(initialEntityId);
 
-  // 현재 선택된 개체 정보
+  // 농장 공통 여부 판별
+  const isFarmCommon = selectedEntityId === 'FARM_COMMON';
+
+  // 현재 선택된 개체 정보 (농장 공통인 경우 가상 개체 객체 반환)
   const currentSelectedEntity = useMemo(() => {
+    if (isFarmCommon) {
+      return { id: 'FARM_COMMON', tagNumber: null, name: '농장 공통', isFarmCommon: true };
+    }
     return (entities || []).find(e => e.id === selectedEntityId) || preselectedEntity || null;
-  }, [entities, selectedEntityId, preselectedEntity]);
+  }, [entities, selectedEntityId, preselectedEntity, isFarmCommon]);
 
   // 지능형 분류 필터링:
-  // 거세우('castrated') 또는 수컷('male') 개체의 경우 번식 카테고리 4종(인공수정, 발정관찰, 임신감정, 분만관리) 완전 제외!
+  // 1) 농장 공통('FARM_COMMON'): 번식 카테고리 4종(인공수정, 발정관찰, 임신감정, 분만관리) 제외
+  // 2) 거세우('castrated') 또는 수컷('male') 개체의 경우 번식 카테고리 4종 완전 제외!
   const categoriesToDisplay = useMemo(() => {
     const isMaleOrCastrated = currentSelectedEntity && (currentSelectedEntity.gender === 'castrated' || currentSelectedEntity.gender === 'male');
-    if (isMaleOrCastrated) {
+    if (isFarmCommon || isMaleOrCastrated) {
       return allCategories.filter(cat => !BREEDING_CATEGORY_IDS.has(normalizeCategoryId(cat.id)));
     }
     return allCategories;
-  }, [allCategories, currentSelectedEntity]);
+  }, [allCategories, currentSelectedEntity, isFarmCommon]);
   const [date, setDate] = useState(logToEdit?.date || initialValues?.date || getTodayDateString());
   const [time, setTime] = useState(logToEdit?.time || getCurrentTimeString());
   const [category, setCategory] = useState(normalizeCategoryId(logToEdit?.category || initialValues?.category) || '');
@@ -102,7 +112,8 @@ export default function CareLogFormModal({
 
   useEffect(() => {
     if (logToEdit) {
-      setSelectedEntityId(logToEdit.entityId);
+      const editEntId = logToEdit.isFarmCommon || (!logToEdit.entityId && logToEdit.entityName === '농장 공통') ? 'FARM_COMMON' : logToEdit.entityId;
+      setSelectedEntityId(editEntId);
       setDate(logToEdit.date);
       setTime(logToEdit.time || getCurrentTimeString());
       setCategory(normalizeCategoryId(logToEdit.category));
@@ -126,7 +137,11 @@ export default function CareLogFormModal({
         else setDate(getTodayDateString());
         if (initialValues.time) setTime(initialValues.time);
         else setTime(getCurrentTimeString());
-        if (initialValues.entityId) setSelectedEntityId(initialValues.entityId);
+        if (initialValues.entityId) {
+          setSelectedEntityId(initialValues.entityId);
+        } else if (initialValues.isFarmCommon) {
+          setSelectedEntityId('FARM_COMMON');
+        }
         if (initialValues.details) setDetails(initialValues.details);
         else setDetails('');
       } else {
@@ -137,8 +152,8 @@ export default function CareLogFormModal({
         setTime(getCurrentTimeString());
       }
       if (preselectedEntity) {
-        setSelectedEntityId(preselectedEntity.id);
-      } else if (entities && entities.length > 0 && !selectedEntityId) {
+        setSelectedEntityId(preselectedEntity === 'FARM_COMMON' ? 'FARM_COMMON' : preselectedEntity.id);
+      } else if (entities && entities.length > 0 && !selectedEntityId && !initialValues?.entityId && !initialValues?.isFarmCommon) {
         const firstActive = entities.find(e => e.status !== 'shipped' && e.status !== 'deceased') || entities[0];
         setSelectedEntityId(firstActive.id);
       }
@@ -236,7 +251,7 @@ export default function CareLogFormModal({
     setErrorMsg('');
 
     if (!selectedEntityId) {
-      setErrorMsg('대상 개체를 선택해주세요.');
+      setErrorMsg('관리 대상(개체 또는 농장 공통)을 선택해주세요.');
       return;
     }
 
@@ -250,19 +265,23 @@ export default function CareLogFormModal({
       return;
     }
 
-    const targetEntity = entities.find(e => e.id === selectedEntityId);
-    if (!targetEntity) {
-      setErrorMsg('선택한 개체 정보를 찾을 수 없습니다.');
-      return;
+    let targetEntity = null;
+    if (!isFarmCommon) {
+      targetEntity = entities.find(e => e.id === selectedEntityId);
+      if (!targetEntity) {
+        setErrorMsg('선택한 개체 정보를 찾을 수 없습니다.');
+        return;
+      }
     }
 
     const trimmedOperator = operator.trim();
 
     const logData = {
       id: logToEdit?.id || `LOG-${Date.now()}`,
-      entityId: targetEntity.id,
-      tagNumber: targetEntity.tagNumber,
-      entityName: targetEntity.name,
+      entityId: isFarmCommon ? null : targetEntity.id,
+      tagNumber: isFarmCommon ? null : targetEntity.tagNumber,
+      entityName: isFarmCommon ? '농장 공통' : targetEntity.name,
+      isFarmCommon: isFarmCommon,
       date,
       time,
       category,
@@ -280,7 +299,7 @@ export default function CareLogFormModal({
       updatedAt: new Date().toISOString(),
     };
 
-    onSave(logData, {
+    onSave(logData, isFarmCommon ? null : {
       entityId: targetEntity.id,
       weight: updateWeight ? Number(updateWeight) : null,
       status: updateStatus || null,
@@ -339,7 +358,7 @@ export default function CareLogFormModal({
             )}
 
             {/* 대상 개체: 개체 상세정보와 100% 동일한 규격으로 인라인 표시 (불필요한 라벨 및 박스 제거) */}
-            {preselectedEntity || isEditing ? (
+            {preselectedEntity || isEditing || initialValues?.isFarmCommon || isFarmCommon ? (
               <div style={{ 
                 display: 'flex', 
                 alignItems: 'center', 
@@ -348,35 +367,64 @@ export default function CareLogFormModal({
                 minWidth: 0,
                 overflow: 'hidden'
               }}>
-                <span style={{ 
-                  fontSize: '1.18rem', 
-                  fontWeight: 800, 
-                  color: 'var(--text-main)', 
-                  fontFamily: 'var(--font-family)',
-                  fontVariantNumeric: 'tabular-nums',
-                  fontFeatureSettings: '"tnum" 1',
-                  letterSpacing: '-0.025em',
-                  whiteSpace: 'nowrap',
-                  flexShrink: 0 
-                }}>
-                  {currentSelectedEntity?.tagNumber}
-                </span>
-                <span style={{ 
-                  fontSize: '1.05rem', 
-                  fontWeight: 700, 
-                  color: 'var(--text-main)', 
-                  overflow: 'hidden', 
-                  textOverflow: 'ellipsis', 
-                  whiteSpace: 'nowrap' 
-                }}>
-                  {currentSelectedEntity?.name}
-                </span>
+                {isFarmCommon ? (
+                  <>
+                    <span style={{ 
+                      fontSize: '0.88rem', 
+                      fontWeight: 800, 
+                      color: 'var(--text-main)', 
+                      background: 'var(--bg-card-subtle)',
+                      padding: '0.2rem 0.6rem',
+                      borderRadius: 'var(--radius-sm)',
+                      border: '1px solid var(--border-color)',
+                      flexShrink: 0 
+                    }}>
+                      🚜 농장 공통
+                    </span>
+                    <span style={{ 
+                      fontSize: '0.92rem', 
+                      fontWeight: 700, 
+                      color: 'var(--text-muted)', 
+                      overflow: 'hidden', 
+                      textOverflow: 'ellipsis', 
+                      whiteSpace: 'nowrap' 
+                    }}>
+                      (축사 소독, 방역, 시설 청소, 사료 관리)
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span style={{ 
+                      fontSize: '1.18rem', 
+                      fontWeight: 800, 
+                      color: 'var(--text-main)', 
+                      fontFamily: 'var(--font-family)',
+                      fontVariantNumeric: 'tabular-nums',
+                      fontFeatureSettings: '"tnum" 1',
+                      letterSpacing: '-0.025em',
+                      whiteSpace: 'nowrap',
+                      flexShrink: 0 
+                    }}>
+                      {currentSelectedEntity?.tagNumber}
+                    </span>
+                    <span style={{ 
+                      fontSize: '1.05rem', 
+                      fontWeight: 700, 
+                      color: 'var(--text-main)', 
+                      overflow: 'hidden', 
+                      textOverflow: 'ellipsis', 
+                      whiteSpace: 'nowrap' 
+                    }}>
+                      {currentSelectedEntity?.name}
+                    </span>
+                  </>
+                )}
               </div>
             ) : (
               /* 미지정 진입 시 (예: 메인 FAB 등): 기존 개체 선택 드롭다운 유지 */
               <div className="form-group" style={{ marginBottom: '1.25rem' }}>
                 <label className="form-label">
-                  관리 대상 개체 선택 <span className="required">*</span>
+                  관리 대상 선택 <span className="required">*</span>
                 </label>
                 <select
                   className="form-select"
@@ -384,7 +432,8 @@ export default function CareLogFormModal({
                   onChange={(e) => setSelectedEntityId(e.target.value)}
                   required
                 >
-                  <option value="">-- 개체를 선택하세요 --</option>
+                  <option value="">-- 관리 대상을 선택하세요 --</option>
+                  <option value="FARM_COMMON">🚜 [농장 공통] (축사 소독, 방역, 시설 점검, 사료 등)</option>
                   {activeEntities.length > 0 && (
                     <optgroup label="사육 중인 개체">
                       {activeEntities.map(ent => (

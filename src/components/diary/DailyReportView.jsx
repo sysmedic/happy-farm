@@ -429,6 +429,7 @@ export default function DailyReportView({
   schedules = [],
   careCategories,
   onOpenEntityDetail,
+  onOpenFarmCommonHistory,
   onOpenCareLogModal,
   onEditCareLog,
   onNavigateToDiary,
@@ -1150,23 +1151,45 @@ export default function DailyReportView({
                     {/* 1행: [이표번호] [소 이름] [분류 뱃지] <──────────> [✏️ 수정 버튼] */}
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.45rem', width: '100%' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap', minWidth: 0, flex: 1 }}>
-                        <span 
-                          className="badge badge-tag"
-                          onClick={() => onOpenEntityDetail(log.tagNumber)}
-                          title="클릭 시 이 개체의 관리 내역으로 이동"
-                          style={{ 
-                            cursor: 'pointer', 
-                            fontSize: '0.78rem', 
-                            padding: '0.18rem 0.5rem', 
-                            borderRadius: 'var(--radius-sm)',
-                            flexShrink: 0 
-                          }}
-                        >
-                          {log.tagNumber}
-                        </span>
-                        {entityName && (
-                          <span style={{ fontWeight: 800, fontSize: '0.88rem', color: 'var(--text-main)', flexShrink: 0 }}>
-                            {entityName}
+                        {log.tagNumber ? (
+                          <>
+                            <span 
+                              className="badge badge-tag"
+                              onClick={() => onOpenEntityDetail(log.tagNumber)}
+                              title="클릭 시 이 개체의 관리 내역으로 이동"
+                              style={{ 
+                                cursor: 'pointer', 
+                                fontSize: '0.78rem', 
+                                padding: '0.18rem 0.5rem', 
+                                borderRadius: 'var(--radius-sm)',
+                                flexShrink: 0 
+                              }}
+                            >
+                              {log.tagNumber}
+                            </span>
+                            {entityName && (
+                              <span style={{ fontWeight: 800, fontSize: '0.88rem', color: 'var(--text-main)', flexShrink: 0 }}>
+                                {entityName}
+                              </span>
+                            )}
+                          </>
+                        ) : (
+                          <span 
+                            onClick={() => onOpenFarmCommonHistory && onOpenFarmCommonHistory()}
+                            title="클릭 시 농장 공통 관리 이력(소독·방역 전체 이력) 모아보기"
+                            style={{ 
+                              cursor: onOpenFarmCommonHistory ? 'pointer' : 'default',
+                              fontSize: '0.82rem', 
+                              fontWeight: 800,
+                              color: 'var(--text-main)',
+                              background: 'var(--bg-card-subtle)',
+                              padding: '0.15rem 0.5rem', 
+                              borderRadius: 'var(--radius-sm)',
+                              border: '1px solid var(--border-color)',
+                              flexShrink: 0 
+                            }}
+                          >
+                            {entityName || '농장 공통'} 🚜
                           </span>
                         )}
                         <span 
@@ -1458,25 +1481,42 @@ export default function DailyReportView({
                           {/* ⚡ 박스 없는 단정한 블랙 텍스트: 이표번호(클릭 이동) + 개체명 */}
                           <td>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
-                              <span 
-                                onClick={() => onOpenEntityDetail(log.tagNumber)}
-                                title="클릭 시 이 개체의 관리 내역으로 이동"
-                                style={{ 
-                                  cursor: 'pointer', 
-                                  fontFamily: 'var(--font-mono)', 
-                                  fontWeight: 700, 
-                                  color: '#0f172a',
-                                  fontSize: '0.85rem',
-                                  textDecoration: 'underline',
-                                  textUnderlineOffset: '2px',
-                                  textDecorationColor: '#cbd5e1'
-                                }}
-                              >
-                                {log.tagNumber}
-                              </span>
-                              {log.entityName && (
-                                <span style={{ fontWeight: 600, color: '#334155', fontSize: '0.825rem' }}>
-                                  ({log.entityName})
+                              {log.tagNumber ? (
+                                <>
+                                  <span 
+                                    onClick={() => onOpenEntityDetail(log.tagNumber)}
+                                    title="클릭 시 이 개체의 관리 내역으로 이동"
+                                    style={{ 
+                                      cursor: 'pointer', 
+                                      fontFamily: 'var(--font-mono)', 
+                                      fontWeight: 700, 
+                                      color: '#0f172a',
+                                      fontSize: '0.85rem',
+                                      textDecoration: 'underline',
+                                      textUnderlineOffset: '2px',
+                                      textDecorationColor: '#cbd5e1'
+                                    }}
+                                  >
+                                    {log.tagNumber}
+                                  </span>
+                                  {log.entityName && (
+                                    <span style={{ fontWeight: 600, color: '#334155', fontSize: '0.825rem' }}>
+                                      ({log.entityName})
+                                    </span>
+                                  )}
+                                </>
+                              ) : (
+                                <span 
+                                  onClick={() => onOpenFarmCommonHistory && onOpenFarmCommonHistory()}
+                                  title="클릭 시 농장 공통 관리 이력 모아보기"
+                                  style={{ 
+                                    cursor: onOpenFarmCommonHistory ? 'pointer' : 'default',
+                                    fontWeight: 700, 
+                                    color: '#0f172a',
+                                    fontSize: '0.85rem'
+                                  }}
+                                >
+                                  {log.entityName || '농장 공통'} 🚜
                                 </span>
                               )}
                             </div>
