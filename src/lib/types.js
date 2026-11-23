@@ -149,6 +149,18 @@ export const DEFAULT_CARE_CATEGORIES = [
 // 농장 공통 4대 핵심 분류 ID 세트 (방역소독, 시설환경, 사료자재, 퇴비기타)
 export const FARM_COMMON_CATEGORY_IDS = new Set(['routine', 'facility', 'feed', 'other']);
 
+// 개체 개별 전용 8대 분류 ID 세트 (백신, 치료, 인공수정, 발정, 임신, 분만, 출하, 체중)
+export const ENTITY_ONLY_CATEGORY_IDS = new Set([
+  'vaccine',
+  'treatment',
+  'breeding',
+  'heat_check',
+  'pregnancy_check',
+  'calving',
+  'shipment',
+  'weight'
+]);
+
 export const CARE_CATEGORIES = DEFAULT_CARE_CATEGORIES;
 
 const STORAGE_CUSTOM_CATEGORIES_KEY = 'happy_farm_custom_care_categories_v1';

@@ -54,9 +54,10 @@ export default function CareLogFormModal({
     return (entities || []).find(e => e.id === selectedEntityId) || preselectedEntity || null;
   }, [entities, selectedEntityId, preselectedEntity, isFarmCommon]);
 
-  // 지능형 분류 필터링:
+  // 지능형 분류 필터링 (개체 개별 vs 농장 공통 완전 분리):
   // 1) 농장 공통('FARM_COMMON'): 축약된 4대 표준 분류 (방역소독, 시설환경, 사료자재, 퇴비기타) + 커스텀 분류만 깔끔하게 노출!
-  // 2) 거세우('castrated') 또는 수컷('male') 개체의 경우 번식 카테고리 4종 완전 제외!
+  // 2) 개체 개별: 농장 공통 전용 4종(방역소독, 시설환경, 사료자재, 퇴비기타) 완전 제외!
+  //    - 거세우/수컷 개체의 경우 번식 카테고리 4종 추가 제외!
   const categoriesToDisplay = useMemo(() => {
     if (isFarmCommon) {
       return allCategories.filter(cat => {
@@ -65,12 +66,35 @@ export default function CareLogFormModal({
       });
     }
 
+    // 개체 개별: 농장 공통 4대 분류 완전 제외 + 수컷/거세우 번식 4종 제외
     const isMaleOrCastrated = currentSelectedEntity && (currentSelectedEntity.gender === 'castrated' || currentSelectedEntity.gender === 'male');
-    if (isMaleOrCastrated) {
-      return allCategories.filter(cat => !BREEDING_CATEGORY_IDS.has(normalizeCategoryId(cat.id)));
-    }
-    return allCategories;
+    return allCategories.filter(cat => {
+      const norm = normalizeCategoryId(cat.id);
+      // 농장 공통 전용 4종은 개체 개별에서 완전 제외
+      if (['routine', 'facility', 'feed', 'other'].includes(norm)) return false;
+      // 거세우/수컷 번식 4종 제외
+      if (isMaleOrCastrated && BREEDING_CATEGORY_IDS.has(norm)) return false;
+      return true;
+    });
   }, [allCategories, currentSelectedEntity, isFarmCommon]);
+
+  // 대상 개체 전환(개체 <-> 농장 공통 또는 거세우 선택) 시 선택 불가능한 카테고리가 남아있으면 안전하게 자동 리셋
+  useEffect(() => {
+    if (!category) return;
+    const norm = normalizeCategoryId(category);
+    if (isFarmCommon) {
+      if (!['routine', 'facility', 'feed', 'other'].includes(norm) && !allCategories.find(c => c.id === norm && c.isCustom)) {
+        setCategory('routine');
+      }
+    } else {
+      const isFarmCommonCat = ['routine', 'facility', 'feed', 'other'].includes(norm);
+      const isMaleOrCastrated = currentSelectedEntity && (currentSelectedEntity.gender === 'castrated' || currentSelectedEntity.gender === 'male');
+      const isDisallowedBreeding = isMaleOrCastrated && BREEDING_CATEGORY_IDS.has(norm);
+      if (isFarmCommonCat || isDisallowedBreeding) {
+        setCategory('');
+      }
+    }
+  }, [isFarmCommon, currentSelectedEntity, category, allCategories]);
   const [date, setDate] = useState(logToEdit?.date || initialValues?.date || getTodayDateString());
   const [time, setTime] = useState(logToEdit?.time || getCurrentTimeString());
   const [category, setCategory] = useState(normalizeCategoryId(logToEdit?.category || initialValues?.category) || '');

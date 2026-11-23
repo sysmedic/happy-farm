@@ -79,7 +79,11 @@ export default function ScheduleFormModal({
   const [selectedEntityId, setSelectedEntityId] = useState(
     scheduleToEdit?.entityId || initialData?.entityId || ''
   );
-  const [category, setCategory] = useState(scheduleToEdit?.category || initialData?.category || 'routine');
+  const [category, setCategory] = useState(() => {
+    if (scheduleToEdit?.category) return normalizeCategoryId(scheduleToEdit.category);
+    if (initialData?.category) return normalizeCategoryId(initialData.category);
+    return targetType === 'farm' ? 'routine' : 'vaccine';
+  });
   const [title, setTitle] = useState(scheduleToEdit?.title || initialData?.title || '');
   const [memo, setMemo] = useState(scheduleToEdit?.memo || initialData?.memo || '');
   const [errorMsg, setErrorMsg] = useState('');
@@ -90,10 +94,10 @@ export default function ScheduleFormModal({
     return (entities || []).find(e => e.id === selectedEntityId) || null;
   }, [entities, targetType, selectedEntityId]);
 
-  // 지능형 분류 필터링:
+  // 지능형 분류 필터링 (개체 개별 vs 농장 공통 완전 분리):
   // 1) 농장 공통('farm'): 축약된 4대 표준 분류 (방역소독, 시설환경, 사료자재, 퇴비기타) + 커스텀 분류만 깔끔하게 노출!
-  // 2) 개체 개별('entity') 중 거세우/수컷: 번식 카테고리 4종 제외
-  // 3) 개체 개별('entity') 암컷: 전체 12종 및 커스텀 분류 전체 표시
+  // 2) 개체 개별('entity'): 농장 공통 전용 4종(방역소독, 시설환경, 사료자재, 퇴비기타) 완전 제외!
+  //    - 수컷/거세우: 번식 4종(인공수정, 발정관찰, 임신감정, 분만관리) 추가 제외!
   const categoriesToDisplay = useMemo(() => {
     if (targetType === 'farm') {
       return allCategories.filter(cat => {
@@ -102,27 +106,35 @@ export default function ScheduleFormModal({
       });
     }
 
+    // 개체 개별: 농장 공통 4종 제외 + 수컷/거세우 번식 4종 제외
     const isMaleOrCastrated = selectedEntity && (selectedEntity.gender === 'castrated' || selectedEntity.gender === 'male');
-    if (isMaleOrCastrated) {
-      return allCategories.filter(cat => !BREEDING_CATEGORY_IDS.has(normalizeCategoryId(cat.id)));
-    }
-    return allCategories;
+    return allCategories.filter(cat => {
+      const norm = normalizeCategoryId(cat.id);
+      // 농장 공통 전용 4종은 개체 개별에서 완전 제외
+      if (['routine', 'facility', 'feed', 'other'].includes(norm)) return false;
+      // 거세우/수컷의 번식 4종 제외
+      if (isMaleOrCastrated && BREEDING_CATEGORY_IDS.has(norm)) return false;
+      return true;
+    });
   }, [allCategories, targetType, selectedEntity]);
 
-  // 대상 변경(농장공통 전환 또는 거세우 선택)으로 인해 현재 선택 카테고리가 제외된 경우 안전하게 자동 전환
+  // 대상 변경(농장공통 <-> 개체개별 전환 또는 거세우 선택)으로 인해 현재 선택 카테고리가 제외된 경우 안전하게 자동 전환
   useEffect(() => {
     const normCurrentCat = normalizeCategoryId(category);
     if (targetType === 'farm') {
-      // 농장 공통에서 허용되지 않는 개체 전용 분류(백신, 진료, 번식4종, 출하, 체중 등)가 선택되어 있다면 기본인 'routine'(방역소독)으로 전환
+      // 농장 공통에서 허용되지 않는 개체 전용 분류가 선택되어 있다면 기본인 'routine'(방역소독)으로 전환
       if (!['routine', 'facility', 'feed', 'other'].includes(normCurrentCat) && !allCategories.find(c => c.id === normCurrentCat && c.isCustom)) {
         setCategory('routine');
         setTitle('');
       }
     } else {
-      // 개체 개별 선택 시 거세우/수컷인데 번식 카테고리인 경우
+      // 개체 개별일 때: 농장 공통 전용 분류이거나 수컷/거세우 번식 카테고리인 경우 'vaccine'(백신접종)으로 전환
+      const isFarmCommonCat = ['routine', 'facility', 'feed', 'other'].includes(normCurrentCat);
       const isMaleOrCastrated = selectedEntity && (selectedEntity.gender === 'castrated' || selectedEntity.gender === 'male');
-      if (isMaleOrCastrated && BREEDING_CATEGORY_IDS.has(normCurrentCat)) {
-        setCategory('treatment');
+      const isDisallowedBreeding = isMaleOrCastrated && BREEDING_CATEGORY_IDS.has(normCurrentCat);
+
+      if (isFarmCommonCat || isDisallowedBreeding) {
+        setCategory('vaccine');
         setTitle('');
       }
     }
