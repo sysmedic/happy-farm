@@ -37,17 +37,15 @@ export default function FarmHistoryPrintModal({
       oldIframe.remove();
     }
 
-    // 격리된 숨김 iframe 생성
+    // 격리된 오프스크린 iframe 생성 (A4 실제 크기 부여로 브라우저 렌더링 엔진 정상 활성화)
     const iframe = document.createElement('iframe');
     iframe.id = 'farm-history-print-frame';
     iframe.style.position = 'fixed';
-    iframe.style.right = '0';
-    iframe.style.bottom = '0';
-    iframe.style.width = '0';
-    iframe.style.height = '0';
-    iframe.style.border = '0';
-    iframe.style.opacity = '0';
-    iframe.style.pointerEvents = 'none';
+    iframe.style.top = '-9999px';
+    iframe.style.left = '-9999px';
+    iframe.style.width = '210mm';
+    iframe.style.height = '297mm';
+    iframe.style.border = 'none';
     document.body.appendChild(iframe);
 
     const doc = iframe.contentWindow.document;
@@ -280,67 +278,6 @@ export default function FarmHistoryPrintModal({
             fontFamily: "'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
           }}
         >
-          {/* 인쇄 전용 CSS (빈 화면 방지 및 A4 출력 최적화) */}
-          <style dangerouslySetInnerHTML={{ __html: `
-            @media print {
-              html, body {
-                background: #ffffff !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                height: auto !important;
-                overflow: visible !important;
-              }
-              body * {
-                visibility: hidden;
-              }
-              .print-modal-overlay,
-              .print-modal-overlay * {
-                visibility: visible !important;
-              }
-              .print-modal-overlay {
-                display: block !important;
-                position: static !important;
-                inset: auto !important;
-                padding: 0 !important;
-                background: #ffffff !important;
-                width: 100% !important;
-                height: auto !important;
-                overflow: visible !important;
-              }
-              .print-preview-container {
-                box-shadow: none !important;
-                max-width: 100% !important;
-                max-height: none !important;
-                border-radius: 0 !important;
-                border: none !important;
-                width: 100% !important;
-                height: auto !important;
-                overflow: visible !important;
-                display: block !important;
-              }
-              .print-page-body {
-                padding: 0 !important;
-                overflow: visible !important;
-                width: 100% !important;
-              }
-              .no-print {
-                display: none !important;
-              }
-              @page {
-                size: A4 portrait;
-                margin: 15mm 12mm 15mm 12mm;
-              }
-              table {
-                page-break-inside: auto;
-                width: 100% !important;
-              }
-              tr {
-                page-break-inside: avoid;
-                break-inside: avoid;
-              }
-            }
-          `}} />
-
           {/* 1. 상단 제목 (내부 보관용 심플 텍스트 헤더 - 불필요한 테두리 박스 없음) */}
           <div style={{ textAlign: 'center', marginBottom: '1.25rem' }}>
             <h1 style={{ 

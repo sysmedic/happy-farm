@@ -42,13 +42,11 @@ export default function FarmDisinfectionPrintModal({
     const iframe = document.createElement('iframe');
     iframe.id = 'farm-disinfection-print-frame';
     iframe.style.position = 'fixed';
-    iframe.style.right = '0';
-    iframe.style.bottom = '0';
-    iframe.style.width = '0';
-    iframe.style.height = '0';
-    iframe.style.border = '0';
-    iframe.style.opacity = '0';
-    iframe.style.pointerEvents = 'none';
+    iframe.style.top = '-9999px';
+    iframe.style.left = '-9999px';
+    iframe.style.width = '210mm';
+    iframe.style.height = '297mm';
+    iframe.style.border = 'none';
     document.body.appendChild(iframe);
 
     const doc = iframe.contentWindow.document;
@@ -239,67 +237,6 @@ export default function FarmDisinfectionPrintModal({
             fontFamily: "'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
           }}
         >
-          {/* 인쇄용 인라인 스타일 */}
-          <style dangerouslySetInnerHTML={{ __html: `
-            @media print {
-              html, body {
-                background: #ffffff !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                height: auto !important;
-                overflow: visible !important;
-              }
-              body * {
-                visibility: hidden;
-              }
-              .print-modal-overlay,
-              .print-modal-overlay * {
-                visibility: visible !important;
-              }
-              .print-modal-overlay {
-                display: block !important;
-                position: static !important;
-                inset: auto !important;
-                padding: 0 !important;
-                background: #ffffff !important;
-                width: 100% !important;
-                height: auto !important;
-                overflow: visible !important;
-              }
-              .print-preview-container {
-                box-shadow: none !important;
-                max-width: 100% !important;
-                max-height: none !important;
-                border-radius: 0 !important;
-                border: none !important;
-                width: 100% !important;
-                height: auto !important;
-                overflow: visible !important;
-                display: block !important;
-              }
-              .print-page-body {
-                padding: 0 !important;
-                overflow: visible !important;
-                width: 100% !important;
-              }
-              .no-print {
-                display: none !important;
-              }
-              @page {
-                size: A4 portrait;
-                margin: 15mm 12mm 15mm 12mm;
-              }
-              table {
-                page-break-inside: auto;
-                width: 100% !important;
-              }
-              tr {
-                page-break-inside: avoid;
-                break-inside: avoid;
-              }
-            }
-          `}} />
-
           {/* 1. 공문서 헤더 타이틀 (가축전염병예방법 시행규칙 별지 제6호서식) */}
           <div style={{ textAlign: 'center', marginBottom: '1.25rem' }}>
             <h2 style={{ 
