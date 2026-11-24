@@ -227,33 +227,35 @@ export default function FarmCommonHistoryModal({
               onChange={(e) => setStartDate(e.target.value)}
               style={{
                 flex: '1 1 0px',
-                minWidth: '100px',
-                maxWidth: '135px',
-                padding: '0.2rem 0.3rem',
+                minWidth: '105px',
+                maxWidth: '140px',
+                height: '30px',
+                padding: '0.2rem 0.35rem',
                 borderRadius: 'var(--radius-sm)',
                 border: '1px solid var(--border-color)',
                 background: 'var(--bg-page)',
                 color: 'var(--text-main)',
-                fontSize: '0.78rem',
+                fontSize: '0.82rem',
                 fontFamily: 'inherit',
                 textAlign: 'center'
               }}
             />
-            <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem', flexShrink: 0 }}>~</span>
+            <span style={{ color: 'var(--text-muted)', fontSize: '0.82rem', flexShrink: 0 }}>~</span>
             <input 
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
               style={{
                 flex: '1 1 0px',
-                minWidth: '100px',
-                maxWidth: '135px',
-                padding: '0.2rem 0.3rem',
+                minWidth: '105px',
+                maxWidth: '140px',
+                height: '30px',
+                padding: '0.2rem 0.35rem',
                 borderRadius: 'var(--radius-sm)',
                 border: '1px solid var(--border-color)',
                 background: 'var(--bg-page)',
                 color: 'var(--text-main)',
-                fontSize: '0.78rem',
+                fontSize: '0.82rem',
                 fontFamily: 'inherit',
                 textAlign: 'center'
               }}
