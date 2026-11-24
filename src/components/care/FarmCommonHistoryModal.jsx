@@ -96,10 +96,9 @@ export default function FarmCommonHistoryModal({
               color: '#059669',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '1.25rem'
+              justifyContent: 'center'
             }}>
-              🚜
+              <ClipboardList size={20} color="#059669" />
             </div>
             <div>
               <h2 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-main)', letterSpacing: '-0.02em' }}>

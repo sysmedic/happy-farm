@@ -752,7 +752,7 @@ export default function App() {
                 initialDate={targetDiaryDate}
                 initialTab={initialDiaryTab}
                 onOpenEntityDetail={handleOpenEntityDetail}
-                onOpenFarmCommonHistory={() => setActiveTab('farm')}
+                onOpenFarmCommonHistory={() => setIsFarmCommonModalOpen(true)}
                 onOpenCareLogModal={(entity = null, date = null, initialValues = null) => {
                   setCareLogPreselectedEntity(entity);
                   setCareLogInitialValues(initialValues);
@@ -782,7 +782,7 @@ export default function App() {
                 careCategories={allCareCategories}
                 farmSettings={farmSettings}
                 onOpenEntityDetail={handleOpenEntityDetail}
-                onOpenFarmCommonHistory={() => setActiveTab('farm')}
+                onOpenFarmCommonHistory={() => setIsFarmCommonModalOpen(true)}
                 onOpenCareLogModal={(entity = null) => {
                   setCareLogPreselectedEntity(entity);
                   setCareLogInitialValues(null);
