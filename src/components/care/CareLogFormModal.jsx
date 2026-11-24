@@ -1040,8 +1040,8 @@ export default function CareLogFormModal({
               className="card" 
               style={{ 
                 marginTop: '1.25rem', 
-                background: initialValues?.focusNextSchedule ? 'rgba(245, 158, 11, 0.08)' : 'var(--bg-card-subtle)', 
-                border: initialValues?.focusNextSchedule ? '2px dashed var(--color-accent)' : '1px dashed var(--border-color)',
+                background: initialValues?.focusNextSchedule ? 'rgba(245, 158, 11, 0.08)' : (hasNextSchedule ? 'rgba(2, 132, 199, 0.04)' : 'var(--bg-card-subtle)'), 
+                border: initialValues?.focusNextSchedule ? '2px dashed var(--color-accent)' : (hasNextSchedule ? '1px dashed rgba(2, 132, 199, 0.45)' : '1px dashed var(--border-color)'),
                 borderRadius: 'var(--radius-md)',
                 transition: 'all 0.3s ease'
               }}
@@ -1052,7 +1052,7 @@ export default function CareLogFormModal({
                     type="checkbox"
                     checked={hasNextSchedule}
                     onChange={(e) => setHasNextSchedule(e.target.checked)}
-                    style={{ width: '18px', height: '18px', accentColor: 'var(--color-primary)' }}
+                    style={{ width: '18px', height: '18px', accentColor: '#0284c7', cursor: 'pointer' }}
                   />
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem' }}>
                     <Calendar size={21} color="#0284c7" strokeWidth={2.3} />
