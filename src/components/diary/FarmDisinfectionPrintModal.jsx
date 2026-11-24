@@ -231,11 +231,11 @@ export default function FarmDisinfectionPrintModal({
           }}>
             <thead>
               <tr style={{ background: '#f1f5f9' }}>
-                <th style={{ ...thStyle, width: '40px', textAlign: 'center' }}>No</th>
-                <th style={{ ...thStyle, width: '125px', textAlign: 'center' }}>소독 일시</th>
-                <th style={{ ...thStyle, width: '150px', textAlign: 'center' }}>소독 구역 / 대상</th>
+                <th style={{ ...thStyle, width: '38px', textAlign: 'center' }}>No</th>
+                <th style={{ ...thStyle, width: '95px', textAlign: 'center' }}>소독 일자</th>
+                <th style={{ ...thStyle, width: '140px', textAlign: 'center' }}>소독 구역 / 대상</th>
                 <th style={{ ...thStyle, textAlign: 'center' }}>소독 약품명 및 세부 작업 내용</th>
-                <th style={{ ...thStyle, width: '90px', textAlign: 'center' }}>작업자</th>
+                <th style={{ ...thStyle, width: '85px', textAlign: 'center' }}>작업자</th>
               </tr>
             </thead>
             <tbody>
@@ -251,7 +251,7 @@ export default function FarmDisinfectionPrintModal({
                     <tr key={log.id || index}>
                       <td style={{ ...tdStyle, textAlign: 'center' }}>{index + 1}</td>
                       <td style={{ ...tdStyle, textAlign: 'center', whiteSpace: 'nowrap' }}>
-                        {log.date} {log.time || ''}
+                        {log.date}
                       </td>
                       <td style={{ ...tdStyle, fontWeight: 700 }}>
                         {log.title || '축사 방역소독'}
