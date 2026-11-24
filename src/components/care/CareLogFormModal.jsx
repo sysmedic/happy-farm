@@ -1054,9 +1054,9 @@ export default function CareLogFormModal({
                     onChange={(e) => setHasNextSchedule(e.target.checked)}
                     style={{ width: '18px', height: '18px', accentColor: 'var(--color-primary)' }}
                   />
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
-                    <Calendar size={17} color="#0284c7" strokeWidth={2.2} />
-                    <span>다음 일정 등록</span>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem' }}>
+                    <Calendar size={21} color="#0284c7" strokeWidth={2.3} />
+                    <span style={{ fontSize: '0.98rem' }}>다음 일정 등록</span>
                   </span>
                 </label>
 
