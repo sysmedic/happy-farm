@@ -499,7 +499,37 @@ export default function ScheduleFormModal({
               </div>
             )}
 
-            {/* 2. 일정 분류 선택 (관리 내역 추가와 동일한 알약 캡슐 디자인 및 커스텀 분류 실시간 연동) */}
+            {/* 2. 예정 일자 및 시간 (상단에서 일시 먼저 확정하여, 아래 분류~제목 흐름이 끊기지 않도록 배치) */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1.15fr 0.85fr', gap: '0.65rem', marginBottom: '1.15rem' }}>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label" style={{ fontWeight: 700, marginBottom: '0.35rem' }}>
+                  예정 일자 <span style={{ color: 'var(--color-danger)' }}>*</span>
+                </label>
+                <input
+                  type="date"
+                  className="form-input"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label" style={{ fontWeight: 700, marginBottom: '0.35rem' }}>
+                  예정 시간 (선택)
+                </label>
+                <div style={{ position: 'relative' }}>
+                  <input
+                    type="time"
+                    className="form-input"
+                    value={time}
+                    onChange={(e) => setTime(e.target.value)}
+                    placeholder="선택 사항"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* 3. 일정 분류 선택 (관리 내역 추가와 동일한 알약 캡슐 디자인 및 커스텀 분류 실시간 연동) */}
             <div className="form-group" style={{ marginBottom: '1.15rem' }}>
               <label className="form-label" style={{ fontWeight: 700, marginBottom: '0.45rem' }}>
                 일정 분류 선택
@@ -661,36 +691,6 @@ export default function ScheduleFormModal({
                   </div>
                 </div>
               )}
-            </div>
-
-            {/* 3. 예정 일자 및 시간 (관리 내역 모달과 동일한 위치) */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1.15fr 0.85fr', gap: '0.65rem', marginBottom: '1.15rem' }}>
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <label className="form-label" style={{ fontWeight: 700, marginBottom: '0.35rem' }}>
-                  예정 일자 <span style={{ color: 'var(--color-danger)' }}>*</span>
-                </label>
-                <input
-                  type="date"
-                  className="form-input"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <label className="form-label" style={{ fontWeight: 700, marginBottom: '0.35rem' }}>
-                  예정 시간 (선택)
-                </label>
-                <div style={{ position: 'relative' }}>
-                  <input
-                    type="time"
-                    className="form-input"
-                    value={time}
-                    onChange={(e) => setTime(e.target.value)}
-                    placeholder="선택 사항"
-                  />
-                </div>
-              </div>
             </div>
 
             {/* 4. 빠른 제목 추천 프리셋 뱃지 (스카이 블루 테마 + 직접 추가/삭제 지원) */}

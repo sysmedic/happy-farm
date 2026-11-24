@@ -573,6 +573,31 @@ export default function CareLogFormModal({
               </div>
             )}
 
+            {/* 2. 작업 일시 (상단에서 일시 먼저 확정하여, 아래 분류~제목 흐름이 끊기지 않도록 배치) */}
+            <div className="form-group" style={{ marginBottom: '1.15rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1.15fr 0.85fr', gap: '0.65rem' }}>
+                <div>
+                  <label className="form-label" style={{ fontWeight: 700, marginBottom: '0.35rem' }}>작업 일자 <span className="required">*</span></label>
+                  <input
+                    type="date"
+                    className="form-input"
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="form-label" style={{ fontWeight: 700, marginBottom: '0.35rem' }}>작업 시간</label>
+                  <input
+                    type="time"
+                    className="form-input"
+                    value={time}
+                    onChange={(e) => setTime(e.target.value)}
+                  />
+                </div>
+              </div>
+            </div>
+
             {/* 관리 분류 선택기 (3열 가로폭 균등 통일 알약 칩) */}
             <div className="form-group" style={{ marginBottom: '1.25rem' }}>
               <label className="form-label" style={{ marginBottom: '0.45rem', fontWeight: 700 }}>관리 분류 선택</label>
@@ -737,33 +762,9 @@ export default function CareLogFormModal({
               )}
             </div>
 
-            {/* 작업 일시 및 작업명 */}
+            {/* 작업 내용 (빠른 추천, 제목, 상세) */}
             <div className="form-grid">
-              <div className="form-group full-width" style={{ marginBottom: 0 }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1.15fr 0.85fr', gap: '0.65rem' }}>
-                  <div>
-                    <label className="form-label">작업 일자 <span className="required">*</span></label>
-                    <input
-                      type="date"
-                      className="form-input"
-                      value={date}
-                      onChange={(e) => setDate(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="form-label">작업 시간</label>
-                    <input
-                      type="time"
-                      className="form-input"
-                      value={time}
-                      onChange={(e) => setTime(e.target.value)}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* 빠른 제목 추천 프리셋 뱃지 (스카이 블루 테마 + 직접 추가/삭제 지원) */}
+              {/* 빠른 제목 추천 프리셋 뱃지 (직접 추가/삭제 지원) */}
               {currentCategoryKey && (
                 <div className="form-group full-width" style={{ marginBottom: '0.45rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.35rem' }}>
