@@ -183,11 +183,11 @@ export default function FarmCommonHistoryModal({
           flexDirection: 'column',
           gap: '0.55rem'
         }}>
-          {/* 1단: 기간 선택창 (좌측 📅 클릭 시 최근 1달 리셋, 우측 텍스트/박스 제거) */}
+          {/* 1단: 기간 선택창 (좌측 정렬: 📅 클릭 시 최근 1달 리셋, 우측 텍스트/박스 제거) */}
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
+            justifyContent: 'flex-start',
             gap: '0.4rem',
             padding: '0.35rem 0.6rem',
             background: 'var(--bg-card)',

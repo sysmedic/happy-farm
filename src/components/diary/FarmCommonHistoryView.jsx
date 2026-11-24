@@ -312,11 +312,11 @@ export default function FarmCommonHistoryView({
         })}
       </div>
 
-      {/* 4. 날짜 직접 선택 바 (모달과 100% 동일: 📅 클릭 시 1달 리셋, 시작일 ~ 종료일 지정) */}
+      {/* 4. 날짜 직접 선택 바 (좌측 정렬: 📅 클릭 시 1달 리셋, 시작일 ~ 종료일 지정) */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center',
+        justifyContent: 'flex-start',
         gap: '0.45rem',
         padding: '0.4rem 0.65rem',
         background: 'var(--bg-card)',
