@@ -18,7 +18,7 @@ export default function MobileNavBar({
         className={`mobile-nav-btn ${activeTab === 'entities' ? 'active' : ''}`}
         onClick={() => onSelectTab('entities')}
       >
-        <CowIcon size={24} strokeWidth={1.5} className="mobile-nav-icon" />
+        <CowIcon size={24} strokeWidth={1.3} className="mobile-nav-icon" />
         <span className="mobile-nav-label">개체관리</span>
       </button>
 
