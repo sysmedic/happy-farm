@@ -652,7 +652,7 @@ export default function FarmCommonHistoryModal({
               <button
                 type="button"
                 onClick={onNavigateToFarm}
-                title="농장 관리대장 전체 화면으로 이동 (방역대장 인쇄 등)"
+                title="농장 관리 전체 화면으로 이동 (방역대장 인쇄 등)"
                 style={{
                   background: 'none',
                   border: 'none',
