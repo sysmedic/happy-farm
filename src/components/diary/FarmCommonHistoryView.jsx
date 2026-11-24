@@ -499,7 +499,7 @@ export default function FarmCommonHistoryView({
         <div className="empty-state card" style={{ padding: '3.5rem 1.5rem', textAlign: 'center', background: 'var(--bg-card)' }}>
           <ClipboardList size={40} strokeWidth={1.5} style={{ opacity: 0.45, marginBottom: '0.65rem', color: 'var(--text-muted)' }} />
           <p style={{ margin: 0, fontWeight: 700, fontSize: '0.98rem', color: 'var(--text-main)' }}>
-            {searchQuery || periodFilter !== 'all' || selectedCategory !== 'all'
+            {hasActiveFilters
               ? '조건에 맞는 농장 관리 기록이 없습니다.' 
               : '등록된 농장 관리 기록이 없습니다.'}
           </p>
