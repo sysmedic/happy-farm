@@ -250,61 +250,110 @@ export default function FarmCommonHistoryModal({
             />
           </div>
 
-          {/* 2단: 종목별 대시보드 칩 (조회기간 내 건수 실시간 연동, 3개씩 균등 그리드 배치) */}
+          {/* 2단: 종목별 대시보드 칩 (관리분류 선택과 동일한 알약 캡슐 & 에메랄드 틴트 컬러 적용) */}
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: '0.4rem'
+            gap: '0.45rem'
           }}>
             {/* 전체 캡슐 (선택 기간 내 건수) */}
-            <button
-              type="button"
-              className={`fullhistory-tab-btn ${selectedCategory === 'all' ? 'active' : ''}`}
-              onClick={() => setSelectedCategory('all')}
-              title="전체 분류 보기"
-              style={{
-                width: '100%',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.35rem',
-                padding: '0 0.5rem',
-                height: '34px',
-                fontSize: '0.82rem',
-                whiteSpace: 'nowrap'
-              }}
-            >
-              <span>전체</span>
-              <span className="tab-count">{periodFilteredLogs.length}</span>
-            </button>
+            {(() => {
+              const isSelected = selectedCategory === 'all';
+              return (
+                <button
+                  type="button"
+                  onClick={() => setSelectedCategory('all')}
+                  title="전체 분류 보기"
+                  style={{
+                    position: 'relative',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.3rem',
+                    padding: '0.45rem 0.35rem',
+                    height: '38px',
+                    borderRadius: '9999px',
+                    border: isSelected ? '1.5px solid #10b981' : '1px solid var(--border-color)',
+                    background: isSelected ? 'rgba(16, 185, 129, 0.12)' : 'var(--bg-card)',
+                    color: isSelected ? '#059669' : 'var(--text-main)',
+                    fontWeight: isSelected ? 700 : 600,
+                    fontSize: '0.82rem',
+                    cursor: 'pointer',
+                    boxShadow: isSelected ? '0 1px 4px rgba(16, 185, 129, 0.2)' : 'none',
+                    transition: 'all 0.15s ease',
+                    whiteSpace: 'nowrap',
+                    minWidth: 0,
+                    width: '100%'
+                  }}
+                >
+                  <span>전체</span>
+                  <span style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '0.1rem 0.4rem',
+                    borderRadius: '9999px',
+                    fontSize: '0.74rem',
+                    fontWeight: isSelected ? 800 : 600,
+                    background: isSelected ? 'rgba(16, 185, 129, 0.25)' : 'rgba(0, 0, 0, 0.06)',
+                    color: isSelected ? '#047857' : 'var(--text-muted)',
+                    marginLeft: '0.15rem'
+                  }}>
+                    {periodFilteredLogs.length}
+                  </span>
+                </button>
+              );
+            })()}
 
             {/* 개별 카테고리 칩 (선택 기간 내 건수) */}
             {activeCategories.map(cat => {
               const count = categoryCounts[cat.id] || 0;
-              const isActive = selectedCategory === cat.id;
+              const isSelected = selectedCategory === cat.id;
 
               return (
                 <button
                   key={cat.id}
                   type="button"
-                  className={`fullhistory-tab-btn ${isActive ? 'active' : ''}`}
                   onClick={() => setSelectedCategory(cat.id)}
                   title={`${cat.label} 관리 내역만 보기`}
                   style={{
-                    width: '100%',
-                    display: 'inline-flex',
+                    position: 'relative',
+                    display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     gap: '0.25rem',
-                    padding: '0 0.4rem',
-                    height: '34px',
-                    fontSize: '0.8rem',
-                    whiteSpace: 'nowrap'
+                    padding: '0.45rem 0.35rem',
+                    height: '38px',
+                    borderRadius: '9999px',
+                    border: isSelected ? '1.5px solid #10b981' : '1px solid var(--border-color)',
+                    background: isSelected ? 'rgba(16, 185, 129, 0.12)' : 'var(--bg-card)',
+                    color: isSelected ? '#059669' : 'var(--text-main)',
+                    fontWeight: isSelected ? 700 : 600,
+                    fontSize: '0.82rem',
+                    cursor: 'pointer',
+                    boxShadow: isSelected ? '0 1px 4px rgba(16, 185, 129, 0.2)' : 'none',
+                    transition: 'all 0.15s ease',
+                    whiteSpace: 'nowrap',
+                    minWidth: 0,
+                    width: '100%'
                   }}
                 >
-                  {cat.icon && <span style={{ fontSize: '0.85rem' }}>{cat.icon}</span>}
+                  {cat.icon && <span style={{ fontSize: '0.88rem' }}>{cat.icon}</span>}
                   <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{cat.label}</span>
-                  <span className="tab-count">{count}</span>
+                  <span style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '0.1rem 0.4rem',
+                    borderRadius: '9999px',
+                    fontSize: '0.74rem',
+                    fontWeight: isSelected ? 800 : 600,
+                    background: isSelected ? 'rgba(16, 185, 129, 0.25)' : 'rgba(0, 0, 0, 0.06)',
+                    color: isSelected ? '#047857' : 'var(--text-muted)',
+                    marginLeft: '0.15rem'
+                  }}>
+                    {count}
+                  </span>
                 </button>
               );
             })}
