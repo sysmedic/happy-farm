@@ -1,11 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import { 
-  X, 
   Plus, 
   Edit3, 
   ChevronLeft, 
   Calendar, 
-  Clock, 
   ClipboardList
 } from 'lucide-react';
 import { 
@@ -25,11 +23,10 @@ export default function FarmCommonHistoryModal({
   onDeleteCareLog,
   onEditSchedule
 }) {
-  // 기본 선택: 전체 분류 + 최근 1달 기간 필터
+  // 기본 선택: 전체 분류
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [periodFilter, setPeriodFilter] = useState('1m'); // '1m', '3m', 'year', 'all', 'custom'
 
-  // 오늘 날짜 및 1달 전 날짜 기본값
+  // 오늘 날짜 및 최근 1달 전 기본값
   const todayStr = useMemo(() => {
     const now = new Date();
     const y = now.getFullYear();
@@ -38,7 +35,7 @@ export default function FarmCommonHistoryModal({
     return `${y}-${m}-${d}`;
   }, []);
 
-  const oneMonthAgoStr = useMemo(() => {
+  const defaultStartDate = useMemo(() => {
     const now = new Date();
     now.setDate(now.getDate() - 30);
     const y = now.getFullYear();
@@ -47,9 +44,9 @@ export default function FarmCommonHistoryModal({
     return `${y}-${m}-${d}`;
   }, []);
 
-  // 직접 설정 시 시작일과 종료일
-  const [customStartDate, setCustomStartDate] = useState(oneMonthAgoStr);
-  const [customEndDate, setCustomEndDate] = useState(todayStr);
+  // 기본값: 최근 1달 (30일 전 ~ 오늘)
+  const [startDate, setStartDate] = useState(defaultStartDate);
+  const [endDate, setEndDate] = useState(todayStr);
 
   const allCategories = careCategories || CARE_CATEGORIES;
 
@@ -85,44 +82,13 @@ export default function FarmCommonHistoryModal({
     return `D+${Math.abs(diff)}`;
   };
 
-  // 기간 필터 판단 헬퍼 (기본: 최근 1달)
-  const isDateInPeriod = (dateStr, period) => {
-    if (!dateStr || period === 'all') return true;
-    
-    if (period === 'custom') {
-      if (customStartDate && dateStr < customStartDate) return false;
-      if (customEndDate && dateStr > customEndDate) return false;
-      return true;
-    }
-
-    const logDate = new Date(dateStr);
-    if (isNaN(logDate.getTime())) return true;
-    
-    const now = new Date();
-    if (period === '1m') {
-      const oneMonthAgo = new Date(now);
-      oneMonthAgo.setDate(now.getDate() - 30);
-      return logDate >= oneMonthAgo;
-    }
-    if (period === '3m') {
-      const threeMonthsAgo = new Date(now);
-      threeMonthsAgo.setDate(now.getDate() - 90);
-      return logDate >= threeMonthsAgo;
-    }
-    if (period === 'year') {
-      const currentYear = now.getFullYear().toString();
-      return dateStr.startsWith(currentYear);
-    }
-    return true;
-  };
-
   // 3. 기간 및 카테고리 필터링된 기록
   const filteredLogs = useMemo(() => {
     return farmCommonLogs.filter(log => {
-      // 기간 필터
-      if (!isDateInPeriod(log.date, periodFilter)) {
-        return false;
-      }
+      // 기간 필터 (시작일 ~ 종료일)
+      if (startDate && log.date < startDate) return false;
+      if (endDate && log.date > endDate) return false;
+
       // 카테고리 필터
       if (selectedCategory !== 'all') {
         const normCat = normalizeCategoryId(log.category);
@@ -130,7 +96,7 @@ export default function FarmCommonHistoryModal({
       }
       return true;
     });
-  }, [farmCommonLogs, periodFilter, selectedCategory, customStartDate, customEndDate]);
+  }, [farmCommonLogs, startDate, endDate, selectedCategory]);
 
   // 카테고리별 건수 집계 (전체 농장공통 기록 기준)
   const categoryCounts = useMemo(() => {
@@ -154,14 +120,8 @@ export default function FarmCommonHistoryModal({
     });
   }, [allCategories, categoryCounts]);
 
-  // 기간 필터 옵션
-  const PERIOD_OPTIONS = [
-    { id: '1m', label: '최근 1달' },
-    { id: '3m', label: '3개월' },
-    { id: 'year', label: `${new Date().getFullYear()}년` },
-    { id: 'all', label: '전체' },
-    { id: 'custom', label: '📅 직접 설정' }
-  ];
+  // 최근 1달 기본값 여부 확인
+  const isDefaultPeriod = startDate === defaultStartDate && endDate === todayStr;
 
   if (!isOpen) return null;
 
@@ -172,25 +132,16 @@ export default function FarmCommonHistoryModal({
         onClick={(e) => e.stopPropagation()}
         style={{ maxWidth: '640px', width: '100%', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}
       >
-        {/* 1. 모달 헤더: '농장 관리 내역'으로 간결하게 변경 */}
-        <div className="modal-header">
-          <div className="modal-header-title">
-            <span style={{ fontWeight: 800, fontSize: '1.25rem' }}>
+        {/* 1. 모달 헤더: X버튼 제거, '농장 관리 내역' 타이틀 단독 배치 */}
+        <div className="modal-header" style={{ justifyContent: 'center', position: 'relative', padding: '0.95rem 1rem' }}>
+          <div className="modal-header-title" style={{ textAlign: 'center', width: '100%' }}>
+            <span style={{ fontWeight: 800, fontSize: '1.2rem', color: 'var(--text-main)', letterSpacing: '-0.02em' }}>
               농장 관리 내역
             </span>
           </div>
-          <button 
-            type="button" 
-            className="modal-close-btn" 
-            onClick={onClose}
-            title="창 닫기"
-            aria-label="닫기"
-          >
-            <X size={20} />
-          </button>
         </div>
 
-        {/* 2. 서브 헤더 필터 바 (알약 캡슐 크기 정상화 & 기간 직접 설정 폼) */}
+        {/* 2. 서브 헤더 필터 바 (알약 캡슐 가로 나열 & 기간 선택창 상시 노출) */}
         <div style={{
           padding: '0.65rem 1rem',
           background: 'var(--bg-card-subtle)',
@@ -199,7 +150,7 @@ export default function FarmCommonHistoryModal({
           flexDirection: 'column',
           gap: '0.55rem'
         }}>
-          {/* 1단: 종목별 알약 캡슐 필터 칩 (width: auto로 아담하고 예쁘게 가로 나열) */}
+          {/* 1단: 종목별 알약 캡슐 필터 칩 (width auto로 아담하게 가로 나열) */}
           <div style={{
             display: 'flex',
             alignItems: 'center',
@@ -209,7 +160,7 @@ export default function FarmCommonHistoryModal({
             WebkitOverflowScrolling: 'touch',
             scrollbarWidth: 'none'
           }}>
-            {/* 전체 캡슐: width auto 적용으로 정상 크기 복원 */}
+            {/* 전체 캡슐 */}
             <button
               type="button"
               className={`fullhistory-tab-btn ${selectedCategory === 'all' ? 'active' : ''}`}
@@ -232,7 +183,7 @@ export default function FarmCommonHistoryModal({
               <span className="tab-count">{farmCommonLogs.length}</span>
             </button>
 
-            {/* 개별 카테고리 칩: width auto 적용으로 정상 크기 복원 */}
+            {/* 개별 카테고리 칩 */}
             {activeCategories.map(cat => {
               const count = categoryCounts[cat.id] || 0;
               const isActive = selectedCategory === cat.id;
@@ -265,60 +216,27 @@ export default function FarmCommonHistoryModal({
             })}
           </div>
 
-          {/* 2단: 조회 기간 선택 칩 (기본값: '최근 1달', 직접 설정 버튼 포함) */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', flexWrap: 'wrap' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', flexWrap: 'wrap' }}>
-              {PERIOD_OPTIONS.map(opt => {
-                const isSelected = periodFilter === opt.id;
-                return (
-                  <button
-                    key={opt.id}
-                    type="button"
-                    onClick={() => setPeriodFilter(opt.id)}
-                    style={{
-                      padding: '0.22rem 0.55rem',
-                      fontSize: '0.74rem',
-                      fontWeight: isSelected ? 800 : 600,
-                      borderRadius: 'var(--radius-sm)',
-                      border: isSelected ? '1px solid #0284c7' : '1px solid var(--border-color)',
-                      background: isSelected ? 'rgba(2, 132, 199, 0.12)' : 'var(--bg-card)',
-                      color: isSelected ? '#0284c7' : 'var(--text-muted)',
-                      cursor: 'pointer',
-                      transition: 'all 0.15s ease',
-                      whiteSpace: 'nowrap'
-                    }}
-                  >
-                    {opt.label}
-                  </button>
-                );
-              })}
-            </div>
-
-            <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-              조회 {filteredLogs.length}건
-            </span>
-          </div>
-
-          {/* 3단: 직접 설정 선택 시 나타나는 날짜 입력기 */}
-          {periodFilter === 'custom' && (
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              padding: '0.45rem 0.65rem',
-              background: 'var(--bg-card)',
-              border: '1px solid var(--border-color)',
-              borderRadius: 'var(--radius-md)',
-              fontSize: '0.8rem',
-              flexWrap: 'wrap'
-            }}>
-              <span style={{ fontWeight: 700, color: 'var(--text-main)', fontSize: '0.78rem' }}>
-                기간:
+          {/* 2단: 기간 선택창 (기본값: 최근 1달, 상시 노출) */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '0.45rem',
+            padding: '0.42rem 0.65rem',
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border-color)',
+            borderRadius: 'var(--radius-md)',
+            flexWrap: 'wrap'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap' }}>
+              <Calendar size={14} style={{ color: '#0284c7', flexShrink: 0 }} />
+              <span style={{ fontWeight: 700, color: 'var(--text-main)', fontSize: '0.78rem', whiteSpace: 'nowrap' }}>
+                조회 기간:
               </span>
               <input 
                 type="date"
-                value={customStartDate}
-                onChange={(e) => setCustomStartDate(e.target.value)}
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
                 style={{
                   padding: '0.2rem 0.4rem',
                   borderRadius: 'var(--radius-sm)',
@@ -329,11 +247,11 @@ export default function FarmCommonHistoryModal({
                   fontFamily: 'inherit'
                 }}
               />
-              <span style={{ color: 'var(--text-muted)' }}>~</span>
+              <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>~</span>
               <input 
                 type="date"
-                value={customEndDate}
-                onChange={(e) => setCustomEndDate(e.target.value)}
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
                 style={{
                   padding: '0.2rem 0.4rem',
                   borderRadius: 'var(--radius-sm)',
@@ -344,28 +262,34 @@ export default function FarmCommonHistoryModal({
                   fontFamily: 'inherit'
                 }}
               />
-              {(customStartDate !== oneMonthAgoStr || customEndDate !== todayStr) && (
+              {!isDefaultPeriod && (
                 <button
                   type="button"
                   onClick={() => {
-                    setCustomStartDate(oneMonthAgoStr);
-                    setCustomEndDate(todayStr);
+                    setStartDate(defaultStartDate);
+                    setEndDate(todayStr);
                   }}
+                  title="최근 1달 기본값으로 되돌리기"
                   style={{
-                    padding: '0.15rem 0.4rem',
+                    padding: '0.15rem 0.45rem',
                     fontSize: '0.72rem',
-                    background: 'none',
-                    border: 'none',
+                    fontWeight: 700,
+                    background: 'rgba(2, 132, 199, 0.1)',
+                    border: '1px solid rgba(2, 132, 199, 0.25)',
+                    borderRadius: 'var(--radius-sm)',
                     color: '#0284c7',
-                    cursor: 'pointer',
-                    textDecoration: 'underline'
+                    cursor: 'pointer'
                   }}
                 >
-                  초기화
+                  최근 1달로
                 </button>
               )}
             </div>
-          )}
+
+            <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)', fontWeight: 700, whiteSpace: 'nowrap' }}>
+              조회 {filteredLogs.length}건
+            </span>
+          </div>
         </div>
 
         {/* 3. 모달 본문 (스크롤 영역) */}
@@ -385,7 +309,7 @@ export default function FarmCommonHistoryModal({
                 boxShadow: 'var(--shadow-sm)'
               }}
             >
-              {/* 1단: 다음 일정 날짜/시간 + D-day + 수정 버튼 */}
+              {/* 1단: 다음 일정 날짜/시간 + D-day + 틴트 수정 버튼 */}
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -419,24 +343,25 @@ export default function FarmCommonHistoryModal({
                 {onEditSchedule && (
                   <button
                     type="button"
-                    className="btn btn-outline btn-sm btn-icon-only"
                     onClick={() => onEditSchedule(upcomingSchedule)}
-                    title="이 예정 일정 수정"
+                    title="이 예정 일정 변경"
                     style={{
-                      width: '24px',
-                      height: '24px',
+                      width: '26px',
+                      height: '26px',
                       padding: 0,
                       flexShrink: 0,
                       display: 'inline-flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      border: '1px solid rgba(245, 158, 11, 0.4)',
-                      color: '#d97706',
-                      background: 'var(--bg-card)',
-                      borderRadius: 'var(--radius-sm)'
+                      border: '1px solid rgba(2, 132, 199, 0.3)',
+                      color: '#0284c7',
+                      background: 'rgba(2, 132, 199, 0.08)',
+                      borderRadius: 'var(--radius-sm)',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease'
                     }}
                   >
-                    <Edit3 size={12} />
+                    <Edit3 size={13} />
                   </button>
                 )}
               </div>
@@ -466,28 +391,27 @@ export default function FarmCommonHistoryModal({
             }}>
               <ClipboardList size={38} style={{ opacity: 0.3, marginBottom: '0.65rem' }} />
               <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>
-                {periodFilter === '1m' ? '최근 1달간 등록된 농장 관리 기록이 없습니다.' : '해당 조건의 관리 기록이 없습니다.'}
+                선택하신 기간 내 등록된 농장 관리 기록이 없습니다.
               </div>
               <p style={{ fontSize: '0.825rem', marginTop: '0.35rem' }}>
-                {periodFilter === '1m' ? (
-                  <button 
-                    type="button" 
-                    onClick={() => setPeriodFilter('all')}
-                    style={{ 
-                      background: 'none', 
-                      border: 'none', 
-                      color: '#0284c7', 
-                      textDecoration: 'underline', 
-                      cursor: 'pointer',
-                      fontWeight: 700,
-                      fontSize: '0.825rem'
-                    }}
-                  >
-                    전체 기간 기록 보기
-                  </button>
-                ) : (
-                  '하단의 [관리 기록 추가] 버튼을 눌러 새 관리 기록을 등록해보세요.'
-                )}
+                <button 
+                  type="button" 
+                  onClick={() => {
+                    setStartDate('');
+                    setEndDate('');
+                  }}
+                  style={{ 
+                    background: 'none', 
+                    border: 'none', 
+                    color: '#0284c7', 
+                    textDecoration: 'underline', 
+                    cursor: 'pointer',
+                    fontWeight: 700,
+                    fontSize: '0.825rem'
+                  }}
+                >
+                  전체 기간 기록 보기
+                </button>
               </p>
             </div>
           ) : (
@@ -507,7 +431,7 @@ export default function FarmCommonHistoryModal({
                       transition: 'all 0.15s ease'
                     }}
                   >
-                    {/* 1행: [관리분류 뱃지] + [날짜 시간] (좌측) & [✏️ 수정] 액션 버튼 (우측) */}
+                    {/* 1행: [관리분류 뱃지] + [날짜 시간] (좌측) & [✏️ 틴트 수정] 액션 버튼 (우측) */}
                     <div style={{
                       display: 'flex',
                       alignItems: 'center',
@@ -559,28 +483,30 @@ export default function FarmCommonHistoryModal({
                         </span>
                       </div>
 
+                      {/* 에메랄드 틴트 수정 버튼: 터치 시 바로 수정 모달 오픈 */}
                       <div style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
                         {onEditCareLog && (
                           <button
                             type="button"
-                            className="btn btn-outline btn-sm btn-icon-only"
                             onClick={() => onEditCareLog(log)}
                             title="관리 기록 수정"
                             style={{
-                              width: '24px',
-                              height: '24px',
+                              width: '26px',
+                              height: '26px',
                               padding: 0,
                               flexShrink: 0,
                               display: 'inline-flex',
                               alignItems: 'center',
                               justifyContent: 'center',
-                              border: '1px solid rgba(0, 0, 0, 0.15)',
-                              color: 'var(--text-main)',
-                              background: 'var(--bg-card)',
-                              borderRadius: 'var(--radius-sm)'
+                              border: '1px solid rgba(16, 185, 129, 0.3)',
+                              color: '#059669',
+                              background: 'rgba(16, 185, 129, 0.08)',
+                              borderRadius: 'var(--radius-sm)',
+                              cursor: 'pointer',
+                              transition: 'all 0.15s ease'
                             }}
                           >
-                            <Edit3 size={12} />
+                            <Edit3 size={13} />
                           </button>
                         )}
                       </div>
@@ -636,7 +562,7 @@ export default function FarmCommonHistoryModal({
           )}
         </div>
 
-        {/* 4. 모달 푸터 (좌측: 돌아가기, 우측: 관리 기록 추가) */}
+        {/* 4. 모달 푸터 (좌측: 돌아가기, 우측: 에메랄드 틴트 관리 기록 추가) */}
         <div className="modal-footer detail-modal-footer" style={{ borderTop: '1px solid var(--border-color)', padding: '0.75rem 1rem' }}>
           <div className="modal-footer-left">
             <button 
@@ -644,7 +570,7 @@ export default function FarmCommonHistoryModal({
               className="btn btn-secondary" 
               onClick={onClose} 
               title="원래 화면으로 돌아가기"
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontWeight: 700 }}
             >
               <ChevronLeft size={16} />
               <span>돌아가기</span>
@@ -655,7 +581,6 @@ export default function FarmCommonHistoryModal({
             {onOpenCareLogModal && (
               <button
                 type="button"
-                className="btn btn-primary"
                 onClick={() => {
                   onOpenCareLogModal(
                     'FARM_COMMON',
@@ -669,8 +594,21 @@ export default function FarmCommonHistoryModal({
                     }
                   );
                 }}
-                title="농장 공통 관리 기록 등록"
-                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
+                title="농장 관리 기록 등록"
+                style={{
+                  background: 'rgba(16, 185, 129, 0.12)',
+                  color: '#059669',
+                  border: '1px solid rgba(16, 185, 129, 0.3)',
+                  fontWeight: 800,
+                  borderRadius: 'var(--radius-md)',
+                  padding: '0.45rem 0.9rem',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.35rem',
+                  cursor: 'pointer',
+                  fontSize: '0.88rem',
+                  transition: 'all 0.15s ease'
+                }}
               >
                 <Plus size={16} />
                 <span>관리 기록 추가</span>

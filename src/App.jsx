@@ -880,7 +880,40 @@ export default function App() {
         />
       )}
 
-      {/* 개체별 관리 내역 추가 및 수정 폼 모달 */}
+      {/* 농장 관리 이력 모달 (축사 소독, 방역, 시설 점검 전체 이력 및 검색) */}
+      {isFarmCommonModalOpen && (
+        <FarmCommonHistoryModal
+          isOpen={isFarmCommonModalOpen}
+          onClose={() => setIsFarmCommonModalOpen(false)}
+          careLogs={careLogs}
+          schedules={schedules}
+          careCategories={allCareCategories}
+          onOpenCareLogModal={(entity = null, date = null, initialValues = null) => {
+            setCareLogPreselectedEntity(entity);
+            setCareLogInitialValues(initialValues);
+            setIsCareLogModalOpen(true);
+          }}
+          onEditCareLog={handleOpenEditCareLog}
+          onDeleteCareLog={handleDeleteCareLog}
+          onEditSchedule={handleEditSchedule}
+        />
+      )}
+
+      {/* 농장 환경 설정 모달 (농장 기본정보, 시작화면 선택, 구글 드라이브 백업) */}
+      {isSettingsModalOpen && (
+        <FarmSettingsModal
+          isOpen={isSettingsModalOpen}
+          onClose={() => setIsSettingsModalOpen(false)}
+          farmSettings={farmSettings}
+          onSaveSettings={handleSaveFarmSettings}
+          entities={entities}
+          careLogs={careLogs}
+          onDatabaseRestored={handleDatabaseRestored}
+          onShowToast={showToast}
+        />
+      )}
+
+      {/* 개체별 및 농장 공통 관리 내역 추가 및 수정 폼 모달 (최상위 레이어) */}
       {isCareLogModalOpen && (
         <CareLogFormModal
           preselectedEntity={careLogPreselectedEntity}
@@ -903,7 +936,7 @@ export default function App() {
         />
       )}
 
-      {/* 영농 일정 추가 및 수정 폼 모달 (관리내역 모달과 100% 동일한 분류 카테고리 실시간 공유) */}
+      {/* 영농 일정 추가 및 수정 폼 모달 (최상위 레이어) */}
       {isScheduleModalOpen && (
         <ScheduleFormModal
           initialDate={scheduleTargetDate}
@@ -920,39 +953,6 @@ export default function App() {
           }}
           onSave={handleSaveSchedule}
           onDelete={handleDeleteSchedule}
-        />
-      )}
-
-      {/* 농장 환경 설정 모달 (농장 기본정보, 시작화면 선택, 구글 드라이브 백업) */}
-      {isSettingsModalOpen && (
-        <FarmSettingsModal
-          isOpen={isSettingsModalOpen}
-          onClose={() => setIsSettingsModalOpen(false)}
-          farmSettings={farmSettings}
-          onSaveSettings={handleSaveFarmSettings}
-          entities={entities}
-          careLogs={careLogs}
-          onDatabaseRestored={handleDatabaseRestored}
-          onShowToast={showToast}
-        />
-      )}
-
-      {/* 농장 공통 관리 이력 모달 (축사 소독, 방역, 시설 점검 전체 이력 및 검색) */}
-      {isFarmCommonModalOpen && (
-        <FarmCommonHistoryModal
-          isOpen={isFarmCommonModalOpen}
-          onClose={() => setIsFarmCommonModalOpen(false)}
-          careLogs={careLogs}
-          schedules={schedules}
-          careCategories={allCareCategories}
-          onOpenCareLogModal={(entity = null, date = null, initialValues = null) => {
-            setCareLogPreselectedEntity(entity);
-            setCareLogInitialValues(initialValues);
-            setIsCareLogModalOpen(true);
-          }}
-          onEditCareLog={handleOpenEditCareLog}
-          onDeleteCareLog={handleDeleteCareLog}
-          onEditSchedule={handleEditSchedule}
         />
       )}
 

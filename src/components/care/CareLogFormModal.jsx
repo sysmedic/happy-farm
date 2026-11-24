@@ -419,7 +419,7 @@ export default function CareLogFormModal({
   }, [currentSelectedEntity, category]);
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay" onClick={onClose} style={{ zIndex: 1100 }}>
       <form 
         className="modal-content modal-content-lg" 
         onClick={(e) => e.stopPropagation()} 
