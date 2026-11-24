@@ -800,14 +800,14 @@ export default function CareLogFormModal({
                           style={{
                             display: 'inline-flex',
                             alignItems: 'center',
-                            background: isSelected ? '#0284c7' : 'rgba(2, 132, 199, 0.07)',
-                            color: isSelected ? '#ffffff' : '#0284c7',
-                            border: isSelected ? '1px solid #0284c7' : '1px solid rgba(2, 132, 199, 0.25)',
+                            background: isSelected ? '#10b981' : 'var(--bg-card-subtle)',
+                            color: isSelected ? '#ffffff' : 'var(--text-main)',
+                            border: isSelected ? '1px solid #10b981' : '1px solid var(--border-color)',
                             borderRadius: '9999px',
                             padding: '0.2rem 0.5rem 0.2rem 0.65rem',
                             fontSize: '0.76rem',
-                            fontWeight: isSelected ? 700 : 600,
-                            boxShadow: isSelected ? '0 1px 3px rgba(2, 132, 199, 0.3)' : 'none',
+                            fontWeight: isSelected ? 800 : 700,
+                            boxShadow: isSelected ? '0 1px 3px rgba(16, 185, 129, 0.3)' : '0 1px 2px rgba(0, 0, 0, 0.03)',
                             transition: 'all 0.15s ease',
                             gap: '0.3rem'
                           }}
@@ -825,7 +825,7 @@ export default function CareLogFormModal({
                             style={{
                               background: 'transparent',
                               border: 'none',
-                              color: isSelected ? '#ffffff' : 'rgba(2, 132, 199, 0.65)',
+                              color: isSelected ? '#ffffff' : 'var(--text-muted)',
                               cursor: 'pointer',
                               display: 'inline-flex',
                               alignItems: 'center',
@@ -851,8 +851,8 @@ export default function CareLogFormModal({
                           alignItems: 'center',
                           gap: '0.2rem',
                           background: 'transparent',
-                          color: '#0284c7',
-                          border: '1px dashed rgba(2, 132, 199, 0.45)',
+                          color: 'var(--text-muted)',
+                          border: '1px dashed var(--border-color)',
                           borderRadius: '9999px',
                           padding: '0.2rem 0.55rem',
                           fontSize: '0.76rem',
@@ -866,7 +866,7 @@ export default function CareLogFormModal({
                         <span>추천 추가</span>
                       </button>
                     ) : (
-                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', background: 'var(--bg-card)', padding: '0.15rem 0.35rem', borderRadius: '9999px', border: '1px solid #0284c7' }}>
+                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', background: 'var(--bg-card)', padding: '0.15rem 0.35rem', borderRadius: '9999px', border: '1px solid #10b981' }}>
                         <input
                           type="text"
                           value={newQuickTitleInput}
@@ -887,7 +887,7 @@ export default function CareLogFormModal({
                         <button
                           type="button"
                           onClick={() => handleAddQuickTitle()}
-                          style={{ height: '20px', padding: '0 0.4rem', fontSize: '0.72rem', background: '#0284c7', color: '#fff', border: 'none', borderRadius: '9999px', cursor: 'pointer', fontWeight: 700 }}
+                          style={{ height: '20px', padding: '0 0.4rem', fontSize: '0.72rem', background: '#10b981', color: '#fff', border: 'none', borderRadius: '9999px', cursor: 'pointer', fontWeight: 700 }}
                         >
                           추가
                         </button>
