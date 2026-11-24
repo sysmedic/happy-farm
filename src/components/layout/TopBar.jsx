@@ -79,7 +79,7 @@ const TAB_TITLES = {
   entities: '개체 관리',
   diary: '캘린더',
   report: '일일 보고서',
-  farm: '농장 일지'
+  farm: '농장 관리대장'
 };
 
 export default function TopBar({ 
@@ -119,8 +119,8 @@ export default function TopBar({
     },
     farm: {
       id: 'farm',
-      title: '농장 일지 (축사 소독, 방역, 시설 전체 이력)',
-      label: '농장 일지',
+      title: '농장 관리대장 (축사 소독, 방역, 시설 전체 이력)',
+      label: '농장 관리대장',
       icon: <CattleBarnIcon size={24} strokeWidth={1.35} className="nav-tab-icon" />
     }
   };

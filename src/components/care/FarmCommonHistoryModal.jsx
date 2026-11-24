@@ -32,7 +32,8 @@ export default function FarmCommonHistoryModal({
   onOpenCareLogModal,
   onEditCareLog,
   onDeleteCareLog,
-  onEditSchedule
+  onEditSchedule,
+  onNavigateToFarm
 }) {
   // 기본 선택: 전체 분류
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -611,8 +612,8 @@ export default function FarmCommonHistoryModal({
                       </div>
                     )}
 
-                    {/* 4행: 하단 메타 정보 (작업자 / 비용) */}
-                    {((log.operator && log.operator.trim()) || (log.cost && Number(log.cost) > 0)) && (
+                    {/* 4행: 하단 메타 정보 (작업자, 비용 제외) */}
+                    {log.operator && log.operator.trim() && (
                       <div style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -623,12 +624,7 @@ export default function FarmCommonHistoryModal({
                         paddingTop: '0.25rem',
                         borderTop: '1px solid rgba(0,0,0,0.05)'
                       }}>
-                        {log.operator && log.operator.trim() && (
-                          <span>작업자: {log.operator}</span>
-                        )}
-                        {log.cost && Number(log.cost) > 0 && (
-                          <span>비용: {Number(log.cost).toLocaleString()}원</span>
-                        )}
+                        <span>작업자: {log.operator}</span>
                       </div>
                     )}
                   </div>
@@ -638,9 +634,9 @@ export default function FarmCommonHistoryModal({
           )}
         </div>
 
-        {/* 4. 모달 푸터 (좌측: 돌아가기, 우측: 에메랄드 틴트 관리 기록 추가) */}
+        {/* 4. 모달 푸터 (좌측: 돌아가기 & 전체 관리대장 링크, 우측: 관리 기록 추가) */}
         <div className="modal-footer detail-modal-footer" style={{ borderTop: '1px solid var(--border-color)', padding: '0.75rem 1rem' }}>
-          <div className="modal-footer-left">
+          <div className="modal-footer-left" style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
             <button 
               type="button"
               className="btn btn-secondary" 
@@ -651,6 +647,27 @@ export default function FarmCommonHistoryModal({
               <ChevronLeft size={16} />
               <span>돌아가기</span>
             </button>
+
+            {onNavigateToFarm && (
+              <button
+                type="button"
+                onClick={onNavigateToFarm}
+                title="농장 관리대장 전체 화면으로 이동 (방역대장 인쇄 등)"
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#0284c7',
+                  fontSize: '0.82rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  padding: '0.2rem 0.35rem',
+                  textDecoration: 'underline',
+                  textUnderlineOffset: '3px'
+                }}
+              >
+                전체 대장 보기 →
+              </button>
+            )}
           </div>
 
           <div className="modal-footer-right">

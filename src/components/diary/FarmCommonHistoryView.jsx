@@ -13,13 +13,16 @@ import {
   RotateCcw,
   Sparkles,
   Tag,
-  Droplets
+  Droplets,
+  Printer,
+  ShieldCheck
 } from 'lucide-react';
 import { 
   CARE_CATEGORIES, 
   getCategoryById, 
   normalizeCategoryId 
 } from '../../lib/types.js';
+import FarmDisinfectionPrintModal from './FarmDisinfectionPrintModal.jsx';
 
 // 텍스트 내 검색어 형광펜 하이라이트 컴포넌트
 function HighlightText({ text, query }) {
@@ -68,6 +71,7 @@ const QUICK_SEARCH_TAGS = [
 export default function FarmCommonHistoryView({
   careLogs = [],
   careCategories,
+  farmSettings = {},
   onOpenCareLogModal,
   onEditCareLog,
   onDeleteCareLog
@@ -75,6 +79,7 @@ export default function FarmCommonHistoryView({
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [periodFilter, setPeriodFilter] = useState('all'); // 'all', '1m', '3m', 'year'
+  const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
 
   const allCategories = careCategories || CARE_CATEGORIES;
 
@@ -137,19 +142,25 @@ export default function FarmCommonHistoryView({
     });
   }, [farmCommonLogs, periodFilter, selectedCategory, searchQuery]);
 
-  // 상단 요약 통계 (관리기록 건수 + 최근 소독일)
+  // 상단 요약 통계 (총 건수 + 최근 소독일 + 이번 달 방역 횟수)
   const stats = useMemo(() => {
     const totalCount = farmCommonLogs.length;
     const latestDate = farmCommonLogs.length > 0 ? farmCommonLogs[0].date : '-';
     
-    // 소독/방역 관련 기록 중 최근 날짜 검색
-    const disinfectionLog = farmCommonLogs.find(l => {
+    // 소독/방역 관련 기록 필터링
+    const disinfectionLogs = farmCommonLogs.filter(l => {
       const text = `${l.title || ''} ${l.details || ''}`.toLowerCase();
       return text.includes('소독') || text.includes('방역') || text.includes('생석회') || text.includes('안개분무') || text.includes('버콘') || normalizeCategoryId(l.category) === 'routine';
     });
-    const latestDisinfectionDate = disinfectionLog ? disinfectionLog.date : latestDate;
+    const latestDisinfectionLog = disinfectionLogs[0];
+    const latestDisinfectionDate = latestDisinfectionLog ? latestDisinfectionLog.date : latestDate;
 
-    return { totalCount, latestDate, latestDisinfectionDate };
+    // 이번 달 방역 횟수 (주 1회 법정 방역 권장 지표)
+    const now = new Date();
+    const currentMonthPrefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    const thisMonthDisinfections = disinfectionLogs.filter(l => (l.date || '').startsWith(currentMonthPrefix)).length;
+
+    return { totalCount, latestDate, latestDisinfectionDate, thisMonthDisinfections };
   }, [farmCommonLogs]);
 
   // 퀵 태그 클릭 토글 핸들러
@@ -179,7 +190,7 @@ export default function FarmCommonHistoryView({
 
   return (
     <div className="farm-common-history-view" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-      {/* 1. 상단 초슬림 1줄 인라인 대시보드 (A안: 높이 38px, 세로 낭비 60% 압축) */}
+      {/* 1. 상단 초슬림 방역·관리 통계 바 (비용 제외, 총건수·최근소독·이번달방역 3대 지표) */}
       <div style={{ 
         display: 'flex', 
         alignItems: 'center', 
@@ -189,9 +200,10 @@ export default function FarmCommonHistoryView({
         borderRadius: 'var(--radius-md)', 
         padding: '0.45rem 0.85rem',
         boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
-        gap: '0.5rem'
+        gap: '0.4rem',
+        overflowX: 'auto'
       }}>
-        {/* 좌측: 관리기록 건수 */}
+        {/* 1) 관리기록 건수 */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', minWidth: 0 }}>
           <ClipboardList size={14} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
           <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600, whiteSpace: 'nowrap' }}>
@@ -202,11 +214,11 @@ export default function FarmCommonHistoryView({
           </strong>
         </div>
 
-        {/* 중앙 미니 구분선 */}
+        {/* 미니 구분선 */}
         <div style={{ width: '1px', height: '14px', background: 'var(--border-color)', flexShrink: 0 }} />
 
-        {/* 우측: 최근 소독일 */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', minWidth: 0, justifyContent: 'flex-end' }}>
+        {/* 2) 최근 소독일 */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', minWidth: 0 }}>
           <Droplets size={14} style={{ color: '#0284c7', flexShrink: 0 }} />
           <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600, whiteSpace: 'nowrap' }}>
             최근 소독
@@ -222,11 +234,25 @@ export default function FarmCommonHistoryView({
             {stats.latestDisinfectionDate}
           </strong>
         </div>
+
+        {/* 미니 구분선 */}
+        <div style={{ width: '1px', height: '14px', background: 'var(--border-color)', flexShrink: 0 }} />
+
+        {/* 3) 이번 달 방역 횟수 (주 1회 법정 방역 점검 지표) */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', minWidth: 0 }}>
+          <ShieldCheck size={14} style={{ color: '#059669', flexShrink: 0 }} />
+          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600, whiteSpace: 'nowrap' }}>
+            이달 방역
+          </span>
+          <strong style={{ fontSize: '0.92rem', color: '#059669', fontWeight: 800, whiteSpace: 'nowrap' }}>
+            {stats.thisMonthDisinfections}회
+          </strong>
+        </div>
       </div>
 
-      {/* 2. 검색창 및 [+ 관리 기록 추가] 액션 바 */}
-      <div className="search-action-wrapper" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-        <div className="search-input-group" style={{ flex: 1, position: 'relative' }}>
+      {/* 2. 검색창 및 [방역대장 인쇄] / [+ 관리 기록 추가] 액션 바 */}
+      <div className="search-action-wrapper" style={{ display: 'flex', gap: '0.45rem', alignItems: 'center', flexWrap: 'wrap' }}>
+        <div className="search-input-group" style={{ flex: '1 1 200px', position: 'relative', minWidth: '180px' }}>
           <Search size={18} className="search-input-icon" />
           <input
             type="text"
@@ -255,6 +281,33 @@ export default function FarmCommonHistoryView({
             </button>
           )}
         </div>
+
+        {/* 🖨️ 방역대장 인쇄 버튼 (HACCP/정부 점검 제출용 공식 서식 출력) */}
+        <button
+          type="button"
+          onClick={() => setIsPrintModalOpen(true)}
+          title="축사 소독·방역 관리대장 A4 규격 인쇄 / PDF 저장"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.35rem',
+            background: 'rgba(2, 132, 199, 0.08)',
+            color: '#0284c7',
+            border: '1px solid rgba(2, 132, 199, 0.28)',
+            borderRadius: 'var(--radius-md)',
+            height: '40px',
+            padding: '0 0.85rem',
+            fontWeight: 700,
+            fontSize: '0.85rem',
+            cursor: 'pointer',
+            whiteSpace: 'nowrap',
+            flexShrink: 0,
+            transition: 'all 0.15s ease'
+          }}
+        >
+          <Printer size={16} />
+          <span>방역대장 인쇄</span>
+        </button>
 
         {onOpenCareLogModal && (
           <button 
@@ -628,36 +681,38 @@ export default function FarmCommonHistoryView({
                   </div>
                 )}
 
-                {/* 4행: 작업자 및 소요 비용 메타 정보 */}
-                <div style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  gap: '1rem', 
-                  fontSize: '0.8rem', 
-                  color: 'var(--text-muted)',
-                  borderTop: '1px solid var(--border-color)',
-                  paddingTop: '0.45rem',
-                  marginTop: '0.2rem',
-                  flexWrap: 'wrap'
-                }}>
-                  {log.operator && (
+                {/* 4행: 작업자 메타 정보 (비용 제외) */}
+                {log.operator && (
+                  <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '1rem', 
+                    fontSize: '0.8rem', 
+                    color: 'var(--text-muted)',
+                    borderTop: '1px solid var(--border-color)',
+                    paddingTop: '0.45rem',
+                    marginTop: '0.2rem',
+                    flexWrap: 'wrap'
+                  }}>
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
                       <User size={13} />
                       작업자: <strong><HighlightText text={log.operator} query={searchQuery} /></strong>
                     </span>
-                  )}
-                  {log.cost ? (
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', color: '#059669', fontWeight: 700 }}>
-                      <DollarSign size={13} />
-                      소요 비용: {Number(log.cost).toLocaleString()}원
-                    </span>
-                  ) : null}
-                </div>
+                  </div>
+                )}
               </div>
             );
           })}
         </div>
       )}
+
+      {/* 7. 정부·HACCP 제출용 축사 소독·방역 관리대장 A4 인쇄 미리보기 모달 */}
+      <FarmDisinfectionPrintModal
+        isOpen={isPrintModalOpen}
+        onClose={() => setIsPrintModalOpen(false)}
+        logs={filteredLogs}
+        farmSettings={farmSettings}
+      />
     </div>
   );
 }

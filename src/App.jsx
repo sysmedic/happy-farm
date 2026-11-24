@@ -802,6 +802,7 @@ export default function App() {
               <FarmCommonHistoryView
                 careLogs={careLogs}
                 careCategories={allCareCategories}
+                farmSettings={farmSettings}
                 onOpenCareLogModal={(entity = null, date = null, initialValues = null) => {
                   setCareLogPreselectedEntity(entity);
                   setCareLogInitialValues(initialValues);
@@ -896,6 +897,10 @@ export default function App() {
           onEditCareLog={handleOpenEditCareLog}
           onDeleteCareLog={handleDeleteCareLog}
           onEditSchedule={handleEditSchedule}
+          onNavigateToFarm={() => {
+            setIsFarmCommonModalOpen(false);
+            setActiveTab('farm');
+          }}
         />
       )}
 
