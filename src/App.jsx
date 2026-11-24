@@ -722,6 +722,17 @@ export default function App() {
                   setCareLogInitialValues(null);
                   setIsCareLogModalOpen(true);
                 }}
+                onOpenScheduleModal={(entity) => {
+                  setScheduleTargetDate(getTodayDateString());
+                  setScheduleToEdit(null);
+                  setScheduleInitialData({
+                    entityId: entity.id,
+                    targetType: 'entity',
+                    date: getTodayDateString(),
+                    preselectedEntity: entity
+                  });
+                  setIsScheduleModalOpen(true);
+                }}
                 onOpenPrintSheet={(entity) => {
                   setReturnToDetailEntity(null);
                   setPrintSheetEntity(entity);

@@ -66,6 +66,7 @@ export default function EntityList({
   onOpenEntityDetail,
   onOpenEntityModal,
   onOpenCareLogModal,
+  onOpenScheduleModal,
   onOpenPrintSheet,
   onDeleteEntity
 }) {
@@ -1034,27 +1035,30 @@ export default function EntityList({
                   )}
                 </div>
 
-                {/* 5층: 액션 버튼 그룹: 상세 이력(좌) & 관리 추가(우) 배치 */}
+                {/* 5층: 액션 버튼 그룹: [다음 일정 등록] (스카이 블루 틴트) & [관리 기록 추가] (에메랄드 틴트) 2분할 배치 */}
                 <div className="entity-card-actions" style={{ display: 'flex', gap: '0.5rem' }}>
                   <button 
-                    className="btn btn-outline btn-sm"
-                    onClick={() => onOpenEntityDetail(entity.tagNumber)}
-                    title="관리 이력 및 상세 프로필 조회"
+                    type="button"
+                    className="btn btn-sm"
+                    onClick={() => onOpenScheduleModal && onOpenScheduleModal(entity)}
+                    title={isHistory ? "이 개체의 일정 등록" : "이 개체의 다음 영농 일정 등록"}
                     style={{ 
                       flex: 1, 
                       height: '36px', 
-                      fontWeight: 600, 
-                      gap: '0.4rem',
-                      border: '1px solid var(--border-color)',
-                      color: 'var(--text-main)',
-                      background: 'var(--bg-card)'
+                      fontWeight: 800, 
+                      gap: '0.35rem',
+                      borderRadius: 'var(--radius-sm)',
+                      background: 'rgba(2, 132, 199, 0.12)',
+                      border: '1px solid #0284c7',
+                      color: '#0284c7'
                     }}
                   >
-                    <History size={15} />
-                    <span>상세 이력</span>
+                    <Calendar size={15} color="#0284c7" strokeWidth={2.2} />
+                    <span>다음 일정 등록</span>
                   </button>
 
                   <button 
+                    type="button"
                     className="btn btn-sm"
                     onClick={() => onOpenCareLogModal(entity)}
                     title={isShipped ? "출하 완료된 개체 (과거 이력 추가)" : isDeceased ? "폐사/도태된 개체 (과거 이력 추가)" : "이 개체에 관리 기록 추가"}
@@ -1062,7 +1066,7 @@ export default function EntityList({
                       flex: 1, 
                       height: '36px', 
                       fontWeight: 800, 
-                      gap: '0.4rem',
+                      gap: '0.35rem',
                       borderRadius: 'var(--radius-sm)',
                       ...(isHistory 
                         ? {
@@ -1083,7 +1087,7 @@ export default function EntityList({
                       color={isHistory ? '#0369a1' : '#065f46'} 
                       strokeWidth={2.2} 
                     />
-                    <span>{isHistory ? '이력 추가' : '관리 추가'}</span>
+                    <span>{isHistory ? '과거 이력 추가' : '관리 기록 추가'}</span>
                   </button>
                 </div>
               </div>

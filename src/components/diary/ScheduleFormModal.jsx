@@ -100,8 +100,13 @@ export default function ScheduleFormModal({
   // 선택된 대상 개체 정보 (개체 개별 일정 시)
   const selectedEntity = useMemo(() => {
     if (targetType !== 'entity') return null;
-    return (entities || []).find(e => e.id === selectedEntityId) || null;
-  }, [entities, targetType, selectedEntityId]);
+    return (entities || []).find(e => e.id === selectedEntityId) || initialData?.preselectedEntity || null;
+  }, [entities, targetType, selectedEntityId, initialData]);
+
+  // 개체 카드 등에서 특정 개체가 사전 지정되어 열린 경우 판별 (상단 대상 탭/선택창 대신 단정형 1줄 텍스트로 노출)
+  const isPreselectedEntity = Boolean(
+    !scheduleToEdit && (initialData?.preselectedEntity || (initialData?.entityId && targetType === 'entity'))
+  );
 
   // 지능형 분류 필터링 (개체 개별 vs 농장 공통 완전 분리):
   // 1) 농장 공통('farm'): 축약된 4대 표준 분류 (방역소독, 시설환경, 사료자재, 퇴비기타) + 커스텀 분류만 깔끔하게 노출!
@@ -410,82 +415,119 @@ export default function ScheduleFormModal({
               </div>
             </div>
 
-            {/* 2. 대상 구분 (스카이 블루 2분할 세그먼트 스위치 탭) */}
-            <div className="form-group" style={{ marginBottom: '1.15rem' }}>
-              <label className="form-label" style={{ fontWeight: 700, marginBottom: '0.45rem' }}>
-                일정 대상
-              </label>
+            {/* 2. 대상 구분 (사전 지정된 개체가 있을 경우 단정형 1줄 텍스트로 노출, 일반 진입 시 2분할 탭+선택창) */}
+            {isPreselectedEntity && selectedEntity ? (
               <div style={{ 
-                display: 'grid', 
-                gridTemplateColumns: '1fr 1fr', 
-                gap: '0.35rem', 
-                background: 'var(--bg-card-subtle)',
-                padding: '0.25rem',
-                borderRadius: 'var(--radius-md)',
-                border: '1px solid var(--border-color)',
-                marginBottom: '0.6rem' 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '0.65rem', 
+                marginBottom: '1.15rem', 
+                minWidth: 0, 
+                overflow: 'hidden' 
               }}>
-                <button
-                  type="button"
-                  onClick={() => setTargetType('entity')}
-                  style={{ 
-                    padding: '0.55rem 0.5rem', 
-                    fontSize: '0.88rem',
-                    fontWeight: targetType === 'entity' ? 800 : 600,
-                    borderRadius: 'var(--radius-sm)',
-                    border: targetType === 'entity' ? '1px solid #0284c7' : '1px solid transparent',
-                    background: targetType === 'entity' ? '#0284c7' : 'transparent',
-                    color: targetType === 'entity' ? '#ffffff' : 'var(--text-muted)',
-                    boxShadow: targetType === 'entity' ? '0 1px 3px rgba(2, 132, 199, 0.3)' : 'none',
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                >
-                  개체 개별
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setTargetType('farm')}
-                  style={{ 
-                    padding: '0.55rem 0.5rem', 
-                    fontSize: '0.88rem',
-                    fontWeight: targetType === 'farm' ? 800 : 600,
-                    borderRadius: 'var(--radius-sm)',
-                    border: targetType === 'farm' ? '1px solid #0284c7' : '1px solid transparent',
-                    background: targetType === 'farm' ? '#0284c7' : 'transparent',
-                    color: targetType === 'farm' ? '#ffffff' : 'var(--text-muted)',
-                    boxShadow: targetType === 'farm' ? '0 1px 3px rgba(2, 132, 199, 0.3)' : 'none',
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                >
-                  농장 공통
-                </button>
+                <span style={{ 
+                  fontSize: '1.18rem', 
+                  fontWeight: 800, 
+                  color: 'var(--text-main)', 
+                  fontFamily: 'var(--font-family)',
+                  fontVariantNumeric: 'tabular-nums',
+                  fontFeatureSettings: '"tnum" 1',
+                  letterSpacing: '-0.025em',
+                  whiteSpace: 'nowrap',
+                  flexShrink: 0 
+                }}>
+                  {selectedEntity.tagNumber}
+                </span>
+                {selectedEntity.name && (
+                  <span style={{ 
+                    fontSize: '1.05rem', 
+                    fontWeight: 700, 
+                    color: 'var(--text-main)', 
+                    overflow: 'hidden', 
+                    textOverflow: 'ellipsis', 
+                    whiteSpace: 'nowrap' 
+                  }}>
+                    {selectedEntity.name}
+                  </span>
+                )}
               </div>
-
-              {/* 특정 개체 지정 시 개체 선택 드롭다운 */}
-              {targetType === 'entity' && (
-                <div style={{ marginTop: '0.5rem' }}>
-                  <select
-                    className="form-select"
-                    value={selectedEntityId}
-                    onChange={(e) => setSelectedEntityId(e.target.value)}
+            ) : (
+              <div className="form-group" style={{ marginBottom: '1.15rem' }}>
+                <label className="form-label" style={{ fontWeight: 700, marginBottom: '0.45rem' }}>
+                  일정 대상
+                </label>
+                <div style={{ 
+                  display: 'grid', 
+                  gridTemplateColumns: '1fr 1fr', 
+                  gap: '0.35rem', 
+                  background: 'var(--bg-card-subtle)',
+                  padding: '0.25rem',
+                  borderRadius: 'var(--radius-md)',
+                  border: '1px solid var(--border-color)',
+                  marginBottom: '0.6rem' 
+                }}>
+                  <button
+                    type="button"
+                    onClick={() => setTargetType('entity')}
+                    style={{ 
+                      padding: '0.55rem 0.5rem', 
+                      fontSize: '0.88rem',
+                      fontWeight: targetType === 'entity' ? 800 : 600,
+                      borderRadius: 'var(--radius-sm)',
+                      border: targetType === 'entity' ? '1px solid #0284c7' : '1px solid transparent',
+                      background: targetType === 'entity' ? '#0284c7' : 'transparent',
+                      color: targetType === 'entity' ? '#ffffff' : 'var(--text-muted)',
+                      boxShadow: targetType === 'entity' ? '0 1px 3px rgba(2, 132, 199, 0.3)' : 'none',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
                   >
-                    {activeEntities.map(ent => (
-                      <option key={ent.id} value={ent.id}>
-                        {ent.tagNumber}{ent.name ? ` ${ent.name}` : ''}
-                      </option>
-                    ))}
-                  </select>
+                    개체 개별
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setTargetType('farm')}
+                    style={{ 
+                      padding: '0.55rem 0.5rem', 
+                      fontSize: '0.88rem',
+                      fontWeight: targetType === 'farm' ? 800 : 600,
+                      borderRadius: 'var(--radius-sm)',
+                      border: targetType === 'farm' ? '1px solid #0284c7' : '1px solid transparent',
+                      background: targetType === 'farm' ? '#0284c7' : 'transparent',
+                      color: targetType === 'farm' ? '#ffffff' : 'var(--text-muted)',
+                      boxShadow: targetType === 'farm' ? '0 1px 3px rgba(2, 132, 199, 0.3)' : 'none',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    농장 공통
+                  </button>
                 </div>
-              )}
-            </div>
+
+                {/* 특정 개체 지정 시 개체 선택 드롭다운 */}
+                {targetType === 'entity' && (
+                  <div style={{ marginTop: '0.5rem' }}>
+                    <select
+                      className="form-select"
+                      value={selectedEntityId}
+                      onChange={(e) => setSelectedEntityId(e.target.value)}
+                    >
+                      {activeEntities.map(ent => (
+                        <option key={ent.id} value={ent.id}>
+                          {ent.tagNumber}{ent.name ? ` ${ent.name}` : ''}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* 3. 일정 분류 선택 (관리 내역 추가와 동일한 알약 캡슐 디자인 및 커스텀 분류 실시간 연동) */}
             <div className="form-group" style={{ marginBottom: '1.15rem' }}>
