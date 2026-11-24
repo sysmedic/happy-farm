@@ -9,7 +9,9 @@ import {
 import { 
   CARE_CATEGORIES, 
   getCategoryById, 
-  normalizeCategoryId 
+  normalizeCategoryId,
+  FARM_COMMON_CATEGORY_IDS,
+  ENTITY_ONLY_CATEGORY_IDS
 } from '../../lib/types.js';
 
 export default function FarmCommonHistoryModal({
@@ -82,46 +84,63 @@ export default function FarmCommonHistoryModal({
     return `D+${Math.abs(diff)}`;
   };
 
-  // 3. 기간 및 카테고리 필터링된 기록
-  const filteredLogs = useMemo(() => {
+  // 3. 선택된 조회 기간(startDate ~ endDate)에 해당하는 농장 관리기록 추출
+  const periodFilteredLogs = useMemo(() => {
     return farmCommonLogs.filter(log => {
-      // 기간 필터 (시작일 ~ 종료일)
       if (startDate && log.date < startDate) return false;
       if (endDate && log.date > endDate) return false;
-
-      // 카테고리 필터
-      if (selectedCategory !== 'all') {
-        const normCat = normalizeCategoryId(log.category);
-        if (normCat !== selectedCategory) return false;
-      }
       return true;
     });
-  }, [farmCommonLogs, startDate, endDate, selectedCategory]);
+  }, [farmCommonLogs, startDate, endDate]);
 
-  // 카테고리별 건수 집계 (전체 농장 관리기록 기준)
+  // 4. 기간 + 카테고리까지 모두 적용된 최종 표시 목록
+  const filteredLogs = useMemo(() => {
+    if (selectedCategory === 'all') return periodFilteredLogs;
+    return periodFilteredLogs.filter(log => {
+      const normCat = normalizeCategoryId(log.category);
+      return normCat === selectedCategory;
+    });
+  }, [periodFilteredLogs, selectedCategory]);
+
+  // 5. 대시보드 칩에 표시할 '선택 조회 기간 내' 카테고리별 건수 집계
   const categoryCounts = useMemo(() => {
     const counts = {};
     allCategories.forEach(cat => {
       counts[cat.id] = 0;
     });
-    farmCommonLogs.forEach(log => {
+    periodFilteredLogs.forEach(log => {
       const normCat = normalizeCategoryId(log.category);
       if (counts[normCat] !== undefined) {
         counts[normCat]++;
       }
     });
     return counts;
-  }, [farmCommonLogs, allCategories]);
+  }, [periodFilteredLogs, allCategories]);
 
-  // 기록이 1건 이상 있거나 농장 주요 카테고리는 칩으로 노출 (3열 균등 배치에 최적화)
+  // 6. 농장 관리 카테고리 칩 목록:
+  // - 개체 전용 분류(진료치료 treatment, 백신 vaccine 등)는 완전 제외!
+  // - 농장 4대 표준 분류(방역소독 routine, 시설환경 facility, 사료자재 feed, 퇴비기타 other) 기본 노출
+  // - 농장 관리 신규 칩(커스텀 카테고리 등)이 추가될 경우 자동으로 칩에 배치!
   const activeCategories = useMemo(() => {
-    const defaultMajorCats = ['routine', 'facility', 'feed', 'other', 'treatment'];
-    const filtered = allCategories.filter(cat => {
-      return (categoryCounts[cat.id] || 0) > 0 || defaultMajorCats.includes(cat.id);
+    return allCategories.filter(cat => {
+      // 개체 전용 분류(진료치료, 백신, 체중, 번식 관련 등)는 농장 관리 칩에서 제외
+      if (ENTITY_ONLY_CATEGORY_IDS && ENTITY_ONLY_CATEGORY_IDS.has(cat.id)) {
+        return false;
+      }
+      // 농장 4대 표준 분류 또는 신규 추가된 커스텀 카테고리 또는 농장 기록이 있는 카테고리
+      const isFarmStandard = FARM_COMMON_CATEGORY_IDS 
+        ? FARM_COMMON_CATEGORY_IDS.has(cat.id) 
+        : ['routine', 'facility', 'feed', 'other'].includes(cat.id);
+      const isCustom = Boolean(cat.isCustom);
+      const hasLogs = (categoryCounts[cat.id] || 0) > 0;
+      return isFarmStandard || isCustom || hasLogs;
+    }).sort((a, b) => {
+      // 농장 관리 핵심 순서: 방역소독(1) -> 시설환경(2) -> 사료자재(3) -> 퇴비기타(4), 이후 추가 칩은 순서대로 배치
+      const standardOrder = { routine: 1, facility: 2, feed: 3, other: 4 };
+      const orderA = standardOrder[a.id] || 99;
+      const orderB = standardOrder[b.id] || 99;
+      return orderA - orderB;
     });
-    // 농장 관리 핵심 순서로 정렬: 방역소독 -> 시설환경 -> 사료자재 -> 퇴비기타 -> 진료치료 순
-    const orderMap = { routine: 1, facility: 2, feed: 3, other: 4, treatment: 5 };
-    return filtered.sort((a, b) => (orderMap[a.id] || 99) - (orderMap[b.id] || 99));
   }, [allCategories, categoryCounts]);
 
   // 최근 1달 기본값 여부 확인
@@ -154,94 +173,90 @@ export default function FarmCommonHistoryModal({
           flexDirection: 'column',
           gap: '0.55rem'
         }}>
-          {/* 1단: 기간 선택창 ('조회 기간' 텍스트 제거로 한 줄 칼정렬) */}
+          {/* 1단: 기간 선택창 (좌측 📅 클릭 시 최근 1달 리셋, 우측 텍스트/박스 제거) */}
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'space-between',
+            justifyContent: 'center',
             gap: '0.4rem',
             padding: '0.35rem 0.6rem',
             background: 'var(--bg-card)',
             border: '1px solid var(--border-color)',
             borderRadius: 'var(--radius-md)'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', flex: 1, minWidth: 0 }}>
-              <Calendar size={14} style={{ color: '#0284c7', flexShrink: 0 }} />
-              <input 
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                style={{
-                  flex: '1 1 0px',
-                  minWidth: '100px',
-                  maxWidth: '135px',
-                  padding: '0.2rem 0.3rem',
-                  borderRadius: 'var(--radius-sm)',
-                  border: '1px solid var(--border-color)',
-                  background: 'var(--bg-page)',
-                  color: 'var(--text-main)',
-                  fontSize: '0.78rem',
-                  fontFamily: 'inherit',
-                  textAlign: 'center'
-                }}
-              />
-              <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem', flexShrink: 0 }}>~</span>
-              <input 
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                style={{
-                  flex: '1 1 0px',
-                  minWidth: '100px',
-                  maxWidth: '135px',
-                  padding: '0.2rem 0.3rem',
-                  borderRadius: 'var(--radius-sm)',
-                  border: '1px solid var(--border-color)',
-                  background: 'var(--bg-page)',
-                  color: 'var(--text-main)',
-                  fontSize: '0.78rem',
-                  fontFamily: 'inherit',
-                  textAlign: 'center'
-                }}
-              />
-              {!isDefaultPeriod && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setStartDate(defaultStartDate);
-                    setEndDate(todayStr);
-                  }}
-                  title="최근 1달 기본값으로 되돌리기"
-                  style={{
-                    padding: '0.15rem 0.4rem',
-                    fontSize: '0.72rem',
-                    fontWeight: 700,
-                    background: 'rgba(2, 132, 199, 0.1)',
-                    border: '1px solid rgba(2, 132, 199, 0.25)',
-                    borderRadius: 'var(--radius-sm)',
-                    color: '#0284c7',
-                    cursor: 'pointer',
-                    whiteSpace: 'nowrap',
-                    flexShrink: 0
-                  }}
-                >
-                  최근 1달
-                </button>
-              )}
-            </div>
+            {/* 좌측 📅 이모지 버튼: 클릭 시 최근 1달 기본값으로 복귀 */}
+            <button
+              type="button"
+              onClick={() => {
+                setStartDate(defaultStartDate);
+                setEndDate(todayStr);
+              }}
+              title="클릭 시 기본 조회기간(최근 1달)으로 재설정"
+              style={{
+                background: 'none',
+                border: 'none',
+                padding: '0.2rem',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                borderRadius: 'var(--radius-sm)',
+                color: isDefaultPeriod ? 'var(--text-muted)' : '#0284c7',
+                transition: 'all 0.15s ease',
+                flexShrink: 0
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.15)'}
+              onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+            >
+              <Calendar size={16} strokeWidth={isDefaultPeriod ? 2 : 2.5} />
+            </button>
 
-            <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)', fontWeight: 700, whiteSpace: 'nowrap', flexShrink: 0 }}>
-              조회 {filteredLogs.length}건
-            </span>
+            <input 
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              style={{
+                flex: '1 1 0px',
+                minWidth: '100px',
+                maxWidth: '135px',
+                padding: '0.2rem 0.3rem',
+                borderRadius: 'var(--radius-sm)',
+                border: '1px solid var(--border-color)',
+                background: 'var(--bg-page)',
+                color: 'var(--text-main)',
+                fontSize: '0.78rem',
+                fontFamily: 'inherit',
+                textAlign: 'center'
+              }}
+            />
+            <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem', flexShrink: 0 }}>~</span>
+            <input 
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              style={{
+                flex: '1 1 0px',
+                minWidth: '100px',
+                maxWidth: '135px',
+                padding: '0.2rem 0.3rem',
+                borderRadius: 'var(--radius-sm)',
+                border: '1px solid var(--border-color)',
+                background: 'var(--bg-page)',
+                color: 'var(--text-main)',
+                fontSize: '0.78rem',
+                fontFamily: 'inherit',
+                textAlign: 'center'
+              }}
+            />
           </div>
 
-          {/* 2단: 종목별 알약 캡슐 필터 칩 (3개씩 균등 그리드 배치) */}
+          {/* 2단: 종목별 대시보드 칩 (조회기간 내 건수 실시간 연동, 3개씩 균등 그리드 배치) */}
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(3, 1fr)',
             gap: '0.4rem'
           }}>
-            {/* 전체 캡슐 */}
+            {/* 전체 캡슐 (선택 기간 내 건수) */}
             <button
               type="button"
               className={`fullhistory-tab-btn ${selectedCategory === 'all' ? 'active' : ''}`}
@@ -260,10 +275,10 @@ export default function FarmCommonHistoryModal({
               }}
             >
               <span>전체</span>
-              <span className="tab-count">{farmCommonLogs.length}</span>
+              <span className="tab-count">{periodFilteredLogs.length}</span>
             </button>
 
-            {/* 개별 카테고리 칩 */}
+            {/* 개별 카테고리 칩 (선택 기간 내 건수) */}
             {activeCategories.map(cat => {
               const count = categoryCounts[cat.id] || 0;
               const isActive = selectedCategory === cat.id;
