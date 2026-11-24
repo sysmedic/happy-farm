@@ -13,6 +13,7 @@ import {
   FARM_COMMON_CATEGORY_IDS,
   ENTITY_ONLY_CATEGORY_IDS
 } from '../../lib/types.js';
+import SmartDateInput from '../common/SmartDateInput.jsx';
 
 // 농장 관리 대시보드 칩 고유 컬러 매핑 (개체 대시보드 stat-card와 동일 규격)
 const FARM_CHIP_COLORS = {
@@ -221,44 +222,22 @@ export default function FarmCommonHistoryModal({
               <Calendar size={16} strokeWidth={isDefaultPeriod ? 2 : 2.5} />
             </button>
 
-            <input 
-              type="date"
+            <SmartDateInput
+              compact
               value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              style={{
-                flex: '1 1 0px',
-                minWidth: '105px',
-                maxWidth: '140px',
-                height: '30px',
-                padding: '0.2rem 0.35rem',
-                borderRadius: 'var(--radius-sm)',
-                border: '1px solid var(--border-color)',
-                background: 'var(--bg-page)',
-                color: 'var(--text-main)',
-                fontSize: '0.82rem',
-                fontFamily: 'inherit',
-                textAlign: 'center'
-              }}
+              onChange={(val) => setStartDate(val)}
+              quickPresets={['yesterday', 'today']}
+              accentColor="#0284c7"
+              style={{ flex: '1 1 0px', minWidth: '112px', maxWidth: '142px' }}
             />
             <span style={{ color: 'var(--text-muted)', fontSize: '0.82rem', flexShrink: 0 }}>~</span>
-            <input 
-              type="date"
+            <SmartDateInput
+              compact
               value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              style={{
-                flex: '1 1 0px',
-                minWidth: '105px',
-                maxWidth: '140px',
-                height: '30px',
-                padding: '0.2rem 0.35rem',
-                borderRadius: 'var(--radius-sm)',
-                border: '1px solid var(--border-color)',
-                background: 'var(--bg-page)',
-                color: 'var(--text-main)',
-                fontSize: '0.82rem',
-                fontFamily: 'inherit',
-                textAlign: 'center'
-              }}
+              onChange={(val) => setEndDate(val)}
+              quickPresets={['yesterday', 'today']}
+              accentColor="#0284c7"
+              style={{ flex: '1 1 0px', minWidth: '112px', maxWidth: '142px' }}
             />
           </div>
 

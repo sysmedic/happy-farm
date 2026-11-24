@@ -12,6 +12,7 @@ import {
   isStatusAllowed,
   buildBreedName
 } from '../../lib/types.js';
+import SmartDateInput from '../common/SmartDateInput.jsx';
 
 export default function EntityFormModal({
   entityToEdit,
@@ -366,11 +367,11 @@ export default function EntityFormModal({
                 <label className="form-label">
                   생년월일 (월령 자동 계산)
                 </label>
-                <input
-                  type="date"
-                  className="form-input"
+                <SmartDateInput
                   value={formData.birthDate}
-                  onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
+                  onChange={(val) => setFormData({ ...formData, birthDate: val })}
+                  quickPresets={[]}
+                  accentColor="#4f46e5"
                 />
                 <span className="form-hint" style={{ color: 'var(--text-muted)', fontWeight: 600 }}>
                   현재 {agePreview.text}

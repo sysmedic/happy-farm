@@ -18,6 +18,8 @@ import {
   saveQuickTitlesMap,
   DEFAULT_QUICK_TITLES
 } from '../../lib/types.js';
+import SmartDateInput from '../common/SmartDateInput.jsx';
+import SmartTimeInput from '../common/SmartTimeInput.jsx';
 
 // 일정 전용 카테고리 프리셋 (types.js 4글자 표준 카테고리와 100% 동기화)
 export const SCHEDULE_CATEGORIES = [
@@ -505,12 +507,12 @@ export default function ScheduleFormModal({
                 <label className="form-label" style={{ fontWeight: 700, marginBottom: '0.35rem' }}>
                   예정 일자 <span style={{ color: 'var(--color-danger)' }}>*</span>
                 </label>
-                <input
-                  type="date"
-                  className="form-input"
+                <SmartDateInput
                   value={date}
-                  onChange={(e) => setDate(e.target.value)}
+                  onChange={(val) => setDate(val)}
                   required
+                  quickPresets={['today', 'tomorrow']}
+                  accentColor="#0284c7"
                 />
               </div>
               <div className="form-group" style={{ marginBottom: 0 }}>
@@ -518,12 +520,11 @@ export default function ScheduleFormModal({
                   예정 시간 (선택)
                 </label>
                 <div style={{ position: 'relative' }}>
-                  <input
-                    type="time"
-                    className="form-input"
+                  <SmartTimeInput
                     value={time}
-                    onChange={(e) => setTime(e.target.value)}
+                    onChange={(val) => setTime(val)}
                     placeholder="선택 사항"
+                    accentColor="#0284c7"
                   />
                 </div>
               </div>

@@ -18,6 +18,8 @@ import {
   saveQuickTitlesMap,
   DEFAULT_QUICK_TITLES
 } from '../../lib/types.js';
+import SmartDateInput from '../common/SmartDateInput.jsx';
+import SmartTimeInput from '../common/SmartTimeInput.jsx';
 
 // 번식 전용 카테고리 (암소 전용: 거세/수소에서 제외)
 const BREEDING_CATEGORY_IDS = new Set(['breeding', 'heat_check', 'pregnancy_check', 'calving']);
@@ -577,21 +579,20 @@ export default function CareLogFormModal({
               <div style={{ display: 'grid', gridTemplateColumns: '1.15fr 0.85fr', gap: '0.65rem' }}>
                 <div>
                   <label className="form-label" style={{ fontWeight: 700, marginBottom: '0.35rem' }}>작업 일자 <span className="required">*</span></label>
-                  <input
-                    type="date"
-                    className="form-input"
+                  <SmartDateInput
                     value={date}
-                    onChange={(e) => setDate(e.target.value)}
+                    onChange={(val) => setDate(val)}
                     required
+                    quickPresets={['yesterday', 'today']}
+                    accentColor="#10b981"
                   />
                 </div>
                 <div>
                   <label className="form-label" style={{ fontWeight: 700, marginBottom: '0.35rem' }}>작업 시간</label>
-                  <input
-                    type="time"
-                    className="form-input"
+                  <SmartTimeInput
                     value={time}
-                    onChange={(e) => setTime(e.target.value)}
+                    onChange={(val) => setTime(val)}
+                    accentColor="#10b981"
                   />
                 </div>
               </div>
@@ -1105,22 +1106,21 @@ export default function CareLogFormModal({
                         <div style={{ display: 'grid', gridTemplateColumns: '1.15fr 0.85fr', gap: '0.65rem' }}>
                           <div>
                             <label className="form-label">예정 날짜</label>
-                            <input
-                              ref={nextScheduleDateInputRef}
-                              type="date"
-                              className="form-input"
+                            <SmartDateInput
+                              inputRef={nextScheduleDateInputRef}
                               value={nextScheduleDate}
-                              onChange={(e) => setNextScheduleDate(e.target.value)}
+                              onChange={(val) => setNextScheduleDate(val)}
                               required={hasNextSchedule}
+                              quickPresets={['today', 'tomorrow']}
+                              accentColor="#0284c7"
                             />
                           </div>
                           <div>
                             <label className="form-label">예정 시간 (선택)</label>
-                            <input
-                              type="time"
-                              className="form-input"
+                            <SmartTimeInput
                               value={nextScheduleTime}
-                              onChange={(e) => setNextScheduleTime(e.target.value)}
+                              onChange={(val) => setNextScheduleTime(val)}
+                              accentColor="#0284c7"
                             />
                           </div>
                         </div>

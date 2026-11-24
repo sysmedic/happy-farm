@@ -25,6 +25,7 @@ import {
 // [봉인 보존] 관공서/HACCP 제출용 가축전염병예방법 별지 제6호서식 소독실시기록부 인쇄 모달 (필요 시 즉시 재활성화 가능)
 // import FarmDisinfectionPrintModal from './FarmDisinfectionPrintModal.jsx';
 import FarmHistoryPrintModal from './FarmHistoryPrintModal.jsx';
+import SmartDateInput from '../common/SmartDateInput.jsx';
 
 // 텍스트 내 검색어 형광펜 하이라이트 컴포넌트
 function HighlightText({ text, query }) {
@@ -312,83 +313,104 @@ export default function FarmCommonHistoryView({
         })}
       </div>
 
-      {/* 4. 날짜 직접 선택 바 (좌측 정렬: 📅 클릭 시 1달 리셋, 시작일 ~ 종료일 지정) */}
+      {/* 4. 날짜 직접 선택 바 (좌측 정렬: 📅 클릭 시 1달 리셋, 시작일 ~ 종료일 + 1주/1달/3개월 퀵 선택) */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'flex-start',
+        flexWrap: 'wrap',
         gap: '0.45rem',
-        padding: '0.4rem 0.65rem',
+        padding: '0.45rem 0.65rem',
         background: 'var(--bg-card)',
         border: '1px solid var(--border-color)',
         borderRadius: 'var(--radius-md)'
       }}>
-        {/* 좌측 📅 이모지 버튼: 클릭 시 최근 1달 기본값으로 복귀 */}
-        <button
-          type="button"
-          onClick={() => {
-            setStartDate(defaultStartDate);
-            setEndDate(todayStr);
-          }}
-          title="클릭 시 기본 조회기간(최근 1달)으로 재설정"
-          style={{
-            background: 'none',
-            border: 'none',
-            padding: '0.2rem',
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            borderRadius: 'var(--radius-sm)',
-            color: isDefaultPeriod ? 'var(--text-muted)' : '#0284c7',
-            transition: 'all 0.15s ease',
-            flexShrink: 0
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.15)'}
-          onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-        >
-          <Calendar size={16} strokeWidth={isDefaultPeriod ? 2 : 2.5} />
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flex: '1 1 260px', maxWidth: '340px' }}>
+          {/* 좌측 📅 이모지 버튼: 클릭 시 최근 1달 기본값으로 복귀 */}
+          <button
+            type="button"
+            onClick={() => {
+              setStartDate(defaultStartDate);
+              setEndDate(todayStr);
+            }}
+            title="클릭 시 기본 조회기간(최근 1달)으로 재설정"
+            style={{
+              background: 'none',
+              border: 'none',
+              padding: '0.2rem',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              borderRadius: 'var(--radius-sm)',
+              color: isDefaultPeriod ? 'var(--text-muted)' : '#0284c7',
+              transition: 'all 0.15s ease',
+              flexShrink: 0
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.15)'}
+            onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+          >
+            <Calendar size={16} strokeWidth={isDefaultPeriod ? 2 : 2.5} />
+          </button>
 
-        <input 
-          type="date"
-          value={startDate}
-          onChange={(e) => setStartDate(e.target.value)}
-          style={{
-            flex: '1 1 0px',
-            minWidth: '105px',
-            maxWidth: '140px',
-            height: '30px',
-            padding: '0.2rem 0.35rem',
-            borderRadius: 'var(--radius-sm)',
-            border: '1px solid var(--border-color)',
-            background: 'var(--bg-page)',
-            color: 'var(--text-main)',
-            fontSize: '0.82rem',
-            fontFamily: 'inherit',
-            textAlign: 'center'
-          }}
-        />
-        <span style={{ color: 'var(--text-muted)', fontSize: '0.82rem', flexShrink: 0 }}>~</span>
-        <input 
-          type="date"
-          value={endDate}
-          onChange={(e) => setEndDate(e.target.value)}
-          style={{
-            flex: '1 1 0px',
-            minWidth: '105px',
-            maxWidth: '140px',
-            height: '30px',
-            padding: '0.2rem 0.35rem',
-            borderRadius: 'var(--radius-sm)',
-            border: '1px solid var(--border-color)',
-            background: 'var(--bg-page)',
-            color: 'var(--text-main)',
-            fontSize: '0.82rem',
-            fontFamily: 'inherit',
-            textAlign: 'center'
-          }}
-        />
+          <SmartDateInput
+            compact
+            value={startDate}
+            onChange={(val) => setStartDate(val)}
+            quickPresets={['yesterday', 'today']}
+            accentColor="#0284c7"
+            style={{ flex: '1 1 0px', minWidth: '112px', maxWidth: '142px' }}
+          />
+          <span style={{ color: 'var(--text-muted)', fontSize: '0.82rem', flexShrink: 0 }}>~</span>
+          <SmartDateInput
+            compact
+            value={endDate}
+            onChange={(val) => setEndDate(val)}
+            quickPresets={['yesterday', 'today']}
+            accentColor="#0284c7"
+            style={{ flex: '1 1 0px', minWidth: '112px', maxWidth: '142px' }}
+          />
+        </div>
+
+        {/* 퀵 기간 선택 칩 (1주 / 1달 / 3개월) */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', flexShrink: 0 }}>
+          {[
+            { label: '1주', days: 7 },
+            { label: '1달', days: 30 },
+            { label: '3개월', days: 90 }
+          ].map(preset => {
+            const targetStart = (() => {
+              const d = new Date();
+              d.setDate(d.getDate() - preset.days);
+              return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+            })();
+            const isActive = startDate === targetStart && endDate === todayStr;
+            return (
+              <button
+                key={preset.label}
+                type="button"
+                onClick={() => {
+                  setStartDate(targetStart);
+                  setEndDate(todayStr);
+                }}
+                style={{
+                  height: '28px',
+                  padding: '0 0.55rem',
+                  borderRadius: 'var(--radius-sm)',
+                  border: isActive ? '1.5px solid #0284c7' : '1px solid var(--border-color)',
+                  background: isActive ? 'rgba(2, 132, 199, 0.12)' : 'var(--bg-page)',
+                  color: isActive ? '#0284c7' : 'var(--text-muted)',
+                  fontSize: '0.76rem',
+                  fontWeight: isActive ? 800 : 600,
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                {preset.label}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* 5. 카테고리 필터 칩 바 (가로 스크롤) */}

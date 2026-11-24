@@ -25,6 +25,7 @@ import {
   getCategoryById
 } from '../../lib/types.js';
 import { SCHEDULE_CATEGORIES } from './ScheduleFormModal.jsx';
+import SmartDateInput from '../common/SmartDateInput.jsx';
 
 export default function DailyDiaryView({
   entities,
@@ -1011,20 +1012,13 @@ export default function DailyDiaryView({
                                   <Calendar size={12} color="var(--color-accent)" />
                                   <span>변경일:</span>
                                 </span>
-                                <input 
-                                  type="date"
-                                  className="form-control form-control-sm"
-                                  style={{ 
-                                    maxWidth: '140px',
-                                    height: '24px',
-                                    padding: '0.1rem 0.4rem', 
-                                    fontSize: '0.78rem',
-                                    borderRadius: 'var(--radius-sm)',
-                                    border: '1px solid var(--border-color)',
-                                    background: 'var(--bg-card)'
-                                  }}
+                                <SmartDateInput
+                                  compact
                                   value={tempReminderDate}
-                                  onChange={(e) => setTempReminderDate(e.target.value)}
+                                  onChange={(val) => setTempReminderDate(val)}
+                                  quickPresets={['today', 'tomorrow']}
+                                  accentColor="var(--color-accent)"
+                                  style={{ maxWidth: '142px' }}
                                 />
                               </div>
 
