@@ -908,7 +908,35 @@ export default function CareLogFormModal({
               )}
 
               <div className="form-group full-width">
-                <label className="form-label">관리 작업명 <span className="required">*</span></label>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.45rem' }}>
+                  <label className="form-label" style={{ margin: 0 }}>관리 작업명 <span className="required">*</span></label>
+                  {/* 1안 앰버 골드 북마크 인라인 버튼: 작업명 입력 시 우측에 쏙 노출 */}
+                  {title.trim() && !currentQuickTitles.includes(title.trim()) && (
+                    <button
+                      type="button"
+                      onClick={() => handleAddQuickTitle(title.trim())}
+                      style={{
+                        background: 'rgba(245, 158, 11, 0.1)',
+                        border: '1px solid rgba(245, 158, 11, 0.4)',
+                        borderRadius: 'var(--radius-sm)',
+                        color: '#b45309',
+                        fontSize: '0.74rem',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.25rem',
+                        padding: '0.15rem 0.5rem',
+                        lineHeight: 1.2,
+                        transition: 'all 0.15s ease'
+                      }}
+                      title="현재 입력한 제목을 이 분류의 빠른 추천 목록에 추가"
+                    >
+                      <BookmarkPlus size={12} color="#b45309" strokeWidth={2.2} />
+                      <span>추천에 저장</span>
+                    </button>
+                  )}
+                </div>
                 <input
                   type="text"
                   className="form-input"
@@ -917,33 +945,6 @@ export default function CareLogFormModal({
                   onChange={(e) => setTitle(e.target.value)}
                   required
                 />
-
-                {/* 현재 입력한 제목을 이 분류의 빠른 추천으로 원클릭 등록 버튼 */}
-                {title.trim() && !currentQuickTitles.includes(title.trim()) && (
-                  <button
-                    type="button"
-                    onClick={() => handleAddQuickTitle(title.trim())}
-                    style={{
-                      marginTop: '0.4rem',
-                      background: 'rgba(2, 132, 199, 0.08)',
-                      border: '1px solid rgba(2, 132, 199, 0.25)',
-                      borderRadius: 'var(--radius-sm)',
-                      color: '#0284c7',
-                      fontSize: '0.76rem',
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '0.3rem',
-                      padding: '0.25rem 0.55rem',
-                      transition: 'all 0.15s ease'
-                    }}
-                    title="현재 입력한 제목을 이 분류의 빠른 추천 목록에 추가"
-                  >
-                    <BookmarkPlus size={13} />
-                    <span>현재 제목을 빠른 추천으로 저장</span>
-                  </button>
-                )}
               </div>
 
               <div className="form-group full-width">

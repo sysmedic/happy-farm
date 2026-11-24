@@ -23,12 +23,12 @@ import {
 export const SCHEDULE_CATEGORIES = [
   { id: 'vaccine', label: '백신접종', icon: '💉', color: '#0ea5e9' },
   { id: 'treatment', label: '진료치료', icon: '💊', color: '#ef4444' },
-  { id: 'breeding', label: '인공수정', icon: '🧬', color: '#8b5cf6' },
+  { id: 'weight', label: '체중측정', icon: '⚖️', color: '#64748b' },
   { id: 'heat_check', label: '발정관찰', icon: '🔥', color: '#f97316' },
+  { id: 'breeding', label: '인공수정', icon: '🧬', color: '#8b5cf6' },
   { id: 'pregnancy_check', label: '임신감정', icon: '💖', color: '#ec4899' },
   { id: 'calving', label: '분만관리', icon: '🐮', color: '#10b981' },
   { id: 'shipment', label: '출하매매', icon: '🚛', color: '#0ea5e9' },
-  { id: 'weight', label: '체중측정', icon: '⚖️', color: '#64748b' },
   { id: 'routine', label: '방역소독', icon: '🛡️', color: '#10b981' },
   { id: 'facility', label: '시설환경', icon: '🛠️', color: '#f59e0b' },
   { id: 'feed', label: '사료자재', icon: '🌾', color: '#d97706' },
@@ -839,9 +839,37 @@ export default function ScheduleFormModal({
 
             {/* 5. 일정 제목 직접 입력 */}
             <div className="form-group" style={{ marginBottom: '1rem' }}>
-              <label className="form-label" style={{ fontWeight: 700 }}>
-                일정 제목 <span style={{ color: 'var(--color-danger)' }}>*</span>
-              </label>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.45rem' }}>
+                <label className="form-label" style={{ fontWeight: 700, margin: 0 }}>
+                  일정 제목 <span style={{ color: 'var(--color-danger)' }}>*</span>
+                </label>
+                {/* 1안 앰버 골드 북마크 인라인 버튼: 제목 입력 시 우측에 쏙 노출 */}
+                {title.trim() && !currentQuickTitles.includes(title.trim()) && (
+                  <button
+                    type="button"
+                    onClick={() => handleAddQuickTitle(title.trim())}
+                    style={{
+                      background: 'rgba(245, 158, 11, 0.1)',
+                      border: '1px solid rgba(245, 158, 11, 0.4)',
+                      borderRadius: 'var(--radius-sm)',
+                      color: '#b45309',
+                      fontSize: '0.74rem',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.25rem',
+                      padding: '0.15rem 0.5rem',
+                      lineHeight: 1.2,
+                      transition: 'all 0.15s ease'
+                    }}
+                    title="현재 입력한 제목을 이 분류의 빠른 추천 목록에 추가"
+                  >
+                    <BookmarkPlus size={12} color="#b45309" strokeWidth={2.2} />
+                    <span>추천에 저장</span>
+                  </button>
+                )}
+              </div>
               <input
                 type="text"
                 className="form-input"
@@ -850,33 +878,6 @@ export default function ScheduleFormModal({
                 onChange={(e) => setTitle(e.target.value)}
                 required
               />
-
-              {/* 현재 입력한 제목을 이 분류의 빠른 추천으로 원클릭 등록 버튼 */}
-              {title.trim() && !currentQuickTitles.includes(title.trim()) && (
-                <button
-                  type="button"
-                  onClick={() => handleAddQuickTitle(title.trim())}
-                  style={{
-                    marginTop: '0.4rem',
-                    background: 'rgba(2, 132, 199, 0.08)',
-                    border: '1px solid rgba(2, 132, 199, 0.25)',
-                    borderRadius: 'var(--radius-sm)',
-                    color: '#0284c7',
-                    fontSize: '0.76rem',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '0.3rem',
-                    padding: '0.25rem 0.55rem',
-                    transition: 'all 0.15s ease'
-                  }}
-                  title="현재 입력한 제목을 이 분류의 빠른 추천 목록에 추가"
-                >
-                  <BookmarkPlus size={13} />
-                  <span>현재 제목을 빠른 추천으로 저장</span>
-                </button>
-              )}
             </div>
 
             {/* 6. 상세 메모 */}

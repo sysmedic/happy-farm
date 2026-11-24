@@ -134,12 +134,12 @@ export function isStatusAllowedForGender(statusId, gender, breedOrStage = '') {
 export const DEFAULT_CARE_CATEGORIES = [
   { id: 'vaccine', label: '백신접종', icon: '💉', badgeClass: 'badge-cat-vaccine' },
   { id: 'treatment', label: '진료치료', icon: '💊', badgeClass: 'badge-cat-treatment' },
-  { id: 'breeding', label: '인공수정', icon: '🧬', badgeClass: 'badge-cat-breeding' },
+  { id: 'weight', label: '체중측정', icon: '⚖️', badgeClass: 'badge-cat-weight' },
   { id: 'heat_check', label: '발정관찰', icon: '🔥', badgeClass: 'badge-cat-heat' },
+  { id: 'breeding', label: '인공수정', icon: '🧬', badgeClass: 'badge-cat-breeding' },
   { id: 'pregnancy_check', label: '임신감정', icon: '💖', badgeClass: 'badge-cat-pregnancy' },
   { id: 'calving', label: '분만관리', icon: '🐮', badgeClass: 'badge-cat-calving' },
   { id: 'shipment', label: '출하매매', icon: '🚛', badgeClass: 'badge-cat-shipment' },
-  { id: 'weight', label: '체중측정', icon: '⚖️', badgeClass: 'badge-cat-weight' },
   { id: 'routine', label: '방역소독', icon: '🛡️', badgeClass: 'badge-cat-routine' },
   { id: 'facility', label: '시설환경', icon: '🛠️', badgeClass: 'badge-cat-facility' },
   { id: 'feed', label: '사료자재', icon: '🌾', badgeClass: 'badge-cat-feed' },
@@ -149,16 +149,16 @@ export const DEFAULT_CARE_CATEGORIES = [
 // 농장 공통 4대 핵심 분류 ID 세트 (방역소독, 시설환경, 사료자재, 퇴비기타)
 export const FARM_COMMON_CATEGORY_IDS = new Set(['routine', 'facility', 'feed', 'other']);
 
-// 개체 개별 전용 8대 분류 ID 세트 (백신, 치료, 인공수정, 발정, 임신, 분만, 출하, 체중)
+// 개체 개별 전용 8대 분류 ID 세트 (백신, 치료, 체중, 발정, 수정, 임신, 분만, 출하)
 export const ENTITY_ONLY_CATEGORY_IDS = new Set([
   'vaccine',
   'treatment',
-  'breeding',
+  'weight',
   'heat_check',
+  'breeding',
   'pregnancy_check',
   'calving',
-  'shipment',
-  'weight'
+  'shipment'
 ]);
 
 export const CARE_CATEGORIES = DEFAULT_CARE_CATEGORIES;
