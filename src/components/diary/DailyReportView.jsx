@@ -1152,27 +1152,33 @@ export default function DailyReportView({
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.45rem', width: '100%' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap', minWidth: 0, flex: 1 }}>
                         {log.tagNumber ? (
-                          <>
+                          <div style={{ display: 'inline-flex', alignItems: 'baseline', gap: '0.45rem', flexShrink: 0 }}>
                             <span 
-                              className="badge badge-tag"
+                              className="spec-link-mother"
                               onClick={() => onOpenEntityDetail(log.tagNumber)}
                               title="클릭 시 이 개체의 관리 내역으로 이동"
                               style={{ 
                                 cursor: 'pointer', 
-                                fontSize: '0.78rem', 
-                                padding: '0.18rem 0.5rem', 
-                                borderRadius: 'var(--radius-sm)',
-                                flexShrink: 0 
+                                fontSize: '0.95rem', 
+                                fontWeight: 800,
+                                letterSpacing: '-0.01em',
+                                display: 'inline-block',
+                                lineHeight: 1.25
                               }}
                             >
                               {log.tagNumber}
                             </span>
                             {entityName && (
-                              <span style={{ fontWeight: 800, fontSize: '0.88rem', color: 'var(--text-main)', flexShrink: 0 }}>
+                              <span style={{ 
+                                fontSize: '0.92rem', 
+                                fontWeight: 600, 
+                                color: 'var(--text-main)',
+                                lineHeight: 1.25
+                              }}>
                                 {entityName}
                               </span>
                             )}
-                          </>
+                          </div>
                         ) : (
                           <span 
                             className="spec-link-mother"
