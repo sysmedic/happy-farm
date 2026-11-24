@@ -22,7 +22,9 @@ import {
   getCategoryById, 
   normalizeCategoryId 
 } from '../../lib/types.js';
-import FarmDisinfectionPrintModal from './FarmDisinfectionPrintModal.jsx';
+// [봉인 보존] 관공서/HACCP 제출용 가축전염병예방법 별지 제6호서식 소독실시기록부 인쇄 모달 (필요 시 즉시 재활성화 가능)
+// import FarmDisinfectionPrintModal from './FarmDisinfectionPrintModal.jsx';
+import FarmHistoryPrintModal from './FarmHistoryPrintModal.jsx';
 
 // 텍스트 내 검색어 형광펜 하이라이트 컴포넌트
 function HighlightText({ text, query }) {
@@ -691,11 +693,12 @@ export default function FarmCommonHistoryView({
           alignItems: 'center',
           gap: '0.65rem'
         }}>
-          {/* 🖨️ 방역대장 인쇄 버튼 (가축전염병예방법 별지 제6호서식 소독실시기록부 A4/PDF 인쇄) */}
+          {/* 🖨️ 관리 내역 인쇄 버튼 (농장 내부 보관용 A4 세로 인쇄 및 PDF 저장) */}
+          {/* [봉인 기록 보존: 이전 '방역대장 인쇄' 버튼이 이 자리였으며, 현재는 내부 보관용 관리 내역 인쇄로 전환됨] */}
           <button
             type="button"
             onClick={() => setIsPrintModalOpen(true)}
-            title="가축전염병예방법 별지 제6호서식 소독실시기록부 A4 인쇄 / PDF 저장"
+            title="농장 관리 이력 A4 세로 인쇄 및 PDF 저장 (내부 보관용)"
             style={{
               flex: 1,
               height: '44px',
@@ -715,7 +718,7 @@ export default function FarmCommonHistoryView({
             }}
           >
             <Printer size={17} />
-            <span>방역대장 인쇄</span>
+            <span>관리 내역 인쇄</span>
           </button>
 
           {/* + 관리 기록 추가 버튼 */}
@@ -755,8 +758,8 @@ export default function FarmCommonHistoryView({
         </div>
       </div>
 
-      {/* 8. 정부·HACCP 제출용 축사 소독·방역 관리대장 A4 인쇄 미리보기 모달 */}
-      <FarmDisinfectionPrintModal
+      {/* 8. 농장 관리 기록 대장 (내부 보관용) A4 세로 인쇄 및 PDF 저장 모달 */}
+      <FarmHistoryPrintModal
         isOpen={isPrintModalOpen}
         onClose={() => setIsPrintModalOpen(false)}
         logs={filteredLogs}
@@ -764,6 +767,18 @@ export default function FarmCommonHistoryView({
         startDate={startDate}
         endDate={endDate}
       />
+
+      {/* [봉인 보존] 관공서 방역 점검/HACCP 제출용 별지 제6호서식 소독실시기록부 모달 (필요 시 주석 해제) */}
+      {/* 
+      <FarmDisinfectionPrintModal
+        isOpen={isDisinfectionPrintModalOpen}
+        onClose={() => setIsDisinfectionPrintModalOpen(false)}
+        logs={filteredLogs}
+        farmSettings={farmSettings}
+        startDate={startDate}
+        endDate={endDate}
+      />
+      */}
     </div>
   );
 }
