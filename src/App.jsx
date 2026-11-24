@@ -986,9 +986,9 @@ export default function App() {
           }}
         >
           {activeTab === 'entities' ? (
-            <Calendar size={25} color="#ffffff" strokeWidth={2.2} />
+            <Calendar size={28} color="#ffffff" strokeWidth={2.4} />
           ) : (
-            <CowIcon size={28} strokeWidth={1.6} color="#ffffff" />
+            <CowIcon size={33} strokeWidth={1.7} color="#ffffff" />
           )}
         </button>
       )}
