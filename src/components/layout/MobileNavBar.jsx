@@ -5,6 +5,7 @@ import {
   Cloud, 
   Plus
 } from 'lucide-react';
+import CowIcon from '../common/CowIcon.jsx';
 
 export default function MobileNavBar({
   activeTab,
@@ -17,7 +18,7 @@ export default function MobileNavBar({
         className={`mobile-nav-btn ${activeTab === 'entities' ? 'active' : ''}`}
         onClick={() => onSelectTab('entities')}
       >
-        <span style={{ fontSize: '1.25rem', lineHeight: 1 }}>🐂</span>
+        <CowIcon size={22} strokeWidth={1.5} className="mobile-nav-icon" />
         <span className="mobile-nav-label">개체관리</span>
       </button>
 

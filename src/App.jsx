@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Plus, Calendar } from 'lucide-react';
+import CowIcon from './components/common/CowIcon.jsx';
 import TopBar from './components/layout/TopBar.jsx';
 import EntityList from './components/entities/EntityList.jsx';
 import EntityDetailModal from './components/entities/EntityDetailModal.jsx';
@@ -961,7 +962,7 @@ export default function App() {
         />
       )}
 
-      {/* 개체관리 ⇆ 다이어리(캘린더) 초고속 셔틀 플로팅 액션 버튼 (B안 원형 스마트 아이콘) */}
+      {/* 개체관리 ⇆ 다이어리(캘린더) 초고속 셔틀 플로팅 액션 버튼 (B안 원형 스마트 한우/달력 아이콘) */}
       {(activeTab === 'entities' || activeTab === 'diary') && (
         <button
           type="button"
@@ -985,9 +986,9 @@ export default function App() {
           }}
         >
           {activeTab === 'entities' ? (
-            <Calendar size={24} color="#ffffff" strokeWidth={2.3} />
+            <Calendar size={25} color="#ffffff" strokeWidth={2.2} />
           ) : (
-            <span style={{ fontSize: '1.45rem', lineHeight: 1, userSelect: 'none' }}>🐂</span>
+            <CowIcon size={28} strokeWidth={1.6} color="#ffffff" />
           )}
         </button>
       )}
