@@ -54,7 +54,7 @@ function HighlightText({ text, query }) {
   );
 }
 
-// 자주 찾는 농장 공통 작업 퀵 태그 추천
+// 자주 찾는 농장 관리 작업 퀵 태그 추천
 const QUICK_SEARCH_TAGS = [
   '안개분무',
   '생석회',
@@ -137,7 +137,7 @@ export default function FarmCommonHistoryView({
     });
   }, [farmCommonLogs, periodFilter, selectedCategory, searchQuery]);
 
-  // 상단 요약 통계 (공통작업 건수 + 최근 소독일)
+  // 상단 요약 통계 (관리기록 건수 + 최근 소독일)
   const stats = useMemo(() => {
     const totalCount = farmCommonLogs.length;
     const latestDate = farmCommonLogs.length > 0 ? farmCommonLogs[0].date : '-';
@@ -191,11 +191,11 @@ export default function FarmCommonHistoryView({
         boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
         gap: '0.5rem'
       }}>
-        {/* 좌측: 공통작업 건수 */}
+        {/* 좌측: 관리기록 건수 */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', minWidth: 0 }}>
           <ClipboardList size={14} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
           <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600, whiteSpace: 'nowrap' }}>
-            공통작업
+            관리 기록
           </span>
           <strong style={{ fontSize: '0.92rem', color: 'var(--text-main)', fontWeight: 800 }}>
             {stats.totalCount}건
@@ -224,7 +224,7 @@ export default function FarmCommonHistoryView({
         </div>
       </div>
 
-      {/* 2. 검색창 및 [+ 공통 기록 추가] 액션 바 */}
+      {/* 2. 검색창 및 [+ 관리 기록 추가] 액션 바 */}
       <div className="search-action-wrapper" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
         <div className="search-input-group" style={{ flex: 1, position: 'relative' }}>
           <Search size={18} className="search-input-icon" />
@@ -280,10 +280,10 @@ export default function FarmCommonHistoryView({
               height: '40px',
               padding: '0 0.95rem'
             }}
-            title="새로운 농장 공통 관리 기록 등록"
+            title="새로운 농장 관리 기록 등록"
           >
             <Plus size={16} color="#065f46" strokeWidth={2.5} />
-            <span>공통 기록 추가</span>
+            <span>관리 기록 추가</span>
           </button>
         )}
       </div>
@@ -484,8 +484,8 @@ export default function FarmCommonHistoryView({
           <ClipboardList size={40} strokeWidth={1.5} style={{ opacity: 0.45, marginBottom: '0.65rem', color: 'var(--text-muted)' }} />
           <p style={{ margin: 0, fontWeight: 700, fontSize: '0.98rem', color: 'var(--text-main)' }}>
             {searchQuery || periodFilter !== 'all' || selectedCategory !== 'all'
-              ? '조건에 맞는 농장 공통 관리 기록이 없습니다.' 
-              : '등록된 농장 공통 관리 기록이 없습니다.'}
+              ? '조건에 맞는 농장 관리 기록이 없습니다.' 
+              : '등록된 농장 관리 기록이 없습니다.'}
           </p>
           <p style={{ margin: '0.45rem 0 0 0', fontSize: '0.84rem', color: 'var(--text-muted)' }}>
             축사 소독, 방역, 생석회 살포, 시설 청소 내역을 등록하여 관리해보세요.
@@ -522,7 +522,7 @@ export default function FarmCommonHistoryView({
                 }}
               >
                 <Plus size={15} />
-                <span>새 공통 기록 작성</span>
+                <span>새 관리 기록 작성</span>
               </button>
             )}
           </div>

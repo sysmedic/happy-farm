@@ -1183,7 +1183,7 @@ export default function DailyReportView({
                           <span 
                             className="spec-link-mother"
                             onClick={() => onOpenFarmCommonHistory && onOpenFarmCommonHistory()}
-                            title="클릭 시 농장 공통 관리 이력(소독·방역 전체 이력) 모아보기"
+                            title="클릭 시 농장 관리 내역(소독·방역 전체 이력) 모아보기"
                             style={{ 
                               cursor: onOpenFarmCommonHistory ? 'pointer' : 'default',
                               fontSize: '0.95rem', 
@@ -1514,7 +1514,7 @@ export default function DailyReportView({
                                 <span 
                                   className="spec-link-mother"
                                   onClick={() => onOpenFarmCommonHistory && onOpenFarmCommonHistory()}
-                                  title="클릭 시 농장 공통 관리 이력 모아보기"
+                                  title="클릭 시 농장 관리 내역 모아보기"
                                   style={{ 
                                     cursor: onOpenFarmCommonHistory ? 'pointer' : 'default',
                                     fontWeight: 800, 

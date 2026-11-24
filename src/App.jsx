@@ -60,7 +60,7 @@ export default function App() {
 
   // 환경 설정 모달 상태
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
-  // 농장 공통 관리 이력 모달 상태
+  // 농장 관리 내역 모달 상태
   const [isFarmCommonModalOpen, setIsFarmCommonModalOpen] = useState(false);
 
   // 모달 및 뷰 제어 상태

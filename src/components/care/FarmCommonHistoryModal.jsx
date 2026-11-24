@@ -98,7 +98,7 @@ export default function FarmCommonHistoryModal({
     });
   }, [farmCommonLogs, startDate, endDate, selectedCategory]);
 
-  // 카테고리별 건수 집계 (전체 농장공통 기록 기준)
+  // 카테고리별 건수 집계 (전체 농장 관리기록 기준)
   const categoryCounts = useMemo(() => {
     const counts = {};
     allCategories.forEach(cat => {
