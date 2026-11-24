@@ -1248,25 +1248,23 @@ export default function DailyDiaryView({
                                 </div>
                               ) : (
                                 <span 
+                                  className="spec-link-mother"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     if (onOpenFarmCommonHistory) onOpenFarmCommonHistory();
                                   }}
                                   title="클릭 시 농장 공통 관리 이력(소독·방역 전체 이력) 모아보기"
                                   style={{
-                                    fontSize: '0.82rem',
-                                    color: 'var(--text-main)',
-                                    background: 'var(--bg-card-subtle)',
-                                    padding: '0.15rem 0.45rem',
-                                    borderRadius: 'var(--radius-sm)',
-                                    border: '1px solid var(--border-color)',
-                                    fontWeight: 700,
+                                    fontSize: '0.95rem',
+                                    fontWeight: 800,
+                                    letterSpacing: '-0.01em',
+                                    display: 'inline-block',
+                                    lineHeight: 1.25,
                                     flexShrink: 0,
-                                    cursor: onOpenFarmCommonHistory ? 'pointer' : 'default',
-                                    transition: 'all 0.15s ease'
+                                    cursor: onOpenFarmCommonHistory ? 'pointer' : 'default'
                                   }}
                                 >
-                                  {entityName || '농장 공통'} 🚜
+                                  {entityName || '농장 공통'}
                                 </span>
                               )}
 
@@ -1347,25 +1345,23 @@ export default function DailyDiaryView({
                                 </div>
                               ) : (
                                 <span 
+                                  className="spec-link-mother"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     if (onOpenFarmCommonHistory) onOpenFarmCommonHistory();
                                   }}
                                   title="클릭 시 농장 공통 관리 이력(소독·방역 전체 이력) 모아보기"
                                   style={{
-                                    fontSize: '0.82rem',
-                                    color: 'var(--text-main)',
-                                    background: 'var(--bg-card-subtle)',
-                                    padding: '0.15rem 0.45rem',
-                                    borderRadius: 'var(--radius-sm)',
-                                    border: '1px solid var(--border-color)',
-                                    fontWeight: 700,
+                                    fontSize: '0.95rem',
+                                    fontWeight: 800,
+                                    letterSpacing: '-0.01em',
+                                    display: 'inline-block',
+                                    lineHeight: 1.25,
                                     flexShrink: 0,
-                                    cursor: onOpenFarmCommonHistory ? 'pointer' : 'default',
-                                    transition: 'all 0.15s ease'
+                                    cursor: onOpenFarmCommonHistory ? 'pointer' : 'default'
                                   }}
                                 >
-                                  {entityName || '농장 공통'} 🚜
+                                  {entityName || '농장 공통'}
                                 </span>
                               )}
                             </div>
@@ -1649,24 +1645,22 @@ export default function DailyDiaryView({
                               </div>
                             ) : (
                               <span 
+                                className="spec-link-mother"
                                 onClick={() => {
                                   if (onOpenFarmCommonHistory) onOpenFarmCommonHistory();
                                 }}
                                 title="클릭 시 농장 공통 관리 이력(소독·방역 전체 이력) 모아보기"
                                 style={{
-                                  fontSize: '0.82rem',
-                                  color: 'var(--text-main)',
-                                  background: 'var(--bg-card-subtle)',
-                                  padding: '0.15rem 0.45rem',
-                                  borderRadius: 'var(--radius-sm)',
-                                  border: '1px solid var(--border-color)',
-                                  fontWeight: 700,
+                                  fontSize: '0.95rem',
+                                  fontWeight: 800,
+                                  letterSpacing: '-0.01em',
+                                  display: 'inline-block',
+                                  lineHeight: 1.25,
                                   flexShrink: 0,
-                                  cursor: onOpenFarmCommonHistory ? 'pointer' : 'default',
-                                  transition: 'all 0.15s ease'
+                                  cursor: onOpenFarmCommonHistory ? 'pointer' : 'default'
                                 }}
                               >
-                                {entityName || '농장 공통'} 🚜
+                                {entityName || '농장 공통'}
                               </span>
                             )}
 

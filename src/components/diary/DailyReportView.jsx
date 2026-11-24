@@ -1175,21 +1175,20 @@ export default function DailyReportView({
                           </>
                         ) : (
                           <span 
+                            className="spec-link-mother"
                             onClick={() => onOpenFarmCommonHistory && onOpenFarmCommonHistory()}
                             title="클릭 시 농장 공통 관리 이력(소독·방역 전체 이력) 모아보기"
                             style={{ 
                               cursor: onOpenFarmCommonHistory ? 'pointer' : 'default',
-                              fontSize: '0.82rem', 
+                              fontSize: '0.95rem', 
                               fontWeight: 800,
-                              color: 'var(--text-main)',
-                              background: 'var(--bg-card-subtle)',
-                              padding: '0.15rem 0.5rem', 
-                              borderRadius: 'var(--radius-sm)',
-                              border: '1px solid var(--border-color)',
+                              letterSpacing: '-0.01em',
+                              display: 'inline-block',
+                              lineHeight: 1.25,
                               flexShrink: 0 
                             }}
                           >
-                            {entityName || '농장 공통'} 🚜
+                            {entityName || '농장 공통'}
                           </span>
                         )}
                         <span 
@@ -1507,16 +1506,17 @@ export default function DailyReportView({
                                 </>
                               ) : (
                                 <span 
+                                  className="spec-link-mother"
                                   onClick={() => onOpenFarmCommonHistory && onOpenFarmCommonHistory()}
                                   title="클릭 시 농장 공통 관리 이력 모아보기"
                                   style={{ 
                                     cursor: onOpenFarmCommonHistory ? 'pointer' : 'default',
-                                    fontWeight: 700, 
-                                    color: '#0f172a',
-                                    fontSize: '0.85rem'
+                                    fontWeight: 800, 
+                                    fontSize: '0.9rem',
+                                    letterSpacing: '-0.01em'
                                   }}
                                 >
-                                  {log.entityName || '농장 공통'} 🚜
+                                  {log.entityName || '농장 공통'}
                                 </span>
                               )}
                             </div>
