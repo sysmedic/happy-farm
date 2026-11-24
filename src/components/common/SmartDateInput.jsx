@@ -19,12 +19,73 @@ function toDateStr(dt) {
   return `${y}-${m}-${d}`;
 }
 
-// 숫자 입력을 YYYY-MM-DD 형식으로 자동 하이픈 포맷팅
-function formatDateDigits(raw) {
+// 인텔리전트 날짜 입력 포맷터 (월 2~9, 일 4~9, 2월의 일 3, 1월+3~9 등 자동 0 채움)
+function formatIntelligentDate(raw) {
   const digits = String(raw || '').replace(/\D/g, '').slice(0, 8);
   if (digits.length <= 4) return digits;
-  if (digits.length <= 6) return `${digits.slice(0, 4)}-${digits.slice(4)}`;
-  return `${digits.slice(0, 4)}-${digits.slice(4, 6)}-${digits.slice(6, 8)}`;
+
+  const year = digits.slice(0, 4);
+  const rest = digits.slice(4);
+  let month = '';
+  let dayDigits = '';
+
+  const m1 = rest[0];
+  if (m1 >= '2' && m1 <= '9') {
+    // 20~99월은 없으므로 즉시 02~09월로 자동 보정
+    month = `0${m1}`;
+    dayDigits = rest.slice(1);
+  } else if (m1 === '0') {
+    if (rest.length === 1) return `${year}-0`;
+    const m2 = rest[1];
+    if (m2 === '0') return `${year}-0`; // 00월 차단
+    month = `0${m2}`;
+    dayDigits = rest.slice(2);
+  } else {
+    // m1 === '1'
+    if (rest.length === 1) return `${year}-1`;
+    const m2 = rest[1];
+    if (m2 >= '3' && m2 <= '9') {
+      // 13~19월은 없으므로 01월 + m2는 일(Day) 첫 자리로 자동 추론
+      month = '01';
+      dayDigits = rest.slice(1);
+    } else {
+      month = `1${m2}`; // 10, 11, 12월
+      dayDigits = rest.slice(2);
+    }
+  }
+
+  if (dayDigits.length === 0) {
+    return `${year}-${month}-`;
+  }
+
+  const d1 = dayDigits[0];
+  if ((month === '02' && d1 >= '3') || d1 >= '4') {
+    // 40~99일(2월은 30일+)은 없으므로 즉시 03~09일로 자동 보정
+    return `${year}-${month}-0${d1}`;
+  }
+
+  if (dayDigits.length === 1) {
+    return `${year}-${month}-${d1}`;
+  }
+
+  const candidateDay = `${d1}${dayDigits[1]}`;
+  if (isValidDateStr(`${year}-${month}-${candidateDay}`)) {
+    return `${year}-${month}-${candidateDay}`;
+  }
+
+  // 해당 월에 존재하지 않는 날짜(예: 02-29 비윤년, 04-31, 03-35 등)는 마지막 자리 무시
+  return `${year}-${month}-${d1}`;
+}
+
+// 완료 시점 최종 보정 (예: 2026-03-2 -> 2026-03-02)
+function resolveFinalDate(text) {
+  if (isValidDateStr(text)) return text;
+  const singleDayMatch = text.match(/^(\d{4})-(\d{2})-(\d)$/);
+  if (singleDayMatch) {
+    const candidate = `${singleDayMatch[1]}-${singleDayMatch[2]}-0${singleDayMatch[3]}`;
+    if (isValidDateStr(candidate)) return candidate;
+  }
+  return null;
 }
 
 /**
@@ -100,11 +161,12 @@ export default function SmartDateInput({
 
   // 입력 완료 확정 또는 원래 값 복귀 처리
   const finalizeInput = () => {
-    if (isValidDateStr(textValue)) {
-      if (onChange && textValue !== value) {
-        onChange(textValue);
+    const resolved = resolveFinalDate(textValue);
+    if (resolved) {
+      if (onChange && resolved !== value) {
+        onChange(resolved);
       }
-      setTextValue(textValue);
+      setTextValue(resolved);
     } else {
       // 아무것도 입력하지 않았거나 미완성 날짜인 경우 기존 값으로 안전 복귀
       const restored = backupValueRef.current || value || '';
@@ -137,16 +199,17 @@ export default function SmartDateInput({
     setIsOpen(true);
   };
 
-  // 숫자 직접 입력 핸들러
+  // 숫자 직접 입력 핸들러 (입력 시 인텔리전트 자동 0 채움, 삭제 시 자연스러운 백스페이스)
   const handleTextChange = (e) => {
     const raw = e.target.value;
-    // 사용자가 하이픈을 지울 때 백스페이스 편의 처리
-    if (raw.length < textValue.length && textValue.endsWith('-')) {
-      const trimmed = raw.slice(0, -1);
-      setTextValue(trimmed);
+    // 백스페이스로 지우는 중에는 자동 0 채움을 적용하지 않고 자연스럽게 삭제
+    if (raw.length < textValue.length) {
+      const cleaned = raw.endsWith('-') ? raw.slice(0, -1) : raw;
+      setTextValue(cleaned);
       return;
     }
-    const formatted = formatDateDigits(raw);
+
+    const formatted = formatIntelligentDate(raw);
     setTextValue(formatted);
 
     if (formatted.length === 10 && isValidDateStr(formatted)) {

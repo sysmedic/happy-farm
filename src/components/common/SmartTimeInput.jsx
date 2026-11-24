@@ -9,11 +9,69 @@ function isValidTimeStr(str) {
   return h >= 0 && h <= 23 && m >= 0 && m <= 59;
 }
 
-// 숫자 입력을 HH:mm 형식으로 자동 콜론 포맷팅
-function formatTimeDigits(raw) {
+// 인텔리전트 시간 입력 포맷터 (시 3~9, 분 6~9, 24+ 등 자동 0 채움)
+function formatIntelligentTime(raw) {
   const digits = String(raw || '').replace(/\D/g, '').slice(0, 4);
-  if (digits.length <= 2) return digits;
-  return `${digits.slice(0, 2)}:${digits.slice(2, 4)}`;
+  if (digits.length === 0) return '';
+
+  let hour = '';
+  let minDigits = '';
+
+  const h1 = digits[0];
+  if (h1 >= '3' && h1 <= '9') {
+    // 30~99시는 없으므로 즉시 03~09시로 자동 보정
+    hour = `0${h1}`;
+    minDigits = digits.slice(1);
+  } else {
+    // h1 is 0, 1, 2
+    if (digits.length === 1) return h1;
+    const h2 = digits[1];
+    if (h1 === '2' && h2 >= '4') {
+      // 24~29시는 없으므로 02시 + h2는 분 첫 자리로 자동 추론
+      hour = '02';
+      minDigits = digits.slice(1);
+    } else {
+      hour = `${h1}${h2}`;
+      minDigits = digits.slice(2);
+    }
+  }
+
+  if (minDigits.length === 0) {
+    return `${hour}:`;
+  }
+
+  const m1 = minDigits[0];
+  if (m1 >= '6' && m1 <= '9') {
+    // 60~99분은 없으므로 즉시 06~09분으로 자동 보정
+    return `${hour}:0${m1}`;
+  }
+
+  if (minDigits.length === 1) {
+    return `${hour}:${m1}`;
+  }
+
+  return `${hour}:${m1}${minDigits[1]}`;
+}
+
+// 완료 시점 최종 보정 (예: 09: -> 09:00, 09:5 -> 09:05, 2 -> 02:00)
+function resolveFinalTime(text) {
+  if (isValidTimeStr(text)) return text;
+  const singleMin = text.match(/^(\d{2}):(\d)$/);
+  if (singleMin) {
+    const candidate = `${singleMin[1]}:0${singleMin[2]}`;
+    if (isValidTimeStr(candidate)) return candidate;
+  }
+  const hourOnly = text.match(/^(\d{2}):?$/);
+  if (hourOnly) {
+    const candidate = `${hourOnly[1]}:00`;
+    if (isValidTimeStr(candidate)) return candidate;
+  }
+  const singleHour = text.match(/^(\d)$/);
+  if (singleHour) {
+    const candidate = `0${singleHour[1]}:00`;
+    if (isValidTimeStr(candidate)) return candidate;
+  }
+  return null;
 }
 
 // 24시간 HH:mm -> { period: 'AM'|'PM', hour12: 1..12, minute: 0..59 }
@@ -91,11 +149,12 @@ export default function SmartTimeInput({
 
   // 입력 완료 확정 또는 원래 값 복귀 처리
   const finalizeInput = () => {
-    if (isValidTimeStr(textValue)) {
-      if (onChange && textValue !== value) {
-        onChange(textValue);
+    const resolved = resolveFinalTime(textValue);
+    if (resolved) {
+      if (onChange && resolved !== value) {
+        onChange(resolved);
       }
-      setTextValue(textValue);
+      setTextValue(resolved);
     } else {
       // 아무것도 입력하지 않았거나 미완성 시간인 경우 기존 값으로 안전 복귀
       const restored = backupValueRef.current || value || '';
@@ -125,14 +184,17 @@ export default function SmartTimeInput({
     setIsOpen(true);
   };
 
-  // 숫자 4자리 직접 입력 핸들러
+  // 숫자 직접 입력 핸들러 (입력 시 인텔리전트 자동 0 채움, 삭제 시 자연스러운 백스페이스)
   const handleTextChange = (e) => {
     const raw = e.target.value;
-    if (raw.length < textValue.length && textValue.endsWith(':')) {
-      setTextValue(raw.slice(0, -1));
+    // 백스페이스로 지우는 중에는 자동 0 채움을 적용하지 않고 자연스럽게 삭제
+    if (raw.length < textValue.length) {
+      const cleaned = raw.endsWith(':') ? raw.slice(0, -1) : raw;
+      setTextValue(cleaned);
       return;
     }
-    const formatted = formatTimeDigits(raw);
+
+    const formatted = formatIntelligentTime(raw);
     setTextValue(formatted);
 
     if (formatted.length === 5 && isValidTimeStr(formatted)) {
