@@ -15,7 +15,8 @@ import {
   Sparkles,
   ArrowRight,
   Trash2,
-  Edit2
+  Edit2,
+  Check
 } from 'lucide-react';
 import {
   CARE_CATEGORIES,
@@ -1424,16 +1425,16 @@ export default function DailyDiaryView({
                                     border: '1px solid #10b981',
                                     background: 'rgba(16, 185, 129, 0.15)'
                                   }}
-                                  title="이 일정으로 새 관리기록 작성 (분류·작업명·메모 자동 입력)"
+                                  title="이 일정을 수행 완료하고 영농 일지에 기록"
                                 >
-                                  <Plus size={12} color="#065f46" strokeWidth={2.5} />
-                                  <span>기록</span>
+                                  <Check size={12} color="#065f46" strokeWidth={2.5} />
+                                  <span>완료</span>
                                 </button>
                               )}
                             </div>
                           </div>
 
-                          {/* 2행: [시간] [일정 제목 (말줄임)] (좌측) & [수정] 버튼 (우측) */}
+                          {/* 2행: [시간] [일정 제목 (말줄임)] (좌측) & [변경] 버튼 (우측) */}
                           <div style={{
                             display: 'flex',
                             alignItems: 'center',
@@ -1481,13 +1482,13 @@ export default function DailyDiaryView({
                               </div>
                             </div>
 
-                            {/* [✏️ 수정] 버튼 (개체 및 농장 공통 모두 동일하게 2행 우측 칼정렬) */}
+                            {/* [✏️ 변경] 버튼 (개체 및 농장 공통 모두 동일하게 2행 우측 칼정렬) */}
                             {onEditSchedule && (
                               <button
                                 type="button"
                                 className="btn btn-outline btn-sm"
                                 onClick={() => onEditSchedule(sched)}
-                                title="일정 수정"
+                                title="일정 날짜·시간·내용 변경"
                                 style={{
                                   fontSize: '0.75rem',
                                   fontWeight: 600,
@@ -1505,7 +1506,7 @@ export default function DailyDiaryView({
                                 }}
                               >
                                 <Edit2 size={12} />
-                                <span>수정</span>
+                                <span>변경</span>
                               </button>
                             )}
                           </div>

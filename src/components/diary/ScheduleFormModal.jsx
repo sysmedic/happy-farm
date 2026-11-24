@@ -351,7 +351,7 @@ export default function ScheduleFormModal({
         <div className="modal-header">
           <div className="modal-header-title">
             <span style={{ fontWeight: 800, fontSize: '1.25rem' }}>
-              {isEditing ? '일정 수정' : '새 일정 추가'}
+              {isEditing ? '일정 변경' : '새 일정 추가'}
             </span>
           </div>
           <button 
@@ -959,7 +959,7 @@ export default function ScheduleFormModal({
                 }}
               >
                 <Check size={16} color={isEditing ? 'currentColor' : '#0284c7'} strokeWidth={2.4} />
-                <span>{isEditing ? '수정 사항 저장' : '일정 등록'}</span>
+                <span>{isEditing ? '변경 사항 저장' : '일정 등록'}</span>
               </button>
             </div>
           </div>
