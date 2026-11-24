@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { Calendar, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, X, Check } from 'lucide-react';
 
 // 날짜 문자열(YYYY-MM-DD) 유효성 검사
 function isValidDateStr(str) {
@@ -47,6 +47,19 @@ export default function SmartDateInput({
 }) {
   const [textValue, setTextValue] = useState(value || '');
   const [isOpen, setIsOpen] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
+  const backupValueRef = useRef(value || '');
+  const internalInputRef = useRef(null);
+
+  // 외부 inputRef와 내부 ref 동시 연결
+  const setMergedRef = (el) => {
+    internalInputRef.current = el;
+    if (typeof inputRef === 'function') {
+      inputRef(el);
+    } else if (inputRef && typeof inputRef === 'object') {
+      inputRef.current = el;
+    }
+  };
 
   // 오늘/어제/내일 날짜 문자열
   const todayStr = useMemo(() => toDateStr(new Date()), []);
@@ -71,10 +84,45 @@ export default function SmartDateInput({
     return new Date().getMonth();
   });
 
-  // 외부 value 변경 시 입력창 텍스트 동기화
+  // 외부 value 변경 시 입력창 텍스트 동기화 (타이핑 중이 아닐 때만)
   useEffect(() => {
-    setTextValue(value || '');
-  }, [value]);
+    if (!isFocused) {
+      setTextValue(value || '');
+    }
+  }, [value, isFocused]);
+
+  // 입력칸 포커스 시: 기존 값 임시 보관 후 즉시 비워서 백스페이스 없이 바로 입력 가능
+  const handleFocus = () => {
+    backupValueRef.current = value || '';
+    setIsFocused(true);
+    setTextValue('');
+  };
+
+  // 입력 완료 확정 또는 원래 값 복귀 처리
+  const finalizeInput = () => {
+    if (isValidDateStr(textValue)) {
+      if (onChange && textValue !== value) {
+        onChange(textValue);
+      }
+      setTextValue(textValue);
+    } else {
+      // 아무것도 입력하지 않았거나 미완성 날짜인 경우 기존 값으로 안전 복귀
+      const restored = backupValueRef.current || value || '';
+      setTextValue(restored);
+      if (onChange && restored !== value) {
+        onChange(restored);
+      }
+    }
+    setIsFocused(false);
+  };
+
+  // [완료] 버튼 또는 Enter 키 클릭 시 확정 + 키패드 내리기
+  const handleCompleteClick = () => {
+    finalizeInput();
+    if (internalInputRef.current) {
+      internalInputRef.current.blur();
+    }
+  };
 
   // 달력 팝업 열 때 현재 선택 날짜(또는 오늘)의 연/월로 이동
   const openCalendar = () => {
@@ -101,27 +149,21 @@ export default function SmartDateInput({
     const formatted = formatDateDigits(raw);
     setTextValue(formatted);
 
-    if (formatted === '') {
-      if (!required && onChange) onChange('');
-      return;
-    }
     if (formatted.length === 10 && isValidDateStr(formatted)) {
       if (onChange) onChange(formatted);
     }
   };
 
-  // 포커스 해제 시 미완성/잘못된 날짜는 직전 유효값으로 안전 복원
+  // 포커스 해제 시 확정/복귀 처리
   const handleBlur = () => {
-    if (textValue === '') {
-      if (required && value) {
-        setTextValue(value);
-      } else if (!required && onChange && value !== '') {
-        onChange('');
-      }
-      return;
-    }
-    if (!isValidDateStr(textValue)) {
-      setTextValue(value || '');
+    finalizeInput();
+  };
+
+  // Enter 키 입력 시 상위 폼 제출을 막고 날짜 입력만 완료 처리
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleCompleteClick();
     }
   };
 
@@ -204,60 +246,95 @@ export default function SmartDateInput({
         }}
       >
         <input
-          ref={inputRef}
+          ref={setMergedRef}
           type="text"
           inputMode="numeric"
+          enterKeyHint="done"
           className={compact ? '' : 'form-input'}
           value={textValue}
+          onFocus={handleFocus}
           onChange={handleTextChange}
           onBlur={handleBlur}
-          placeholder={placeholder}
+          onKeyDown={handleKeyDown}
+          placeholder={isFocused ? (backupValueRef.current || placeholder) : placeholder}
           maxLength={10}
           required={required}
           style={compact ? {
             width: '100%',
             height: '30px',
-            padding: '0.2rem 1.75rem 0.2rem 0.45rem',
+            padding: isFocused ? '0.2rem 1.85rem 0.2rem 0.45rem' : '0.2rem 1.75rem 0.2rem 0.45rem',
             borderRadius: 'var(--radius-sm)',
-            border: '1px solid var(--border-color)',
+            border: isFocused ? `1.5px solid ${accentColor}` : '1px solid var(--border-color)',
             background: 'var(--bg-page)',
             color: 'var(--text-main)',
             fontSize: '0.82rem',
             fontFamily: 'inherit',
             textAlign: 'center',
-            boxSizing: 'border-box'
+            boxSizing: 'border-box',
+            outline: 'none'
           } : {
             width: '100%',
-            paddingRight: '2.45rem',
+            paddingRight: isFocused ? '3.6rem' : '2.45rem',
             letterSpacing: '0.02em',
             fontVariantNumeric: 'tabular-nums'
           }}
         />
-        <button
-          type="button"
-          onClick={openCalendar}
-          title="달력에서 날짜 선택"
-          aria-label="달력에서 날짜 선택"
-          style={{
-            position: 'absolute',
-            right: compact ? '2px' : '4px',
-            top: '50%',
-            transform: 'translateY(-50%)',
-            width: compact ? '26px' : '34px',
-            height: compact ? '26px' : '34px',
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            background: 'transparent',
-            border: 'none',
-            borderRadius: 'var(--radius-sm)',
-            color: accentColor,
-            cursor: 'pointer',
-            padding: 0
-          }}
-        >
-          <Calendar size={compact ? 14 : 18} strokeWidth={2.2} />
-        </button>
+        {isFocused ? (
+          <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={handleCompleteClick}
+            title="날짜 입력 완료"
+            aria-label="날짜 입력 완료"
+            style={{
+              position: 'absolute',
+              right: compact ? '3px' : '5px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              height: compact ? '24px' : '28px',
+              padding: compact ? '0 0.35rem' : '0 0.6rem',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: accentColor,
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: '6px',
+              fontSize: compact ? '0.72rem' : '0.78rem',
+              fontWeight: 800,
+              cursor: 'pointer',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            {compact ? <Check size={14} strokeWidth={2.8} /> : '완료'}
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={openCalendar}
+            title="달력에서 날짜 선택"
+            aria-label="달력에서 날짜 선택"
+            style={{
+              position: 'absolute',
+              right: compact ? '2px' : '4px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              width: compact ? '26px' : '34px',
+              height: compact ? '26px' : '34px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: 'transparent',
+              border: 'none',
+              borderRadius: 'var(--radius-sm)',
+              color: accentColor,
+              cursor: 'pointer',
+              padding: 0
+            }}
+          >
+            <Calendar size={compact ? 14 : 18} strokeWidth={2.2} />
+          </button>
+        )}
       </div>
 
       {/* 자체 커스텀 대형 달력 팝업 (Portal로 최상위 레이어 렌더링) */}

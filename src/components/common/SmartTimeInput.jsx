@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { Clock, X } from 'lucide-react';
 
@@ -65,6 +65,9 @@ export default function SmartTimeInput({
 }) {
   const [textValue, setTextValue] = useState(value || '');
   const [isOpen, setIsOpen] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
+  const backupValueRef = useRef(value || '');
+  const inputRef = useRef(null);
 
   // 팝업 내부 임시 선택 상태
   const [period, setPeriod] = useState('AM');
@@ -72,10 +75,45 @@ export default function SmartTimeInput({
   const [minute, setMinute] = useState(0);
   const [fineMinuteMode, setFineMinuteMode] = useState(false);
 
-  // 외부 value 변경 시 동기화
+  // 외부 value 변경 시 동기화 (타이핑 중이 아닐 때만)
   useEffect(() => {
-    setTextValue(value || '');
-  }, [value]);
+    if (!isFocused) {
+      setTextValue(value || '');
+    }
+  }, [value, isFocused]);
+
+  // 입력칸 포커스 시: 기존 값 임시 보관 후 즉시 비워서 백스페이스 없이 바로 입력 가능
+  const handleFocus = () => {
+    backupValueRef.current = value || '';
+    setIsFocused(true);
+    setTextValue('');
+  };
+
+  // 입력 완료 확정 또는 원래 값 복귀 처리
+  const finalizeInput = () => {
+    if (isValidTimeStr(textValue)) {
+      if (onChange && textValue !== value) {
+        onChange(textValue);
+      }
+      setTextValue(textValue);
+    } else {
+      // 아무것도 입력하지 않았거나 미완성 시간인 경우 기존 값으로 안전 복귀
+      const restored = backupValueRef.current || value || '';
+      setTextValue(restored);
+      if (onChange && restored !== value) {
+        onChange(restored);
+      }
+    }
+    setIsFocused(false);
+  };
+
+  // [완료] 버튼 또는 Enter 키 클릭 시 확정 + 키패드 내리기
+  const handleCompleteClick = () => {
+    finalizeInput();
+    if (inputRef.current) {
+      inputRef.current.blur();
+    }
+  };
 
   // 시간 선택 팝업 열기
   const openPicker = () => {
@@ -97,23 +135,21 @@ export default function SmartTimeInput({
     const formatted = formatTimeDigits(raw);
     setTextValue(formatted);
 
-    if (formatted === '') {
-      if (onChange) onChange('');
-      return;
-    }
     if (formatted.length === 5 && isValidTimeStr(formatted)) {
       if (onChange) onChange(formatted);
     }
   };
 
-  // 포커스 해제 시 잘못된 미완성 값은 직전 유효값으로 안전 복원
+  // 포커스 해제 시 확정/복귀 처리
   const handleBlur = () => {
-    if (textValue === '') {
-      if (onChange && value !== '') onChange('');
-      return;
-    }
-    if (!isValidTimeStr(textValue)) {
-      setTextValue(value || '');
+    finalizeInput();
+  };
+
+  // Enter 키 입력 시 상위 폼 제출을 막고 시간 입력만 완료 처리
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleCompleteClick();
     }
   };
 
@@ -159,46 +195,81 @@ export default function SmartTimeInput({
         }}
       >
         <input
+          ref={inputRef}
           type="text"
           inputMode="numeric"
+          enterKeyHint="done"
           className="form-input"
           value={textValue}
+          onFocus={handleFocus}
           onChange={handleTextChange}
           onBlur={handleBlur}
-          placeholder={placeholder}
+          onKeyDown={handleKeyDown}
+          placeholder={isFocused ? (backupValueRef.current || placeholder) : placeholder}
           maxLength={5}
           style={{
             width: '100%',
-            paddingRight: '2.45rem',
+            paddingRight: isFocused ? '3.6rem' : '2.45rem',
             letterSpacing: '0.02em',
             fontVariantNumeric: 'tabular-nums'
           }}
         />
-        <button
-          type="button"
-          onClick={openPicker}
-          title="버튼으로 시간 선택"
-          aria-label="버튼으로 시간 선택"
-          style={{
-            position: 'absolute',
-            right: '4px',
-            top: '50%',
-            transform: 'translateY(-50%)',
-            width: '34px',
-            height: '34px',
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            background: 'transparent',
-            border: 'none',
-            borderRadius: 'var(--radius-sm)',
-            color: accentColor,
-            cursor: 'pointer',
-            padding: 0
-          }}
-        >
-          <Clock size={18} strokeWidth={2.2} />
-        </button>
+        {isFocused ? (
+          <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={handleCompleteClick}
+            title="시간 입력 완료"
+            aria-label="시간 입력 완료"
+            style={{
+              position: 'absolute',
+              right: '5px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              height: '28px',
+              padding: '0 0.6rem',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: accentColor,
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: '6px',
+              fontSize: '0.78rem',
+              fontWeight: 800,
+              cursor: 'pointer',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            완료
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={openPicker}
+            title="버튼으로 시간 선택"
+            aria-label="버튼으로 시간 선택"
+            style={{
+              position: 'absolute',
+              right: '4px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              width: '34px',
+              height: '34px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: 'transparent',
+              border: 'none',
+              borderRadius: 'var(--radius-sm)',
+              color: accentColor,
+              cursor: 'pointer',
+              padding: 0
+            }}
+          >
+            <Clock size={18} strokeWidth={2.2} />
+          </button>
+        )}
       </div>
 
       {/* 큰 버튼 터치식 시간 선택 팝업 (Portal로 최상위 레이어 렌더링) */}
