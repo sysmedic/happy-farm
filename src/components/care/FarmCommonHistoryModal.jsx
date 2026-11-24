@@ -14,6 +14,15 @@ import {
   ENTITY_ONLY_CATEGORY_IDS
 } from '../../lib/types.js';
 
+// 농장 관리 대시보드 칩 고유 컬러 매핑 (개체 대시보드 stat-card와 동일 규격)
+const FARM_CHIP_COLORS = {
+  all: { color: '#0f172a', bg: 'rgba(15, 23, 42, 0.08)' },
+  routine: { color: '#059669', bg: 'rgba(16, 185, 129, 0.12)' },
+  facility: { color: '#d97706', bg: 'rgba(245, 158, 11, 0.12)' },
+  feed: { color: '#0284c7', bg: 'rgba(2, 132, 199, 0.12)' },
+  other: { color: '#7c3aed', bg: 'rgba(124, 58, 237, 0.12)' }
+};
+
 export default function FarmCommonHistoryModal({
   isOpen,
   onClose,
@@ -250,7 +259,7 @@ export default function FarmCommonHistoryModal({
             />
           </div>
 
-          {/* 2단: 종목별 대시보드 칩 (관리분류 선택과 동일한 알약 캡슐 & 에메랄드 틴트 컬러 적용) */}
+          {/* 2단: 종목별 대시보드 칩 (개체 대시보드 stat-card와 100% 동일한 알약 캡슐 및 포인트 컬러 숫자) */}
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(3, 1fr)',
@@ -259,6 +268,8 @@ export default function FarmCommonHistoryModal({
             {/* 전체 캡슐 (선택 기간 내 건수) */}
             {(() => {
               const isSelected = selectedCategory === 'all';
+              const chipTheme = FARM_CHIP_COLORS.all;
+
               return (
                 <button
                   type="button"
@@ -269,34 +280,29 @@ export default function FarmCommonHistoryModal({
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    gap: '0.3rem',
-                    padding: '0.45rem 0.35rem',
+                    gap: '0.35rem',
+                    padding: '0.45rem 0.4rem',
                     height: '38px',
                     borderRadius: '9999px',
-                    border: isSelected ? '1.5px solid #10b981' : '1px solid var(--border-color)',
-                    background: isSelected ? 'rgba(16, 185, 129, 0.12)' : 'var(--bg-card)',
-                    color: isSelected ? '#059669' : 'var(--text-main)',
-                    fontWeight: isSelected ? 700 : 600,
+                    border: isSelected ? `1.5px solid ${chipTheme.color}` : '1px solid var(--border-color)',
+                    background: isSelected ? chipTheme.bg : 'var(--bg-card)',
+                    color: 'var(--text-main)',
                     fontSize: '0.82rem',
                     cursor: 'pointer',
-                    boxShadow: isSelected ? '0 1px 4px rgba(16, 185, 129, 0.2)' : 'none',
+                    boxShadow: isSelected 
+                      ? `0 0 0 2px rgba(15, 23, 42, 0.15), var(--shadow-sm)` 
+                      : '0 1px 2px rgba(0,0,0,0.04)',
                     transition: 'all 0.15s ease',
                     whiteSpace: 'nowrap',
                     minWidth: 0,
                     width: '100%'
                   }}
                 >
-                  <span>전체</span>
+                  <span style={{ fontWeight: 600 }}>전체</span>
                   <span style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: '0.1rem 0.4rem',
-                    borderRadius: '9999px',
-                    fontSize: '0.74rem',
-                    fontWeight: isSelected ? 800 : 600,
-                    background: isSelected ? 'rgba(16, 185, 129, 0.25)' : 'rgba(0, 0, 0, 0.06)',
-                    color: isSelected ? '#047857' : 'var(--text-muted)',
+                    color: chipTheme.color,
+                    fontWeight: 800,
+                    fontSize: '0.94rem',
                     marginLeft: '0.15rem'
                   }}>
                     {periodFilteredLogs.length}
@@ -305,10 +311,14 @@ export default function FarmCommonHistoryModal({
               );
             })()}
 
-            {/* 개별 카테고리 칩 (선택 기간 내 건수) */}
+            {/* 개별 카테고리 칩 (선택 기간 내 건수, 카테고리별 고유 포인트 컬러 숫자) */}
             {activeCategories.map(cat => {
               const count = categoryCounts[cat.id] || 0;
               const isSelected = selectedCategory === cat.id;
+              const chipTheme = FARM_CHIP_COLORS[cat.id] || { 
+                color: cat.color || '#059669', 
+                bg: cat.bg || 'rgba(16, 185, 129, 0.12)' 
+              };
 
               return (
                 <button
@@ -321,36 +331,34 @@ export default function FarmCommonHistoryModal({
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    gap: '0.25rem',
+                    gap: '0.3rem',
                     padding: '0.45rem 0.35rem',
                     height: '38px',
                     borderRadius: '9999px',
-                    border: isSelected ? '1.5px solid #10b981' : '1px solid var(--border-color)',
-                    background: isSelected ? 'rgba(16, 185, 129, 0.12)' : 'var(--bg-card)',
-                    color: isSelected ? '#059669' : 'var(--text-main)',
-                    fontWeight: isSelected ? 700 : 600,
+                    border: isSelected ? `1.5px solid ${chipTheme.color}` : '1px solid var(--border-color)',
+                    background: isSelected ? chipTheme.bg : 'var(--bg-card)',
+                    color: 'var(--text-main)',
                     fontSize: '0.82rem',
                     cursor: 'pointer',
-                    boxShadow: isSelected ? '0 1px 4px rgba(16, 185, 129, 0.2)' : 'none',
+                    boxShadow: isSelected 
+                      ? `0 0 0 2px ${chipTheme.bg}, var(--shadow-sm)` 
+                      : '0 1px 2px rgba(0,0,0,0.04)',
                     transition: 'all 0.15s ease',
                     whiteSpace: 'nowrap',
                     minWidth: 0,
                     width: '100%'
                   }}
                 >
-                  {cat.icon && <span style={{ fontSize: '0.88rem' }}>{cat.icon}</span>}
-                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{cat.label}</span>
+                  {cat.icon && <span style={{ fontSize: '0.92rem', flexShrink: 0 }}>{cat.icon}</span>}
+                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', fontWeight: 600 }}>
+                    {cat.label}
+                  </span>
                   <span style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: '0.1rem 0.4rem',
-                    borderRadius: '9999px',
-                    fontSize: '0.74rem',
-                    fontWeight: isSelected ? 800 : 600,
-                    background: isSelected ? 'rgba(16, 185, 129, 0.25)' : 'rgba(0, 0, 0, 0.06)',
-                    color: isSelected ? '#047857' : 'var(--text-muted)',
-                    marginLeft: '0.15rem'
+                    color: chipTheme.color,
+                    fontWeight: 800,
+                    fontSize: '0.94rem',
+                    marginLeft: '0.15rem',
+                    flexShrink: 0
                   }}>
                     {count}
                   </span>
