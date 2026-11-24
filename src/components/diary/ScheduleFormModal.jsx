@@ -938,20 +938,26 @@ export default function ScheduleFormModal({
               <button 
                 type="submit" 
                 className="btn"
-                style={{
+                style={isEditing ? {
+                  border: '1px solid var(--text-muted)',
+                  color: 'var(--text-main)',
+                  fontWeight: 700,
+                  background: 'var(--bg-card)'
+                } : {
                   fontWeight: 800,
                   minWidth: '105px',
-                  background: '#0284c7',
-                  borderColor: '#0284c7',
-                  color: '#ffffff',
-                  boxShadow: '0 2px 4px rgba(2, 132, 199, 0.25)',
+                  background: 'rgba(2, 132, 199, 0.14)',
+                  border: '1px solid #0284c7',
+                  color: '#0284c7',
+                  boxShadow: 'var(--shadow-sm)',
                   display: 'inline-flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '0.35rem'
+                  gap: '0.35rem',
+                  borderRadius: 'var(--radius-sm)'
                 }}
               >
-                <Check size={16} />
+                <Check size={16} color={isEditing ? 'currentColor' : '#0284c7'} strokeWidth={2.4} />
                 <span>{isEditing ? '수정 사항 저장' : '일정 등록'}</span>
               </button>
             </div>
