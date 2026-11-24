@@ -943,6 +943,7 @@ export default function App() {
           isOpen={isFarmCommonModalOpen}
           onClose={() => setIsFarmCommonModalOpen(false)}
           careLogs={careLogs}
+          schedules={schedules}
           careCategories={allCareCategories}
           onOpenCareLogModal={(entity = null, date = null, initialValues = null) => {
             setCareLogPreselectedEntity(entity);
@@ -951,6 +952,7 @@ export default function App() {
           }}
           onEditCareLog={handleOpenEditCareLog}
           onDeleteCareLog={handleDeleteCareLog}
+          onEditSchedule={handleEditSchedule}
         />
       )}
 

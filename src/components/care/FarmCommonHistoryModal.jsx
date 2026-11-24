@@ -1,15 +1,11 @@
 import React, { useState, useMemo } from 'react';
 import { 
   X, 
-  Search, 
   Plus, 
   Edit3, 
-  Trash2, 
+  ChevronLeft, 
   Calendar, 
   Clock, 
-  User, 
-  DollarSign, 
-  Sparkles,
   ClipboardList
 } from 'lucide-react';
 import { 
@@ -22,463 +18,563 @@ export default function FarmCommonHistoryModal({
   isOpen,
   onClose,
   careLogs = [],
+  schedules = [],
   careCategories,
   onOpenCareLogModal,
   onEditCareLog,
-  onDeleteCareLog
+  onDeleteCareLog,
+  onEditSchedule
 }) {
-  const [searchQuery, setSearchQuery] = useState('');
+  // 기본 선택: 전체 종목 + 최근 1달 기간 필터
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [periodFilter, setPeriodFilter] = useState('1m'); // '1m', '3m', 'year', 'all'
 
   const allCategories = careCategories || CARE_CATEGORIES;
 
-  // 전체 관리기록 중 '농장 공통' 관리기록만 추출 (최신순 정렬)
+  // 오늘 날짜 문자열 (YYYY-MM-DD)
+  const todayStr = useMemo(() => {
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, '0');
+    const d = String(now.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }, []);
+
+  // 1. 전체 관리기록 중 '농장 공통' 관리기록만 추출 (최신순 정렬)
   const farmCommonLogs = useMemo(() => {
     return (careLogs || [])
       .filter(l => l.isFarmCommon || (!l.entityId && l.entityName === '농장 공통') || (!l.tagNumber && !l.entityId))
       .sort((a, b) => new Date(b.date + ' ' + (b.time || '00:00')) - new Date(a.date + ' ' + (a.time || '00:00')));
   }, [careLogs]);
 
-  // 검색어 및 카테고리 필터링
+  // 2. 농장 공통 차기 예정 일정 1건 추출 (미완료 + 오늘 이후 가장 빠른 일정)
+  const upcomingSchedule = useMemo(() => {
+    const list = (schedules || [])
+      .filter(s => {
+        const isCommon = s.isFarmCommon || (!s.entityId && s.entityName === '농장 공통') || (!s.tagNumber && !s.entityId);
+        return isCommon && !s.completed;
+      })
+      .sort((a, b) => new Date(a.date + ' ' + (a.time || '00:00')) - new Date(b.date + ' ' + (b.time || '00:00')));
+
+    return list.length > 0 ? list[0] : null;
+  }, [schedules]);
+
+  // D-day 계산 함수
+  const getDdayBadge = (dateStr) => {
+    if (!dateStr) return '';
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const target = new Date(dateStr);
+    target.setHours(0, 0, 0, 0);
+    const diff = Math.ceil((target - today) / (1000 * 60 * 60 * 24));
+    if (diff === 0) return 'D-Day';
+    if (diff > 0) return `D-${diff}`;
+    return `D+${Math.abs(diff)}`;
+  };
+
+  // 기간 필터 판단 헬퍼 (기본: 최근 1달)
+  const isDateInPeriod = (dateStr, period) => {
+    if (!dateStr || period === 'all') return true;
+    const logDate = new Date(dateStr);
+    if (isNaN(logDate.getTime())) return true;
+    
+    const now = new Date();
+    if (period === '1m') {
+      const oneMonthAgo = new Date(now);
+      oneMonthAgo.setDate(now.getDate() - 30);
+      return logDate >= oneMonthAgo;
+    }
+    if (period === '3m') {
+      const threeMonthsAgo = new Date(now);
+      threeMonthsAgo.setDate(now.getDate() - 90);
+      return logDate >= threeMonthsAgo;
+    }
+    if (period === 'year') {
+      const currentYear = now.getFullYear().toString();
+      return dateStr.startsWith(currentYear);
+    }
+    return true;
+  };
+
+  // 3. 기간 및 카테고리 필터링된 기록
   const filteredLogs = useMemo(() => {
     return farmCommonLogs.filter(log => {
-      // 1. 카테고리 필터
+      // 기간 필터 (기본: 1m)
+      if (!isDateInPeriod(log.date, periodFilter)) {
+        return false;
+      }
+      // 카테고리 필터
       if (selectedCategory !== 'all') {
         const normCat = normalizeCategoryId(log.category);
         if (normCat !== selectedCategory) return false;
       }
-
-      // 2. 검색어 필터 (제목, 세부내용, 작업자, 날짜)
-      if (searchQuery.trim()) {
-        const q = searchQuery.trim().toLowerCase();
-        const matchTitle = (log.title || '').toLowerCase().includes(q);
-        const matchDetails = (log.details || '').toLowerCase().includes(q);
-        const matchOperator = (log.operator || '').toLowerCase().includes(q);
-        const matchDate = (log.date || '').toLowerCase().includes(q);
-        return matchTitle || matchDetails || matchOperator || matchDate;
-      }
-
       return true;
     });
-  }, [farmCommonLogs, selectedCategory, searchQuery]);
+  }, [farmCommonLogs, periodFilter, selectedCategory]);
 
-  // 상단 요약 통계
-  const stats = useMemo(() => {
-    const totalCount = farmCommonLogs.length;
-    const latestDate = farmCommonLogs.length > 0 ? farmCommonLogs[0].date : '-';
-    
-    // 올해 누적 비용 계산
-    const currentYear = new Date().getFullYear().toString();
-    const yearlyCost = farmCommonLogs
-      .filter(l => l.date && l.date.startsWith(currentYear))
-      .reduce((acc, cur) => acc + (Number(cur.cost) || 0), 0);
+  // 카테고리별 건수 집계 (전체 농장공통 기록 기준)
+  const categoryCounts = useMemo(() => {
+    const counts = {};
+    allCategories.forEach(cat => {
+      counts[cat.id] = 0;
+    });
+    farmCommonLogs.forEach(log => {
+      const normCat = normalizeCategoryId(log.category);
+      if (counts[normCat] !== undefined) {
+        counts[normCat]++;
+      }
+    });
+    return counts;
+  }, [farmCommonLogs, allCategories]);
 
-    return { totalCount, latestDate, yearlyCost };
-  }, [farmCommonLogs]);
+  // 기록이 1건 이상 있거나 주요 공통 카테고리만 칩으로 노출
+  const activeCategories = useMemo(() => {
+    return allCategories.filter(cat => {
+      return (categoryCounts[cat.id] || 0) > 0 || ['routine', 'environment', 'treatment'].includes(cat.id);
+    });
+  }, [allCategories, categoryCounts]);
+
+  // 기간 필터 옵션
+  const PERIOD_OPTIONS = [
+    { id: '1m', label: '최근 1달' },
+    { id: '3m', label: '3개월' },
+    { id: 'year', label: `${new Date().getFullYear()}년` },
+    { id: 'all', label: '전체' }
+  ];
 
   if (!isOpen) return null;
 
   return (
     <div className="modal-overlay" onClick={onClose} role="dialog" aria-modal="true">
       <div 
-        className="modal-content modal-content-lg farm-common-history-modal" 
+        className="modal-content modal-content-lg" 
         onClick={(e) => e.stopPropagation()}
-        style={{ maxWidth: '780px' }}
+        style={{ maxWidth: '640px', width: '100%', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}
       >
-        {/* 모달 헤더 */}
-        <div className="modal-header" style={{ padding: '1rem 1.25rem', borderBottom: '1px solid var(--border-color)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-            <div style={{
-              width: '36px',
-              height: '36px',
-              borderRadius: 'var(--radius-md)',
-              background: 'rgba(16, 185, 129, 0.12)',
-              color: '#059669',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-              <ClipboardList size={20} color="#059669" />
-            </div>
-            <div>
-              <h2 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-main)', letterSpacing: '-0.02em' }}>
-                농장 공통 관리 이력
-              </h2>
-              <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                축사 소독, 방역, 시설 점검 및 환경 관리 전체 영농일지
-              </p>
-            </div>
+        {/* 1. 모달 헤더 (개체 생애 관리 내역과 100% 동일한 헤더 규격) */}
+        <div className="modal-header">
+          <div className="modal-header-title">
+            <span style={{ fontWeight: 800, fontSize: '1.25rem' }}>
+              농장 공통 관리 내역
+            </span>
           </div>
           <button 
             type="button" 
             className="modal-close-btn" 
             onClick={onClose}
+            title="창 닫기"
             aria-label="닫기"
           >
             <X size={20} />
           </button>
         </div>
 
-        {/* 모달 본문 */}
-        <div className="modal-body" style={{ padding: '1.15rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem', maxHeight: '78vh', overflowY: 'auto' }}>
-          {/* 상단 3단 미니 통계 대시보드 */}
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(3, 1fr)', 
-            gap: '0.65rem' 
+        {/* 2. 서브 헤더 필터 바 (중복되는 '농장 공통' 텍스트 생략, 분류 칩 & 기간 칩 바로 노출) */}
+        <div style={{
+          padding: '0.65rem 1rem',
+          background: 'var(--bg-card-subtle)',
+          borderBottom: '1px solid var(--border-color)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '0.45rem'
+        }}>
+          {/* 1단: 종목별 캡슐 필터 칩 (전체 N, 방역소독 N, 시설환경 N...) */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.35rem',
+            overflowX: 'auto',
+            paddingBottom: '2px',
+            WebkitOverflowScrolling: 'touch',
+            scrollbarWidth: 'none'
           }}>
-            <div style={{ 
-              background: 'var(--bg-card-subtle)', 
-              border: '1px solid var(--border-color)', 
-              borderRadius: 'var(--radius-md)', 
-              padding: '0.75rem 0.85rem' 
-            }}>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>총 공통 작업</span>
-              <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-main)', marginTop: '0.15rem' }}>
-                {stats.totalCount} <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>건</span>
-              </div>
-            </div>
+            {/* 전체 캡슐 */}
+            <button
+              type="button"
+              className={`fullhistory-tab-btn ${selectedCategory === 'all' ? 'active' : ''}`}
+              onClick={() => setSelectedCategory('all')}
+              title="전체 분류 보기"
+              style={{
+                flexShrink: 0,
+                padding: '0 0.75rem',
+                height: '30px',
+                fontSize: '0.78rem'
+              }}
+            >
+              <span>전체</span>
+              <span className="tab-count">{farmCommonLogs.length}</span>
+            </button>
 
-            <div style={{ 
-              background: 'var(--bg-card-subtle)', 
-              border: '1px solid var(--border-color)', 
-              borderRadius: 'var(--radius-md)', 
-              padding: '0.75rem 0.85rem' 
-            }}>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>최근 작업일</span>
-              <div style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-main)', marginTop: '0.25rem' }}>
-                {stats.latestDate}
-              </div>
-            </div>
+            {/* 개별 카테고리 칩 */}
+            {activeCategories.map(cat => {
+              const count = categoryCounts[cat.id] || 0;
+              const isActive = selectedCategory === cat.id;
 
-            <div style={{ 
-              background: 'var(--bg-card-subtle)', 
-              border: '1px solid var(--border-color)', 
-              borderRadius: 'var(--radius-md)', 
-              padding: '0.75rem 0.85rem' 
-            }}>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>올해 소요 비용</span>
-              <div style={{ fontSize: '1.15rem', fontWeight: 800, color: '#059669', marginTop: '0.2rem' }}>
-                {stats.yearlyCost.toLocaleString()} <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>원</span>
-              </div>
-            </div>
-          </div>
-
-          {/* 검색창 & 필터 바 */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
-            {/* 검색창 */}
-            <div style={{ position: 'relative', width: '100%' }}>
-              <Search 
-                size={16} 
-                style={{ 
-                  position: 'absolute', 
-                  left: '0.75rem', 
-                  top: '50%', 
-                  transform: 'translateY(-50%)', 
-                  color: 'var(--text-muted)' 
-                }} 
-              />
-              <input
-                type="text"
-                className="form-input"
-                placeholder="작업명, 소독약품명, 작업자 또는 날짜 검색 (예: 안개분무, 생석회, 환풍기)"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                style={{ paddingLeft: '2.2rem', height: '38px', fontSize: '0.88rem' }}
-              />
-              {searchQuery && (
+              return (
                 <button
+                  key={cat.id}
                   type="button"
-                  onClick={() => setSearchQuery('')}
+                  className={`fullhistory-tab-btn ${isActive ? 'active' : ''}`}
+                  onClick={() => setSelectedCategory(cat.id)}
+                  title={`${cat.label} 관리 내역만 보기`}
                   style={{
-                    position: 'absolute',
-                    right: '0.75rem',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    background: 'transparent',
-                    border: 'none',
-                    cursor: 'pointer',
-                    color: 'var(--text-muted)'
+                    flexShrink: 0,
+                    padding: '0 0.65rem',
+                    height: '30px',
+                    fontSize: '0.78rem'
                   }}
                 >
-                  <X size={15} />
+                  {cat.icon && <span style={{ marginRight: '0.2rem' }}>{cat.icon}</span>}
+                  <span>{cat.label}</span>
+                  <span className="tab-count">{count}</span>
                 </button>
-              )}
-            </div>
-
-            {/* 카테고리 필터 칩 */}
-            <div style={{ display: 'flex', gap: '0.4rem', overflowX: 'auto', paddingBottom: '0.25rem' }}>
-              <button
-                type="button"
-                onClick={() => setSelectedCategory('all')}
-                style={{
-                  padding: '0.3rem 0.75rem',
-                  fontSize: '0.8rem',
-                  fontWeight: selectedCategory === 'all' ? 800 : 600,
-                  borderRadius: '9999px',
-                  border: selectedCategory === 'all' ? '1.5px solid #10b981' : '1px solid var(--border-color)',
-                  background: selectedCategory === 'all' ? 'rgba(16, 185, 129, 0.12)' : 'var(--bg-card)',
-                  color: selectedCategory === 'all' ? '#065f46' : 'var(--text-main)',
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap'
-                }}
-              >
-                전체 ({farmCommonLogs.length})
-              </button>
-              {allCategories
-                .filter(cat => ['routine', 'treatment', 'feed', 'etc'].includes(cat.id) || cat.isCustom)
-                .map(cat => {
-                  const isSelected = selectedCategory === cat.id;
-                  const count = farmCommonLogs.filter(l => normalizeCategoryId(l.category) === cat.id).length;
-                  return (
-                    <button
-                      key={cat.id}
-                      type="button"
-                      onClick={() => setSelectedCategory(cat.id)}
-                      style={{
-                        padding: '0.3rem 0.75rem',
-                        fontSize: '0.8rem',
-                        fontWeight: isSelected ? 800 : 600,
-                        borderRadius: '9999px',
-                        border: isSelected ? '1.5px solid #10b981' : '1px solid var(--border-color)',
-                        background: isSelected ? 'rgba(16, 185, 129, 0.12)' : 'var(--bg-card)',
-                        color: isSelected ? '#065f46' : 'var(--text-main)',
-                        cursor: 'pointer',
-                        whiteSpace: 'nowrap',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '0.3rem'
-                      }}
-                    >
-                      {cat.icon && <span>{cat.icon}</span>}
-                      <span>{cat.label} ({count})</span>
-                    </button>
-                  );
-                })}
-            </div>
+              );
+            })}
           </div>
 
-          {/* 타임라인 목록 */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
-            {filteredLogs.length === 0 ? (
-              <div style={{ 
-                textAlign: 'center', 
-                padding: '2.5rem 1rem', 
-                background: 'var(--bg-card-subtle)', 
-                borderRadius: 'var(--radius-md)', 
-                border: '1px dashed var(--border-color)',
-                color: 'var(--text-muted)'
-              }}>
-                <ClipboardList size={36} strokeWidth={1.5} style={{ opacity: 0.5, marginBottom: '0.5rem' }} />
-                <p style={{ margin: 0, fontWeight: 700, fontSize: '0.92rem' }}>
-                  {searchQuery ? `"${searchQuery}" 검색 결과가 없습니다.` : '등록된 농장 공통 관리 기록이 없습니다.'}
-                </p>
-                <p style={{ margin: '0.35rem 0 0 0', fontSize: '0.8rem' }}>
-                  축사 소독, 방역, 시설 청소 내역을 영농일지에 등록해보세요.
-                </p>
-                {onOpenCareLogModal && (
+          {/* 2단: 조회 기간 선택 칩 (기본값: '최근 1달') */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+              {PERIOD_OPTIONS.map(opt => {
+                const isSelected = periodFilter === opt.id;
+                return (
                   <button
+                    key={opt.id}
                     type="button"
-                    className="btn btn-sm"
-                    onClick={() => {
-                      onOpenCareLogModal('FARM_COMMON', null, {
-                        isFarmCommon: true,
-                        entityId: 'FARM_COMMON',
-                        entityName: '농장 공통'
-                      });
-                      onClose();
-                    }}
+                    onClick={() => setPeriodFilter(opt.id)}
                     style={{
-                      marginTop: '0.85rem',
-                      background: 'rgba(16, 185, 129, 0.14)',
-                      border: '1px solid #10b981',
-                      color: '#065f46',
-                      fontWeight: 700
+                      padding: '0.2rem 0.55rem',
+                      fontSize: '0.74rem',
+                      fontWeight: isSelected ? 800 : 600,
+                      borderRadius: 'var(--radius-sm)',
+                      border: isSelected ? '1px solid #0284c7' : '1px solid var(--border-color)',
+                      background: isSelected ? 'rgba(2, 132, 199, 0.12)' : 'var(--bg-card)',
+                      color: isSelected ? '#0284c7' : 'var(--text-muted)',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease'
                     }}
                   >
-                    <Plus size={14} />
-                    <span>새 공통 기록 작성</span>
+                    {opt.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+              조회 {filteredLogs.length}건
+            </span>
+          </div>
+        </div>
+
+        {/* 3. 모달 본문 (스크롤 영역) */}
+        <div className="modal-body" style={{ padding: '0.85rem 1rem', overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+          
+          {/* ⭐ 다음 예정 일정 스마트 배너 (농장 공통 예정 일정이 있을 때 최상단 노출) */}
+          {upcomingSchedule && (
+            <div 
+              style={{ 
+                padding: '0.55rem 0.75rem',
+                background: 'rgba(245, 158, 11, 0.08)',
+                border: '1px solid rgba(245, 158, 11, 0.3)',
+                borderRadius: 'var(--radius-md)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.2rem',
+                boxShadow: 'var(--shadow-sm)'
+              }}
+            >
+              {/* 1단: 다음 일정 날짜/시간 + D-day + 수정 버튼 */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '0.5rem',
+                width: '100%'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', minWidth: 0, flex: 1 }}>
+                  <span style={{
+                    fontSize: '0.78rem',
+                    color: '#d97706',
+                    fontWeight: 700,
+                    letterSpacing: '-0.01em',
+                    whiteSpace: 'nowrap'
+                  }}>
+                    다음 일정: {upcomingSchedule.date}{upcomingSchedule.time ? ` - ${upcomingSchedule.time}` : ''}
+                  </span>
+                  <span style={{
+                    fontSize: '0.72rem',
+                    background: '#f59e0b',
+                    color: '#ffffff',
+                    padding: '0.1rem 0.4rem',
+                    borderRadius: '4px',
+                    fontWeight: 800,
+                    whiteSpace: 'nowrap'
+                  }}>
+                    {getDdayBadge(upcomingSchedule.date)}
+                  </span>
+                </div>
+
+                {onEditSchedule && (
+                  <button
+                    type="button"
+                    className="btn btn-outline btn-sm btn-icon-only"
+                    onClick={() => onEditSchedule(upcomingSchedule)}
+                    title="이 예정 일정 수정"
+                    style={{
+                      width: '24px',
+                      height: '24px',
+                      padding: 0,
+                      flexShrink: 0,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      border: '1px solid rgba(245, 158, 11, 0.4)',
+                      color: '#d97706',
+                      background: 'var(--bg-card)',
+                      borderRadius: 'var(--radius-sm)'
+                    }}
+                  >
+                    <Edit3 size={12} />
                   </button>
                 )}
               </div>
-            ) : (
-              filteredLogs.map(log => {
-                const catObj = getCategoryById(log.category, allCategories);
-                return (
-                  <div 
-                    key={log.id}
-                    className="card"
-                    style={{
-                      padding: '0.85rem 1rem',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '0.45rem',
-                      background: 'var(--bg-card)',
-                      border: '1px solid var(--border-color)',
-                      borderRadius: 'var(--radius-md)'
+
+              {/* 2단: 예정 작업명 */}
+              <div style={{
+                fontSize: '0.88rem',
+                fontWeight: 700,
+                color: 'var(--text-main)',
+                opacity: 0.9,
+                lineHeight: 1.35,
+                wordBreak: 'break-word'
+              }}>
+                {upcomingSchedule.title}
+              </div>
+            </div>
+          )}
+
+          {/* 타임라인 카드 목록 */}
+          {filteredLogs.length === 0 ? (
+            <div style={{ 
+              textAlign: 'center', 
+              padding: '3rem 1rem', 
+              color: 'var(--text-muted)',
+              background: 'var(--bg-card-subtle)',
+              borderRadius: 'var(--radius-lg)'
+            }}>
+              <ClipboardList size={38} style={{ opacity: 0.3, marginBottom: '0.65rem' }} />
+              <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>
+                {periodFilter === '1m' ? '최근 1달간 등록된 농장 관리 기록이 없습니다.' : '해당 조건의 관리 기록이 없습니다.'}
+              </div>
+              <p style={{ fontSize: '0.825rem', marginTop: '0.35rem' }}>
+                {periodFilter === '1m' ? (
+                  <button 
+                    type="button" 
+                    onClick={() => setPeriodFilter('all')}
+                    style={{ 
+                      background: 'none', 
+                      border: 'none', 
+                      color: '#0284c7', 
+                      textDecoration: 'underline', 
+                      cursor: 'pointer',
+                      fontWeight: 700,
+                      fontSize: '0.825rem'
                     }}
                   >
-                    {/* 1행: 날짜 & 시간, 카테고리 뱃지 <──────────> 수정/삭제 버튼 */}
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                        <span style={{ 
-                          fontSize: '0.9rem', 
-                          fontWeight: 800, 
-                          color: 'var(--text-main)', 
-                          display: 'inline-flex', 
-                          alignItems: 'center', 
-                          gap: '0.25rem' 
-                        }}>
-                          <Calendar size={13} style={{ opacity: 0.7 }} />
-                          {log.date}
-                        </span>
-                        {log.time && (
-                          <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-                            {log.time}
-                          </span>
-                        )}
+                    전체 기간 기록 보기
+                  </button>
+                ) : (
+                  '하단의 [관리 기록 추가] 버튼을 눌러 새 관리 기록을 등록해보세요.'
+                )}
+              </p>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+              {filteredLogs.map(log => {
+                const catObj = getCategoryById(log.category, careCategories);
+
+                return (
+                  <div 
+                    key={log.id} 
+                    style={{
+                      background: 'var(--bg-card)',
+                      border: '1px solid var(--border-color)',
+                      borderRadius: 'var(--radius-md)',
+                      padding: '0.55rem 0.75rem',
+                      boxShadow: 'var(--shadow-sm)',
+                      transition: 'all 0.15s ease'
+                    }}
+                  >
+                    {/* 1행: [관리분류 뱃지] + [날짜 시간] (좌측) & [✏️ 수정] 액션 버튼 (우측) */}
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: '0.5rem',
+                      marginBottom: '0.3rem',
+                      width: '100%'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem', minWidth: 0, flex: 1, height: '24px' }}>
                         <span 
-                          className={`badge ${catObj.badgeClass}`}
-                          style={{
-                            fontSize: '0.72rem',
-                            padding: '0.12rem 0.5rem',
-                            borderRadius: '9999px',
-                            fontWeight: 700,
+                          className={`badge ${catObj.badgeClass}`} 
+                          style={{ 
+                            flexShrink: 0, 
+                            borderRadius: '9999px', 
+                            padding: '0 0.55rem', 
+                            height: '24px',
                             display: 'inline-flex',
                             alignItems: 'center',
-                            gap: '0.2rem'
+                            justifyContent: 'center',
+                            gap: '0.28rem',
+                            fontSize: '0.76rem', 
+                            fontWeight: 700,
+                            lineHeight: 1,
+                            boxSizing: 'border-box'
                           }}
                         >
-                          {catObj.icon && <span>{catObj.icon}</span>}
-                          <span>{catObj.label}</span>
+                          {catObj.icon && <span style={{ fontSize: '0.8rem', lineHeight: 1, display: 'inline-flex', alignItems: 'center' }}>{catObj.icon}</span>}
+                          <span style={{ lineHeight: 1, display: 'inline-flex', alignItems: 'center' }}>{catObj.label}</span>
+                        </span>
+                        <span style={{
+                          fontWeight: 700,
+                          fontSize: '0.88rem',
+                          whiteSpace: 'nowrap',
+                          flexShrink: 0,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          height: '24px',
+                          gap: '0.35rem',
+                          lineHeight: 1
+                        }}>
+                          <span style={{ color: 'var(--text-main)', opacity: 0.85, lineHeight: 1 }}>
+                            {log.date}
+                          </span>
+                          {log.time && (
+                            <span style={{ fontWeight: 700, fontSize: '0.84rem', color: 'var(--text-muted)', lineHeight: 1 }}>
+                              {log.time}
+                            </span>
+                          )}
                         </span>
                       </div>
 
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexShrink: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
                         {onEditCareLog && (
                           <button
                             type="button"
                             className="btn btn-outline btn-sm btn-icon-only"
-                            onClick={() => {
-                              onEditCareLog(log);
-                              onClose();
+                            onClick={() => onEditCareLog(log)}
+                            title="관리 기록 수정"
+                            style={{
+                              width: '24px',
+                              height: '24px',
+                              padding: 0,
+                              flexShrink: 0,
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              border: '1px solid rgba(0, 0, 0, 0.15)',
+                              color: 'var(--text-main)',
+                              background: 'var(--bg-card)',
+                              borderRadius: 'var(--radius-sm)'
                             }}
-                            title="이 기록 수정"
-                            style={{ width: '26px', height: '26px', padding: 0 }}
                           >
-                            <Edit3 size={13} />
-                          </button>
-                        )}
-                        {onDeleteCareLog && (
-                          <button
-                            type="button"
-                            className="btn btn-outline btn-sm btn-icon-only"
-                            onClick={() => onDeleteCareLog(log.id)}
-                            title="이 기록 삭제"
-                            style={{ width: '26px', height: '26px', padding: 0, color: 'var(--color-danger)' }}
-                          >
-                            <Trash2 size={13} />
+                            <Edit3 size={12} />
                           </button>
                         )}
                       </div>
                     </div>
 
-                    {/* 2행: 작업명 (굵고 선명한 텍스트) */}
-                    <div style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--text-main)' }}>
+                    {/* 2행: 핵심 작업 제목 (굵은 글씨) */}
+                    <div 
+                      style={{ 
+                        fontWeight: 700, 
+                        fontSize: '0.93rem', 
+                        color: 'var(--text-main)',
+                        lineHeight: 1.35,
+                        marginBottom: log.details ? '0.25rem' : '0.05rem',
+                        width: '100%',
+                        wordBreak: 'break-word'
+                      }}
+                      title={log.title}
+                    >
                       {log.title}
                     </div>
 
-                    {/* 3행: 세부 내용 (소독약품명, 살포량 등) */}
+                    {/* 3행: 상세 내용 (있을 때만) */}
                     {log.details && (
-                      <div style={{ 
-                        fontSize: '0.84rem', 
-                        color: 'var(--text-main)', 
-                        background: 'var(--bg-card-subtle)', 
-                        padding: '0.45rem 0.65rem', 
-                        borderRadius: 'var(--radius-sm)',
-                        lineHeight: 1.45,
-                        whiteSpace: 'pre-wrap'
-                      }}>
+                      <div style={{ fontSize: '0.84rem', color: 'var(--text-muted)', lineHeight: 1.45, marginBottom: '0.35rem', whiteSpace: 'pre-wrap' }}>
                         {log.details}
                       </div>
                     )}
 
-                    {/* 4행: 작업자 및 소요 비용 메타 정보 */}
-                    <div style={{ 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      gap: '0.85rem', 
-                      fontSize: '0.78rem', 
-                      color: 'var(--text-muted)',
-                      borderTop: '1px solid var(--border-color)',
-                      paddingTop: '0.35rem',
-                      marginTop: '0.15rem',
-                      flexWrap: 'wrap'
-                    }}>
-                      {log.operator && (
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
-                          <User size={12} />
-                          작업자: <strong>{log.operator}</strong>
-                        </span>
-                      )}
-                      {log.cost ? (
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', color: '#059669', fontWeight: 700 }}>
-                          <DollarSign size={12} />
-                          소요 비용: {Number(log.cost).toLocaleString()}원
-                        </span>
-                      ) : null}
-                    </div>
+                    {/* 4행: 하단 메타 정보 (작업자 / 비용) */}
+                    {((log.operator && log.operator.trim()) || (log.cost && Number(log.cost) > 0)) && (
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.75rem',
+                        flexWrap: 'wrap',
+                        fontSize: '0.76rem',
+                        color: 'var(--text-subtle)',
+                        paddingTop: '0.25rem',
+                        borderTop: '1px solid rgba(0,0,0,0.05)'
+                      }}>
+                        {log.operator && log.operator.trim() && (
+                          <span>작업자: {log.operator}</span>
+                        )}
+                        {log.cost && Number(log.cost) > 0 && (
+                          <span>비용: {Number(log.cost).toLocaleString()}원</span>
+                        )}
+                      </div>
+                    )}
                   </div>
                 );
-              })
-            )}
-          </div>
+              })}
+            </div>
+          )}
         </div>
 
-        {/* 모달 푸터 */}
-        <div className="modal-footer" style={{ 
-          padding: '0.85rem 1.25rem', 
-          borderTop: '1px solid var(--border-color)', 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'space-between' 
-        }}>
-          {onOpenCareLogModal ? (
-            <button
+        {/* 4. 모달 푸터 (좌측: 돌아가기, 우측: 관리 기록 추가) */}
+        <div className="modal-footer detail-modal-footer" style={{ borderTop: '1px solid var(--border-color)', padding: '0.75rem 1rem' }}>
+          <div className="modal-footer-left">
+            <button 
               type="button"
-              className="btn btn-sm"
-              onClick={() => {
-                onOpenCareLogModal('FARM_COMMON', null, {
-                  isFarmCommon: true,
-                  entityId: 'FARM_COMMON',
-                  entityName: '농장 공통'
-                });
-                onClose();
-              }}
-              style={{
-                background: 'rgba(16, 185, 129, 0.14)',
-                border: '1.5px solid #10b981',
-                color: '#065f46',
-                fontWeight: 700,
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.35rem',
-                padding: '0.45rem 0.95rem'
-              }}
+              className="btn btn-secondary" 
+              onClick={onClose} 
+              title="원래 화면으로 돌아가기"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
             >
-              <Plus size={15} />
-              <span>새 공통 기록 추가</span>
+              <ChevronLeft size={16} />
+              <span>돌아가기</span>
             </button>
-          ) : <div />}
+          </div>
 
-          <button 
-            type="button" 
-            className="btn btn-outline" 
-            onClick={onClose}
-            style={{ fontWeight: 700 }}
-          >
-            닫기
-          </button>
+          <div className="modal-footer-right">
+            {onOpenCareLogModal && (
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => {
+                  onOpenCareLogModal(
+                    'FARM_COMMON',
+                    todayStr,
+                    {
+                      isFarmCommon: true,
+                      entityId: 'FARM_COMMON',
+                      entityName: '농장 공통',
+                      category: selectedCategory !== 'all' ? selectedCategory : 'routine',
+                      date: todayStr
+                    }
+                  );
+                }}
+                title="농장 공통 관리 기록 등록"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
+              >
+                <Plus size={16} />
+                <span>관리 기록 추가</span>
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>
