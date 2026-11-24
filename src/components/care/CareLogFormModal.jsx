@@ -470,20 +470,18 @@ export default function CareLogFormModal({
                 {isFarmCommon ? (
                   <>
                     <span style={{ 
-                      fontSize: '0.88rem', 
+                      fontSize: '1.18rem', 
                       fontWeight: 800, 
                       color: 'var(--text-main)', 
-                      background: 'var(--bg-card-subtle)',
-                      padding: '0.2rem 0.6rem',
-                      borderRadius: 'var(--radius-sm)',
-                      border: '1px solid var(--border-color)',
+                      letterSpacing: '-0.025em',
+                      whiteSpace: 'nowrap',
                       flexShrink: 0 
                     }}>
-                      🚜 농장 공통
+                      농장 공통
                     </span>
                     <span style={{ 
-                      fontSize: '0.92rem', 
-                      fontWeight: 700, 
+                      fontSize: '0.95rem', 
+                      fontWeight: 600, 
                       color: 'var(--text-muted)', 
                       overflow: 'hidden', 
                       textOverflow: 'ellipsis', 
@@ -533,7 +531,7 @@ export default function CareLogFormModal({
                   required
                 >
                   <option value="">-- 관리 대상을 선택하세요 --</option>
-                  <option value="FARM_COMMON">🚜 [농장 공통] (축사 소독, 방역, 시설 점검, 사료 등)</option>
+                  <option value="FARM_COMMON">[농장 공통] (축사 소독, 방역, 시설 점검, 사료 등)</option>
                   {activeEntities.length > 0 && (
                     <optgroup label="사육 중인 개체">
                       {activeEntities.map(ent => (
