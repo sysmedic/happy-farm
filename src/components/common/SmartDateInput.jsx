@@ -19,10 +19,23 @@ function toDateStr(dt) {
   return `${y}-${m}-${d}`;
 }
 
-// 인텔리전트 날짜 입력 포맷터 (월 2~9, 일 4~9, 2월의 일 3, 1월+3~9 등 자동 0 채움)
+// 인텔리전트 날짜 입력 포맷터 (2자리 연도 자동 20YY 확장 + 월 2~9, 일 4~9, 2월의 일 3, 1월+3~9 자동 0 채움)
 function formatIntelligentDate(raw) {
-  const digits = String(raw || '').replace(/\D/g, '').slice(0, 8);
-  if (digits.length <= 4) return digits;
+  let digits = String(raw || '').replace(/\D/g, '').slice(0, 8);
+  if (digits.length <= 1) return digits;
+
+  // 앞 두 자리가 '20' 또는 '19'가 아닌 경우 2자리 연도(20YY)로 즉시 자동 확장 (예: 26 -> 2026-)
+  const firstTwo = digits.slice(0, 2);
+  let autoExpandedYear = false;
+  if (firstTwo !== '20' && firstTwo !== '19') {
+    digits = `20${digits}`.slice(0, 8);
+    autoExpandedYear = true;
+  }
+
+  if (digits.length < 4) return digits;
+  if (digits.length === 4) {
+    return autoExpandedYear ? `${digits}-` : digits;
+  }
 
   const year = digits.slice(0, 4);
   const rest = digits.slice(4);
@@ -77,14 +90,24 @@ function formatIntelligentDate(raw) {
   return `${year}-${month}-${d1}`;
 }
 
-// 완료 시점 최종 보정 (예: 2026-03-2 -> 2026-03-02)
+// 완료 시점 최종 보정 (예: 2026-03-2 -> 2026-03-02, 200512 -> 2020-05-12)
 function resolveFinalDate(text) {
   if (isValidDateStr(text)) return text;
+
+  // 1) 일(Day)이 1자리(1~3)로 끝난 경우 0 채움 (예: 2026-03-2 -> 2026-03-02)
   const singleDayMatch = text.match(/^(\d{4})-(\d{2})-(\d)$/);
   if (singleDayMatch) {
     const candidate = `${singleDayMatch[1]}-${singleDayMatch[2]}-0${singleDayMatch[3]}`;
     if (isValidDateStr(candidate)) return candidate;
   }
+
+  // 2) 2020년·2019년을 2자리 연도(YYMMDD, 6자리)로 입력한 경우 자동 구제 (예: 200512 -> 2020-05-12)
+  const rawDigits = String(text || '').replace(/\D/g, '');
+  if (rawDigits.length === 6 && (rawDigits.startsWith('20') || rawDigits.startsWith('19'))) {
+    const candidate = `20${rawDigits.slice(0, 2)}-${rawDigits.slice(2, 4)}-${rawDigits.slice(4, 6)}`;
+    if (isValidDateStr(candidate)) return candidate;
+  }
+
   return null;
 }
 
