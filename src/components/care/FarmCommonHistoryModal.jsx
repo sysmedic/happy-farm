@@ -25,13 +25,11 @@ export default function FarmCommonHistoryModal({
   onDeleteCareLog,
   onEditSchedule
 }) {
-  // 기본 선택: 전체 종목 + 최근 1달 기간 필터
+  // 기본 선택: 전체 분류 + 최근 1달 기간 필터
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [periodFilter, setPeriodFilter] = useState('1m'); // '1m', '3m', 'year', 'all'
+  const [periodFilter, setPeriodFilter] = useState('1m'); // '1m', '3m', 'year', 'all', 'custom'
 
-  const allCategories = careCategories || CARE_CATEGORIES;
-
-  // 오늘 날짜 문자열 (YYYY-MM-DD)
+  // 오늘 날짜 및 1달 전 날짜 기본값
   const todayStr = useMemo(() => {
     const now = new Date();
     const y = now.getFullYear();
@@ -39,6 +37,21 @@ export default function FarmCommonHistoryModal({
     const d = String(now.getDate()).padStart(2, '0');
     return `${y}-${m}-${d}`;
   }, []);
+
+  const oneMonthAgoStr = useMemo(() => {
+    const now = new Date();
+    now.setDate(now.getDate() - 30);
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, '0');
+    const d = String(now.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }, []);
+
+  // 직접 설정 시 시작일과 종료일
+  const [customStartDate, setCustomStartDate] = useState(oneMonthAgoStr);
+  const [customEndDate, setCustomEndDate] = useState(todayStr);
+
+  const allCategories = careCategories || CARE_CATEGORIES;
 
   // 1. 전체 관리기록 중 '농장 공통' 관리기록만 추출 (최신순 정렬)
   const farmCommonLogs = useMemo(() => {
@@ -75,6 +88,13 @@ export default function FarmCommonHistoryModal({
   // 기간 필터 판단 헬퍼 (기본: 최근 1달)
   const isDateInPeriod = (dateStr, period) => {
     if (!dateStr || period === 'all') return true;
+    
+    if (period === 'custom') {
+      if (customStartDate && dateStr < customStartDate) return false;
+      if (customEndDate && dateStr > customEndDate) return false;
+      return true;
+    }
+
     const logDate = new Date(dateStr);
     if (isNaN(logDate.getTime())) return true;
     
@@ -99,7 +119,7 @@ export default function FarmCommonHistoryModal({
   // 3. 기간 및 카테고리 필터링된 기록
   const filteredLogs = useMemo(() => {
     return farmCommonLogs.filter(log => {
-      // 기간 필터 (기본: 1m)
+      // 기간 필터
       if (!isDateInPeriod(log.date, periodFilter)) {
         return false;
       }
@@ -110,7 +130,7 @@ export default function FarmCommonHistoryModal({
       }
       return true;
     });
-  }, [farmCommonLogs, periodFilter, selectedCategory]);
+  }, [farmCommonLogs, periodFilter, selectedCategory, customStartDate, customEndDate]);
 
   // 카테고리별 건수 집계 (전체 농장공통 기록 기준)
   const categoryCounts = useMemo(() => {
@@ -130,7 +150,7 @@ export default function FarmCommonHistoryModal({
   // 기록이 1건 이상 있거나 주요 공통 카테고리만 칩으로 노출
   const activeCategories = useMemo(() => {
     return allCategories.filter(cat => {
-      return (categoryCounts[cat.id] || 0) > 0 || ['routine', 'environment', 'treatment'].includes(cat.id);
+      return (categoryCounts[cat.id] || 0) > 0 || ['routine', 'facility', 'treatment'].includes(cat.id);
     });
   }, [allCategories, categoryCounts]);
 
@@ -139,7 +159,8 @@ export default function FarmCommonHistoryModal({
     { id: '1m', label: '최근 1달' },
     { id: '3m', label: '3개월' },
     { id: 'year', label: `${new Date().getFullYear()}년` },
-    { id: 'all', label: '전체' }
+    { id: 'all', label: '전체' },
+    { id: 'custom', label: '📅 직접 설정' }
   ];
 
   if (!isOpen) return null;
@@ -151,11 +172,11 @@ export default function FarmCommonHistoryModal({
         onClick={(e) => e.stopPropagation()}
         style={{ maxWidth: '640px', width: '100%', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}
       >
-        {/* 1. 모달 헤더 (개체 생애 관리 내역과 100% 동일한 헤더 규격) */}
+        {/* 1. 모달 헤더: '농장 관리 내역'으로 간결하게 변경 */}
         <div className="modal-header">
           <div className="modal-header-title">
             <span style={{ fontWeight: 800, fontSize: '1.25rem' }}>
-              농장 공통 관리 내역
+              농장 관리 내역
             </span>
           </div>
           <button 
@@ -169,43 +190,49 @@ export default function FarmCommonHistoryModal({
           </button>
         </div>
 
-        {/* 2. 서브 헤더 필터 바 (중복되는 '농장 공통' 텍스트 생략, 분류 칩 & 기간 칩 바로 노출) */}
+        {/* 2. 서브 헤더 필터 바 (알약 캡슐 크기 정상화 & 기간 직접 설정 폼) */}
         <div style={{
           padding: '0.65rem 1rem',
           background: 'var(--bg-card-subtle)',
           borderBottom: '1px solid var(--border-color)',
           display: 'flex',
           flexDirection: 'column',
-          gap: '0.45rem'
+          gap: '0.55rem'
         }}>
-          {/* 1단: 종목별 캡슐 필터 칩 (전체 N, 방역소독 N, 시설환경 N...) */}
+          {/* 1단: 종목별 알약 캡슐 필터 칩 (width: auto로 아담하고 예쁘게 가로 나열) */}
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '0.35rem',
+            gap: '0.4rem',
             overflowX: 'auto',
             paddingBottom: '2px',
             WebkitOverflowScrolling: 'touch',
             scrollbarWidth: 'none'
           }}>
-            {/* 전체 캡슐 */}
+            {/* 전체 캡슐: width auto 적용으로 정상 크기 복원 */}
             <button
               type="button"
               className={`fullhistory-tab-btn ${selectedCategory === 'all' ? 'active' : ''}`}
               onClick={() => setSelectedCategory('all')}
               title="전체 분류 보기"
               style={{
+                width: 'auto',
+                minWidth: 'fit-content',
                 flexShrink: 0,
-                padding: '0 0.75rem',
-                height: '30px',
-                fontSize: '0.78rem'
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.35rem',
+                padding: '0 0.85rem',
+                height: '32px',
+                fontSize: '0.82rem',
+                whiteSpace: 'nowrap'
               }}
             >
               <span>전체</span>
               <span className="tab-count">{farmCommonLogs.length}</span>
             </button>
 
-            {/* 개별 카테고리 칩 */}
+            {/* 개별 카테고리 칩: width auto 적용으로 정상 크기 복원 */}
             {activeCategories.map(cat => {
               const count = categoryCounts[cat.id] || 0;
               const isActive = selectedCategory === cat.id;
@@ -218,13 +245,19 @@ export default function FarmCommonHistoryModal({
                   onClick={() => setSelectedCategory(cat.id)}
                   title={`${cat.label} 관리 내역만 보기`}
                   style={{
+                    width: 'auto',
+                    minWidth: 'fit-content',
                     flexShrink: 0,
-                    padding: '0 0.65rem',
-                    height: '30px',
-                    fontSize: '0.78rem'
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.3rem',
+                    padding: '0 0.75rem',
+                    height: '32px',
+                    fontSize: '0.82rem',
+                    whiteSpace: 'nowrap'
                   }}
                 >
-                  {cat.icon && <span style={{ marginRight: '0.2rem' }}>{cat.icon}</span>}
+                  {cat.icon && <span>{cat.icon}</span>}
                   <span>{cat.label}</span>
                   <span className="tab-count">{count}</span>
                 </button>
@@ -232,9 +265,9 @@ export default function FarmCommonHistoryModal({
             })}
           </div>
 
-          {/* 2단: 조회 기간 선택 칩 (기본값: '최근 1달') */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+          {/* 2단: 조회 기간 선택 칩 (기본값: '최근 1달', 직접 설정 버튼 포함) */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', flexWrap: 'wrap' }}>
               {PERIOD_OPTIONS.map(opt => {
                 const isSelected = periodFilter === opt.id;
                 return (
@@ -243,7 +276,7 @@ export default function FarmCommonHistoryModal({
                     type="button"
                     onClick={() => setPeriodFilter(opt.id)}
                     style={{
-                      padding: '0.2rem 0.55rem',
+                      padding: '0.22rem 0.55rem',
                       fontSize: '0.74rem',
                       fontWeight: isSelected ? 800 : 600,
                       borderRadius: 'var(--radius-sm)',
@@ -251,7 +284,8 @@ export default function FarmCommonHistoryModal({
                       background: isSelected ? 'rgba(2, 132, 199, 0.12)' : 'var(--bg-card)',
                       color: isSelected ? '#0284c7' : 'var(--text-muted)',
                       cursor: 'pointer',
-                      transition: 'all 0.15s ease'
+                      transition: 'all 0.15s ease',
+                      whiteSpace: 'nowrap'
                     }}
                   >
                     {opt.label}
@@ -264,6 +298,74 @@ export default function FarmCommonHistoryModal({
               조회 {filteredLogs.length}건
             </span>
           </div>
+
+          {/* 3단: 직접 설정 선택 시 나타나는 날짜 입력기 */}
+          {periodFilter === 'custom' && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              padding: '0.45rem 0.65rem',
+              background: 'var(--bg-card)',
+              border: '1px solid var(--border-color)',
+              borderRadius: 'var(--radius-md)',
+              fontSize: '0.8rem',
+              flexWrap: 'wrap'
+            }}>
+              <span style={{ fontWeight: 700, color: 'var(--text-main)', fontSize: '0.78rem' }}>
+                기간:
+              </span>
+              <input 
+                type="date"
+                value={customStartDate}
+                onChange={(e) => setCustomStartDate(e.target.value)}
+                style={{
+                  padding: '0.2rem 0.4rem',
+                  borderRadius: 'var(--radius-sm)',
+                  border: '1px solid var(--border-color)',
+                  background: 'var(--bg-page)',
+                  color: 'var(--text-main)',
+                  fontSize: '0.78rem',
+                  fontFamily: 'inherit'
+                }}
+              />
+              <span style={{ color: 'var(--text-muted)' }}>~</span>
+              <input 
+                type="date"
+                value={customEndDate}
+                onChange={(e) => setCustomEndDate(e.target.value)}
+                style={{
+                  padding: '0.2rem 0.4rem',
+                  borderRadius: 'var(--radius-sm)',
+                  border: '1px solid var(--border-color)',
+                  background: 'var(--bg-page)',
+                  color: 'var(--text-main)',
+                  fontSize: '0.78rem',
+                  fontFamily: 'inherit'
+                }}
+              />
+              {(customStartDate !== oneMonthAgoStr || customEndDate !== todayStr) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCustomStartDate(oneMonthAgoStr);
+                    setCustomEndDate(todayStr);
+                  }}
+                  style={{
+                    padding: '0.15rem 0.4rem',
+                    fontSize: '0.72rem',
+                    background: 'none',
+                    border: 'none',
+                    color: '#0284c7',
+                    cursor: 'pointer',
+                    textDecoration: 'underline'
+                  }}
+                >
+                  초기화
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
         {/* 3. 모달 본문 (스크롤 영역) */}
