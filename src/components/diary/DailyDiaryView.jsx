@@ -1064,36 +1064,38 @@ export default function DailyDiaryView({
 
           {activeDiaryTab === 'schedules' && (
             <div>
-              {/* 상단 액션 바: 중복 타이틀 제거 및 [일정 추가] 버튼 우측 배치 (일정 전용 스카이 블루 테마, 카드 내부 버튼과 수직 칼정렬) */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'flex-end',
-                marginBottom: '0.65rem',
-                padding: '0 0.85rem'
-              }}>
-                <button
-                  className="btn btn-outline btn-sm"
-                  onClick={() => onOpenScheduleModal(selectedDate)}
-                  style={{
-                    fontSize: '0.75rem',
-                    fontWeight: 700,
-                    padding: '0.15rem 0.6rem',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '0.25rem',
-                    height: '24px',
-                    borderRadius: 'var(--radius-sm)',
-                    color: '#0284c7',
-                    borderColor: '#0284c7',
-                    background: 'var(--bg-card)'
-                  }}
-                  title="선택한 일자에 새 영농 일정 등록"
-                >
-                  <Plus size={12} color="#0284c7" />
-                  <span>일정 추가</span>
-                </button>
-              </div>
+              {/* 상단 액션 바: 일정이 있을 때만 우측 상단 [일정 추가] 버튼 노출 (일정이 0건일 때는 안내 카드 내부의 [이 날짜에 새 일정 추가] 버튼 사용) */}
+              {dailySchedules.length > 0 && (
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'flex-end',
+                  marginBottom: '0.65rem',
+                  padding: '0 0.85rem'
+                }}>
+                  <button
+                    className="btn btn-outline btn-sm"
+                    onClick={() => onOpenScheduleModal(selectedDate)}
+                    style={{
+                      fontSize: '0.75rem',
+                      fontWeight: 700,
+                      padding: '0.15rem 0.6rem',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.25rem',
+                      height: '24px',
+                      borderRadius: 'var(--radius-sm)',
+                      color: '#0284c7',
+                      borderColor: '#0284c7',
+                      background: 'var(--bg-card)'
+                    }}
+                    title="선택한 일자에 새 영농 일정 등록"
+                  >
+                    <Plus size={12} color="#0284c7" />
+                    <span>일정 추가</span>
+                  </button>
+                </div>
+              )}
 
               {dailySchedules.length === 0 ? (
                 <div style={{
