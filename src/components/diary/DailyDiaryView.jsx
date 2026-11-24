@@ -279,7 +279,7 @@ export default function DailyDiaryView({
     <div>
       <div className="diary-container">
         {/* 왼쪽: 캘린더 다이어리 위젯 */}
-        <div style={{ width: '100%' }}>
+        <div style={{ width: '100%', minWidth: 0 }}>
           <div className="calendar-card">
             <div className="calendar-header">
               <h3 style={{ fontSize: '1.25rem', fontWeight: 800, letterSpacing: '-0.02em', margin: 0 }}>
@@ -356,12 +356,13 @@ export default function DailyDiaryView({
                   <button
                     key={index}
                     type="button"
+                    className="calendar-cell"
                     disabled={!item.isCurrentMonth}
                     onClick={() => setSelectedDate(item.dateStr)}
                     style={{
                       aspectRatio: '1',
                       width: '100%',
-                      minHeight: '42px',
+                      minHeight: 'unset',
                       display: 'flex',
                       flexDirection: 'column',
                       alignItems: 'center',
@@ -511,7 +512,7 @@ export default function DailyDiaryView({
         </div>
 
         {/* 오른쪽: 선택한 날짜의 다이어리 및 관리 내역 (외부 중첩 박스 제거로 시원한 뷰 제공) */}
-        <div className="diary-detail-section">
+        <div className="diary-detail-section" style={{ minWidth: 0 }}>
           {/* 상단 날짜 헤더 */}
           <div className="diary-section-header">
             <div>
