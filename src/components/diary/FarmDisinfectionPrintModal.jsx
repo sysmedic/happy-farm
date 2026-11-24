@@ -150,30 +150,45 @@ export default function FarmDisinfectionPrintModal({
           {/* 인쇄용 인라인 스타일 */}
           <style dangerouslySetInnerHTML={{ __html: `
             @media print {
+              html, body {
+                background: #ffffff !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                height: auto !important;
+                overflow: visible !important;
+              }
               body * {
                 visibility: hidden;
               }
               .print-modal-overlay,
-              .print-preview-container,
-              .print-page-body,
-              .print-page-body * {
+              .print-modal-overlay * {
                 visibility: visible !important;
               }
               .print-modal-overlay {
-                position: absolute !important;
-                inset: 0 !important;
+                display: block !important;
+                position: static !important;
+                inset: auto !important;
                 padding: 0 !important;
                 background: #ffffff !important;
+                width: 100% !important;
+                height: auto !important;
+                overflow: visible !important;
               }
               .print-preview-container {
                 box-shadow: none !important;
                 max-width: 100% !important;
                 max-height: none !important;
                 border-radius: 0 !important;
+                border: none !important;
+                width: 100% !important;
+                height: auto !important;
+                overflow: visible !important;
+                display: block !important;
               }
               .print-page-body {
                 padding: 0 !important;
                 overflow: visible !important;
+                width: 100% !important;
               }
               .no-print {
                 display: none !important;
@@ -181,6 +196,14 @@ export default function FarmDisinfectionPrintModal({
               @page {
                 size: A4 portrait;
                 margin: 15mm 12mm 15mm 12mm;
+              }
+              table {
+                page-break-inside: auto;
+                width: 100% !important;
+              }
+              tr {
+                page-break-inside: avoid;
+                break-inside: avoid;
               }
             }
           `}} />

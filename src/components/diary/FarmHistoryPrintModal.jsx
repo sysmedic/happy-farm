@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { Printer, X, FileText, CheckCircle2 } from 'lucide-react';
+import { Printer, X } from 'lucide-react';
 import { getCategoryById } from '../../lib/types.js';
 
 /**
@@ -36,7 +36,7 @@ export default function FarmHistoryPrintModal({
     }, 1000);
   };
 
-  // 날짜순(오름차순 또는 내림차순): 보관용 일지는 과거부터 순서대로(오름차순) 정렬하여 시간 흐름 파악 용이
+  // 날짜순(오름차순): 과거부터 순서대로 정렬하여 시간 흐름 파악 용이
   const displayLogs = [...logs].sort((a, b) => new Date(a.date) - new Date(b.date));
 
   // 오늘 날짜 한글 표기
@@ -45,27 +45,26 @@ export default function FarmHistoryPrintModal({
 
   const farmName = farmSettings.farmName || '행복농장';
 
-  // 카테고리별 읽기 쉬운 레이블 및 연한 틴트 색상
+  // 카테고리별 읽기 쉬운 레이블
   const getCategoryBadge = (catId) => {
     const cat = getCategoryById(catId);
-    const label = cat ? cat.label : (catId || '일반관리');
-    return label;
+    return cat ? cat.label : (catId || '일반관리');
   };
 
   const thStyle = {
-    padding: '0.55rem 0.6rem',
+    padding: '0.6rem 0.65rem',
     background: '#f8fafc',
     border: '1px solid #cbd5e1',
     fontWeight: 700,
     color: '#1e293b',
-    fontSize: '0.82rem'
+    fontSize: '0.85rem'
   };
 
   const tdStyle = {
-    padding: '0.55rem 0.65rem',
+    padding: '0.6rem 0.65rem',
     border: '1px solid #cbd5e1',
     color: '#0f172a',
-    fontSize: '0.82rem',
+    fontSize: '0.83rem',
     verticalAlign: 'middle'
   };
 
@@ -167,7 +166,7 @@ export default function FarmHistoryPrintModal({
           </div>
         </div>
 
-        {/* 인쇄 팁 배너 (화면 전용) */}
+        {/* 인쇄 팁 안내 바 (화면 전용) */}
         <div 
           className="no-print"
           style={{
@@ -183,7 +182,7 @@ export default function FarmHistoryPrintModal({
         >
           <span>💡</span>
           <span>
-            <strong>PDF로 저장하는 방법:</strong> [PDF 저장 / 인쇄] 버튼을 누른 후, 인쇄 창에서 <strong>대상(프린터)</strong>을 <strong>'PDF로 저장'</strong>으로 선택하시면 파일로 깔끔하게 저장됩니다.
+            <strong>PDF 파일 저장 안내:</strong> [PDF 저장 / 인쇄] 버튼 클릭 후, 프린터 대상을 <strong>'PDF로 저장'</strong>으로 선택하시면 파일로 저장됩니다.
           </span>
         </div>
 
@@ -194,28 +193,37 @@ export default function FarmHistoryPrintModal({
           style={{
             flex: 1,
             overflowY: 'auto',
-            padding: '2.2rem 2.5rem',
+            padding: '2.5rem 2.8rem',
             background: '#ffffff',
             fontFamily: "'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
           }}
         >
-          {/* 인쇄 전용 CSS */}
+          {/* 인쇄 전용 CSS (빈 화면 방지 및 A4 출력 최적화) */}
           <style dangerouslySetInnerHTML={{ __html: `
             @media print {
+              html, body {
+                background: #ffffff !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                height: auto !important;
+                overflow: visible !important;
+              }
               body * {
-                visibility: hidden !important;
+                visibility: hidden;
               }
               .print-modal-overlay,
-              .print-preview-container,
-              .print-page-body,
-              .print-page-body * {
+              .print-modal-overlay * {
                 visibility: visible !important;
               }
               .print-modal-overlay {
-                position: absolute !important;
-                inset: 0 !important;
+                display: block !important;
+                position: static !important;
+                inset: auto !important;
                 padding: 0 !important;
                 background: #ffffff !important;
+                width: 100% !important;
+                height: auto !important;
+                overflow: visible !important;
               }
               .print-preview-container {
                 box-shadow: none !important;
@@ -223,20 +231,26 @@ export default function FarmHistoryPrintModal({
                 max-height: none !important;
                 border-radius: 0 !important;
                 border: none !important;
+                width: 100% !important;
+                height: auto !important;
+                overflow: visible !important;
+                display: block !important;
               }
               .print-page-body {
                 padding: 0 !important;
                 overflow: visible !important;
+                width: 100% !important;
               }
               .no-print {
                 display: none !important;
               }
               @page {
                 size: A4 portrait;
-                margin: 14mm 12mm 14mm 12mm;
+                margin: 15mm 12mm 15mm 12mm;
               }
               table {
                 page-break-inside: auto;
+                width: 100% !important;
               }
               tr {
                 page-break-inside: avoid;
@@ -245,68 +259,69 @@ export default function FarmHistoryPrintModal({
             }
           `}} />
 
-          {/* 1. 상단 제목 (내부 보관용 실용 헤더) */}
+          {/* 1. 상단 제목 (내부 보관용 심플 텍스트 헤더 - 불필요한 테두리 박스 없음) */}
           <div style={{ textAlign: 'center', marginBottom: '1.25rem' }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.35rem' }}>
-              <h1 style={{ 
-                margin: 0, 
-                fontSize: '1.65rem', 
-                fontWeight: 800, 
-                letterSpacing: '0.06em',
-                color: '#0f172a'
-              }}>
-                농장 관리 기록 대장
-              </h1>
-              <span style={{
-                fontSize: '0.75rem',
-                fontWeight: 700,
-                color: '#475569',
-                background: '#f1f5f9',
-                border: '1px solid #cbd5e1',
-                borderRadius: '4px',
-                padding: '0.15rem 0.5rem',
-                letterSpacing: '0.02em'
-              }}>
-                내부 보관용
-              </span>
+            <h1 style={{ 
+              margin: '0 0 0.35rem 0', 
+              fontSize: '1.75rem', 
+              fontWeight: 800, 
+              letterSpacing: '0.04em',
+              color: '#0f172a'
+            }}>
+              농장 관리 기록 대장
+            </h1>
+            <div style={{
+              fontSize: '0.85rem',
+              fontWeight: 600,
+              color: '#64748b',
+              letterSpacing: '0.02em'
+            }}>
+              (내부 보관용 영농일지)
             </div>
           </div>
 
-          {/* 2. 농장 정보 및 조회 기간 요약 박스 (언제부터 언제까지 기간 강조) */}
+          {/* 2. 농장 정보 및 기록 기간 (박스 내 박스 제거 -> 단정한 상하 구분선 라인형) */}
           <div style={{
+            borderTop: '2px solid #0f172a',
+            borderBottom: '1px solid #0f172a',
+            padding: '0.65rem 0.25rem',
+            marginBottom: '1.25rem',
             display: 'flex',
-            flexWrap: 'wrap',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            border: '1.5px solid #0f172a',
-            background: '#f8fafc',
-            padding: '0.65rem 1rem',
-            marginBottom: '1rem',
-            borderRadius: '4px',
-            gap: '0.5rem 1rem'
+            flexDirection: 'column',
+            gap: '0.35rem'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
-              <div style={{ fontSize: '0.88rem' }}>
-                <span style={{ color: '#475569', fontWeight: 600 }}>농장명: </span>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              fontSize: '0.88rem'
+            }}>
+              <div>
+                <span style={{ color: '#475569', fontWeight: 600 }}>농장명 : </span>
                 <strong style={{ color: '#0f172a', fontWeight: 800 }}>{farmName}</strong>
               </div>
-              <div style={{ fontSize: '0.88rem' }}>
-                <span style={{ color: '#475569', fontWeight: 600 }}>기록 기간: </span>
-                <strong style={{ 
-                  color: '#0284c7', 
-                  fontWeight: 800,
-                  background: '#e0f2fe',
-                  padding: '0.15rem 0.55rem',
-                  borderRadius: '4px'
-                }}>
-                  {startDate && endDate ? `${startDate} ~ ${endDate}` : '전체 등록 기간'}
-                </strong>
+              <div>
+                <span style={{ color: '#475569', fontWeight: 600 }}>출력일자 : </span>
+                <strong style={{ color: '#0f172a', fontWeight: 700 }}>{printDateStr}</strong>
               </div>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontSize: '0.82rem', color: '#475569' }}>
-              <div>출력일: <strong>{printDateStr}</strong></div>
-              <div>출력 건수: <strong>{displayLogs.length}건</strong></div>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              fontSize: '0.88rem'
+            }}>
+              <div>
+                <span style={{ color: '#475569', fontWeight: 600 }}>기록 기간 : </span>
+                <strong style={{ color: '#0284c7', fontWeight: 800, fontSize: '0.92rem' }}>
+                  {startDate && endDate ? `${startDate} ~ ${endDate}` : '전체 등록 기간'}
+                </strong>
+              </div>
+              <div>
+                <span style={{ color: '#475569', fontWeight: 600 }}>기록 건수 : </span>
+                <strong style={{ color: '#0f172a', fontWeight: 700 }}>총 {displayLogs.length}건</strong>
+              </div>
             </div>
           </div>
 
@@ -319,7 +334,7 @@ export default function FarmHistoryPrintModal({
           }}>
             <thead>
               <tr style={{ background: '#f1f5f9' }}>
-                <th style={{ ...thStyle, width: '40px', textAlign: 'center' }}>No</th>
+                <th style={{ ...thStyle, width: '42px', textAlign: 'center' }}>No</th>
                 <th style={{ ...thStyle, width: '95px', textAlign: 'center' }}>관리 일자</th>
                 <th style={{ ...thStyle, width: '85px', textAlign: 'center' }}>구분</th>
                 <th style={{ ...thStyle, textAlign: 'center' }}>관리 작업 세부 내용</th>
@@ -346,20 +361,15 @@ export default function FarmHistoryPrintModal({
                       <td style={{ ...tdStyle, textAlign: 'center', whiteSpace: 'nowrap', fontWeight: 600 }}>
                         {log.date}
                       </td>
-                      <td style={{ ...tdStyle, textAlign: 'center' }}>
-                        <span style={{
-                          display: 'inline-block',
-                          padding: '0.15rem 0.45rem',
-                          borderRadius: '3px',
-                          background: '#f1f5f9',
-                          border: '1px solid #cbd5e1',
-                          fontSize: '0.76rem',
-                          fontWeight: 700,
-                          color: '#334155',
-                          whiteSpace: 'nowrap'
-                        }}>
-                          {categoryLabel}
-                        </span>
+                      {/* 구분 열: 칸 안의 중첩 뱃지 박스 제거 -> 단정한 텍스트 표기 */}
+                      <td style={{ 
+                        ...tdStyle, 
+                        textAlign: 'center', 
+                        whiteSpace: 'nowrap', 
+                        fontWeight: 600, 
+                        color: '#334155' 
+                      }}>
+                        {categoryLabel}
                       </td>
                       <td style={{ ...tdStyle, lineHeight: 1.45 }}>
                         <div style={{ fontWeight: 700, color: '#0f172a' }}>
@@ -386,7 +396,7 @@ export default function FarmHistoryPrintModal({
             </tbody>
           </table>
 
-          {/* 4. 내부 보관용 풋노트 (관공서 서명란 대신 영농 기록철 꼬리말) */}
+          {/* 4. 내부 보관용 풋노트 */}
           <div style={{
             display: 'flex',
             alignItems: 'center',

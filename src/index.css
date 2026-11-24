@@ -3527,7 +3527,7 @@ form.modal-content {
   .mobile-fab,
   .btn,
   .filter-bar,
-  .modal-overlay,
+  .modal-overlay:not(.print-modal-overlay),
   .nav-tabs,
   .report-mobile-view,
   .mobile-only {
