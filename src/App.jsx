@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, Calendar } from 'lucide-react';
 import TopBar from './components/layout/TopBar.jsx';
 import EntityList from './components/entities/EntityList.jsx';
 import EntityDetailModal from './components/entities/EntityDetailModal.jsx';
@@ -961,19 +961,34 @@ export default function App() {
         />
       )}
 
-      {/* 모바일 전용 우측 하단 플로팅 액션 버튼 (FAB): 개체 관리 탭에서만 노출 (다이어리, 보고서, 드라이브 탭에서는 가림 방지) */}
-      {activeTab === 'entities' && (
+      {/* 개체관리 ⇆ 다이어리(캘린더) 초고속 셔틀 플로팅 액션 버튼 (B안 원형 스마트 아이콘) */}
+      {(activeTab === 'entities' || activeTab === 'diary') && (
         <button
           type="button"
           className="mobile-fab"
           onClick={() => {
-            setCareLogPreselectedEntity(null);
-            setIsCareLogModalOpen(true);
+            if (activeTab === 'entities') {
+              setActiveTab('diary');
+            } else {
+              setActiveTab('entities');
+            }
           }}
-          title="현장 관리 기록 빠른 추가"
-          aria-label="현장 관리 기록 빠른 추가"
+          title={activeTab === 'entities' ? '캘린더/다이어리로 바로 이동' : '개체 관리(소 목록)로 바로 이동'}
+          aria-label={activeTab === 'entities' ? '캘린더로 이동' : '개체 관리로 이동'}
+          style={{
+            background: activeTab === 'entities'
+              ? 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)' // 캘린더로 갈 때는 산뜻한 스카이블루
+              : 'linear-gradient(135deg, #10b981 0%, #059669 100%)', // 개체목록으로 갈 때는 에메랄드 그린
+            boxShadow: activeTab === 'entities'
+              ? '0 4px 16px rgba(2, 132, 199, 0.45), 0 2px 6px rgba(0, 0, 0, 0.15)'
+              : '0 4px 16px rgba(16, 185, 129, 0.45), 0 2px 6px rgba(0, 0, 0, 0.15)'
+          }}
         >
-          <Plus size={26} color="#ffffff" strokeWidth={2.5} />
+          {activeTab === 'entities' ? (
+            <Calendar size={24} color="#ffffff" strokeWidth={2.3} />
+          ) : (
+            <span style={{ fontSize: '1.45rem', lineHeight: 1, userSelect: 'none' }}>🐂</span>
+          )}
         </button>
       )}
     </div>
