@@ -222,7 +222,7 @@ export default function FarmDisinfectionPrintModal({
             </tbody>
           </table>
 
-          {/* 3. 소독·방역 대장 본문 테이블 */}
+          {/* 3. 소독·방역 대장 본문 테이블 (서명 열 제거로 작업내용 열 최대 확보) */}
           <table style={{
             width: '100%',
             borderCollapse: 'collapse',
@@ -231,18 +231,17 @@ export default function FarmDisinfectionPrintModal({
           }}>
             <thead>
               <tr style={{ background: '#f1f5f9' }}>
-                <th style={{ ...thStyle, width: '38px', textAlign: 'center' }}>No</th>
-                <th style={{ ...thStyle, width: '115px', textAlign: 'center' }}>소독 일시</th>
-                <th style={{ ...thStyle, width: '135px', textAlign: 'center' }}>소독 구역 / 대상</th>
+                <th style={{ ...thStyle, width: '40px', textAlign: 'center' }}>No</th>
+                <th style={{ ...thStyle, width: '125px', textAlign: 'center' }}>소독 일시</th>
+                <th style={{ ...thStyle, width: '150px', textAlign: 'center' }}>소독 구역 / 대상</th>
                 <th style={{ ...thStyle, textAlign: 'center' }}>소독 약품명 및 세부 작업 내용</th>
-                <th style={{ ...thStyle, width: '75px', textAlign: 'center' }}>작업자</th>
-                <th style={{ ...thStyle, width: '60px', textAlign: 'center' }}>서명</th>
+                <th style={{ ...thStyle, width: '90px', textAlign: 'center' }}>작업자</th>
               </tr>
             </thead>
             <tbody>
               {displayLogs.length === 0 ? (
                 <tr>
-                  <td colSpan={6} style={{ ...tdStyle, textAlign: 'center', padding: '2rem 1rem', color: '#6b7280' }}>
+                  <td colSpan={5} style={{ ...tdStyle, textAlign: 'center', padding: '2rem 1rem', color: '#6b7280' }}>
                     조회 기간 내 등록된 방역·소독 기록이 없습니다.
                   </td>
                 </tr>
@@ -262,9 +261,6 @@ export default function FarmDisinfectionPrintModal({
                       </td>
                       <td style={{ ...tdStyle, textAlign: 'center' }}>
                         {log.operator || ownerName || '-'}
-                      </td>
-                      <td style={{ ...tdStyle, textAlign: 'center' }}>
-                        <span style={{ color: '#9ca3af', fontSize: '0.75rem' }}>(인)</span>
                       </td>
                     </tr>
                   );
