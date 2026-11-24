@@ -113,11 +113,15 @@ export default function FarmCommonHistoryModal({
     return counts;
   }, [farmCommonLogs, allCategories]);
 
-  // 기록이 1건 이상 있거나 주요 공통 카테고리만 칩으로 노출
+  // 기록이 1건 이상 있거나 농장 주요 카테고리는 칩으로 노출 (3열 균등 배치에 최적화)
   const activeCategories = useMemo(() => {
-    return allCategories.filter(cat => {
-      return (categoryCounts[cat.id] || 0) > 0 || ['routine', 'facility', 'treatment'].includes(cat.id);
+    const defaultMajorCats = ['routine', 'facility', 'feed', 'other', 'treatment'];
+    const filtered = allCategories.filter(cat => {
+      return (categoryCounts[cat.id] || 0) > 0 || defaultMajorCats.includes(cat.id);
     });
+    // 농장 관리 핵심 순서로 정렬: 방역소독 -> 시설환경 -> 사료자재 -> 퇴비기타 -> 진료치료 순
+    const orderMap = { routine: 1, facility: 2, feed: 3, other: 4, treatment: 5 };
+    return filtered.sort((a, b) => (orderMap[a.id] || 99) - (orderMap[b.id] || 99));
   }, [allCategories, categoryCounts]);
 
   // 최근 1달 기본값 여부 확인
@@ -141,7 +145,7 @@ export default function FarmCommonHistoryModal({
           </div>
         </div>
 
-        {/* 2. 서브 헤더 필터 바 (알약 캡슐 가로 나열 & 기간 선택창 상시 노출) */}
+        {/* 2. 서브 헤더 필터 바 (1단: 조회기간 상시 노출, 2단: 관리 내역 뱃지 3열 그리드) */}
         <div style={{
           padding: '0.65rem 1rem',
           background: 'var(--bg-card-subtle)',
@@ -150,15 +154,92 @@ export default function FarmCommonHistoryModal({
           flexDirection: 'column',
           gap: '0.55rem'
         }}>
-          {/* 1단: 종목별 알약 캡슐 필터 칩 (width auto로 아담하게 가로 나열) */}
+          {/* 1단: 기간 선택창 ('조회 기간' 텍스트 제거로 한 줄 칼정렬) */}
           <div style={{
             display: 'flex',
             alignItems: 'center',
+            justifyContent: 'space-between',
             gap: '0.4rem',
-            overflowX: 'auto',
-            paddingBottom: '2px',
-            WebkitOverflowScrolling: 'touch',
-            scrollbarWidth: 'none'
+            padding: '0.35rem 0.6rem',
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border-color)',
+            borderRadius: 'var(--radius-md)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', flex: 1, minWidth: 0 }}>
+              <Calendar size={14} style={{ color: '#0284c7', flexShrink: 0 }} />
+              <input 
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                style={{
+                  flex: '1 1 0px',
+                  minWidth: '100px',
+                  maxWidth: '135px',
+                  padding: '0.2rem 0.3rem',
+                  borderRadius: 'var(--radius-sm)',
+                  border: '1px solid var(--border-color)',
+                  background: 'var(--bg-page)',
+                  color: 'var(--text-main)',
+                  fontSize: '0.78rem',
+                  fontFamily: 'inherit',
+                  textAlign: 'center'
+                }}
+              />
+              <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem', flexShrink: 0 }}>~</span>
+              <input 
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                style={{
+                  flex: '1 1 0px',
+                  minWidth: '100px',
+                  maxWidth: '135px',
+                  padding: '0.2rem 0.3rem',
+                  borderRadius: 'var(--radius-sm)',
+                  border: '1px solid var(--border-color)',
+                  background: 'var(--bg-page)',
+                  color: 'var(--text-main)',
+                  fontSize: '0.78rem',
+                  fontFamily: 'inherit',
+                  textAlign: 'center'
+                }}
+              />
+              {!isDefaultPeriod && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStartDate(defaultStartDate);
+                    setEndDate(todayStr);
+                  }}
+                  title="최근 1달 기본값으로 되돌리기"
+                  style={{
+                    padding: '0.15rem 0.4rem',
+                    fontSize: '0.72rem',
+                    fontWeight: 700,
+                    background: 'rgba(2, 132, 199, 0.1)',
+                    border: '1px solid rgba(2, 132, 199, 0.25)',
+                    borderRadius: 'var(--radius-sm)',
+                    color: '#0284c7',
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0
+                  }}
+                >
+                  최근 1달
+                </button>
+              )}
+            </div>
+
+            <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)', fontWeight: 700, whiteSpace: 'nowrap', flexShrink: 0 }}>
+              조회 {filteredLogs.length}건
+            </span>
+          </div>
+
+          {/* 2단: 종목별 알약 캡슐 필터 칩 (3개씩 균등 그리드 배치) */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            gap: '0.4rem'
           }}>
             {/* 전체 캡슐 */}
             <button
@@ -167,14 +248,13 @@ export default function FarmCommonHistoryModal({
               onClick={() => setSelectedCategory('all')}
               title="전체 분류 보기"
               style={{
-                width: 'auto',
-                minWidth: 'fit-content',
-                flexShrink: 0,
+                width: '100%',
                 display: 'inline-flex',
                 alignItems: 'center',
+                justifyContent: 'center',
                 gap: '0.35rem',
-                padding: '0 0.85rem',
-                height: '32px',
+                padding: '0 0.5rem',
+                height: '34px',
                 fontSize: '0.82rem',
                 whiteSpace: 'nowrap'
               }}
@@ -196,99 +276,23 @@ export default function FarmCommonHistoryModal({
                   onClick={() => setSelectedCategory(cat.id)}
                   title={`${cat.label} 관리 내역만 보기`}
                   style={{
-                    width: 'auto',
-                    minWidth: 'fit-content',
-                    flexShrink: 0,
+                    width: '100%',
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: '0.3rem',
-                    padding: '0 0.75rem',
-                    height: '32px',
-                    fontSize: '0.82rem',
+                    justifyContent: 'center',
+                    gap: '0.25rem',
+                    padding: '0 0.4rem',
+                    height: '34px',
+                    fontSize: '0.8rem',
                     whiteSpace: 'nowrap'
                   }}
                 >
-                  {cat.icon && <span>{cat.icon}</span>}
-                  <span>{cat.label}</span>
+                  {cat.icon && <span style={{ fontSize: '0.85rem' }}>{cat.icon}</span>}
+                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{cat.label}</span>
                   <span className="tab-count">{count}</span>
                 </button>
               );
             })}
-          </div>
-
-          {/* 2단: 기간 선택창 (기본값: 최근 1달, 상시 노출) */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '0.45rem',
-            padding: '0.42rem 0.65rem',
-            background: 'var(--bg-card)',
-            border: '1px solid var(--border-color)',
-            borderRadius: 'var(--radius-md)',
-            flexWrap: 'wrap'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap' }}>
-              <Calendar size={14} style={{ color: '#0284c7', flexShrink: 0 }} />
-              <span style={{ fontWeight: 700, color: 'var(--text-main)', fontSize: '0.78rem', whiteSpace: 'nowrap' }}>
-                조회 기간:
-              </span>
-              <input 
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                style={{
-                  padding: '0.2rem 0.4rem',
-                  borderRadius: 'var(--radius-sm)',
-                  border: '1px solid var(--border-color)',
-                  background: 'var(--bg-page)',
-                  color: 'var(--text-main)',
-                  fontSize: '0.78rem',
-                  fontFamily: 'inherit'
-                }}
-              />
-              <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>~</span>
-              <input 
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                style={{
-                  padding: '0.2rem 0.4rem',
-                  borderRadius: 'var(--radius-sm)',
-                  border: '1px solid var(--border-color)',
-                  background: 'var(--bg-page)',
-                  color: 'var(--text-main)',
-                  fontSize: '0.78rem',
-                  fontFamily: 'inherit'
-                }}
-              />
-              {!isDefaultPeriod && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setStartDate(defaultStartDate);
-                    setEndDate(todayStr);
-                  }}
-                  title="최근 1달 기본값으로 되돌리기"
-                  style={{
-                    padding: '0.15rem 0.45rem',
-                    fontSize: '0.72rem',
-                    fontWeight: 700,
-                    background: 'rgba(2, 132, 199, 0.1)',
-                    border: '1px solid rgba(2, 132, 199, 0.25)',
-                    borderRadius: 'var(--radius-sm)',
-                    color: '#0284c7',
-                    cursor: 'pointer'
-                  }}
-                >
-                  최근 1달로
-                </button>
-              )}
-            </div>
-
-            <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)', fontWeight: 700, whiteSpace: 'nowrap' }}>
-              조회 {filteredLogs.length}건
-            </span>
           </div>
         </div>
 
