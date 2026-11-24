@@ -691,11 +691,11 @@ export default function FarmCommonHistoryView({
           alignItems: 'center',
           gap: '0.65rem'
         }}>
-          {/* 🖨️ 방역대장 인쇄 버튼 (A4/PDF 인쇄 모달) */}
+          {/* 🖨️ 방역대장 인쇄 버튼 (가축전염병예방법 별지 제6호서식 소독실시기록부 A4/PDF 인쇄) */}
           <button
             type="button"
             onClick={() => setIsPrintModalOpen(true)}
-            title="축사 소독·방역 관리대장 A4 규격 인쇄 / PDF 저장"
+            title="가축전염병예방법 별지 제6호서식 소독실시기록부 A4 인쇄 / PDF 저장"
             style={{
               flex: 1,
               height: '44px',

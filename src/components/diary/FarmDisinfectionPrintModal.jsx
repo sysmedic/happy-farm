@@ -78,7 +78,7 @@ export default function FarmDisinfectionPrintModal({
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <span style={{ fontSize: '1.1rem' }}>🖨️</span>
             <span style={{ fontWeight: 800, fontSize: '1rem', color: '#0f172a' }}>
-              축사 소독·방역 실시 기록부 인쇄 미리보기
+              소독실시기록부 (가축사육시설) 인쇄 미리보기
             </span>
             <span style={{ fontSize: '0.8rem', color: '#64748b', marginLeft: '0.3rem' }}>
               (총 {displayLogs.length}건)
@@ -176,7 +176,7 @@ export default function FarmDisinfectionPrintModal({
             }
           `}} />
 
-          {/* 1. 공문서 헤더 타이틀 */}
+          {/* 1. 공문서 헤더 타이틀 (가축전염병예방법 시행규칙 별지 제6호서식) */}
           <div style={{ textAlign: 'center', marginBottom: '1.25rem' }}>
             <h2 style={{ 
               margin: '0 0 0.4rem 0', 
@@ -186,10 +186,10 @@ export default function FarmDisinfectionPrintModal({
               textDecoration: 'underline',
               textUnderlineOffset: '6px'
             }}>
-              축사 소독·방역 실시 기록부
+              소독실시기록부 (가축사육시설)
             </h2>
             <p style={{ margin: 0, fontSize: '0.85rem', color: '#4b5563' }}>
-              [가축전염병 예방법 시행규칙 제20조 관련]
+              [가축전염병 예방법 시행규칙 별지 제6호서식]
             </p>
           </div>
 
