@@ -17,23 +17,105 @@ export default function FarmHistoryPrintModal({
 
   if (!isOpen) return null;
 
-  // 인쇄 및 PDF 저장 실행
+  // 인쇄 및 PDF 저장 실행 (숨김 iframe 방식으로 메인 화면의 CSS/구조 간섭을 100% 원천 차단)
   const handlePrint = () => {
-    const originalTitle = document.title;
+    const printElement = printAreaRef.current;
+    if (!printElement) {
+      window.print();
+      return;
+    }
+
     const farmNameClean = (farmSettings.farmName || '행복농장').replace(/\s+/g, '_');
     const periodText = startDate && endDate 
       ? `${startDate.replace(/-/g, '')}-${endDate.replace(/-/g, '')}` 
       : '전체';
-    
-    // PDF 저장 시 브라우저가 기본 파일명으로 제안하도록 document.title 임시 변경
-    document.title = `${farmNameClean}_농장관리기록대장_${periodText}`;
-    
-    window.print();
+    const documentTitle = `${farmNameClean}_농장관리기록대장_${periodText}`;
 
-    // 인쇄 창 호출 후 원래 페이지 타이틀 복원
-    setTimeout(() => {
-      document.title = originalTitle;
-    }, 1000);
+    // 기존 프레임 정리
+    const oldIframe = document.getElementById('farm-history-print-frame');
+    if (oldIframe) {
+      oldIframe.remove();
+    }
+
+    // 격리된 숨김 iframe 생성
+    const iframe = document.createElement('iframe');
+    iframe.id = 'farm-history-print-frame';
+    iframe.style.position = 'fixed';
+    iframe.style.right = '0';
+    iframe.style.bottom = '0';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.border = '0';
+    iframe.style.opacity = '0';
+    iframe.style.pointerEvents = 'none';
+    document.body.appendChild(iframe);
+
+    const doc = iframe.contentWindow.document;
+    doc.open();
+    doc.write(`
+      <!DOCTYPE html>
+      <html lang="ko">
+        <head>
+          <meta charset="utf-8" />
+          <title>${documentTitle}</title>
+          <style>
+            @page {
+              size: A4 portrait;
+              margin: 15mm 12mm 15mm 12mm;
+            }
+            * {
+              box-sizing: border-box;
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+            }
+            html, body {
+              margin: 0;
+              padding: 0;
+              background: #ffffff !important;
+              color: #0f172a !important;
+              font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif;
+              font-size: 12px;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              page-break-inside: auto;
+            }
+            tr {
+              page-break-inside: avoid;
+              break-inside: avoid;
+            }
+            th, td {
+              border: 1px solid #cbd5e1;
+            }
+            .no-print {
+              display: none !important;
+            }
+          </style>
+        </head>
+        <body>
+          <div style="padding: 5px 0;">
+            ${printElement.innerHTML}
+          </div>
+        </body>
+      </html>
+    `);
+    doc.close();
+
+    let hasPrinted = false;
+    const executePrint = () => {
+      if (hasPrinted) return;
+      hasPrinted = true;
+      try {
+        iframe.contentWindow.focus();
+        iframe.contentWindow.print();
+      } catch (err) {
+        console.error('Iframe print error, fallback to window.print', err);
+        window.print();
+      }
+    };
+
+    setTimeout(executePrint, 250);
   };
 
   // 날짜순(오름차순): 과거부터 순서대로 정렬하여 시간 흐름 파악 용이
