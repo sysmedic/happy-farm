@@ -1571,26 +1571,6 @@ export default function DailyDiaryView({
                 }}>
                   <CalendarIcon size={36} style={{ opacity: 0.3, marginBottom: '0.5rem' }} />
                   <div style={{ fontWeight: 600 }}>{selectedDate}에 등록된 관리 내역이 없습니다.</div>
-                  <p style={{ fontSize: '0.825rem', marginTop: '0.25rem' }}>
-                    작업 내역을 추가하여 당일 영농 다이어리를 작성해보세요.
-                  </p>
-                  <button
-                    className="btn btn-sm"
-                    onClick={() => onOpenCareLogModal(null, selectedDate)}
-                    style={{
-                      marginTop: '0.75rem',
-                      fontWeight: 700,
-                      background: 'rgba(16, 185, 129, 0.14)',
-                      border: '1px solid #10b981',
-                      color: '#065f46',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '0.35rem'
-                    }}
-                  >
-                    <Plus size={14} color="#065f46" strokeWidth={2.2} />
-                    <span>이 날짜에 관리 기록 추가</span>
-                  </button>
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
