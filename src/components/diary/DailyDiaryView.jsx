@@ -264,6 +264,19 @@ export default function DailyDiaryView({
     });
   };
 
+  // 날짜 클릭 핸들러: 다른 달의 날짜를 누르면 해당 달로 캘린더를 전환하면서 날짜 선택
+  const handleDateClick = (item) => {
+    if (!item.isCurrentMonth && item.dateStr) {
+      const parts = item.dateStr.split('-');
+      if (parts.length === 3) {
+        const itemYear = parseInt(parts[0], 10);
+        const itemMonth = parseInt(parts[1], 10) - 1; // 0-indexed
+        setCurrentYearMonth({ year: itemYear, month: itemMonth });
+      }
+    }
+    setSelectedDate(item.dateStr);
+  };
+
   const todayStr = getTodayDateString();
 
   // 날짜 한국어 요일 포맷
@@ -335,30 +348,33 @@ export default function DailyDiaryView({
                 const hasSchedule = datesWithPendingSchedules.has(item.dateStr);
                 const hasLog = datesWithCareLogs.has(item.dateStr);
 
-                // 1안 모던 슬레이트 & 차콜 테마 배경 및 테두리
-                const cellBg = !item.isCurrentMonth 
-                  ? 'transparent' 
-                  : isSelected 
-                    ? 'rgba(51, 65, 85, 0.12)' 
+                // 1안 모던 슬레이트 & 차콜 테마 배경 및 테두리 (선택 상태 우선 적용)
+                const cellBg = isSelected 
+                  ? 'rgba(51, 65, 85, 0.12)' 
+                  : !item.isCurrentMonth 
+                    ? 'transparent' 
                     : 'var(--bg-card-subtle)';
 
-                const cellBorder = !item.isCurrentMonth
-                  ? 'none'
-                  : isSelected
-                    ? '2px solid #334155'
+                const cellBorder = isSelected
+                  ? '2px solid #334155'
+                  : !item.isCurrentMonth
+                    ? '1px solid transparent'
                     : isToday
                       ? '1.5px solid var(--border-color)'
                       : '1px solid var(--border-color)';
 
-                const textColor = isSelected ? '#0f172a' : 'var(--text-main)';
+                const textColor = isSelected 
+                  ? '#0f172a' 
+                  : !item.isCurrentMonth
+                    ? 'var(--text-subtle)'
+                    : 'var(--text-main)';
 
                 return (
                   <button
                     key={index}
                     type="button"
                     className="calendar-cell"
-                    disabled={!item.isCurrentMonth}
-                    onClick={() => setSelectedDate(item.dateStr)}
+                    onClick={() => handleDateClick(item)}
                     style={{
                       aspectRatio: '1',
                       width: '100%',
@@ -370,16 +386,17 @@ export default function DailyDiaryView({
                       borderRadius: 'var(--radius-md)',
                       fontSize: '0.95rem',
                       fontWeight: (isSelected || isToday) ? 800 : 600,
-                      cursor: item.isCurrentMonth ? 'pointer' : 'default',
+                      cursor: 'pointer',
                       position: 'relative',
                       transition: 'all 0.15s ease',
-                      opacity: item.isCurrentMonth ? 1 : 0.25,
+                      opacity: !item.isCurrentMonth && !(hasReminder || hasSchedule || hasLog) ? 0.35 : 1,
                       background: cellBg,
                       border: cellBorder,
                       color: textColor,
                       boxSizing: 'border-box',
                       padding: 0
                     }}
+                    title={`${item.dateStr} 선택`}
                   >
                     {/* '오늘' 텍스트를 상단에 플로팅 (에메랄드 그린 제거 후 모던 차콜/슬레이트 적용) */}
                     {isToday && (
